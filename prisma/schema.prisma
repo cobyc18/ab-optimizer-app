@@ -1,0 +1,132 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Session {
+  id        String   @id
+  shop      String
+  state     String
+  isOnline  Boolean  @default(false)
+  scope     String?
+  expires   DateTime?
+  accessToken String?
+  userId    BigInt?
+  firstName String?
+  lastName  String?
+  email     String?
+  accountOwner Boolean @default(false)
+  locale    String?
+  collaborator Boolean @default(false)
+  emailVerified Boolean @default(false)
+}
+
+model ABTest {
+  id           String     @id @default(uuid())
+  shop         String
+  name         String     @unique
+  productId    String
+  templateA    String
+  templateB    String
+  trafficSplit Int        @default(50)
+  status       String     @default("running") // "running", "completed", etc.
+  startDate    DateTime   @default(now())
+  endDate      DateTime?
+
+  events       ABEvent[]  @relation("TestEvents")
+  shopData     Shop       @relation(fields: [shop], references: [shop], onDelete: Cascade)
+  @@map("ab_tests")
+}
+
+model ABEvent {
+  id         String   @id @default(uuid())
+  testId     String
+  variant    String   // "A" or "B"
+  eventType  String   // "impression", "add_to_cart", "time_on_page", "cart_view", "checkout_initiated", "purchase"
+  productId  String
+  timestamp  DateTime @default(now())
+  // Additional tracking data
+  value      Float?   // For monetary values (purchase amount, etc.)
+  metadata   Json?    // For additional event data (time spent, cart value, etc.)
+
+  test       ABTest   @relation("TestEvents", fields: [testId], references: [id], onDelete: Cascade)
+  @@map("ab_events")
+}
+
+model WidgetConfig {
+  id        String   @id @default(uuid())
+  shop      String
+  widget    String   // e.g. "recipe_widget" or "star_rating"
+  config    Json     // All widget settings as JSON
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  shopData  Shop     @relation(fields: [shop], references: [shop], onDelete: Cascade)
+}
+
+// Additional models for the standalone app
+model Shop {
+  id            String   @id @default(uuid())
+  shop          String   @unique
+  accessToken   String
+  scope         String
+  isActive      Boolean  @default(true)
+  installedAt   DateTime @default(now())
+  uninstalledAt DateTime?
+  lastWebhookAt DateTime?
+  settings      Json     @default("{}")
+  metadata      Json     @default("{}")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  webhookEvents WebhookEvent[]
+  abTests       ABTest[]
+  widgetConfigs WidgetConfig[]
+
+  @@map("shops")
+}
+
+model User {
+  id          String   @id @default(uuid())
+  email       String   @unique
+  password    String
+  firstName   String
+  lastName    String
+  role        String   @default("user") // "admin", "user", "viewer"
+  isActive    Boolean  @default(true)
+  lastLoginAt DateTime?
+  shopAccess  Json     @default("[]")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("users")
+}
+
+model WebhookEvent {
+  id            String   @id @default(uuid())
+  topic         String
+  shop          String
+  webhookId     String   @unique
+  eventId       String
+  payload       Json
+  processed     Boolean  @default(false)
+  processedAt   DateTime?
+  processingTime Int?    // in milliseconds
+  error         Json?    // { message: string, stack: string, retryCount: number }
+  retryAttempts Int      @default(0)
+  nextRetryAt   DateTime?
+  metadata      Json     @default("{}")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  shopData      Shop     @relation(fields: [shop], references: [shop], onDelete: Cascade)
+
+  @@map("webhook_events")
+}
