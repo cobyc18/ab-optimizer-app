@@ -3,7 +3,7 @@ import { useLoaderData } from "@remix-run/react";
 import { 
   BeakerIcon, 
   ChartBarIcon, 
-  TrendingUpIcon, 
+  FireIcon, 
   UsersIcon,
   PlusIcon,
   ArrowUpIcon,
@@ -107,7 +107,7 @@ export default function Dashboard() {
             title="Active Tests"
             value={stats.activeTests}
             change={-5}
-            icon={TrendingUpIcon}
+            icon={FireIcon}
             color="green"
           />
           <StatCard
