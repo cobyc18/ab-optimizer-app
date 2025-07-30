@@ -3,7 +3,7 @@ import { Badge } from "./ui/badge";
 import { 
   StarIcon, 
   BoltIcon, 
-  TargetIcon, 
+  BeakerIcon, 
   SparklesIcon 
 } from "@heroicons/react/24/outline";
 
@@ -71,7 +71,7 @@ export default function GamifiedHero({ user, experiments = [] }) {
             
             <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
               <div className="flex items-center justify-center mb-2">
-                <TargetIcon className="w-4 h-4 mr-1" />
+                <BeakerIcon className="w-4 h-4 mr-1" />
                 <p className="text-2xl font-bold">{variantsCreated}</p>
               </div>
               <p className="text-white/80 text-sm">Variants created</p>
