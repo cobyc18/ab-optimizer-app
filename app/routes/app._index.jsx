@@ -1,8 +1,8 @@
 import { json } from "@remix-run/node";
 import { useLoaderData, useOutletContext } from "@remix-run/react";
 import { motion } from "framer-motion";
-import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
+import { Tile, TileHeader, TileTitle, TileContent } from "../components/ui/tile";
 import SummaryCards from "../components/SummaryCards";
 import GamifiedHero from "../components/GamifiedHero";
 
@@ -134,27 +134,28 @@ export default function Dashboard() {
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl shadow-xl p-8 text-white"
       >
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">Welcome back! 👋</h1>
-            <p className="text-blue-100 text-lg">Here's what's happening with your experiments today.</p>
-          </div>
-          <div className="flex items-center space-x-4">
-            <Button 
-              className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
-            >
-              <span className="mr-2">+</span>
-              New Experiment
-            </Button>
-            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
-              <span className="text-white font-semibold">
-                {user.firstName ? user.firstName.charAt(0) : 'U'}
-              </span>
+        <Tile variant="colorful" className="p-8">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold mb-2">Welcome back! 👋</h1>
+              <p className="text-indigo-100 text-lg">Here's what's happening with your experiments today.</p>
+            </div>
+            <div className="flex items-center space-x-4">
+              <Button 
+                className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
+              >
+                <span className="mr-2">+</span>
+                New Experiment
+              </Button>
+              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
+                <span className="text-white font-semibold">
+                  {user.firstName ? user.firstName.charAt(0) : 'U'}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
+        </Tile>
       </motion.div>
 
       {/* Summary Cards Tile */}
@@ -162,13 +163,19 @@ export default function Dashboard() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.1 }}
-        className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
       >
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2">📊 Performance Overview</h2>
-          <p className="text-gray-600">Your key metrics at a glance</p>
-        </div>
-        <SummaryCards user={userProgress} experiments={experiments} />
+        <Tile variant="default">
+          <TileHeader>
+            <TileTitle className="flex items-center">
+              <span className="mr-2">📊</span>
+              Performance Overview
+            </TileTitle>
+            <p className="text-gray-600 mt-1">Your key metrics at a glance</p>
+          </TileHeader>
+          <TileContent>
+            <SummaryCards user={userProgress} experiments={experiments} />
+          </TileContent>
+        </Tile>
       </motion.div>
 
       {/* Gamified Hero Tile */}
@@ -177,7 +184,9 @@ export default function Dashboard() {
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.2 }}
       >
-        <GamifiedHero user={userProgress} experiments={experiments} />
+        <Tile variant="gradient" className="p-0 overflow-hidden">
+          <GamifiedHero user={userProgress} experiments={experiments} />
+        </Tile>
       </motion.div>
 
       {/* Main Content Grid */}
@@ -189,14 +198,14 @@ export default function Dashboard() {
           transition={{ delay: 0.3 }}
           className="lg:col-span-1"
         >
-          <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 rounded-2xl shadow-lg">
-            <CardHeader className="pb-4">
-              <CardTitle className="text-xl font-semibold text-indigo-800 flex items-center">
+          <Tile variant="info">
+            <TileHeader>
+              <TileTitle className="flex items-center text-blue-800">
                 <span className="mr-2">✨</span>
                 What's New
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
+              </TileTitle>
+            </TileHeader>
+            <TileContent className="space-y-4">
               {updates.map((update, index) => (
                 <motion.div
                   key={index}
@@ -212,15 +221,15 @@ export default function Dashboard() {
                     <div>
                       <h4 className="font-semibold text-gray-800">{update.title}</h4>
                       <p className="text-sm text-gray-600 mt-1">{update.description}</p>
-                      <a href="#" className="text-indigo-600 text-sm font-medium hover:underline mt-2 inline-block">
+                      <a href="#" className="text-blue-600 text-sm font-medium hover:underline mt-2 inline-block">
                         Learn more →
                       </a>
                     </div>
                   </div>
                 </motion.div>
               ))}
-            </CardContent>
-          </Card>
+            </TileContent>
+          </Tile>
         </motion.div>
 
         {/* Live Experiments Tile */}
@@ -230,17 +239,17 @@ export default function Dashboard() {
           transition={{ delay: 0.3 }}
           className="lg:col-span-2"
         >
-          <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 rounded-2xl shadow-lg">
-            <CardHeader className="flex flex-row items-center justify-between pb-4">
-              <CardTitle className="text-xl font-semibold text-emerald-800 flex items-center">
+          <Tile variant="success">
+            <TileHeader className="flex flex-row items-center justify-between">
+              <TileTitle className="flex items-center text-emerald-800">
                 <span className="mr-2">🔬</span>
                 Live Experiments
-              </CardTitle>
+              </TileTitle>
               <Button variant="link" className="text-emerald-600 hover:text-emerald-700">
                 View all →
               </Button>
-            </CardHeader>
-            <CardContent>
+            </TileHeader>
+            <TileContent>
               <div className="space-y-4">
                 {experiments.filter(exp => exp.status === "running").length === 0 ? (
                   <div className="text-center py-12 text-gray-500">
@@ -290,8 +299,8 @@ export default function Dashboard() {
                   ))
                 )}
               </div>
-            </CardContent>
-          </Card>
+            </TileContent>
+          </Tile>
         </motion.div>
       </div>
 
@@ -300,35 +309,38 @@ export default function Dashboard() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.4 }}
-        className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
       >
-        <div className="mb-6">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center">
-            <span className="mr-2">⚡</span>
-            Quick Actions
-          </h2>
-          <p className="text-gray-600">Get started with common tasks</p>
-        </div>
-        <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          <QuickActionCard
-            title="Create New Test"
-            description="Set up a new A/B test for your products"
-            href="/app/ab-tests/new"
-            color="blue"
-          />
-          <QuickActionCard
-            title="View Analytics"
-            description="Check detailed performance metrics"
-            href="/app/analytics"
-            color="green"
-          />
-          <QuickActionCard
-            title="Manage Tests"
-            description="View and edit existing A/B tests"
-            href="/app/ab-tests"
-            color="purple"
-          />
-        </div>
+        <Tile variant="default">
+          <TileHeader>
+            <TileTitle className="flex items-center">
+              <span className="mr-2">⚡</span>
+              Quick Actions
+            </TileTitle>
+            <p className="text-gray-600 mt-1">Get started with common tasks</p>
+          </TileHeader>
+          <TileContent>
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              <QuickActionCard
+                title="Create New Test"
+                description="Set up a new A/B test for your products"
+                href="/app/ab-tests/new"
+                color="blue"
+              />
+              <QuickActionCard
+                title="View Analytics"
+                description="Check detailed performance metrics"
+                href="/app/analytics"
+                color="green"
+              />
+              <QuickActionCard
+                title="Manage Tests"
+                description="View and edit existing A/B tests"
+                href="/app/ab-tests"
+                color="purple"
+              />
+            </div>
+          </TileContent>
+        </Tile>
       </motion.div>
 
       {/* Recent Activity Tile */}
@@ -336,65 +348,66 @@ export default function Dashboard() {
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.5 }}
-        className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
       >
-        <div className="p-6 border-b border-gray-100">
-          <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center">
-            <span className="mr-2">📝</span>
-            Recent Activity
-          </h2>
-          <p className="text-gray-600">Your latest testing activities</p>
-        </div>
-        <div className="p-6">
-          <div className="flow-root">
-            <ul className="-mb-8">
-              {stats.recentActivity.map((activity, activityIdx) => {
-                const activityIcon = getActivityIcon(activity.iconType);
-                const colorClasses = {
-                  blue: 'bg-gradient-to-br from-blue-500 to-blue-600',
-                  green: 'bg-gradient-to-br from-green-500 to-green-600',
-                  orange: 'bg-gradient-to-br from-orange-500 to-orange-600',
-                  purple: 'bg-gradient-to-br from-purple-500 to-purple-600'
-                };
-                
-                return (
-                  <motion.li
-                    key={activity.id}
-                    initial={{ opacity: 0, x: -20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    transition={{ delay: 0.6 + activityIdx * 0.1 }}
-                  >
-                    <div className="relative pb-8">
-                      {activityIdx !== stats.recentActivity.length - 1 ? (
-                        <span
-                          className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gradient-to-b from-gray-200 to-transparent"
-                          aria-hidden="true"
-                        />
-                      ) : null}
-                      <div className="relative flex space-x-4">
-                        <div>
-                          <span className={`h-10 w-10 rounded-full ${colorClasses[activity.color]} flex items-center justify-center ring-4 ring-white shadow-lg`}>
-                            <span className="text-white text-sm">{activityIcon}</span>
-                          </span>
-                        </div>
-                        <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+        <Tile variant="glass">
+          <TileHeader>
+            <TileTitle className="flex items-center">
+              <span className="mr-2">📝</span>
+              Recent Activity
+            </TileTitle>
+            <p className="text-gray-600 mt-1">Your latest testing activities</p>
+          </TileHeader>
+          <TileContent>
+            <div className="flow-root">
+              <ul className="-mb-8">
+                {stats.recentActivity.map((activity, activityIdx) => {
+                  const activityIcon = getActivityIcon(activity.iconType);
+                  const colorClasses = {
+                    blue: 'bg-gradient-to-br from-blue-500 to-blue-600',
+                    green: 'bg-gradient-to-br from-green-500 to-green-600',
+                    orange: 'bg-gradient-to-br from-orange-500 to-orange-600',
+                    purple: 'bg-gradient-to-br from-purple-500 to-purple-600'
+                  };
+                  
+                  return (
+                    <motion.li
+                      key={activity.id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.6 + activityIdx * 0.1 }}
+                    >
+                      <div className="relative pb-8">
+                        {activityIdx !== stats.recentActivity.length - 1 ? (
+                          <span
+                            className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gradient-to-b from-gray-200 to-transparent"
+                            aria-hidden="true"
+                          />
+                        ) : null}
+                        <div className="relative flex space-x-4">
                           <div>
-                            <p className="text-sm font-semibold text-gray-800">
-                              {activity.message}
-                            </p>
+                            <span className={`h-10 w-10 rounded-full ${colorClasses[activity.color]} flex items-center justify-center ring-4 ring-white shadow-lg`}>
+                              <span className="text-white text-sm">{activityIcon}</span>
+                            </span>
                           </div>
-                          <div className="whitespace-nowrap text-right text-sm text-gray-500">
-                            {activity.time}
+                          <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
+                            <div>
+                              <p className="text-sm font-semibold text-gray-800">
+                                {activity.message}
+                              </p>
+                            </div>
+                            <div className="whitespace-nowrap text-right text-sm text-gray-500">
+                              {activity.time}
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </motion.li>
-                );
-              })}
-            </ul>
-          </div>
-        </div>
+                    </motion.li>
+                  );
+                })}
+              </ul>
+            </div>
+          </TileContent>
+        </Tile>
       </motion.div>
     </div>
   );
