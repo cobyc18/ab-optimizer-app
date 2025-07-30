@@ -1,10 +1,5 @@
 import { json } from "@remix-run/node";
 import { useLoaderData, useOutletContext } from "@remix-run/react";
-import { motion } from "framer-motion";
-import { Button } from "../components/ui/button";
-import { Tile, TileHeader, TileTitle, TileContent } from "../components/ui/tile";
-import SummaryCards from "../components/SummaryCards";
-import GamifiedHero from "../components/GamifiedHero";
 
 export const loader = async ({ request }) => {
   // Mock data - in a real app, you'd fetch this from your database
@@ -23,20 +18,39 @@ export const loader = async ({ request }) => {
   return json({ stats });
 };
 
-const QuickActionCard = ({ title, description, href, color = "blue" }) => {
-  const colorClasses = {
-    blue: { bg: 'bg-gradient-to-br from-blue-500 to-blue-600', hover: 'hover:from-blue-600 hover:to-blue-700' },
-    green: { bg: 'bg-gradient-to-br from-green-500 to-green-600', hover: 'hover:from-green-600 hover:to-green-700' },
-    purple: { bg: 'bg-gradient-to-br from-purple-500 to-purple-600', hover: 'hover:from-purple-600 hover:to-purple-700' }
+const QuickActionCard = ({ title, description, color = "blue" }) => {
+  const colorStyles = {
+    blue: { 
+      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+      hoverBg: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)'
+    },
+    green: { 
+      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+      hoverBg: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+    },
+    purple: { 
+      background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+      hoverBg: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
+    }
   };
 
-  const classes = colorClasses[color];
+  const styles = colorStyles[color];
 
   return (
-    <motion.div
-      whileHover={{ scale: 1.02, y: -2 }}
-      whileTap={{ scale: 0.98 }}
-      className={`${classes.bg} ${classes.hover} rounded-xl shadow-lg p-6 cursor-pointer transition-all duration-200 text-white`}
+    <div 
+      className="rounded-xl shadow-lg p-6 cursor-pointer transition-all duration-200 text-white hover:scale-105"
+      style={{ 
+        background: styles.background,
+        transform: 'translateY(0)',
+      }}
+      onMouseEnter={(e) => {
+        e.target.style.background = styles.hoverBg;
+        e.target.style.transform = 'translateY(-4px) scale(1.02)';
+      }}
+      onMouseLeave={(e) => {
+        e.target.style.background = styles.background;
+        e.target.style.transform = 'translateY(0) scale(1)';
+      }}
     >
       <div className="flex items-center">
         <div className="p-3 rounded-lg bg-white/20 backdrop-blur-sm">
@@ -48,7 +62,7 @@ const QuickActionCard = ({ title, description, href, color = "blue" }) => {
         </div>
         <span className="text-white/70 text-lg">→</span>
       </div>
-    </motion.div>
+    </div>
   );
 };
 
@@ -91,324 +105,331 @@ export default function Dashboard() {
     }
   ];
 
-  // Mock user progress data
-  const userProgress = {
-    currentLevel: "Data Scientist",
-    xp: 1250,
-    streak: 5,
-    variantsCreated: 8,
-    pointsEarned: 450,
-    badges: ["first_test", "week_streak", "high_lift"]
-  };
-
-  const updates = [
-    {
-      icon: "🚀",
-      title: "AI-Powered Suggestions",
-      description: "Get intelligent test recommendations",
-      bgColor: "bg-gradient-to-br from-blue-500/20 to-blue-600/20",
-      borderColor: "border-blue-200",
-      iconBg: "bg-blue-500/20"
-    },
-    {
-      icon: "📈",
-      title: "Enhanced Analytics",
-      description: "Deeper insights into your results",
-      bgColor: "bg-gradient-to-br from-green-500/20 to-green-600/20",
-      borderColor: "border-green-200",
-      iconBg: "bg-green-500/20"
-    },
-    {
-      icon: "📱",
-      title: "Mobile Optimization",
-      description: "Better mobile testing experience",
-      bgColor: "bg-gradient-to-br from-orange-500/20 to-orange-600/20",
-      borderColor: "border-orange-200",
-      iconBg: "bg-orange-500/20"
-    }
-  ];
-
   return (
-    <div className="space-y-8">
+    <div style={{ padding: '20px', fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Header Tile */}
-      <motion.div
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-      >
-        <Tile variant="colorful" className="p-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold mb-2">Welcome back! 👋</h1>
-              <p className="text-indigo-100 text-lg">Here's what's happening with your experiments today.</p>
+      <div style={{
+        background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 0%, #ec4899 100%)',
+        color: 'white',
+        padding: '32px',
+        borderRadius: '16px',
+        marginBottom: '32px',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>Welcome back! 👋</h1>
+            <p style={{ fontSize: '18px', opacity: 0.9 }}>Here's what's happening with your experiments today.</p>
+          </div>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+            <button style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              color: 'white',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              fontSize: '16px',
+              fontWeight: '500',
+              backdropFilter: 'blur(8px)',
+              transition: 'all 0.2s'
+            }}>
+              <span style={{ marginRight: '8px' }}>+</span>
+              New Experiment
+            </button>
+            <div style={{
+              width: '48px',
+              height: '48px',
+              background: 'rgba(255, 255, 255, 0.2)',
+              borderRadius: '50%',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(255, 255, 255, 0.3)'
+            }}>
+              <span style={{ color: 'white', fontWeight: '600' }}>
+                {user?.firstName ? user.firstName.charAt(0) : 'U'}
+              </span>
             </div>
-            <div className="flex items-center space-x-4">
-              <Button 
-                className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
-              >
-                <span className="mr-2">+</span>
-                New Experiment
-              </Button>
-              <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
-                <span className="text-white font-semibold">
-                  {user?.firstName ? user.firstName.charAt(0) : 'U'}
-                </span>
+          </div>
+        </div>
+      </div>
+
+      {/* Performance Overview Tile */}
+      <div style={{
+        background: 'white',
+        padding: '24px',
+        borderRadius: '16px',
+        marginBottom: '32px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e5e7eb'
+      }}>
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center' }}>
+            <span style={{ marginRight: '8px' }}>📊</span>
+            Performance Overview
+          </h2>
+          <p style={{ color: '#6b7280', marginTop: '4px' }}>Your key metrics at a glance</p>
+        </div>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
+          {/* Active Experiments */}
+          <div style={{
+            background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+            padding: '20px',
+            borderRadius: '12px',
+            border: '1px solid #bae6fd'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+              <div style={{ width: '8px', height: '8px', background: '#3b82f6', borderRadius: '50%', marginRight: '8px' }}></div>
+              <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Active Experiments</span>
+            </div>
+            <div style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', marginBottom: '16px' }}>
+              {experiments.filter(exp => exp.status === "running").length}
+            </div>
+            <div style={{ height: '20px', background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.4) 100%)', borderRadius: '4px' }}></div>
+            <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>Currently running</p>
+          </div>
+
+          {/* Wins This Month */}
+          <div style={{
+            background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
+            padding: '20px',
+            borderRadius: '12px',
+            border: '1px solid #fcd34d'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+              <div style={{ width: '8px', height: '8px', background: '#f59e0b', borderRadius: '50%', marginRight: '8px' }}></div>
+              <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Wins This Month</span>
+            </div>
+            <div style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', marginBottom: '8px' }}>
+              {experiments.filter(exp => exp.status === "completed").length}
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <span style={{ color: '#10b981', marginRight: '4px' }}>↗</span>
+              <p style={{ fontSize: '12px', color: '#10b981' }}>+25% from last month</p>
+            </div>
+          </div>
+
+          {/* Revenue Lift */}
+          <div style={{
+            background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
+            padding: '20px',
+            borderRadius: '12px',
+            border: '1px solid #6ee7b7'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+              <div style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', marginRight: '8px' }}></div>
+              <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Revenue Lift</span>
+            </div>
+            <div style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', marginBottom: '8px' }}>
+              ${experiments.reduce((sum, exp) => sum + (exp.revenueLift || 0), 0).toLocaleString()}
+            </div>
+            <p style={{ fontSize: '12px', color: '#10b981' }}>+15.2% total lift</p>
+          </div>
+
+          {/* Your Progress */}
+          <div style={{
+            background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+            padding: '20px',
+            borderRadius: '12px',
+            border: '1px solid #93c5fd'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
+              <div style={{ width: '8px', height: '8px', background: '#3b82f6', borderRadius: '50%', marginRight: '8px' }}></div>
+              <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Your Progress</span>
+            </div>
+            <div style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937', marginBottom: '16px' }}>
+              Data Scientist
+            </div>
+            <div style={{ marginBottom: '8px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+                <span>Level Progress</span>
+                <span>1250 / 1750 XP</span>
+              </div>
+              <div style={{ height: '8px', background: '#e5e7eb', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ width: '71%', height: '100%', background: '#3b82f6', borderRadius: '4px' }}></div>
               </div>
             </div>
           </div>
-        </Tile>
-      </motion.div>
-
-      {/* Summary Cards Tile */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-      >
-        <Tile variant="default">
-          <TileHeader>
-            <TileTitle className="flex items-center">
-              <span className="mr-2">📊</span>
-              Performance Overview
-            </TileTitle>
-            <p className="text-gray-600 mt-1">Your key metrics at a glance</p>
-          </TileHeader>
-          <TileContent>
-            <SummaryCards user={userProgress} experiments={experiments} />
-          </TileContent>
-        </Tile>
-      </motion.div>
+        </div>
+      </div>
 
       {/* Gamified Hero Tile */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.2 }}
-      >
-        <Tile variant="gradient" className="p-0 overflow-hidden">
-          <GamifiedHero user={userProgress} experiments={experiments} />
-        </Tile>
-      </motion.div>
-
-      {/* Main Content Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* What's New Tile */}
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className="lg:col-span-1"
-        >
-          <Tile variant="info">
-            <TileHeader>
-              <TileTitle className="flex items-center text-blue-800">
-                <span className="mr-2">✨</span>
-                What's New
-              </TileTitle>
-            </TileHeader>
-            <TileContent className="space-y-4">
-              {updates.map((update, index) => (
-                <motion.div
-                  key={index}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: 0.4 + index * 0.1 }}
-                  className={`p-4 rounded-xl border ${update.borderColor} ${update.bgColor} backdrop-blur-sm`}
-                >
-                  <div className="flex items-start space-x-3">
-                    <div className={`w-10 h-10 ${update.iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                      <span className="text-lg">{update.icon}</span>
-                    </div>
-                    <div>
-                      <h4 className="font-semibold text-gray-800">{update.title}</h4>
-                      <p className="text-sm text-gray-600 mt-1">{update.description}</p>
-                      <a href="#" className="text-blue-600 text-sm font-medium hover:underline mt-2 inline-block">
-                        Learn more →
-                      </a>
-                    </div>
-                  </div>
-                </motion.div>
-              ))}
-            </TileContent>
-          </Tile>
-        </motion.div>
-
-        {/* Live Experiments Tile */}
-        <motion.div
-          initial={{ opacity: 0, x: 20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.3 }}
-          className="lg:col-span-2"
-        >
-          <Tile variant="success">
-            <TileHeader className="flex flex-row items-center justify-between">
-              <TileTitle className="flex items-center text-emerald-800">
-                <span className="mr-2">🔬</span>
-                Live Experiments
-              </TileTitle>
-              <Button variant="link" className="text-emerald-600 hover:text-emerald-700">
-                View all →
-              </Button>
-            </TileHeader>
-            <TileContent>
-              <div className="space-y-4">
-                {experiments.filter(exp => exp.status === "running").length === 0 ? (
-                  <div className="text-center py-12 text-gray-500">
-                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                      <span className="text-2xl">+</span>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-700 mb-2">No live experiments yet</h3>
-                    <p className="text-sm">Create your first experiment to get started</p>
-                    <Button className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white">
-                      Create Experiment
-                    </Button>
-                  </div>
-                ) : (
-                  experiments.filter(exp => exp.status === "running").map((experiment, index) => (
-                    <motion.div
-                      key={experiment.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      transition={{ delay: 0.4 + index * 0.1 }}
-                      className="flex items-center justify-between p-6 bg-white/60 backdrop-blur-sm border border-emerald-200 rounded-xl hover:bg-white/80 transition-all duration-200"
-                    >
-                      <div className="flex items-center space-x-4">
-                        <div className="w-4 h-4 bg-emerald-500 rounded-full animate-pulse"></div>
-                        <div>
-                          <h4 className="font-semibold text-gray-800">{experiment.name}</h4>
-                          <p className="text-sm text-gray-600">{experiment.description}</p>
-                        </div>
-                      </div>
-                      <div className="flex items-center space-x-8 text-sm">
-                        <div className="text-center">
-                          <p className="font-semibold text-gray-800">
-                            {experiment.createdAt ? Math.floor((Date.now() - new Date(experiment.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0} days
-                          </p>
-                          <p className="text-gray-600">Running</p>
-                        </div>
-                        <div className="text-center">
-                          <p className="font-semibold text-emerald-600">
-                            {experiment.lift ? `+${experiment.lift}%` : "+0%"}
-                          </p>
-                          <p className="text-gray-600">Lift</p>
-                        </div>
-                        <Button variant="ghost" size="sm" className="text-emerald-600 hover:text-emerald-700">
-                          →
-                        </Button>
-                      </div>
-                    </motion.div>
-                  ))
-                )}
+      <div style={{
+        background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+        color: 'white',
+        padding: '32px',
+        borderRadius: '16px',
+        marginBottom: '32px',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
+        <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '50%', transform: 'translate(64px, -64px)' }}></div>
+        <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '50%', transform: 'translate(-48px, 48px)' }}></div>
+        
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+          <div style={{ display: 'flex', alignItems: 'center' }}>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                width: '64px',
+                height: '64px',
+                background: 'rgba(255, 255, 255, 0.2)',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                animation: 'pulse 2s infinite'
+              }}>
+                <span style={{ fontSize: '24px' }}>🏆</span>
               </div>
-            </TileContent>
-          </Tile>
-        </motion.div>
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                width: '24px',
+                height: '24px',
+                background: '#f59e0b',
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white' }}>3</span>
+              </div>
+            </div>
+            <div style={{ marginLeft: '24px' }}>
+              <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px' }}>🏅 Data Scientist</h2>
+              <p style={{ opacity: 0.9 }}>You've run a test for 5 days straight!</p>
+            </div>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', textAlign: 'center' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>2</div>
+              <p style={{ fontSize: '14px', opacity: 0.8 }}>Tests this week</p>
+            </div>
+            <div style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>8</div>
+              <p style={{ fontSize: '14px', opacity: 0.8 }}>Variants created</p>
+            </div>
+            <div style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>450</div>
+              <p style={{ fontSize: '14px', opacity: 0.8 }}>Points earned</p>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Quick Actions Tile */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.4 }}
-      >
-        <Tile variant="default">
-          <TileHeader>
-            <TileTitle className="flex items-center">
-              <span className="mr-2">⚡</span>
-              Quick Actions
-            </TileTitle>
-            <p className="text-gray-600 mt-1">Get started with common tasks</p>
-          </TileHeader>
-          <TileContent>
-            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-              <QuickActionCard
-                title="Create New Test"
-                description="Set up a new A/B test for your products"
-                href="/app/ab-tests/new"
-                color="blue"
-              />
-              <QuickActionCard
-                title="View Analytics"
-                description="Check detailed performance metrics"
-                href="/app/analytics"
-                color="green"
-              />
-              <QuickActionCard
-                title="Manage Tests"
-                description="View and edit existing A/B tests"
-                href="/app/ab-tests"
-                color="purple"
-              />
-            </div>
-          </TileContent>
-        </Tile>
-      </motion.div>
+      <div style={{
+        background: 'white',
+        padding: '24px',
+        borderRadius: '16px',
+        marginBottom: '32px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e5e7eb'
+      }}>
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center' }}>
+            <span style={{ marginRight: '8px' }}>⚡</span>
+            Quick Actions
+          </h2>
+          <p style={{ color: '#6b7280', marginTop: '4px' }}>Get started with common tasks</p>
+        </div>
+        
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+          <QuickActionCard
+            title="Create New Test"
+            description="Set up a new A/B test for your products"
+            color="blue"
+          />
+          <QuickActionCard
+            title="View Analytics"
+            description="Check detailed performance metrics"
+            color="green"
+          />
+          <QuickActionCard
+            title="Manage Tests"
+            description="View and edit existing A/B tests"
+            color="purple"
+          />
+        </div>
+      </div>
 
       {/* Recent Activity Tile */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.5 }}
-      >
-        <Tile variant="glass">
-          <TileHeader>
-            <TileTitle className="flex items-center">
-              <span className="mr-2">📝</span>
-              Recent Activity
-            </TileTitle>
-            <p className="text-gray-600 mt-1">Your latest testing activities</p>
-          </TileHeader>
-          <TileContent>
-            <div className="flow-root">
-              <ul className="-mb-8">
-                {stats.recentActivity.map((activity, activityIdx) => {
-                  const activityIcon = getActivityIcon(activity.iconType);
-                  const colorClasses = {
-                    blue: 'bg-gradient-to-br from-blue-500 to-blue-600',
-                    green: 'bg-gradient-to-br from-green-500 to-green-600',
-                    orange: 'bg-gradient-to-br from-orange-500 to-orange-600',
-                    purple: 'bg-gradient-to-br from-purple-500 to-purple-600'
-                  };
-                  
-                  return (
-                    <motion.li
-                      key={activity.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: 0.6 + activityIdx * 0.1 }}
-                    >
-                      <div className="relative pb-8">
-                        {activityIdx !== stats.recentActivity.length - 1 ? (
-                          <span
-                            className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gradient-to-b from-gray-200 to-transparent"
-                            aria-hidden="true"
-                          />
-                        ) : null}
-                        <div className="relative flex space-x-4">
-                          <div>
-                            <span className={`h-10 w-10 rounded-full ${colorClasses[activity.color]} flex items-center justify-center ring-4 ring-white shadow-lg`}>
-                              <span className="text-white text-sm">{activityIcon}</span>
-                            </span>
-                          </div>
-                          <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                            <div>
-                              <p className="text-sm font-semibold text-gray-800">
-                                {activity.message}
-                              </p>
-                            </div>
-                            <div className="whitespace-nowrap text-right text-sm text-gray-500">
-                              {activity.time}
-                            </div>
-                          </div>
-                        </div>
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(8px)',
+        padding: '24px',
+        borderRadius: '16px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid rgba(255, 255, 255, 0.2)'
+      }}>
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center' }}>
+            <span style={{ marginRight: '8px' }}>📝</span>
+            Recent Activity
+          </h2>
+          <p style={{ color: '#6b7280', marginTop: '4px' }}>Your latest testing activities</p>
+        </div>
+        
+        <div>
+          <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+            {stats.recentActivity.map((activity, activityIdx) => {
+              const activityIcon = getActivityIcon(activity.iconType);
+              const colorStyles = {
+                blue: { background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
+                green: { background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' },
+                orange: { background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' },
+                purple: { background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' }
+              };
+              
+              return (
+                <li key={activity.id} style={{ marginBottom: '32px', position: 'relative' }}>
+                  {activityIdx !== stats.recentActivity.length - 1 && (
+                    <div style={{
+                      position: 'absolute',
+                      top: '16px',
+                      left: '20px',
+                      width: '2px',
+                      height: 'calc(100% + 16px)',
+                      background: 'linear-gradient(to bottom, #e5e7eb 0%, transparent 100%)'
+                    }}></div>
+                  )}
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                      border: '4px solid white',
+                      ...colorStyles[activity.color]
+                    }}>
+                      <span style={{ color: 'white', fontSize: '14px' }}>{activityIcon}</span>
+                    </div>
+                    <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '6px' }}>
+                      <div>
+                        <p style={{ fontSize: '14px', fontWeight: '600', color: '#374151', margin: 0 }}>
+                          {activity.message}
+                        </p>
                       </div>
-                    </motion.li>
-                  );
-                })}
-              </ul>
-            </div>
-          </TileContent>
-        </Tile>
-      </motion.div>
+                      <div style={{ fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap', marginLeft: '16px' }}>
+                        {activity.time}
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      </div>
     </div>
   );
 } 
