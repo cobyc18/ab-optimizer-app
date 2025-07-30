@@ -7,7 +7,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
   return { 
     user: {
-      shop: admin.shop || '',
+      shop: (admin as any).shop || '',
       email: (admin as any).email || '',
       firstName: (admin as any).firstName || '',
       lastName: (admin as any).lastName || '',
