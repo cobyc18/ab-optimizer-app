@@ -10,7 +10,6 @@ import {
   ArrowDownIcon
 } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
-import Layout from "../components/Layout";
 
 export const loader = async ({ request }) => {
   // In a real app, you'd fetch this data from your database
@@ -85,8 +84,7 @@ export default function Dashboard() {
   const { user } = useOutletContext();
 
   return (
-    <Layout user={user}>
-      <div className="space-y-6">
+    <div className="space-y-6">
         {/* Header */}
         <div>
           <h1 className="text-2xl font-bold text-gray-900">Dashboard</h1>
@@ -197,6 +195,6 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 } 

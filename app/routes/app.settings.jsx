@@ -1,12 +1,10 @@
 import { useOutletContext } from "@remix-run/react";
 import { CogIcon } from "@heroicons/react/24/outline";
-import Layout from "../components/Layout";
 
 export default function Settings() {
   const { user } = useOutletContext();
 
   return (
-    <Layout user={user}>
       <div className="space-y-6">
         {/* Header */}
         <div>
@@ -27,6 +25,6 @@ export default function Settings() {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 } 

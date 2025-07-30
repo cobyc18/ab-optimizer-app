@@ -1,12 +1,10 @@
 import { useOutletContext } from "@remix-run/react";
 import { BeakerIcon, PlusIcon } from "@heroicons/react/24/outline";
-import Layout from "../components/Layout";
 
 export default function ABTests() {
   const { user } = useOutletContext();
 
   return (
-    <Layout user={user}>
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
@@ -39,6 +37,6 @@ export default function ABTests() {
           </div>
         </div>
       </div>
-    </Layout>
+    </div>
   );
 } 
