@@ -106,144 +106,208 @@ export default function Dashboard() {
       icon: "🚀",
       title: "AI-Powered Suggestions",
       description: "Get intelligent test recommendations",
-      bgColor: "bg-blue-500/20",
-      iconColor: "text-blue-500"
+      bgColor: "bg-gradient-to-br from-blue-500/20 to-blue-600/20",
+      borderColor: "border-blue-200",
+      iconBg: "bg-blue-500/20"
     },
     {
       icon: "📈",
       title: "Enhanced Analytics",
       description: "Deeper insights into your results",
-      bgColor: "bg-green-500/20",
-      iconColor: "text-green-500"
+      bgColor: "bg-gradient-to-br from-green-500/20 to-green-600/20",
+      borderColor: "border-green-200",
+      iconBg: "bg-green-500/20"
     },
     {
       icon: "📱",
       title: "Mobile Optimization",
       description: "Better mobile testing experience",
-      bgColor: "bg-orange-500/20",
-      iconColor: "text-orange-500"
+      bgColor: "bg-gradient-to-br from-orange-500/20 to-orange-600/20",
+      borderColor: "border-orange-200",
+      iconBg: "bg-orange-500/20"
     }
   ];
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+      {/* Header Tile */}
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-white border-b border-neutral-200 -mx-8 -mt-8 px-8 py-6"
+        className="bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 rounded-2xl shadow-xl p-8 text-white"
       >
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-semibold text-neutral-800">Dashboard</h1>
-            <p className="text-neutral-600 mt-1">Welcome back! Here's what's happening with your experiments.</p>
+            <h1 className="text-3xl font-bold mb-2">Welcome back! 👋</h1>
+            <p className="text-blue-100 text-lg">Here's what's happening with your experiments today.</p>
           </div>
           <div className="flex items-center space-x-4">
             <Button 
-              className="hover-scale bg-blue-600 text-white hover:bg-blue-700"
+              className="bg-white/20 hover:bg-white/30 text-white border border-white/30 backdrop-blur-sm"
             >
               <span className="mr-2">+</span>
               New Experiment
             </Button>
-            <div className="w-10 h-10 bg-neutral-200 rounded-full flex items-center justify-center">
-              <span className="text-neutral-600 text-sm">U</span>
+            <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/30">
+              <span className="text-white font-semibold">
+                {user.firstName ? user.firstName.charAt(0) : 'U'}
+              </span>
             </div>
           </div>
         </div>
       </motion.div>
 
-      {/* Summary Cards */}
-      <SummaryCards user={userProgress} experiments={experiments} />
+      {/* Summary Cards Tile */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.1 }}
+        className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+      >
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2">📊 Performance Overview</h2>
+          <p className="text-gray-600">Your key metrics at a glance</p>
+        </div>
+        <SummaryCards user={userProgress} experiments={experiments} />
+      </motion.div>
 
-      {/* Gamified Hero */}
-      <GamifiedHero user={userProgress} experiments={experiments} />
+      {/* Gamified Hero Tile */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.2 }}
+      >
+        <GamifiedHero user={userProgress} experiments={experiments} />
+      </motion.div>
 
+      {/* Main Content Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        {/* What's New */}
-        <div className="lg:col-span-1">
-          <Card>
-            <CardHeader>
-              <CardTitle>What's New</CardTitle>
+        {/* What's New Tile */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+          className="lg:col-span-1"
+        >
+          <Card className="bg-gradient-to-br from-indigo-50 to-purple-50 border-indigo-200 rounded-2xl shadow-lg">
+            <CardHeader className="pb-4">
+              <CardTitle className="text-xl font-semibold text-indigo-800 flex items-center">
+                <span className="mr-2">✨</span>
+                What's New
+              </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {updates.map((update, index) => (
-                <div key={index} className="flex items-start space-x-3">
-                  <div className={`w-8 h-8 ${update.bgColor} rounded-lg flex items-center justify-center flex-shrink-0`}>
-                    <span className="text-sm">{update.icon}</span>
+                <motion.div
+                  key={index}
+                  initial={{ opacity: 0, x: -10 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 0.4 + index * 0.1 }}
+                  className={`p-4 rounded-xl border ${update.borderColor} ${update.bgColor} backdrop-blur-sm`}
+                >
+                  <div className="flex items-start space-x-3">
+                    <div className={`w-10 h-10 ${update.iconBg} rounded-lg flex items-center justify-center flex-shrink-0`}>
+                      <span className="text-lg">{update.icon}</span>
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-800">{update.title}</h4>
+                      <p className="text-sm text-gray-600 mt-1">{update.description}</p>
+                      <a href="#" className="text-indigo-600 text-sm font-medium hover:underline mt-2 inline-block">
+                        Learn more →
+                      </a>
+                    </div>
                   </div>
-                  <div>
-                    <h4 className="font-medium text-neutral-800">{update.title}</h4>
-                    <p className="text-sm text-neutral-600 mt-1">{update.description}</p>
-                    <a href="#" className="text-blue-600 text-sm font-medium hover:underline">
-                      Learn more →
-                    </a>
-                  </div>
-                </div>
+                </motion.div>
               ))}
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
 
-        {/* Live Experiments */}
-        <div className="lg:col-span-2">
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <CardTitle>Live Experiments</CardTitle>
-              <Button variant="link" className="text-blue-600">
+        {/* Live Experiments Tile */}
+        <motion.div
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ delay: 0.3 }}
+          className="lg:col-span-2"
+        >
+          <Card className="bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200 rounded-2xl shadow-lg">
+            <CardHeader className="flex flex-row items-center justify-between pb-4">
+              <CardTitle className="text-xl font-semibold text-emerald-800 flex items-center">
+                <span className="mr-2">🔬</span>
+                Live Experiments
+              </CardTitle>
+              <Button variant="link" className="text-emerald-600 hover:text-emerald-700">
                 View all →
               </Button>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
                 {experiments.filter(exp => exp.status === "running").length === 0 ? (
-                  <div className="text-center py-8 text-neutral-500">
-                    <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <span className="text-lg">+</span>
+                  <div className="text-center py-12 text-gray-500">
+                    <div className="w-16 h-16 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <span className="text-2xl">+</span>
                     </div>
-                    <p>No live experiments yet</p>
+                    <h3 className="text-lg font-semibold text-gray-700 mb-2">No live experiments yet</h3>
                     <p className="text-sm">Create your first experiment to get started</p>
+                    <Button className="mt-4 bg-emerald-600 hover:bg-emerald-700 text-white">
+                      Create Experiment
+                    </Button>
                   </div>
                 ) : (
-                  experiments.filter(exp => exp.status === "running").map((experiment) => (
-                    <div key={experiment.id} className="flex items-center justify-between p-4 border border-neutral-200 rounded-lg hover:bg-neutral-50 transition-colors">
+                  experiments.filter(exp => exp.status === "running").map((experiment, index) => (
+                    <motion.div
+                      key={experiment.id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: 0.4 + index * 0.1 }}
+                      className="flex items-center justify-between p-6 bg-white/60 backdrop-blur-sm border border-emerald-200 rounded-xl hover:bg-white/80 transition-all duration-200"
+                    >
                       <div className="flex items-center space-x-4">
-                        <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                        <div className="w-4 h-4 bg-emerald-500 rounded-full animate-pulse"></div>
                         <div>
-                          <h4 className="font-medium text-neutral-800">{experiment.name}</h4>
-                          <p className="text-sm text-neutral-600">{experiment.description}</p>
+                          <h4 className="font-semibold text-gray-800">{experiment.name}</h4>
+                          <p className="text-sm text-gray-600">{experiment.description}</p>
                         </div>
                       </div>
-                      <div className="flex items-center space-x-6 text-sm">
+                      <div className="flex items-center space-x-8 text-sm">
                         <div className="text-center">
-                          <p className="font-medium text-neutral-800">
+                          <p className="font-semibold text-gray-800">
                             {experiment.createdAt ? Math.floor((Date.now() - new Date(experiment.createdAt).getTime()) / (1000 * 60 * 60 * 24)) : 0} days
                           </p>
-                          <p className="text-neutral-600">Running</p>
+                          <p className="text-gray-600">Running</p>
                         </div>
                         <div className="text-center">
-                          <p className="font-medium text-green-500">
+                          <p className="font-semibold text-emerald-600">
                             {experiment.lift ? `+${experiment.lift}%` : "+0%"}
                           </p>
-                          <p className="text-neutral-600">Lift</p>
+                          <p className="text-gray-600">Lift</p>
                         </div>
-                        <Button variant="ghost" size="sm">
+                        <Button variant="ghost" size="sm" className="text-emerald-600 hover:text-emerald-700">
                           →
                         </Button>
                       </div>
-                    </div>
+                    </motion.div>
                   ))
                 )}
               </div>
             </CardContent>
           </Card>
-        </div>
+        </motion.div>
       </div>
 
-      {/* Quick Actions */}
-      <div>
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-          <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
+      {/* Quick Actions Tile */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="bg-white rounded-2xl shadow-lg p-6 border border-gray-100"
+      >
+        <div className="mb-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center">
+            <span className="mr-2">⚡</span>
+            Quick Actions
+          </h2>
+          <p className="text-gray-600">Get started with common tasks</p>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <QuickActionCard
@@ -265,67 +329,73 @@ export default function Dashboard() {
             color="purple"
           />
         </div>
-      </div>
+      </motion.div>
 
-      {/* Recent Activity */}
-      <div>
-        <div className="flex items-center space-x-3 mb-6">
-          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
-          <h2 className="text-2xl font-bold text-gray-900">Recent Activity</h2>
+      {/* Recent Activity Tile */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.5 }}
+        className="bg-white rounded-2xl shadow-lg border border-gray-100 overflow-hidden"
+      >
+        <div className="p-6 border-b border-gray-100">
+          <h2 className="text-xl font-semibold text-gray-800 mb-2 flex items-center">
+            <span className="mr-2">📝</span>
+            Recent Activity
+          </h2>
+          <p className="text-gray-600">Your latest testing activities</p>
         </div>
-        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-          <div className="p-6">
-            <div className="flow-root">
-              <ul className="-mb-8">
-                {stats.recentActivity.map((activity, activityIdx) => {
-                  const activityIcon = getActivityIcon(activity.iconType);
-                  const colorClasses = {
-                    blue: 'bg-blue-500',
-                    green: 'bg-green-500',
-                    orange: 'bg-orange-500',
-                    purple: 'bg-purple-500'
-                  };
-                  
-                  return (
-                    <motion.li
-                      key={activity.id}
-                      initial={{ opacity: 0, x: -20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ delay: activityIdx * 0.1 }}
-                    >
-                      <div className="relative pb-8">
-                        {activityIdx !== stats.recentActivity.length - 1 ? (
-                          <span
-                            className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gradient-to-b from-gray-200 to-transparent"
-                            aria-hidden="true"
-                          />
-                        ) : null}
-                        <div className="relative flex space-x-3">
+        <div className="p-6">
+          <div className="flow-root">
+            <ul className="-mb-8">
+              {stats.recentActivity.map((activity, activityIdx) => {
+                const activityIcon = getActivityIcon(activity.iconType);
+                const colorClasses = {
+                  blue: 'bg-gradient-to-br from-blue-500 to-blue-600',
+                  green: 'bg-gradient-to-br from-green-500 to-green-600',
+                  orange: 'bg-gradient-to-br from-orange-500 to-orange-600',
+                  purple: 'bg-gradient-to-br from-purple-500 to-purple-600'
+                };
+                
+                return (
+                  <motion.li
+                    key={activity.id}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: 0.6 + activityIdx * 0.1 }}
+                  >
+                    <div className="relative pb-8">
+                      {activityIdx !== stats.recentActivity.length - 1 ? (
+                        <span
+                          className="absolute top-4 left-4 -ml-px h-full w-0.5 bg-gradient-to-b from-gray-200 to-transparent"
+                          aria-hidden="true"
+                        />
+                      ) : null}
+                      <div className="relative flex space-x-4">
+                        <div>
+                          <span className={`h-10 w-10 rounded-full ${colorClasses[activity.color]} flex items-center justify-center ring-4 ring-white shadow-lg`}>
+                            <span className="text-white text-sm">{activityIcon}</span>
+                          </span>
+                        </div>
+                        <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
                           <div>
-                            <span className={`h-8 w-8 rounded-full ${colorClasses[activity.color]} flex items-center justify-center ring-4 ring-white shadow-lg`}>
-                              <span className="text-white text-sm">{activityIcon}</span>
-                            </span>
+                            <p className="text-sm font-semibold text-gray-800">
+                              {activity.message}
+                            </p>
                           </div>
-                          <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
-                            <div>
-                              <p className="text-sm font-medium text-gray-900">
-                                {activity.message}
-                              </p>
-                            </div>
-                            <div className="whitespace-nowrap text-right text-sm text-gray-500">
-                              {activity.time}
-                            </div>
+                          <div className="whitespace-nowrap text-right text-sm text-gray-500">
+                            {activity.time}
                           </div>
                         </div>
                       </div>
-                    </motion.li>
-                  );
-                })}
-              </ul>
-            </div>
+                    </div>
+                  </motion.li>
+                );
+              })}
+            </ul>
           </div>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 } 
