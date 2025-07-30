@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { useLoaderData } from "@remix-run/react";
+import { useLoaderData, useOutletContext } from "@remix-run/react";
 import { 
   BeakerIcon, 
   ChartBarIcon, 
@@ -82,9 +82,10 @@ const QuickActionCard = ({ title, description, icon: Icon, href, color = "blue" 
 
 export default function Dashboard() {
   const { stats } = useLoaderData();
+  const { user } = useOutletContext();
 
   return (
-    <Layout user={{ shop: "ogcc18.myshopify.com" }}>
+    <Layout user={user}>
       <div className="space-y-6">
         {/* Header */}
         <div>

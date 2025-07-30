@@ -5,7 +5,18 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
   const { admin } = await authenticate.admin(request);
-  return { user: admin };
+  return { 
+    user: {
+      shop: admin.shop,
+      email: admin.email,
+      firstName: admin.firstName,
+      lastName: admin.lastName,
+      accountOwner: admin.accountOwner,
+      locale: admin.locale,
+      collaborator: admin.collaborator,
+      emailVerified: admin.emailVerified
+    }
+  };
 };
 
 export default function App() {
