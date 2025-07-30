@@ -2,7 +2,7 @@ import { useOutletContext } from "@remix-run/react";
 import { 
   ChartBarIcon, 
   SparklesIcon,
-  TrendingUpIcon,
+  ArrowTrendingUpIcon,
   UsersIcon,
   CurrencyDollarIcon,
   EyeIcon,
@@ -28,7 +28,7 @@ export default function Analytics() {
       title: "Conversion Rate",
       value: "3.2%",
       change: 8.1,
-      icon: TrendingUpIcon,
+      icon: ArrowTrendingUpIcon,
       color: "blue"
     },
     {
@@ -218,7 +218,7 @@ export default function Analytics() {
         <div className="bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl p-6 border border-green-100">
           <div className="flex items-center space-x-3 mb-4">
             <div className="p-2 bg-green-500 rounded-lg">
-              <TrendingUpIcon className="h-5 w-5 text-white" />
+              <ArrowTrendingUpIcon className="h-5 w-5 text-white" />
             </div>
             <h3 className="text-lg font-semibold text-gray-900">Key Insights</h3>
           </div>
