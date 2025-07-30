@@ -15,6 +15,7 @@
     "db:reset": "prisma migrate reset",
     "db:studio": "prisma studio",
     "setup": "node scripts/setup.js",
+    "test:db": "node scripts/test-db.js",
     "start": "remix-serve ./build/index.js",
     "postinstall": "prisma generate"
   },

@@ -4,7 +4,7 @@ services:
     env: node
     plan: free
     buildCommand: npm install && npm run build
-    startCommand: npx prisma migrate deploy && npm start
+    startCommand: node scripts/test-db.js && npx prisma migrate deploy && npm start
     envVars:
       - key: NODE_ENV
         value: production
