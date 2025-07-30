@@ -1,12 +1,5 @@
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
 import { Progress } from "./ui/progress";
-import { 
-  BeakerIcon, 
-  TrophyIcon, 
-  CurrencyDollarIcon, 
-  StarIcon, 
-  ArrowTrendingUpIcon 
-} from "@heroicons/react/24/outline";
 
 export default function SummaryCards({ user, experiments = [] }) {
   const activeExperiments = experiments.filter(exp => exp.status === "running").length;
@@ -52,7 +45,7 @@ export default function SummaryCards({ user, experiments = [] }) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-neutral-600 flex items-center">
-            <BeakerIcon className="w-4 h-4 mr-2 text-blue-500" />
+            <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
             Active Experiments
           </CardTitle>
         </CardHeader>
@@ -70,14 +63,14 @@ export default function SummaryCards({ user, experiments = [] }) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-neutral-600 flex items-center">
-            <TrophyIcon className="w-4 h-4 mr-2 text-orange-500" />
+            <div className="w-2 h-2 bg-orange-500 rounded-full mr-2"></div>
             Wins This Month
           </CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-semibold text-neutral-800">{completedThisMonth}</div>
           <div className="flex items-center mt-2">
-            <ArrowTrendingUpIcon className="w-3 h-3 text-green-500 mr-1" />
+            <span className="text-green-500 mr-1">↗</span>
             <p className="text-xs text-green-600">
               {completedThisMonth > 0 ? "+25% from last month" : "Start testing to see wins"}
             </p>
@@ -89,7 +82,7 @@ export default function SummaryCards({ user, experiments = [] }) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-neutral-600 flex items-center">
-            <CurrencyDollarIcon className="w-4 h-4 mr-2 text-green-500" />
+            <div className="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
             Revenue Lift
           </CardTitle>
         </CardHeader>
@@ -107,7 +100,7 @@ export default function SummaryCards({ user, experiments = [] }) {
       <Card>
         <CardHeader className="pb-2">
           <CardTitle className="text-sm font-medium text-neutral-600 flex items-center">
-            <StarIcon className="w-4 h-4 mr-2 text-blue-500" />
+            <div className="w-2 h-2 bg-blue-500 rounded-full mr-2"></div>
             Your Progress
           </CardTitle>
         </CardHeader>

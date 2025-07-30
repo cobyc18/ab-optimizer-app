@@ -1,11 +1,5 @@
 import { Card, CardContent } from "./ui/card";
 import { Badge } from "./ui/badge";
-import { 
-  StarIcon, 
-  BoltIcon, 
-  BeakerIcon, 
-  SparklesIcon 
-} from "@heroicons/react/24/outline";
 
 export default function GamifiedHero({ user, experiments = [] }) {
   const testsThisWeek = experiments.filter(exp => {
@@ -44,7 +38,7 @@ export default function GamifiedHero({ user, experiments = [] }) {
           <div className="flex items-center">
             <div className="relative">
               <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center badge-glow animate-pulse">
-                <StarIcon className="w-8 h-8 text-white" />
+                <span className="text-white text-2xl">🏆</span>
               </div>
               {user?.currentLevel && (
                 <div className="absolute -top-1 -right-1 w-6 h-6 bg-orange-500 rounded-full flex items-center justify-center">
@@ -63,24 +57,21 @@ export default function GamifiedHero({ user, experiments = [] }) {
           <div className="grid grid-cols-3 gap-6 text-center">
             <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
               <div className="flex items-center justify-center mb-2">
-                <BoltIcon className="w-4 h-4 mr-1" />
-                <p className="text-2xl font-bold">{testsThisWeek}</p>
+                <span className="text-2xl font-bold">{testsThisWeek}</span>
               </div>
               <p className="text-white/80 text-sm">Tests this week</p>
             </div>
             
             <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
               <div className="flex items-center justify-center mb-2">
-                <BeakerIcon className="w-4 h-4 mr-1" />
-                <p className="text-2xl font-bold">{variantsCreated}</p>
+                <span className="text-2xl font-bold">{variantsCreated}</span>
               </div>
               <p className="text-white/80 text-sm">Variants created</p>
             </div>
             
             <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm">
               <div className="flex items-center justify-center mb-2">
-                <SparklesIcon className="w-4 h-4 mr-1" />
-                <p className="text-2xl font-bold">{pointsEarned}</p>
+                <span className="text-2xl font-bold">{pointsEarned}</span>
               </div>
               <p className="text-white/80 text-sm">Points earned</p>
             </div>

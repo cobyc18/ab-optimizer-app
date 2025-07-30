@@ -1,18 +1,5 @@
 import { json } from "@remix-run/node";
 import { useLoaderData, useOutletContext } from "@remix-run/react";
-import { 
-  BeakerIcon, 
-  ChartBarIcon, 
-  FireIcon, 
-  UsersIcon,
-  PlusIcon,
-  ArrowUpIcon,
-  ArrowDownIcon,
-  SparklesIcon,
-  RocketLaunchIcon,
-  CpuChipIcon,
-  UserIcon
-} from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Button } from "../components/ui/button";
@@ -36,7 +23,7 @@ export const loader = async ({ request }) => {
   return json({ stats });
 };
 
-const QuickActionCard = ({ title, description, icon: Icon, href, color = "blue" }) => {
+const QuickActionCard = ({ title, description, href, color = "blue" }) => {
   const colorClasses = {
     blue: { bg: 'bg-gradient-to-br from-blue-500 to-blue-600', hover: 'hover:from-blue-600 hover:to-blue-700' },
     green: { bg: 'bg-gradient-to-br from-green-500 to-green-600', hover: 'hover:from-green-600 hover:to-green-700' },
@@ -53,13 +40,13 @@ const QuickActionCard = ({ title, description, icon: Icon, href, color = "blue" 
     >
       <div className="flex items-center">
         <div className="p-3 rounded-lg bg-white/20 backdrop-blur-sm">
-          <Icon className="h-6 w-6 text-white" />
+          <span className="text-white text-lg">+</span>
         </div>
         <div className="ml-4 flex-1">
           <h3 className="text-lg font-semibold text-white">{title}</h3>
           <p className="text-sm text-blue-100">{description}</p>
         </div>
-        <ArrowUpIcon className="h-5 w-5 text-white/70 transform rotate-45" />
+        <span className="text-white/70 text-lg">→</span>
       </div>
     </motion.div>
   );
@@ -68,13 +55,13 @@ const QuickActionCard = ({ title, description, icon: Icon, href, color = "blue" 
 const getActivityIcon = (iconType) => {
   switch (iconType) {
     case 'beaker':
-      return BeakerIcon;
+      return '🧪';
     case 'chart':
-      return ChartBarIcon;
+      return '📊';
     case 'fire':
-      return FireIcon;
+      return '🔥';
     default:
-      return BeakerIcon;
+      return '🧪';
   }
 };
 
@@ -155,11 +142,11 @@ export default function Dashboard() {
             <Button 
               className="hover-scale bg-blue-600 text-white hover:bg-blue-700"
             >
-              <PlusIcon className="w-4 h-4 mr-2" />
+              <span className="mr-2">+</span>
               New Experiment
             </Button>
             <div className="w-10 h-10 bg-neutral-200 rounded-full flex items-center justify-center">
-              <UserIcon className="w-5 h-5 text-neutral-600" />
+              <span className="text-neutral-600 text-sm">U</span>
             </div>
           </div>
         </div>
@@ -211,7 +198,7 @@ export default function Dashboard() {
                 {experiments.filter(exp => exp.status === "running").length === 0 ? (
                   <div className="text-center py-8 text-neutral-500">
                     <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                      <PlusIcon className="w-6 h-6" />
+                      <span className="text-lg">+</span>
                     </div>
                     <p>No live experiments yet</p>
                     <p className="text-sm">Create your first experiment to get started</p>
@@ -255,28 +242,25 @@ export default function Dashboard() {
       {/* Quick Actions */}
       <div>
         <div className="flex items-center space-x-3 mb-6">
-          <RocketLaunchIcon className="h-6 w-6 text-blue-500" />
+          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
           <h2 className="text-2xl font-bold text-gray-900">Quick Actions</h2>
         </div>
         <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
           <QuickActionCard
             title="Create New Test"
             description="Set up a new A/B test for your products"
-            icon={PlusIcon}
             href="/app/ab-tests/new"
             color="blue"
           />
           <QuickActionCard
             title="View Analytics"
             description="Check detailed performance metrics"
-            icon={ChartBarIcon}
             href="/app/analytics"
             color="green"
           />
           <QuickActionCard
             title="Manage Tests"
             description="View and edit existing A/B tests"
-            icon={BeakerIcon}
             href="/app/ab-tests"
             color="purple"
           />
@@ -286,7 +270,7 @@ export default function Dashboard() {
       {/* Recent Activity */}
       <div>
         <div className="flex items-center space-x-3 mb-6">
-          <CpuChipIcon className="h-6 w-6 text-blue-500" />
+          <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
           <h2 className="text-2xl font-bold text-gray-900">Recent Activity</h2>
         </div>
         <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
@@ -294,7 +278,7 @@ export default function Dashboard() {
             <div className="flow-root">
               <ul className="-mb-8">
                 {stats.recentActivity.map((activity, activityIdx) => {
-                  const ActivityIcon = getActivityIcon(activity.iconType);
+                  const activityIcon = getActivityIcon(activity.iconType);
                   const colorClasses = {
                     blue: 'bg-blue-500',
                     green: 'bg-green-500',
@@ -319,7 +303,7 @@ export default function Dashboard() {
                         <div className="relative flex space-x-3">
                           <div>
                             <span className={`h-8 w-8 rounded-full ${colorClasses[activity.color]} flex items-center justify-center ring-4 ring-white shadow-lg`}>
-                              <ActivityIcon className="h-4 w-4 text-white" />
+                              <span className="text-white text-sm">{activityIcon}</span>
                             </span>
                           </div>
                           <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">

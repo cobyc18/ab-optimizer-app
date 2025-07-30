@@ -2,21 +2,7 @@ import { Link, Outlet, useLoaderData, useRouteError, useLocation } from "@remix-
 import { boundary } from "@shopify/shopify-app-remix/server";
 import { authenticate } from "../shopify.server";
 import type { LoaderFunctionArgs } from "@remix-run/node";
-import { 
-  ChartBarIcon, 
-  BeakerIcon, 
-  BookOpenIcon, 
-  TrophyIcon, 
-  ChartBarSquareIcon, 
-  SwatchIcon, 
-  Cog6ToothIcon, 
-  ChevronRightIcon, 
-  ChevronLeftIcon,
-  SparklesIcon,
-  UserIcon
-} from "@heroicons/react/24/outline";
 import { cn } from "../lib/utils";
-import { Button } from "../components/ui/button";
 import { useState } from "react";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
@@ -38,18 +24,17 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 interface NavigationItem {
   name: string;
   href: string;
-  icon: React.ComponentType<{ className?: string }>;
   badge?: string;
 }
 
 const navigation: NavigationItem[] = [
-  { name: "Dashboard", href: "/app", icon: ChartBarIcon },
-  { name: "A/B Tests", href: "/app/ab-tests", icon: BeakerIcon },
-  { name: "Recipe Library", href: "/app/recipes", icon: BookOpenIcon, badge: "Soon" },
-  { name: "Badges & Leaderboard", href: "/app/badges", icon: TrophyIcon },
-  { name: "Insights & Reports", href: "/app/analytics", icon: ChartBarSquareIcon },
-  { name: "Live Themes", href: "/app/themes", icon: SwatchIcon },
-  { name: "Settings", href: "/app/settings", icon: Cog6ToothIcon },
+  { name: "Dashboard", href: "/app" },
+  { name: "A/B Tests", href: "/app/ab-tests" },
+  { name: "Recipe Library", href: "/app/recipes", badge: "Soon" },
+  { name: "Badges & Leaderboard", href: "/app/badges" },
+  { name: "Insights & Reports", href: "/app/analytics" },
+  { name: "Live Themes", href: "/app/themes" },
+  { name: "Settings", href: "/app/settings" },
 ];
 
 export default function App() {
@@ -75,10 +60,10 @@ export default function App() {
             isActiveItem && "bg-blue-50 text-blue-700"
           )}
         >
-          <item.icon className="w-5 h-5" />
+          <div className="w-2 h-2 bg-current rounded-full mr-3"></div>
           {!isSidebarCollapsed && (
             <>
-              <span className="ml-3 font-medium">{item.name}</span>
+              <span className="font-medium">{item.name}</span>
               {item.badge && (
                 <span className="ml-auto text-xs bg-orange-500 text-white px-2 py-1 rounded-full">
                   {item.badge}
@@ -107,7 +92,7 @@ export default function App() {
         <div className="p-4 border-b border-neutral-200">
           <div className="flex items-center">
             <div className="w-8 h-8 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg flex items-center justify-center">
-              <SparklesIcon className="w-4 h-4 text-white" />
+              <span className="text-white font-bold text-sm">AB</span>
             </div>
             {!isSidebarCollapsed && (
               <span className="ml-3 font-semibold text-neutral-800">AB Optimizer</span>
@@ -131,9 +116,9 @@ export default function App() {
             className="w-full flex items-center justify-center p-3 text-neutral-600 hover:bg-neutral-100 rounded-lg transition-colors"
           >
             {isSidebarCollapsed ? (
-              <ChevronRightIcon className="w-4 h-4" />
+              <span className="text-sm">→</span>
             ) : (
-              <ChevronLeftIcon className="w-4 h-4" />
+              <span className="text-sm">←</span>
             )}
           </button>
         </div>
