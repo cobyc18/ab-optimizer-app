@@ -22,9 +22,9 @@ export const loader = async ({ request }) => {
     totalConversions: 1247,
     conversionRate: 3.2,
     recentActivity: [
-      { id: 1, type: 'test_created', message: 'New A/B test created for Product Page', time: '2 hours ago', icon: BeakerIcon, color: 'blue' },
-      { id: 2, type: 'test_completed', message: 'Product Title test completed - Variant B won', time: '1 day ago', icon: ChartBarIcon, color: 'green' },
-      { id: 3, type: 'conversion', message: 'Checkout button test showing 15% improvement', time: '2 days ago', icon: FireIcon, color: 'orange' },
+      { id: 1, type: 'test_created', message: 'New A/B test created for Product Page', time: '2 hours ago', iconType: 'beaker', color: 'blue' },
+      { id: 2, type: 'test_completed', message: 'Product Title test completed - Variant B won', time: '1 day ago', iconType: 'chart', color: 'green' },
+      { id: 3, type: 'conversion', message: 'Checkout button test showing 15% improvement', time: '2 days ago', iconType: 'fire', color: 'orange' },
     ]
   };
 
@@ -103,6 +103,19 @@ const QuickActionCard = ({ title, description, icon: Icon, href, color = "blue" 
       </div>
     </motion.div>
   );
+};
+
+const getActivityIcon = (iconType) => {
+  switch (iconType) {
+    case 'beaker':
+      return BeakerIcon;
+    case 'chart':
+      return ChartBarIcon;
+    case 'fire':
+      return FireIcon;
+    default:
+      return BeakerIcon;
+  }
 };
 
 export default function Dashboard() {
@@ -203,7 +216,7 @@ export default function Dashboard() {
             <div className="flow-root">
               <ul className="-mb-8">
                 {stats.recentActivity.map((activity, activityIdx) => {
-                  const Icon = activity.icon;
+                  const ActivityIcon = getActivityIcon(activity.iconType);
                   const colorClasses = {
                     blue: 'bg-blue-500',
                     green: 'bg-green-500',
@@ -228,7 +241,7 @@ export default function Dashboard() {
                         <div className="relative flex space-x-3">
                           <div>
                             <span className={`h-8 w-8 rounded-full ${colorClasses[activity.color]} flex items-center justify-center ring-4 ring-white shadow-lg`}>
-                              <Icon className="h-4 w-4 text-white" />
+                              <ActivityIcon className="h-4 w-4 text-white" />
                             </span>
                           </div>
                           <div className="flex min-w-0 flex-1 justify-between space-x-4 pt-1.5">
