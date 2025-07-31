@@ -43,7 +43,7 @@ export const action = async ({ request }) => {
     });
 
     // Validate required fields
-    if (!testId || !variant || !eventType || !productId) {
+    if (!variant || !eventType || !productId) {
       console.log("❌ Missing required fields");
       return json({ error: "Missing required fields" }, { 
         status: 400,
