@@ -373,7 +373,25 @@ export const action = async ({ request }) => {
     });
     console.log("✅ A/B test created successfully:", abTest.id);
 
-    return json({ success: true, abTest });
+    return json({ 
+      success: true, 
+      abTest: {
+        id: abTest.id,
+        name: abTest.name,
+        shop: abTest.shop,
+        productId: abTest.productId,
+        templateA: abTest.templateA,
+        templateB: abTest.templateB,
+        trafficSplit: abTest.trafficSplit,
+        status: abTest.status,
+        startDate: abTest.startDate
+      }
+    }, { 
+      status: 200,
+      headers: {
+        'Content-Type': 'application/json'
+      }
+    });
   } catch (error) {
     console.error("❌ Unhandled error in action:", error);
     return json({ 
@@ -394,6 +412,7 @@ export default function ABTesting() {
   const [testName, setTestName] = useState("");
   const [error, setError] = useState(null);
   const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || "");
+  const [successMessage, setSuccessMessage] = useState(null);
 
   // Template preview state
   const [selectedTemplate, setSelectedTemplate] = useState(productTemplates[0] || "");
@@ -496,6 +515,7 @@ export default function ABTesting() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
+    setSuccessMessage(null);
 
     // Client-side validation
     if (!testName.trim()) {
@@ -560,12 +580,19 @@ export default function ABTesting() {
 
       if (data.success) {
         console.log("✅ A/B test created successfully");
+        // Show success message
+        setError(null);
         // Reset form on success
         setTestName("");
         setTemplateA(productTemplates[0] || "");
         setTemplateB("");
         setTrafficSplit("50");
         setSelectedProductId(products[0]?.id || "");
+        
+        // Show success message in the UI
+        const successMessage = `✅ A/B test "${data.abTest.name}" created successfully!`;
+        setSuccessMessage(successMessage); // Use successMessage state for success
+        setTimeout(() => setSuccessMessage(null), 5000); // Clear after 5 seconds
       } else {
         console.log("❌ A/B test creation failed:", data.error);
         setError(data.error || "Failed to create A/B test");
@@ -880,7 +907,7 @@ export default function ABTesting() {
               </div>
             )}
 
-            {actionData?.success && (
+            {successMessage && (
               <div style={{
                 padding: '12px',
                 background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
@@ -888,7 +915,7 @@ export default function ABTesting() {
                 borderRadius: '8px',
                 color: '#065f46'
               }}>
-                ✅ A/B Test created successfully!
+                {successMessage}
               </div>
             )}
 
