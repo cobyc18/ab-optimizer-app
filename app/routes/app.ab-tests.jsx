@@ -497,6 +497,27 @@ export default function ABTesting() {
     e.preventDefault();
     setError(null);
 
+    // Client-side validation
+    if (!testName.trim()) {
+      setError("Test name is required");
+      return;
+    }
+
+    if (!templateA) {
+      setError("Please select Template A");
+      return;
+    }
+
+    if (!templateB) {
+      setError("Please select Template B (Second Variant)");
+      return;
+    }
+
+    if (templateA === templateB) {
+      setError("Template A and Template B must be different");
+      return;
+    }
+
     console.log("🔍 Submitting A/B test form with data:", {
       shop: shopDomain,
       testName,
@@ -705,9 +726,12 @@ export default function ABTesting() {
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           border: '1px solid #e5e7eb'
         }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
             🧪 Create A/B Test
           </h2>
+          <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '24px' }}>
+            Select two different templates to compare their performance. Both templates are required.
+          </p>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <input type="hidden" name="shop" value={shopDomain} />
@@ -715,7 +739,7 @@ export default function ABTesting() {
             {/* Test Name */}
             <div>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Test Name
+                Test Name <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
                 type="text"
@@ -767,12 +791,13 @@ export default function ABTesting() {
             {/* Template A */}
             <div>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Template A (First Variant)
+                Template A (First Variant) <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <select
                 value={templateA}
                 onChange={(e) => setTemplateA(e.target.value)}
                 name="templateA"
+                required
                 style={{
                   width: '100%',
                   padding: '12px',
@@ -782,6 +807,7 @@ export default function ABTesting() {
                   background: 'white'
                 }}
               >
+                <option value="">Select Template A</option>
                 {templateOptions.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
@@ -791,25 +817,32 @@ export default function ABTesting() {
             {/* Template B */}
             <div>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Template B (Second Variant)
+                Template B (Second Variant) <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <select
                 value={templateB}
                 onChange={(e) => setTemplateB(e.target.value)}
                 name="templateB"
+                required
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #d1d5db',
+                  border: templateB ? '1px solid #d1d5db' : '1px solid #ef4444',
                   borderRadius: '8px',
                   fontSize: '14px',
                   background: 'white'
                 }}
               >
+                <option value="">Select Template B</option>
                 {templateOptions.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
+              {!templateB && (
+                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                  Template B is required for A/B testing
+                </p>
+              )}
             </div>
 
             {/* Traffic Split */}
