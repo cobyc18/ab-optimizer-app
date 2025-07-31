@@ -523,6 +523,8 @@ if (sessionStorage.getItem(scriptId)) {
     // Store test ID globally for tracking functions
     window.currentTestId = testId;
     window.currentVariant = bucket;
+    console.log("🔍 Set global testId:", window.currentTestId);
+    console.log("🔍 Set global variant:", window.currentVariant);
 
     // Only redirect for actual customer visits (not manual navigation)
     if (bucket && bucket !== "" && !currentView) {
@@ -666,6 +668,27 @@ function setupNavigationTracking() {
 }
 */
 
+// Helper function to get current test ID
+function getCurrentTestId() {
+  // First try window.currentTestId
+  if (window.currentTestId) {
+    console.log("Using window.currentTestId:", window.currentTestId);
+    return window.currentTestId;
+  }
+  
+  // Fallback: try to get from localStorage
+  var keys = Object.keys(localStorage);
+  var testKeys = keys.filter(key => key.startsWith('ab_test_'));
+  if (testKeys.length > 0) {
+    var testId = testKeys[0].replace('ab_test_', '');
+    console.log("Using testId from localStorage:", testId);
+    return testId;
+  }
+  
+  console.log("No testId found");
+  return null;
+}
+
 // Track cart count for this product
 var currentCartCount = 0;
 var isManualCartUpdate = false; // Flag to prevent duplicate events
@@ -738,7 +761,7 @@ async function updateCartCountAndLog(action) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
-      testId: window.currentTestId, // Add testId
+      testId: getCurrentTestId(), // Use helper function
       eventType: 'cart_updated', 
       productId: String({{ product.id | json }}),
       variant: currentVariant,
@@ -800,7 +823,7 @@ function trackAddToCart(event) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        testId: window.currentTestId, // Add testId
+        testId: getCurrentTestId(), // Use helper function
         eventType: 'add_to_cart', 
         productId: String({{ product.id | json }}),
         variant: currentVariant,
@@ -1232,7 +1255,7 @@ function trackCartView() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        testId: window.currentTestId, // Add testId
+        testId: getCurrentTestId(), // Use helper function
         eventType: 'checkout_initiated', 
         productId: String({{ product.id | json }}),
         variant: currentVariant
@@ -1265,7 +1288,7 @@ function trackPurchase(orderData) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
-      testId: window.currentTestId, // Add testId
+      testId: getCurrentTestId(), // Use helper function
       eventType: 'purchase', 
       productId: String({{ product.id | json }}),
       variant: currentVariant,
