@@ -1494,17 +1494,19 @@ function detectPurchase() {
 
 // Function to determine the current A/B test variant
 function determineCurrentVariant() {
+  console.log("🔍 determineCurrentVariant() called");
+  
   // First, try to use the stored variant from the A/B test (this should be the actual template name)
   if (window.currentVariant) {
-    console.log("Using stored current variant:", window.currentVariant);
+    console.log("✅ Using stored current variant:", window.currentVariant);
     return window.currentVariant;
   }
   
   // Use the global function that returns the actual template name
-  if (window.getABTestVariant) {
+  if (window.getABTestVariant && typeof window.getABTestVariant === 'function') {
     var variant = window.getABTestVariant();
-    console.log("Using getABTestVariant():", variant);
-    return variant;
+    console.log("✅ Using getABTestVariant():", variant);
+    if (variant) return variant;
   }
   
   // Check if we have a stored bucket for this test
@@ -1513,7 +1515,7 @@ function determineCurrentVariant() {
     var bucketKey = 'ab_test_' + testId;
     var bucket = localStorage.getItem(bucketKey);
     if (bucket) {
-      console.log("Using stored bucket for variant:", bucket);
+      console.log("✅ Using stored bucket for variant:", bucket);
       return bucket;
     }
   }
@@ -1523,12 +1525,12 @@ function determineCurrentVariant() {
   var currentView = url.searchParams.get('view') || "";
   
   if (currentView) {
-    console.log("Determining variant from view parameter:", currentView);
+    console.log("✅ Determining variant from view parameter:", currentView);
     return currentView; // Return the actual view parameter (template name)
   }
   
   // Fallback to variant A if we can't determine
-  console.log("Could not determine variant, using fallback");
+  console.log("❌ Could not determine variant, using fallback 'default'");
   return "default"; // Return the default template name instead of "A"
 }
 

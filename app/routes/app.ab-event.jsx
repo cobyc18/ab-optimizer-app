@@ -84,9 +84,25 @@ export const action = async ({ request }) => {
       });
     }
 
-    // Validate variant
-    if (variant !== test.templateA && variant !== test.templateB) {
-      console.log("❌ Invalid variant:", variant);
+    // Validate variant - accept both template names and generic A/B variants
+    let validVariant = false;
+    let actualVariant = variant;
+    
+    // Check if it's a generic A/B variant (A or B)
+    if (variant === 'A' || variant === 'B') {
+      // Convert generic variant to actual template name
+      actualVariant = variant === 'A' ? test.templateA : test.templateB;
+      console.log(`🔄 Converted generic variant '${variant}' to template name '${actualVariant}'`);
+      validVariant = true;
+    } else {
+      // Check if it's an actual template name
+      if (variant === test.templateA || variant === test.templateB) {
+        validVariant = true;
+      }
+    }
+    
+    if (!validVariant) {
+      console.log("❌ Invalid variant:", variant, "Expected:", test.templateA, "or", test.templateB, "or 'A' or 'B'");
       return json({ error: "Invalid variant" }, { 
         status: 400,
         headers: {
@@ -101,7 +117,7 @@ export const action = async ({ request }) => {
     const event = await prisma.aBEvent.create({
       data: {
         testId: testId,
-        variant: variant,
+        variant: actualVariant, // Use the actual variant name
         eventType: eventType,
         productId: String(productId),
         value: value || null,
@@ -114,7 +130,7 @@ export const action = async ({ request }) => {
     return json({ 
       success: true, 
       eventId: event.id,
-      message: `${eventType} event logged for variant ${variant}`
+      message: `${eventType} event logged for variant ${actualVariant}`
     }, {
       headers: {
         'Access-Control-Allow-Origin': '*',
