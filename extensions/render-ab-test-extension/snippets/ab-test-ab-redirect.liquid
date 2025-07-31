@@ -1663,17 +1663,22 @@ function setupCartTracking() {
       trackAddToCart();
     }
     
-    // Check for checkout forms
+    // Check for checkout forms - MORE SPECIFIC DETECTION
     if (form && (
-      form.action.includes('/cart') ||
+      // Only detect forms that are specifically for checkout
       form.action.includes('/checkout') ||
-      form.classList.contains('cart-form') ||
       form.classList.contains('checkout-form') ||
       form.querySelector('[type="submit"][value*="checkout"]') ||
       form.querySelector('[type="submit"][value*="check out"]') ||
-      form.querySelector('[data-action="checkout"]')
+      form.querySelector('[data-action="checkout"]') ||
+      form.querySelector('[data-action="go-to-checkout"]')
     )) {
       console.log("✅ Checkout form detected - triggering trackCheckoutInitiated");
+      console.log("🔍 Checkout form details:", {
+        action: form.action,
+        class: form.className,
+        method: form.method
+      });
       trackCheckoutInitiated();
     }
   });
@@ -1707,7 +1712,7 @@ function setupCartTracking() {
     }
   });
   
-  // Method 3: Checkout button clicks
+  // Method 3: Checkout button clicks - MORE SPECIFIC DETECTION
   document.addEventListener('click', function(event) {
     var target = event.target;
     var targetText = target.textContent ? target.textContent.toLowerCase().trim() : '';
@@ -1716,7 +1721,7 @@ function setupCartTracking() {
     var targetId = target.id ? target.id.toLowerCase() : '';
     
     // Debug: Log all clicks to see what we're missing
-    console.log("Click detected on:", {
+    console.log("🔍 Click detected on:", {
       tagName: target.tagName,
       text: targetText,
       class: targetClass,
@@ -1726,35 +1731,64 @@ function setupCartTracking() {
       dataAction: target.getAttribute('data-action')
     });
     
+    // EXCLUDE add to cart buttons first
     if (target && (
-      // Text-based detection (more flexible)
-      targetText.includes('checkout') ||
-      targetText.includes('check out') ||
-      targetText.includes('buy now') ||
+      targetText.includes('add to cart') ||
+      targetText.includes('add to bag') ||
+      targetClass.includes('add-to-cart') ||
+      targetClass.includes('add-to-bag') ||
+      targetId.includes('add-to-cart') ||
+      target.getAttribute('data-action') === 'add-to-cart' ||
+      target.getAttribute('data-action') === 'add-to-bag'
+    )) {
+      console.log("🚫 Excluding add to cart button from checkout detection");
+      return;
+    }
+    
+    // SPECIFIC checkout detection
+    var isCheckoutButton = false;
+    var checkoutReason = '';
+    
+    if (target && (
+      // Text-based detection (more specific)
+      (targetText === 'checkout' || targetText === 'check out') ||
       targetText.includes('proceed to checkout') ||
       targetText.includes('go to checkout') ||
       
-      // Class-based detection
-      targetClass.includes('checkout') ||
+      // Class-based detection (specific to checkout)
       targetClass.includes('checkout-button') ||
       targetClass.includes('cart__checkout') ||
+      targetClass.includes('checkout-btn') ||
       
-      // ID-based detection
-      targetId.includes('checkout') ||
+      // ID-based detection (specific to checkout)
       targetId.includes('cartdrawer-checkout') ||
+      targetId.includes('checkout-button') ||
       
       // URL-based detection
       targetHref.includes('/checkout') ||
       
-      // Data attribute detection
+      // Data attribute detection (specific to checkout)
       target.getAttribute('data-action') === 'checkout' ||
       target.getAttribute('data-action') === 'go-to-checkout' ||
       
-      // Aria label detection
+      // Aria label detection (specific to checkout)
       (target.getAttribute('aria-label') && target.getAttribute('aria-label').toLowerCase().includes('checkout'))
     )) {
-      console.log("✅ Checkout button clicked - triggering trackCheckoutInitiated");
+      isCheckoutButton = true;
+      checkoutReason = 'Checkout button detected';
+    }
+    
+    if (isCheckoutButton) {
+      console.log("✅ " + checkoutReason + " - triggering trackCheckoutInitiated");
+      console.log("🔍 Checkout button details:", {
+        text: targetText,
+        class: targetClass,
+        id: targetId,
+        href: targetHref
+      });
       trackCheckoutInitiated();
+    } else {
+      console.log("🚫 Not a checkout button - skipping");
     }
   });
   
@@ -1817,17 +1851,22 @@ document.addEventListener('DOMContentLoaded', function() {
         trackAddToCart();
       }
       
-      // Check for checkout forms
+      // Check for checkout forms - MORE SPECIFIC DETECTION
       if (form && (
-        form.action.includes('/cart') ||
+        // Only detect forms that are specifically for checkout
         form.action.includes('/checkout') ||
-        form.classList.contains('cart-form') ||
         form.classList.contains('checkout-form') ||
         form.querySelector('[type="submit"][value*="checkout"]') ||
         form.querySelector('[type="submit"][value*="check out"]') ||
-        form.querySelector('[data-action="checkout"]')
+        form.querySelector('[data-action="checkout"]') ||
+        form.querySelector('[data-action="go-to-checkout"]')
       )) {
         console.log("✅ Checkout form detected - triggering trackCheckoutInitiated");
+        console.log("🔍 Checkout form details:", {
+          action: form.action,
+          class: form.className,
+          method: form.method
+        });
         trackCheckoutInitiated();
       }
     });
@@ -1861,7 +1900,7 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     });
     
-    // Method 3: Checkout button clicks
+    // Method 3: Checkout button clicks - MORE SPECIFIC DETECTION
     document.addEventListener('click', function(event) {
       var target = event.target;
       var targetText = target.textContent ? target.textContent.toLowerCase().trim() : '';
@@ -1880,35 +1919,64 @@ document.addEventListener('DOMContentLoaded', function() {
         dataAction: target.getAttribute('data-action')
       });
       
+      // EXCLUDE add to cart buttons first
       if (target && (
-        // Text-based detection (more flexible)
-        targetText.includes('checkout') ||
-        targetText.includes('check out') ||
-        targetText.includes('buy now') ||
+        targetText.includes('add to cart') ||
+        targetText.includes('add to bag') ||
+        targetClass.includes('add-to-cart') ||
+        targetClass.includes('add-to-bag') ||
+        targetId.includes('add-to-cart') ||
+        target.getAttribute('data-action') === 'add-to-cart' ||
+        target.getAttribute('data-action') === 'add-to-bag'
+      )) {
+        console.log("🚫 Excluding add to cart button from checkout detection");
+        return;
+      }
+      
+      // SPECIFIC checkout detection
+      var isCheckoutButton = false;
+      var checkoutReason = '';
+      
+      if (target && (
+        // Text-based detection (more specific)
+        (targetText === 'checkout' || targetText === 'check out') ||
         targetText.includes('proceed to checkout') ||
         targetText.includes('go to checkout') ||
         
-        // Class-based detection
-        targetClass.includes('checkout') ||
+        // Class-based detection (specific to checkout)
         targetClass.includes('checkout-button') ||
         targetClass.includes('cart__checkout') ||
+        targetClass.includes('checkout-btn') ||
         
-        // ID-based detection
-        targetId.includes('checkout') ||
+        // ID-based detection (specific to checkout)
         targetId.includes('cartdrawer-checkout') ||
+        targetId.includes('checkout-button') ||
         
         // URL-based detection
         targetHref.includes('/checkout') ||
         
-        // Data attribute detection
+        // Data attribute detection (specific to checkout)
         target.getAttribute('data-action') === 'checkout' ||
         target.getAttribute('data-action') === 'go-to-checkout' ||
         
-        // Aria label detection
+        // Aria label detection (specific to checkout)
         (target.getAttribute('aria-label') && target.getAttribute('aria-label').toLowerCase().includes('checkout'))
       )) {
-        console.log("✅ Checkout button clicked - triggering trackCheckoutInitiated");
+        isCheckoutButton = true;
+        checkoutReason = 'Checkout button detected';
+      }
+      
+      if (isCheckoutButton) {
+        console.log("✅ " + checkoutReason + " - triggering trackCheckoutInitiated");
+        console.log("🔍 Checkout button details:", {
+          text: targetText,
+          class: targetClass,
+          id: targetId,
+          href: targetHref
+        });
         trackCheckoutInitiated();
+      } else {
+        console.log("🚫 Not a checkout button - skipping");
       }
     });
     
