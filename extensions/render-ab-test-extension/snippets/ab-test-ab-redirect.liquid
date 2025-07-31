@@ -530,6 +530,11 @@ if (sessionStorage.getItem(scriptId)) {
     localStorage.setItem('current_test_id', testId);
     localStorage.setItem('current_variant', bucket);
     console.log("🔍 Stored testId in localStorage:", testId);
+    
+    // Also store in a global variable for immediate access
+    window.abTestId = testId;
+    window.abTestVariant = bucket;
+    console.log("🔍 Set global abTestId:", window.abTestId);
 
     // Only redirect for actual customer visits (not manual navigation)
     if (bucket && bucket !== "" && !currentView) {
@@ -676,15 +681,26 @@ function setupNavigationTracking() {
 // Helper function to get current test ID
 function getCurrentTestId() {
   console.log("🔍 getCurrentTestId() called");
+  console.log("🔍 Current URL:", window.location.href);
   
-  // First try localStorage (most reliable)
+  // First try global abTestId (most immediate)
+  console.log("🔍 window.abTestId:", window.abTestId);
+  if (window.abTestId) {
+    console.log("✅ Using window.abTestId:", window.abTestId);
+    return window.abTestId;
+  }
+  
+  // Second try localStorage (most reliable)
   var storedTestId = localStorage.getItem('current_test_id');
+  console.log("🔍 localStorage.getItem('current_test_id'):", storedTestId);
+  
   if (storedTestId) {
     console.log("✅ Using testId from localStorage:", storedTestId);
     return storedTestId;
   }
   
   // Fallback: try window.currentTestId
+  console.log("🔍 window.currentTestId:", window.currentTestId);
   if (window.currentTestId) {
     console.log("✅ Using window.currentTestId:", window.currentTestId);
     return window.currentTestId;
@@ -703,6 +719,7 @@ function getCurrentTestId() {
   }
   
   console.log("❌ No testId found anywhere");
+  console.log("❌ This will cause the event to fail!");
   return null;
 }
 
@@ -1510,7 +1527,16 @@ function setupCartTracking() {
     }
   }
   
-  console.log("🔍 Setting up cart tracking with testId:", window.currentTestId);
+  // Initialize global abTestId from localStorage if not already set
+  if (!window.abTestId) {
+    var storedTestId = localStorage.getItem('current_test_id');
+    if (storedTestId) {
+      window.abTestId = storedTestId;
+      console.log("🔍 Initialized abTestId from localStorage:", storedTestId);
+    }
+  }
+  
+  console.log("🔍 Setting up cart tracking with testId:", window.abTestId || window.currentTestId);
   
   // Set up quantity change monitoring
   setupQuantityMonitoring();
