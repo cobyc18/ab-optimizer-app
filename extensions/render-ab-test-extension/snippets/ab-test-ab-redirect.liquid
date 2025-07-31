@@ -526,8 +526,10 @@ if (sessionStorage.getItem(scriptId)) {
     console.log("🔍 Set global testId:", window.currentTestId);
     console.log("🔍 Set global variant:", window.currentVariant);
     
-    // Set up cart tracking after testId is available
-    setupCartTracking();
+    // Store testId in localStorage for persistence across page loads
+    localStorage.setItem('current_test_id', testId);
+    localStorage.setItem('current_variant', bucket);
+    console.log("🔍 Stored testId in localStorage:", testId);
 
     // Only redirect for actual customer visits (not manual navigation)
     if (bucket && bucket !== "" && !currentView) {
@@ -674,15 +676,21 @@ function setupNavigationTracking() {
 // Helper function to get current test ID
 function getCurrentTestId() {
   console.log("🔍 getCurrentTestId() called");
-  console.log("🔍 window.currentTestId:", window.currentTestId);
   
-  // First try window.currentTestId
+  // First try localStorage (most reliable)
+  var storedTestId = localStorage.getItem('current_test_id');
+  if (storedTestId) {
+    console.log("✅ Using testId from localStorage:", storedTestId);
+    return storedTestId;
+  }
+  
+  // Fallback: try window.currentTestId
   if (window.currentTestId) {
     console.log("✅ Using window.currentTestId:", window.currentTestId);
     return window.currentTestId;
   }
   
-  // Fallback: try to get from localStorage
+  // Last fallback: try to get from ab_test_ keys
   var keys = Object.keys(localStorage);
   console.log("🔍 All localStorage keys:", keys);
   var testKeys = keys.filter(key => key.startsWith('ab_test_'));
@@ -690,12 +698,11 @@ function getCurrentTestId() {
   
   if (testKeys.length > 0) {
     var testId = testKeys[0].replace('ab_test_', '');
-    console.log("✅ Using testId from localStorage:", testId);
+    console.log("✅ Using testId from ab_test_ key:", testId);
     return testId;
   }
   
-  // Last resort: try to fetch from API
-  console.log("🔍 No testId found, attempting to fetch from API...");
+  console.log("❌ No testId found anywhere");
   return null;
 }
 
@@ -1494,6 +1501,15 @@ function determineCurrentVariant() {
 
 // Set up cart tracking after testId is available
 function setupCartTracking() {
+  // Initialize testId from localStorage if not already set
+  if (!window.currentTestId) {
+    var storedTestId = localStorage.getItem('current_test_id');
+    if (storedTestId) {
+      window.currentTestId = storedTestId;
+      console.log("🔍 Initialized testId from localStorage:", storedTestId);
+    }
+  }
+  
   console.log("🔍 Setting up cart tracking with testId:", window.currentTestId);
   
   // Set up quantity change monitoring
@@ -1583,10 +1599,10 @@ document.addEventListener('DOMContentLoaded', function() {
   
   console.log("Setting up A/B test tracking...");
   
-  // Note: Cart tracking is now set up after testId is available
-  // in the setupCartTracking() function called from the A/B test setup
+  // Set up cart tracking immediately (will use localStorage for testId)
+  setupCartTracking();
   
-  console.log("✅ Basic A/B test tracking setup complete");
+  console.log("✅ A/B test tracking setup complete");
 });
 
 </script>
