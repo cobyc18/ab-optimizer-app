@@ -732,6 +732,30 @@ function getCurrentTestId() {
   return null;
 }
 
+// Helper function to wait for testId to be available
+function waitForTestId(callback, maxAttempts = 10) {
+  var attempts = 0;
+  
+  function checkTestId() {
+    attempts++;
+    console.log(`🔍 Waiting for testId... attempt ${attempts}/${maxAttempts}`);
+    
+    var testId = getCurrentTestId();
+    if (testId) {
+      console.log("✅ testId found:", testId);
+      callback(testId);
+    } else if (attempts < maxAttempts) {
+      console.log("⏳ testId not ready, retrying in 100ms...");
+      setTimeout(checkTestId, 100);
+    } else {
+      console.log("❌ testId not available after maximum attempts");
+      callback(null);
+    }
+  }
+  
+  checkTestId();
+}
+
 // Track cart count for this product
 var currentCartCount = 0;
 var isManualCartUpdate = false; // Flag to prevent duplicate events
@@ -785,56 +809,63 @@ async function updateCartCountAndLog(action) {
   // Store current count in sessionStorage
   sessionStorage.setItem('cart-count-' + {{ product.id | json }}, newCount.toString());
   
-  // Log the cart update event
-  var currentVariant = determineCurrentVariant();
-  var currentTestId = getCurrentTestId();
-  console.log("🔍 Cart update - testId:", currentTestId);
-  console.log("🔍 Cart update - variant:", currentVariant);
-  var cartValue = 0;
-  
-  // Get cart value if available
-  if (window.Shopify && window.Shopify.theme && window.Shopify.theme.money) {
-    var cartTotalElement = document.querySelector('[data-cart-total]') || 
-                          document.querySelector('.cart-total') ||
-                          document.querySelector('[data-cart-price]');
-    if (cartTotalElement) {
-      var cartText = cartTotalElement.textContent || cartTotalElement.innerText;
-      cartValue = parseFloat(cartText.replace(/[^0-9.]/g, '')) || 0;
+  // Wait for testId to be available before logging
+  waitForTestId(function(testId) {
+    if (!testId) {
+      console.log("❌ Cannot log cart event - no testId available");
+      return;
     }
-  }
-  
-  fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      testId: currentTestId, // Use stored variable
-      eventType: 'cart_updated', 
-      productId: String({{ product.id | json }}),
-      variant: currentVariant,
-      value: cartValue,
-      metadata: { 
-        productTitle: {{ product.title | json }},
-        productPrice: ({{ product.price | json }} / 100).toFixed(2), // Convert cents to dollars
-        cartCount: newCount,
-        previousCount: oldCount,
-        action: action, // 'add', 'remove', 'update'
-        productId: {{ product.id | json }}
+    
+    // Log the cart update event
+    var currentVariant = determineCurrentVariant();
+    console.log("🔍 Cart update - testId:", testId);
+    console.log("🔍 Cart update - variant:", currentVariant);
+    var cartValue = 0;
+    
+    // Get cart value if available
+    if (window.Shopify && window.Shopify.theme && window.Shopify.theme.money) {
+      var cartTotalElement = document.querySelector('[data-cart-total]') || 
+                            document.querySelector('.cart-total') ||
+                            document.querySelector('[data-cart-price]');
+      if (cartTotalElement) {
+        var cartText = cartTotalElement.textContent || cartTotalElement.innerText;
+        cartValue = parseFloat(cartText.replace(/[^0-9.]/g, '')) || 0;
       }
-    })
-  }).then(r => {
-    console.log("🔍 Cart update response status:", r.status);
-    console.log("🔍 Cart update response ok:", r.ok);
-    if (!r.ok) {
-      return r.text().then(text => {
-        console.log("❌ Cart update error response:", text);
-        throw new Error(`HTTP ${r.status}: ${text}`);
-      });
     }
-    return r.json();
-  }).then(data => {
-    console.log("✅ Logged cart update event:", data);
-  }).catch(e => {
-    console.log("❌ Failed to log cart update event:", e);
+    
+    fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        testId: testId,
+        eventType: 'cart_updated', 
+        productId: String({{ product.id | json }}),
+        variant: currentVariant,
+        value: cartValue,
+        metadata: { 
+          productTitle: {{ product.title | json }},
+          productPrice: ({{ product.price | json }} / 100).toFixed(2), // Convert cents to dollars
+          cartCount: newCount,
+          previousCount: oldCount,
+          action: action, // 'add', 'remove', 'update'
+          productId: {{ product.id | json }}
+        }
+      })
+    }).then(r => {
+      console.log("🔍 Cart update response status:", r.status);
+      console.log("🔍 Cart update response ok:", r.ok);
+      if (!r.ok) {
+        return r.text().then(text => {
+          console.log("❌ Cart update error response:", text);
+          throw new Error(`HTTP ${r.status}: ${text}`);
+        });
+      }
+      return r.json();
+    }).then(data => {
+      console.log("✅ Logged cart update event:", data);
+    }).catch(e => {
+      console.log("❌ Failed to log cart update event:", e);
+    });
   });
   
   // Reset flag after a short delay
@@ -861,52 +892,59 @@ function trackAddToCart(event) {
   if (!sessionStorage.getItem(addToCartKey)) {
     sessionStorage.setItem(addToCartKey, 'true');
     
-    var currentVariant = determineCurrentVariant();
-    var currentTestId = getCurrentTestId();
-    console.log("🔍 Add to cart - testId:", currentTestId);
-    console.log("🔍 Add to cart - variant:", currentVariant);
-    var cartValue = 0;
-    
-    // Get cart value if available
-    if (window.Shopify && window.Shopify.theme && window.Shopify.theme.money) {
-      var cartTotalElement = document.querySelector('[data-cart-total]') || 
-                            document.querySelector('.cart-total') ||
-                            document.querySelector('[data-cart-price]');
-      if (cartTotalElement) {
-        var cartText = cartTotalElement.textContent || cartTotalElement.innerText;
-        cartValue = parseFloat(cartText.replace(/[^0-9.]/g, '')) || 0;
+    // Wait for testId to be available before logging
+    waitForTestId(function(testId) {
+      if (!testId) {
+        console.log("❌ Cannot log add to cart event - no testId available");
+        return;
       }
-    }
-    
-    fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        testId: currentTestId, // Use stored variable
-        eventType: 'add_to_cart', 
-        productId: String({{ product.id | json }}),
-        variant: currentVariant,
-        value: cartValue,
-        metadata: { 
-          productTitle: {{ product.title | json }},
-          productPrice: ({{ product.price | json }} / 100).toFixed(2), // Convert cents to dollars
-          cartCount: previousCount
+      
+      var currentVariant = determineCurrentVariant();
+      console.log("🔍 Add to cart - testId:", testId);
+      console.log("🔍 Add to cart - variant:", currentVariant);
+      var cartValue = 0;
+      
+      // Get cart value if available
+      if (window.Shopify && window.Shopify.theme && window.Shopify.theme.money) {
+        var cartTotalElement = document.querySelector('[data-cart-total]') || 
+                              document.querySelector('.cart-total') ||
+                              document.querySelector('[data-cart-price]');
+        if (cartTotalElement) {
+          var cartText = cartTotalElement.textContent || cartTotalElement.innerText;
+          cartValue = parseFloat(cartText.replace(/[^0-9.]/g, '')) || 0;
         }
-      })
-    }).then(r => {
-      console.log("🔍 Add to cart response status:", r.status);
-      console.log("🔍 Add to cart response ok:", r.ok);
-      if (!r.ok) {
-        return r.text().then(text => {
-          console.log("❌ Add to cart error response:", text);
-          throw new Error(`HTTP ${r.status}: ${text}`);
-        });
       }
-      return r.json();
-    }).then(data => {
-      console.log("✅ Logged initial add to cart event:", data);
-    }).catch(e => {
-      console.log("❌ Failed to log add to cart event:", e);
+      
+      fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          testId: testId,
+          eventType: 'add_to_cart', 
+          productId: String({{ product.id | json }}),
+          variant: currentVariant,
+          value: cartValue,
+          metadata: { 
+            productTitle: {{ product.title | json }},
+            productPrice: ({{ product.price | json }} / 100).toFixed(2), // Convert cents to dollars
+            cartCount: previousCount
+          }
+        })
+      }).then(r => {
+        console.log("🔍 Add to cart response status:", r.status);
+        console.log("🔍 Add to cart response ok:", r.ok);
+        if (!r.ok) {
+          return r.text().then(text => {
+            console.log("❌ Add to cart error response:", text);
+            throw new Error(`HTTP ${r.status}: ${text}`);
+          });
+        }
+        return r.json();
+      }).then(data => {
+        console.log("✅ Logged initial add to cart event:", data);
+      }).catch(e => {
+        console.log("❌ Failed to log add to cart event:", e);
+      });
     });
   }
   
