@@ -1,6 +1,31 @@
 import { json } from "@remix-run/node";
 import prisma from "../db.server";
 
+// Add loader to handle OPTIONS requests (CORS preflight)
+export const loader = async ({ request }) => {
+  // Handle CORS preflight requests
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Max-Age': '86400'
+      }
+    });
+  }
+  
+  // For GET requests, return a simple response
+  return json({ message: "A/B Event endpoint - use POST to log events" }, {
+    headers: {
+      'Access-Control-Allow-Origin': '*',
+      'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type'
+    }
+  });
+};
+
 export const action = async ({ request }) => {
   try {
     const body = await request.json();

@@ -1,7 +1,22 @@
 import { json } from "@remix-run/node";
 import prisma from "../db.server";
 
+// Add loader to handle OPTIONS requests (CORS preflight)
 export const loader = async ({ request }) => {
+  // Handle CORS preflight requests
+  if (request.method === "OPTIONS") {
+    return new Response(null, {
+      status: 200,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Max-Age': '86400'
+      }
+    });
+  }
+  
+  // For GET requests, proceed with the normal logic
   try {
     const url = new URL(request.url);
     const productId = url.searchParams.get('productId');
@@ -15,7 +30,14 @@ export const loader = async ({ request }) => {
     
     if (!productId) {
       console.log("❌ No product ID provided");
-      return json({ error: "Product ID is required" }, { status: 400 });
+      return json({ error: "Product ID is required" }, { 
+        status: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      });
     }
 
     console.log("🔍 Fetching A/B test config for product:", productId);
@@ -46,7 +68,13 @@ export const loader = async ({ request }) => {
 
     if (activeTests.length === 0) {
       console.log("❌ No active A/B tests found for product:", numericProductId);
-      return json({ testId: null });
+      return json({ testId: null }, {
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      });
     }
 
     const test = activeTests[0];
