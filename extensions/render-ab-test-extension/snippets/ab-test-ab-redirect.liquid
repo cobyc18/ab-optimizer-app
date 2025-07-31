@@ -84,7 +84,7 @@
     var orderId = orderData.id || orderData.order_id || orderData.orderId || null;
     var currentVariant = determineCurrentVariantGlobal();
     
-    fetch('/apps/testing-ab-app/ab-event', {
+    fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -441,11 +441,11 @@ if (sessionStorage.getItem(scriptId)) {
     if (currentView && currentView !== "") {
       console.log("User is manually viewing template:", currentView, "- no redirect");
       // Still log the impression for the current template
-      var res = await fetch('/apps/testing-ab-app/ab-test-config?productId=' + encodeURIComponent(productId));
+      var res = await fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
       if (res.ok) {
         var config = await res.json();
         if (config.testId) {
-          fetch('/apps/testing-ab-app/ab-event', {
+          fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ testId: config.testId, variant: currentView, eventType: 'impression', productId: String(productId) })
@@ -484,7 +484,7 @@ if (sessionStorage.getItem(scriptId)) {
     }
 
     console.log("Fetching A/B test config...");
-    var res = await fetch('/apps/testing-ab-app/ab-test-config?productId=' + encodeURIComponent(productId));
+    var res = await fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
     if (!res.ok) {
       console.log("Failed to fetch test config");
       console.log("=== A/B TEST DEBUG END ===");
@@ -529,7 +529,7 @@ if (sessionStorage.getItem(scriptId)) {
     var impressionKey = 'impression-' + productId + '-' + Date.now();
     if (!sessionStorage.getItem(impressionKey)) {
       sessionStorage.setItem(impressionKey, 'true');
-      fetch('/apps/testing-ab-app/ab-event', {
+      fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ testId, variant: bucket, eventType: 'impression', productId: String(productId) })
@@ -589,7 +589,7 @@ function stopTimeTracking() {
       // Determine the current variant
       var currentVariant = determineCurrentVariant();
       
-      fetch('/apps/testing-ab-app/ab-event', {
+      fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -726,7 +726,7 @@ async function updateCartCountAndLog(action) {
     }
   }
   
-  fetch('/apps/testing-ab-app/ab-event', {
+  fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
@@ -787,7 +787,7 @@ function trackAddToCart(event) {
       }
     }
     
-    fetch('/apps/testing-ab-app/ab-event', {
+    fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -1140,7 +1140,7 @@ function trackCartView() {
   // Determine the current variant
   var currentVariant = determineCurrentVariant();
   
-  fetch('/apps/testing-ab-app/ab-event', {
+  fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
@@ -1218,7 +1218,7 @@ function trackCartView() {
       console.log("Could not update cart note:", e);
     }
     
-    fetch('/apps/testing-ab-app/ab-event', {
+    fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -1250,7 +1250,7 @@ function trackPurchase(orderData) {
   // Determine the current variant
   var currentVariant = determineCurrentVariant();
   
-  fetch('/apps/testing-ab-app/ab-event', {
+  fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
@@ -1418,7 +1418,7 @@ function determineCurrentVariant() {
     // Get the test configuration to match templates
     if (window.currentTestId) {
       // Fetch test config to get template mappings
-      fetch('/apps/testing-ab-app/ab-test-config?productId=' + encodeURIComponent({{ product.id | json }}))
+      fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent({{ product.id | json }}))
         .then(res => res.json())
         .then(config => {
           if (config.testId) {

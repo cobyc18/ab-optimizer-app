@@ -36,7 +36,7 @@
         // Defensive: Only fetch if configId looks valid
         if (!configId || configId === 'Enter config ID' || configId === 'none') return;
 
-        fetch('/apps/api/widget-config/{{ config_id }}')
+        fetch('https://ab-optimizer-app.onrender.com/app/widget-config/{{ config_id }}')
           .then(res => res.text())
           .then(text => {
             let config;
