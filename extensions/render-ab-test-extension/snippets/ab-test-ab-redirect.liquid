@@ -1662,6 +1662,20 @@ function setupCartTracking() {
       // Don't prevent default here - let the form submit normally
       trackAddToCart();
     }
+    
+    // Check for checkout forms
+    if (form && (
+      form.action.includes('/cart') ||
+      form.action.includes('/checkout') ||
+      form.classList.contains('cart-form') ||
+      form.classList.contains('checkout-form') ||
+      form.querySelector('[type="submit"][value*="checkout"]') ||
+      form.querySelector('[type="submit"][value*="check out"]') ||
+      form.querySelector('[data-action="checkout"]')
+    )) {
+      console.log("✅ Checkout form detected - triggering trackCheckoutInitiated");
+      trackCheckoutInitiated();
+    }
   });
   
   // Method 2: Button clicks with debouncing
@@ -1696,17 +1710,50 @@ function setupCartTracking() {
   // Method 3: Checkout button clicks
   document.addEventListener('click', function(event) {
     var target = event.target;
-    var targetText = target.textContent ? target.textContent.toLowerCase() : '';
+    var targetText = target.textContent ? target.textContent.toLowerCase().trim() : '';
     var targetHref = target.href || '';
+    var targetClass = target.className ? (typeof target.className === 'string' ? target.className : target.className.toString()).toLowerCase() : '';
+    var targetId = target.id ? target.id.toLowerCase() : '';
+    
+    // Debug: Log all clicks to see what we're missing
+    console.log("Click detected on:", {
+      tagName: target.tagName,
+      text: targetText,
+      class: targetClass,
+      id: targetId,
+      href: targetHref,
+      ariaLabel: target.getAttribute('aria-label'),
+      dataAction: target.getAttribute('data-action')
+    });
     
     if (target && (
+      // Text-based detection (more flexible)
       targetText.includes('checkout') ||
+      targetText.includes('check out') ||
       targetText.includes('buy now') ||
+      targetText.includes('proceed to checkout') ||
+      targetText.includes('go to checkout') ||
+      
+      // Class-based detection
+      targetClass.includes('checkout') ||
+      targetClass.includes('checkout-button') ||
+      targetClass.includes('cart__checkout') ||
+      
+      // ID-based detection
+      targetId.includes('checkout') ||
+      targetId.includes('cartdrawer-checkout') ||
+      
+      // URL-based detection
       targetHref.includes('/checkout') ||
+      
+      // Data attribute detection
       target.getAttribute('data-action') === 'checkout' ||
-      target.getAttribute('aria-label') && target.getAttribute('aria-label').toLowerCase().includes('checkout')
+      target.getAttribute('data-action') === 'go-to-checkout' ||
+      
+      // Aria label detection
+      (target.getAttribute('aria-label') && target.getAttribute('aria-label').toLowerCase().includes('checkout'))
     )) {
-      console.log("Checkout button clicked");
+      console.log("✅ Checkout button clicked - triggering trackCheckoutInitiated");
       trackCheckoutInitiated();
     }
   });
@@ -1769,6 +1816,20 @@ document.addEventListener('DOMContentLoaded', function() {
         // Don't prevent default here - let the form submit normally
         trackAddToCart();
       }
+      
+      // Check for checkout forms
+      if (form && (
+        form.action.includes('/cart') ||
+        form.action.includes('/checkout') ||
+        form.classList.contains('cart-form') ||
+        form.classList.contains('checkout-form') ||
+        form.querySelector('[type="submit"][value*="checkout"]') ||
+        form.querySelector('[type="submit"][value*="check out"]') ||
+        form.querySelector('[data-action="checkout"]')
+      )) {
+        console.log("✅ Checkout form detected - triggering trackCheckoutInitiated");
+        trackCheckoutInitiated();
+      }
     });
     
     // Method 2: Button clicks with debouncing
@@ -1803,17 +1864,50 @@ document.addEventListener('DOMContentLoaded', function() {
     // Method 3: Checkout button clicks
     document.addEventListener('click', function(event) {
       var target = event.target;
-      var targetText = target.textContent ? target.textContent.toLowerCase() : '';
+      var targetText = target.textContent ? target.textContent.toLowerCase().trim() : '';
       var targetHref = target.href || '';
+      var targetClass = target.className ? (typeof target.className === 'string' ? target.className : target.className.toString()).toLowerCase() : '';
+      var targetId = target.id ? target.id.toLowerCase() : '';
+      
+      // Debug: Log all clicks to see what we're missing
+      console.log("Click detected on:", {
+        tagName: target.tagName,
+        text: targetText,
+        class: targetClass,
+        id: targetId,
+        href: targetHref,
+        ariaLabel: target.getAttribute('aria-label'),
+        dataAction: target.getAttribute('data-action')
+      });
       
       if (target && (
+        // Text-based detection (more flexible)
         targetText.includes('checkout') ||
+        targetText.includes('check out') ||
         targetText.includes('buy now') ||
+        targetText.includes('proceed to checkout') ||
+        targetText.includes('go to checkout') ||
+        
+        // Class-based detection
+        targetClass.includes('checkout') ||
+        targetClass.includes('checkout-button') ||
+        targetClass.includes('cart__checkout') ||
+        
+        // ID-based detection
+        targetId.includes('checkout') ||
+        targetId.includes('cartdrawer-checkout') ||
+        
+        // URL-based detection
         targetHref.includes('/checkout') ||
+        
+        // Data attribute detection
         target.getAttribute('data-action') === 'checkout' ||
-        target.getAttribute('aria-label') && target.getAttribute('aria-label').toLowerCase().includes('checkout')
+        target.getAttribute('data-action') === 'go-to-checkout' ||
+        
+        // Aria label detection
+        (target.getAttribute('aria-label') && target.getAttribute('aria-label').toLowerCase().includes('checkout'))
       )) {
-        console.log("Checkout button clicked");
+        console.log("✅ Checkout button clicked - triggering trackCheckoutInitiated");
         trackCheckoutInitiated();
       }
     });
