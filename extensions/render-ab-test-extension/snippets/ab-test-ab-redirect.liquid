@@ -7,7 +7,7 @@
 <script>
 // Global A/B test tracking system that works on all pages
 (function() {
-  console.log("=== GLOBAL A/B TEST TRACKING INITIALIZED COBY !!===");
+  console.log("=== GLOBAL A/B TEST TRACKING INITIALIZED LIATE !!===");
   
   // Function to determine the current A/B test variant (global version)
   function determineCurrentVariantGlobal() {
@@ -379,201 +379,205 @@
 
 {% if product %}
 <script>
-// Prevent multiple executions of this script using sessionStorage
-var scriptId = 'ab-test-script-' + {{ product.id | json }};
-if (sessionStorage.getItem(scriptId)) {
-  console.log("A/B test script already executed for this product, skipping...");
-} else {
-  sessionStorage.setItem(scriptId, 'true');
-  
-  (async function() {
-    console.log("=== A/B TEST DEBUG START ===");
-    console.log("Current URL:", window.location.href);
-    console.log("Hostname:", window.location.hostname);
-    console.log("Pathname:", window.location.pathname);
-    
-    var rawId = {{ product.id | json }};
-    var productId = rawId;
-    if (typeof rawId === "string" && rawId.startsWith("gid://")) {
-      var match = rawId.match(/Product\/(\\d+)/);
-      if (match) productId = match[1];
-    }
-    console.log("Product ID:", productId);
-
-    // Check current URL parameters
-    var url = new URL(window.location.href);
-    var currentView = url.searchParams.get('view') || "";
-    var previewPath = url.searchParams.get('previewPath') || "";
-    var noRedirect = url.searchParams.get('no_redirect') || "";
-    console.log("Current view parameter:", currentView);
-    console.log("Preview path parameter:", previewPath);
-    console.log("No redirect parameter:", noRedirect);
-    
-    // Multiple ways to detect theme editor
-    var isThemeEditor = (
-      window.location.hostname === "admin.shopify.com" && 
-      window.location.pathname.includes("/themes/") && 
-      window.location.pathname.includes("/editor")
-    ) || (
-      window.location.hostname === "admin.shopify.com" && 
-      previewPath !== ""
-    ) || (
-      window.location.href.includes("context=apps")
-    );
-    
-    console.log("Is theme editor:", isThemeEditor);
-    
-    // CRITICAL: If we're in theme editor, NEVER redirect
-    if (isThemeEditor) {
-      console.log("In Shopify theme editor - NEVER redirecting");
-      console.log("=== A/B TEST DEBUG END ===");
-      return;
-    }
-    
-    // If no_redirect parameter is present, skip redirect
-    if (noRedirect === "true") {
-      console.log("No redirect parameter detected - skipping A/B test redirect");
-      console.log("=== A/B TEST DEBUG END ===");
-      return;
-    }
-
-    // If there's already a view parameter, don't redirect - user is manually navigating
-    if (currentView && currentView !== "") {
-      console.log("User is manually viewing template:", currentView, "- no redirect");
-      // Still log the impression for the current template
-      var res = await fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
-      if (res.ok) {
+  // Prevent multiple executions of this script using sessionStorage
+  var scriptId = 'ab-test-script-' + {{ product.id | json }};
+  if (sessionStorage.getItem(scriptId)) {
+    console.log("A/B test script already executed for this product, skipping...");
+  } else {
+    sessionStorage.setItem(scriptId, 'true');
+    (async function() {
+      console.log("=== A/B TEST DEBUG START ===");
+      console.log("Current URL:", window.location.href);
+      console.log("Hostname:", window.location.hostname);
+      console.log("Pathname:", window.location.pathname);
+      var rawId = {{ product.id | json }};
+      var productId = rawId;
+      if (typeof rawId === "string" && rawId.startsWith("gid://")) {
+        var match = rawId.match(/Product\/(\\d+)/);
+        if (match) productId = match[1];
+      }
+      console.log("Product ID:", productId);
+      
+      // Check current URL parameters
+      var url = new URL(window.location.href);
+      var currentView = url.searchParams.get('view') || "";
+      var previewPath = url.searchParams.get('previewPath') || "";
+      var noRedirect = url.searchParams.get('no_redirect') || "";
+      console.log("Current view parameter:", currentView);
+      console.log("Preview path parameter:", previewPath);
+      console.log("No redirect parameter:", noRedirect);
+      
+      var isThemeEditor = (
+        window.location.hostname === "admin.shopify.com" &&
+        window.location.pathname.includes("/themes/") &&
+        window.location.pathname.includes("/editor")
+      ) || (
+        window.location.hostname === "admin.shopify.com" &&
+        previewPath !== ""
+      ) || (
+        window.location.href.includes("context=apps")
+      );
+      console.log("Is theme editor:", isThemeEditor);
+      
+      if (isThemeEditor) {
+        console.log("In Shopify theme editor - NEVER redirecting");
+        console.log("=== A/B TEST DEBUG END ===");
+        return;
+      }
+      
+      if (noRedirect === "true") {
+        console.log("No redirect parameter detected - skipping A/B test redirect");
+        console.log("=== A/B TEST DEBUG END ===");
+        return;
+      }
+      
+      if (currentView && currentView !== "") {
+        console.log("User is manually viewing template:", currentView, "- no redirect");
+        var res = await fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
+        if (res.ok) {
+          var config = await res.json();
+          if (config.testId) {
+            fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ testId: config.testId, variant: currentView, eventType: 'impression', productId: String(productId) })
+            }).then(r => r.json()).then(data => {
+              console.log("Logged impression event for manual view:", data);
+            }).catch(e => {
+              console.log("Failed to log impression event", e);
+            });
+          }
+        }
+        console.log("=== A/B TEST DEBUG END ===");
+        return;
+      }
+      
+      var isManualNavigation = false;
+      if (document.referrer) {
+        var referrerUrl = new URL(document.referrer);
+        var referrerView = referrerUrl.searchParams.get('view');
+        if (referrerView && referrerView !== "") {
+          console.log("User navigated from template with view parameter:", referrerView, "- treating as manual navigation");
+          isManualNavigation = true;
+        }
+      }
+      
+      if (isManualNavigation) {
+        console.log("Manual navigation detected - skipping A/B test redirect");
+        console.log("=== A/B TEST DEBUG END ===");
+        return;
+      }
+      
+      console.log("Fetching A/B test config...");
+      try {
+        var res = await fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
+        console.log("A/B test config response status:", res.status);
+        console.log("A/B test config response ok:", res.ok);
+        
+        if (!res.ok) {
+          console.log("Failed to fetch test config - response not ok");
+          console.log("=== A/B TEST DEBUG END ===");
+          return;
+        }
+        
         var config = await res.json();
-        if (config.testId) {
+        console.log("Fetched config:", config);
+        
+        if (!config.testId) {
+          console.log("No testId in config");
+          console.log("=== A/B TEST DEBUG END ===");
+          return;
+        }
+        
+        var testId = config.testId;
+        var variantA = config.templateA;
+        var variantB = config.templateB;
+        var bucketKey = 'ab_test_' + testId;
+        var bucket = localStorage.getItem(bucketKey);
+        
+        console.log("Test ID:", testId);
+        console.log("Variant A:", variantA);
+        console.log("Variant B:", variantB);
+        console.log("Bucket key:", bucketKey);
+        console.log("Existing bucket:", bucket);
+        
+        if (!bucket) {
+          bucket = Math.random() < config.trafficSplit / 100 ? variantA : variantB;
+          localStorage.setItem(bucketKey, bucket);
+          console.log("Assigned bucket:", bucket);
+        } else {
+          console.log("Existing bucket:", bucket);
+        }
+        
+        // Store test ID globally for tracking functions
+        window.currentTestId = testId;
+        window.currentVariant = bucket;
+        console.log("🔍 Set global testId:", window.currentTestId);
+        console.log("🔍 Set global variant:", window.currentVariant);
+        
+        // Store testId in localStorage for persistence across page loads
+        localStorage.setItem('current_test_id', testId);
+        localStorage.setItem('current_variant', bucket);
+        console.log("🔍 Stored testId in localStorage:", testId);
+        
+        // Also store in a global variable for immediate access
+        window.abTestId = testId;
+        window.abTestVariant = bucket;
+        console.log("🔍 Set global abTestId:", window.abTestId);
+        
+        // CRITICAL: Set a global function that returns the current testId
+        window.getABTestId = function() {
+          return testId; // Direct access to the variable from this scope
+        };
+        window.getABTestVariant = function() {
+          return bucket; // Direct access to the variable from this scope
+        };
+        console.log("🔍 Set global getABTestId function");
+        
+        // Only redirect for actual customer visits (not manual navigation)
+        if (bucket && bucket !== "" && !currentView) {
+          url.searchParams.set('view', bucket);
+          console.log("Redirecting to variant:", url.toString());
+          window.location.replace(url.toString());
+        } else {
+          console.log("No redirect needed. Current view:", currentView, "Bucket:", bucket);
+        }
+        
+        // Log impression event (only once per page load using sessionStorage)
+        var impressionKey = 'impression-' + productId + '-' + Date.now();
+        if (!sessionStorage.getItem(impressionKey)) {
+          sessionStorage.setItem(impressionKey, 'true');
+          console.log("Logging impression event...");
           fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ testId: config.testId, variant: currentView, eventType: 'impression', productId: String(productId) })
-          }).then(r => r.json()).then(data => {
-            console.log("Logged impression event for manual view:", data);
+            body: JSON.stringify({ testId, variant: bucket, eventType: 'impression', productId: String(productId) })
+          }).then(r => {
+            console.log("Impression response status:", r.status);
+            console.log("Impression response ok:", r.ok);
+            if (!r.ok) {
+              return r.text().then(text => {
+                console.log("Impression error response:", text);
+                throw new Error(`HTTP ${r.status}: ${text}`);
+              });
+            }
+            return r.json();
+          }).then(data => {
+            console.log("✅ Logged impression event:", data);
           }).catch(e => {
-            console.log("Failed to log impression event", e);
+            console.log("❌ Failed to log impression event", e);
           });
+        } else {
+          console.log("Impression already logged, skipping...");
         }
+        
+        console.log("=== A/B TEST DEBUG END ===");
+      } catch (error) {
+        console.log("❌ Error in A/B test initialization:", error);
+        console.log("=== A/B TEST DEBUG END ===");
       }
-      console.log("=== A/B TEST DEBUG END ===");
-      return;
-    }
-
-    // Additional safety checks for manual navigation
-    var isManualNavigation = false;
-    
-    // Check if user came from another template (referrer contains view parameter)
-    if (document.referrer) {
-      var referrerUrl = new URL(document.referrer);
-      var referrerView = referrerUrl.searchParams.get('view');
-      if (referrerView && referrerView !== "") {
-        console.log("User navigated from template with view parameter:", referrerView, "- treating as manual navigation");
-        isManualNavigation = true;
-      }
-    }
-    
-    // Only treat as manual navigation if there's a specific referrer with view parameter
-    // Don't treat direct visits or internal navigation as manual navigation
-    // This allows normal customer visits to trigger A/B testing
-    
-    if (isManualNavigation) {
-      console.log("Manual navigation detected - skipping A/B test redirect");
-      console.log("=== A/B TEST DEBUG END ===");
-      return;
-    }
-
-    console.log("Fetching A/B test config...");
-    console.log("🔍 Fetch URL:", 'https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
-    
-    var res = await fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
-    console.log("🔍 Fetch response status:", res.status);
-    console.log("🔍 Fetch response ok:", res.ok);
-    
-    if (!res.ok) {
-      console.log("❌ Failed to fetch test config - Status:", res.status);
-      var errorText = await res.text();
-      console.log("❌ Error response:", errorText);
-      console.log("=== A/B TEST DEBUG END ===");
-      return;
-    }
-    
-    var config = await res.json();
-    console.log("✅ Fetched config:", config);
-    if (!config.testId) {
-      console.log("❌ No testId in config - Config:", config);
-      console.log("=== A/B TEST DEBUG END ===");
-      return;
-    }
-
-    var testId = config.testId;
-    var variantA = config.templateA;
-    var variantB = config.templateB;
-    var bucketKey = 'ab_test_' + testId;
-    var bucket = localStorage.getItem(bucketKey);
-
-    if (!bucket) {
-      bucket = Math.random() < config.trafficSplit / 100 ? variantA : variantB;
-      localStorage.setItem(bucketKey, bucket);
-      console.log("Assigned bucket:", bucket);
-    } else {
-      console.log("Existing bucket:", bucket);
-    }
-
-    // Store test ID globally for tracking functions
-    window.currentTestId = testId;
-    window.currentVariant = bucket;
-    console.log("🔍 Set global testId:", window.currentTestId);
-    console.log("🔍 Set global variant:", window.currentVariant);
-    
-    // Store testId in localStorage for persistence across page loads
-    localStorage.setItem('current_test_id', testId);
-    localStorage.setItem('current_variant', bucket);
-    console.log("🔍 Stored testId in localStorage:", testId);
-    
-    // Also store in a global variable for immediate access
-    window.abTestId = testId;
-    window.abTestVariant = bucket;
-    console.log("🔍 Set global abTestId:", window.abTestId);
-    
-    // CRITICAL: Set a global function that returns the current testId
-    window.getABTestId = function() {
-      return testId; // Direct access to the variable from this scope
-    };
-    window.getABTestVariant = function() {
-      return bucket; // Direct access to the variable from this scope
-    };
-    console.log("🔍 Set global getABTestId function");
-
-    // Only redirect for actual customer visits (not manual navigation)
-    if (bucket && bucket !== "" && !currentView) {
-      url.searchParams.set('view', bucket);
-      console.log("Redirecting to variant:", url.toString());
-      window.location.replace(url.toString());
-    } else {
-      console.log("No redirect needed. Current view:", currentView, "Bucket:", bucket);
-    }
-
-    // Log impression event (only once per page load using sessionStorage)
-    var impressionKey = 'impression-' + productId + '-' + Date.now();
-    if (!sessionStorage.getItem(impressionKey)) {
-      sessionStorage.setItem(impressionKey, 'true');
-      fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ testId, variant: bucket, eventType: 'impression', productId: String(productId) })
-      }).then(r => r.json()).then(data => {
-        console.log("Logged impression event:", data);
-      }).catch(e => {
-        console.log("Failed to log impression event", e);
-      });
-    } else {
-      console.log("Impression already logged, skipping...");
-    }
-    
-    console.log("=== A/B TEST DEBUG END ===");
-  })();
-}
+    })();
+  }
 
 // ===== COMPREHENSIVE A/B TEST TRACKING =====
 
