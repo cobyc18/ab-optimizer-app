@@ -525,6 +525,9 @@ if (sessionStorage.getItem(scriptId)) {
     window.currentVariant = bucket;
     console.log("🔍 Set global testId:", window.currentTestId);
     console.log("🔍 Set global variant:", window.currentVariant);
+    
+    // Set up cart tracking after testId is available
+    setupCartTracking();
 
     // Only redirect for actual customer visits (not manual navigation)
     if (bucket && bucket !== "" && !currentView) {
@@ -670,22 +673,29 @@ function setupNavigationTracking() {
 
 // Helper function to get current test ID
 function getCurrentTestId() {
+  console.log("🔍 getCurrentTestId() called");
+  console.log("🔍 window.currentTestId:", window.currentTestId);
+  
   // First try window.currentTestId
   if (window.currentTestId) {
-    console.log("Using window.currentTestId:", window.currentTestId);
+    console.log("✅ Using window.currentTestId:", window.currentTestId);
     return window.currentTestId;
   }
   
   // Fallback: try to get from localStorage
   var keys = Object.keys(localStorage);
+  console.log("🔍 All localStorage keys:", keys);
   var testKeys = keys.filter(key => key.startsWith('ab_test_'));
+  console.log("🔍 Test keys found:", testKeys);
+  
   if (testKeys.length > 0) {
     var testId = testKeys[0].replace('ab_test_', '');
-    console.log("Using testId from localStorage:", testId);
+    console.log("✅ Using testId from localStorage:", testId);
     return testId;
   }
   
-  console.log("No testId found");
+  // Last resort: try to fetch from API
+  console.log("🔍 No testId found, attempting to fetch from API...");
   return null;
 }
 
@@ -1482,25 +1492,9 @@ function determineCurrentVariant() {
   return "A";
 }
 
-// Set up event listeners when DOM is ready
-document.addEventListener('DOMContentLoaded', function() {
-  // Prevent multiple setups
-  if (window.abTestTrackingSetup) {
-    console.log("A/B test tracking already setup, skipping...");
-    return;
-  }
-  window.abTestTrackingSetup = true;
-  
-  console.log("Setting up A/B test tracking...");
-  
-  // Start time tracking
-  // startTimeTracking();
-  
-  // Set up navigation tracking
-  // setupNavigationTracking();
-  
-  // Set up cart monitoring (disabled to prevent duplicate events)
-  // setupCartMonitoring();
+// Set up cart tracking after testId is available
+function setupCartTracking() {
+  console.log("🔍 Setting up cart tracking with testId:", window.currentTestId);
   
   // Set up quantity change monitoring
   setupQuantityMonitoring();
@@ -1547,122 +1541,52 @@ document.addEventListener('DOMContentLoaded', function() {
       target.getAttribute('data-action') === 'add-to-bag' ||
       target.getAttribute('aria-label') && target.getAttribute('aria-label').toLowerCase().includes('add to cart')
     )) {
-      console.log("Add to cart button detected");
+      console.log("Add to cart button clicked");
       
-      // Clear any existing timeout
-      if (addToCartClickTimeout) {
-        clearTimeout(addToCartClickTimeout);
-      }
-      
-      // Debounce the click to prevent multiple rapid clicks
+      // Debounce to prevent multiple events
+      clearTimeout(addToCartClickTimeout);
       addToCartClickTimeout = setTimeout(function() {
-        trackAddToCart(event);
+        trackAddToCart();
       }, 100);
     }
   });
   
-  // Method 3: Shopify AJAX cart events
-  if (window.Shopify && window.Shopify.onCartUpdate) {
-    window.Shopify.onCartUpdate = function(cart) {
-      console.log("Shopify cart updated:", cart);
-      trackAddToCart();
-    };
-  }
-  
-  // Method 4: Listen for cart update events
-  document.addEventListener('cart:updated', function(event) {
-    console.log("Cart updated event detected");
-    trackAddToCart(event);
-  });
-  
-  // Method 5: Listen for custom add to cart events
-  document.addEventListener('add-to-cart', function(event) {
-    console.log("Custom add to cart event detected");
-    trackAddToCart(event);
-  });
-  
-  // Track cart view events
-  // Listen for clicks on cart links and icons
+  // Method 3: Checkout button clicks
   document.addEventListener('click', function(event) {
     var target = event.target;
     var targetText = target.textContent ? target.textContent.toLowerCase() : '';
-    var targetClass = target.className ? (typeof target.className === 'string' ? target.className : target.className.toString()).toLowerCase() : '';
-    var targetId = target.id ? target.id.toLowerCase() : '';
     var targetHref = target.href || '';
-    var targetAriaLabel = target.getAttribute('aria-label') || '';
     
-    // Check for cart-related elements
-    var isCartElement = (
-      // URL-based detection
-      targetHref.includes('/cart') ||
-      
-      // Text-based detection
-      targetText.includes('cart') ||
-      targetText.includes('bag') ||
-      targetText.includes('basket') ||
-      
-      // Class-based detection
-      targetClass.includes('cart') ||
-      targetClass.includes('bag') ||
-      targetClass.includes('basket') ||
-      targetClass.includes('cart-icon') ||
-      targetClass.includes('cart-button') ||
-      targetClass.includes('cart-link') ||
-      
-      // ID-based detection
-      targetId.includes('cart') ||
-      targetId.includes('bag') ||
-      targetId.includes('basket') ||
-      
-      // Data attribute detection
-      target.getAttribute('data-action') === 'view-cart' ||
-      target.getAttribute('data-action') === 'cart' ||
-      
-      // Aria label detection
-      targetAriaLabel.toLowerCase().includes('cart') ||
-      targetAriaLabel.toLowerCase().includes('bag') ||
-      targetAriaLabel.toLowerCase().includes('basket') ||
-      
-      // Common cart icon selectors
-      target.closest('.cart-icon') ||
-      target.closest('.cart-button') ||
-      target.closest('.cart-link') ||
-      target.closest('[data-cart-toggle]') ||
-      target.closest('[data-drawer-trigger="cart"]') ||
-      
-      // Shopify-specific cart selectors
-      target.closest('[data-cart-count]') ||
-      target.closest('.header__icon--cart') ||
-      target.closest('.site-header__cart') ||
-      target.closest('.cart-count-bubble')
-    );
-    
-    if (isCartElement) {
-      console.log("Cart element clicked:", target.tagName, targetText, targetClass, targetId);
-      // trackCartView(); // Commented out as per edit hint
-    }
-  });
-  
-  // Track checkout initiation
-  // Listen for clicks on checkout buttons
-  document.addEventListener('click', function(event) {
-    var target = event.target;
-    var targetText = target.textContent ? target.textContent.toLowerCase() : '';
-    var targetClass = target.className ? (typeof target.className === 'string' ? target.className : target.className.toString()).toLowerCase() : '';
-    
-    if (target && (target.href && target.href.includes('/checkout') ||
-                   targetText.includes('checkout') ||
-                   targetClass.includes('checkout-button') ||
-                   target.getAttribute('data-action') === 'checkout')) {
+    if (target && (
+      targetText.includes('checkout') ||
+      targetText.includes('buy now') ||
+      targetHref.includes('/checkout') ||
+      target.getAttribute('data-action') === 'checkout' ||
+      target.getAttribute('aria-label') && target.getAttribute('aria-label').toLowerCase().includes('checkout')
+    )) {
+      console.log("Checkout button clicked");
       trackCheckoutInitiated();
     }
   });
   
-  // Track purchase events (this would typically be on a thank you page)
-  // Check if we're on a thank you page and detect purchase
-  detectPurchase();
+  console.log("✅ Cart tracking setup complete");
+}
+
+// Set up event listeners when DOM is ready
+document.addEventListener('DOMContentLoaded', function() {
+  // Prevent multiple setups
+  if (window.abTestTrackingSetup) {
+    console.log("A/B test tracking already setup, skipping...");
+    return;
+  }
+  window.abTestTrackingSetup = true;
   
-  console.log("A/B test tracking setup complete");
+  console.log("Setting up A/B test tracking...");
+  
+  // Note: Cart tracking is now set up after testId is available
+  // in the setupCartTracking() function called from the A/B test setup
+  
+  console.log("✅ Basic A/B test tracking setup complete");
 });
 
 </script>
