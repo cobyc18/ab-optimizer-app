@@ -770,6 +770,9 @@ async function updateCartCountAndLog(action) {
   
   // Log the cart update event
   var currentVariant = determineCurrentVariant();
+  var currentTestId = getCurrentTestId();
+  console.log("🔍 Cart update - testId:", currentTestId);
+  console.log("🔍 Cart update - variant:", currentVariant);
   var cartValue = 0;
   
   // Get cart value if available
@@ -787,7 +790,7 @@ async function updateCartCountAndLog(action) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
-      testId: getCurrentTestId(), // Use helper function
+      testId: currentTestId, // Use stored variable
       eventType: 'cart_updated', 
       productId: String({{ product.id | json }}),
       variant: currentVariant,
@@ -801,10 +804,20 @@ async function updateCartCountAndLog(action) {
         productId: {{ product.id | json }}
       }
     })
-  }).then(r => r.json()).then(data => {
-    console.log("Logged cart update event:", data);
+  }).then(r => {
+    console.log("🔍 Cart update response status:", r.status);
+    console.log("🔍 Cart update response ok:", r.ok);
+    if (!r.ok) {
+      return r.text().then(text => {
+        console.log("❌ Cart update error response:", text);
+        throw new Error(`HTTP ${r.status}: ${text}`);
+      });
+    }
+    return r.json();
+  }).then(data => {
+    console.log("✅ Logged cart update event:", data);
   }).catch(e => {
-    console.log("Failed to log cart update event", e);
+    console.log("❌ Failed to log cart update event:", e);
   });
   
   // Reset flag after a short delay
@@ -832,6 +845,9 @@ function trackAddToCart(event) {
     sessionStorage.setItem(addToCartKey, 'true');
     
     var currentVariant = determineCurrentVariant();
+    var currentTestId = getCurrentTestId();
+    console.log("🔍 Add to cart - testId:", currentTestId);
+    console.log("🔍 Add to cart - variant:", currentVariant);
     var cartValue = 0;
     
     // Get cart value if available
@@ -849,7 +865,7 @@ function trackAddToCart(event) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        testId: getCurrentTestId(), // Use helper function
+        testId: currentTestId, // Use stored variable
         eventType: 'add_to_cart', 
         productId: String({{ product.id | json }}),
         variant: currentVariant,
@@ -860,10 +876,20 @@ function trackAddToCart(event) {
           cartCount: previousCount
         }
       })
-    }).then(r => r.json()).then(data => {
-      console.log("Logged initial add to cart event:", data);
+    }).then(r => {
+      console.log("🔍 Add to cart response status:", r.status);
+      console.log("🔍 Add to cart response ok:", r.ok);
+      if (!r.ok) {
+        return r.text().then(text => {
+          console.log("❌ Add to cart error response:", text);
+          throw new Error(`HTTP ${r.status}: ${text}`);
+        });
+      }
+      return r.json();
+    }).then(data => {
+      console.log("✅ Logged initial add to cart event:", data);
     }).catch(e => {
-      console.log("Failed to log add to cart event", e);
+      console.log("❌ Failed to log add to cart event:", e);
     });
   }
   
@@ -1281,7 +1307,7 @@ function trackCartView() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
-        testId: getCurrentTestId(), // Use helper function
+        testId: currentTestId, // Use stored variable
         eventType: 'checkout_initiated', 
         productId: String({{ product.id | json }}),
         variant: currentVariant
@@ -1314,7 +1340,7 @@ function trackPurchase(orderData) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
-      testId: getCurrentTestId(), // Use helper function
+      testId: currentTestId, // Use stored variable
       eventType: 'purchase', 
       productId: String({{ product.id | json }}),
       variant: currentVariant,
