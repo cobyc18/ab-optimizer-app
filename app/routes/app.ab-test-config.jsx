@@ -1,5 +1,4 @@
 import { json } from "@remix-run/node";
-import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 
 export const loader = async ({ request }) => {
@@ -7,7 +6,15 @@ export const loader = async ({ request }) => {
     const url = new URL(request.url);
     const productId = url.searchParams.get('productId');
     
+    console.log("🔍 A/B Test Config Request:", {
+      url: request.url,
+      productId: productId,
+      userAgent: request.headers.get('user-agent'),
+      origin: request.headers.get('origin')
+    });
+    
     if (!productId) {
+      console.log("❌ No product ID provided");
       return json({ error: "Product ID is required" }, { status: 400 });
     }
 
@@ -19,6 +26,7 @@ export const loader = async ({ request }) => {
       const match = productId.match(/Product\/(\d+)/);
       if (match) {
         numericProductId = match[1];
+        console.log("🔍 Extracted numeric product ID:", numericProductId);
       }
     }
 
@@ -33,6 +41,8 @@ export const loader = async ({ request }) => {
       },
       take: 1 // Get the most recent active test
     });
+
+    console.log("🔍 Found active tests:", activeTests.length);
 
     if (activeTests.length === 0) {
       console.log("❌ No active A/B tests found for product:", numericProductId);
@@ -52,10 +62,25 @@ export const loader = async ({ request }) => {
     };
 
     console.log("📊 Returning A/B test config:", config);
-    return json(config);
+    
+    // Add CORS headers for storefront access
+    return json(config, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
 
   } catch (error) {
     console.error("❌ Error fetching A/B test config:", error);
-    return json({ error: "Failed to fetch A/B test configuration" }, { status: 500 });
+    return json({ error: "Failed to fetch A/B test configuration" }, { 
+      status: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
   }
 }; 

@@ -1,5 +1,4 @@
 import { json } from "@remix-run/node";
-import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 
 export const action = async ({ request }) => {
@@ -13,13 +12,22 @@ export const action = async ({ request }) => {
       eventType,
       productId,
       value,
-      metadata
+      metadata,
+      userAgent: request.headers.get('user-agent'),
+      origin: request.headers.get('origin')
     });
 
     // Validate required fields
     if (!testId || !variant || !eventType || !productId) {
       console.log("❌ Missing required fields");
-      return json({ error: "Missing required fields" }, { status: 400 });
+      return json({ error: "Missing required fields" }, { 
+        status: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      });
     }
 
     // Verify the test exists and is active
@@ -29,18 +37,39 @@ export const action = async ({ request }) => {
 
     if (!test) {
       console.log("❌ A/B test not found:", testId);
-      return json({ error: "A/B test not found" }, { status: 404 });
+      return json({ error: "A/B test not found" }, { 
+        status: 404,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      });
     }
 
     if (test.status !== "running") {
       console.log("❌ A/B test is not running:", testId);
-      return json({ error: "A/B test is not running" }, { status: 400 });
+      return json({ error: "A/B test is not running" }, { 
+        status: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      });
     }
 
     // Validate variant
     if (variant !== test.templateA && variant !== test.templateB) {
       console.log("❌ Invalid variant:", variant);
-      return json({ error: "Invalid variant" }, { status: 400 });
+      return json({ error: "Invalid variant" }, { 
+        status: 400,
+        headers: {
+          'Access-Control-Allow-Origin': '*',
+          'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+          'Access-Control-Allow-Headers': 'Content-Type'
+        }
+      });
     }
 
     // Create the event record
@@ -61,10 +90,23 @@ export const action = async ({ request }) => {
       success: true, 
       eventId: event.id,
       message: `${eventType} event logged for variant ${variant}`
+    }, {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
     });
 
   } catch (error) {
     console.error("❌ Error logging A/B event:", error);
-    return json({ error: "Failed to log A/B event" }, { status: 500 });
+    return json({ error: "Failed to log A/B event" }, { 
+      status: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type'
+      }
+    });
   }
 }; 

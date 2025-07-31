@@ -484,16 +484,24 @@ if (sessionStorage.getItem(scriptId)) {
     }
 
     console.log("Fetching A/B test config...");
+    console.log("🔍 Fetch URL:", 'https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
+    
     var res = await fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
+    console.log("🔍 Fetch response status:", res.status);
+    console.log("🔍 Fetch response ok:", res.ok);
+    
     if (!res.ok) {
-      console.log("Failed to fetch test config");
+      console.log("❌ Failed to fetch test config - Status:", res.status);
+      var errorText = await res.text();
+      console.log("❌ Error response:", errorText);
       console.log("=== A/B TEST DEBUG END ===");
       return;
     }
+    
     var config = await res.json();
-    console.log("Fetched config:", config);
+    console.log("✅ Fetched config:", config);
     if (!config.testId) {
-      console.log("No testId in config");
+      console.log("❌ No testId in config - Config:", config);
       console.log("=== A/B TEST DEBUG END ===");
       return;
     }
