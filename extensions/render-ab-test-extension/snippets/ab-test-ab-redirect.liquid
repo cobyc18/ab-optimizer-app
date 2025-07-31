@@ -1314,67 +1314,87 @@ function trackCartView() {
     
     console.log("Checkout initiated event detected");
     
-    // Determine the current variant
-    var currentVariant = determineCurrentVariant();
+    // Wait for testId to be available before logging
+    waitForTestId(function(testId) {
+      if (!testId) {
+        console.log("❌ Cannot log checkout initiated event - no testId available");
+        return;
+      }
+      
+      // Determine the current variant
+      var currentVariant = determineCurrentVariant();
+      console.log("🔍 Checkout initiated - testId:", testId);
+      console.log("🔍 Checkout initiated - variant:", currentVariant);
 
-    // --- ADDED: Set cart note with variant for server-side purchase tracking ---
-    function setCartNoteWithVariant(variant) {
-      fetch('/cart/update.js', {
+      // --- ADDED: Set cart note with variant for server-side purchase tracking ---
+      function setCartNoteWithVariant(variant) {
+        fetch('/cart/update.js', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ note: 'ab_variant:' + variant })
+        }).then(res => res.json()).then(data => {
+          console.log('Cart note updated with variant:', variant, data);
+        }).catch(e => {
+          console.log('Failed to update cart note with variant', e);
+        });
+      }
+      setCartNoteWithVariant(currentVariant);
+      // --- END ADDED ---
+      
+      // Track purchase intent when checkout is initiated
+      if (window.ABTestTracking && window.ABTestTracking.trackPurchaseIntent) {
+        window.ABTestTracking.trackPurchaseIntent({{ product.id | json }}, currentVariant);
+      }
+      
+      // Store variant information in localStorage for webhook access
+      var variantInfo = {
+        productId: {{ product.id | json }},
+        variant: currentVariant,
+        timestamp: Date.now()
+      };
+      localStorage.setItem('ab_test_variant_' + {{ product.id | json }}, JSON.stringify(variantInfo));
+      console.log("Stored variant info for webhook access:", variantInfo);
+      
+      // Also try to add variant info to cart attributes if possible
+      try {
+        if (window.Shopify && window.Shopify.theme && window.Shopify.theme.cart) {
+          // Add variant info to cart note or attributes
+          var cartNote = window.Shopify.theme.cart.note || '';
+          if (!cartNote.includes('ab_variant')) {
+            cartNote += (cartNote ? ' ' : '') + 'ab_variant:' + currentVariant;
+            // Note: We can't directly update cart note here, but we can store it for later use
+            localStorage.setItem('ab_cart_note_' + {{ product.id | json }}, cartNote);
+            console.log("Stored cart note with variant info:", cartNote);
+          }
+        }
+      } catch (e) {
+        console.log("Could not update cart note:", e);
+      }
+      
+      fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ note: 'ab_variant:' + variant })
-      }).then(res => res.json()).then(data => {
-        console.log('Cart note updated with variant:', variant, data);
-      }).catch(e => {
-        console.log('Failed to update cart note with variant', e);
-      });
-    }
-    setCartNoteWithVariant(currentVariant);
-    // --- END ADDED ---
-    
-    // Track purchase intent when checkout is initiated
-    if (window.ABTestTracking && window.ABTestTracking.trackPurchaseIntent) {
-      window.ABTestTracking.trackPurchaseIntent({{ product.id | json }}, currentVariant);
-    }
-    
-    // Store variant information in localStorage for webhook access
-    var variantInfo = {
-      productId: {{ product.id | json }},
-      variant: currentVariant,
-      timestamp: Date.now()
-    };
-    localStorage.setItem('ab_test_variant_' + {{ product.id | json }}, JSON.stringify(variantInfo));
-    console.log("Stored variant info for webhook access:", variantInfo);
-    
-    // Also try to add variant info to cart attributes if possible
-    try {
-      if (window.Shopify && window.Shopify.theme && window.Shopify.theme.cart) {
-        // Add variant info to cart note or attributes
-        var cartNote = window.Shopify.theme.cart.note || '';
-        if (!cartNote.includes('ab_variant')) {
-          cartNote += (cartNote ? ' ' : '') + 'ab_variant:' + currentVariant;
-          // Note: We can't directly update cart note here, but we can store it for later use
-          localStorage.setItem('ab_cart_note_' + {{ product.id | json }}, cartNote);
-          console.log("Stored cart note with variant info:", cartNote);
+        body: JSON.stringify({ 
+          testId: testId,
+          eventType: 'checkout_initiated', 
+          productId: String({{ product.id | json }}),
+          variant: currentVariant
+        })
+      }).then(r => {
+        console.log("🔍 Checkout initiated response status:", r.status);
+        console.log("🔍 Checkout initiated response ok:", r.ok);
+        if (!r.ok) {
+          return r.text().then(text => {
+            console.log("❌ Checkout initiated error response:", text);
+            throw new Error(`HTTP ${r.status}: ${text}`);
+          });
         }
-      }
-    } catch (e) {
-      console.log("Could not update cart note:", e);
-    }
-    
-    fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ 
-        testId: currentTestId, // Use stored variable
-        eventType: 'checkout_initiated', 
-        productId: String({{ product.id | json }}),
-        variant: currentVariant
-      })
-    }).then(r => r.json()).then(data => {
-      console.log("Logged checkout initiated event:", data);
-    }).catch(e => {
-      console.log("Failed to log checkout initiated event", e);
+        return r.json();
+      }).then(data => {
+        console.log("✅ Logged checkout initiated event:", data);
+      }).catch(e => {
+        console.log("❌ Failed to log checkout initiated event", e);
+      });
     });
   }
 
@@ -1392,28 +1412,48 @@ function trackPurchase(orderData) {
   var orderValue = orderData.total_price || orderData.totalPrice || orderData.price || 0;
   var orderId = orderData.id || orderData.order_id || orderData.orderId || null;
   
-  // Determine the current variant
-  var currentVariant = determineCurrentVariant();
-  
-  fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ 
-      testId: currentTestId, // Use stored variable
-      eventType: 'purchase', 
-      productId: String({{ product.id | json }}),
-      variant: currentVariant,
-      value: orderValue,
-      metadata: { 
-        orderId: orderId,
-        orderData: orderData,
-        purchaseAmount: orderValue
+  // Wait for testId to be available before logging
+  waitForTestId(function(testId) {
+    if (!testId) {
+      console.log("❌ Cannot log purchase event - no testId available");
+      return;
+    }
+    
+    // Determine the current variant
+    var currentVariant = determineCurrentVariant();
+    console.log("🔍 Purchase - testId:", testId);
+    console.log("🔍 Purchase - variant:", currentVariant);
+    
+    fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ 
+        testId: testId,
+        eventType: 'purchase', 
+        productId: String({{ product.id | json }}),
+        variant: currentVariant,
+        value: orderValue,
+        metadata: { 
+          orderId: orderId,
+          orderData: orderData,
+          purchaseAmount: orderValue
+        }
+      })
+    }).then(r => {
+      console.log("🔍 Purchase response status:", r.status);
+      console.log("🔍 Purchase response ok:", r.ok);
+      if (!r.ok) {
+        return r.text().then(text => {
+          console.log("❌ Purchase error response:", text);
+          throw new Error(`HTTP ${r.status}: ${text}`);
+        });
       }
-    })
-  }).then(r => r.json()).then(data => {
-    console.log("Logged purchase event:", data);
-  }).catch(e => {
-    console.log("Failed to log purchase event", e);
+      return r.json();
+    }).then(data => {
+      console.log("✅ Logged purchase event:", data);
+    }).catch(e => {
+      console.log("❌ Failed to log purchase event", e);
+    });
   });
 }
 
