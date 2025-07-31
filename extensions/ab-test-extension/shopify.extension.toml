@@ -1,4 +1,0 @@
-name = "ab-test-extension"
-type = "theme_app_extension"
-
-[settings] 

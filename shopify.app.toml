@@ -3,7 +3,7 @@
 client_id = "5ff212573a3e19bae68ca45eae0a80c4"
 name = "ab-optimizer-app"
 handle = "ab-optimizer-app"
-application_url = "https://ab-optimizer-app.onrender.com"
+application_url = "https://ii-tiny-chile-untitled.trycloudflare.com"
   embedded = false
 
 [build]
@@ -34,7 +34,7 @@ api_version = "2025-04"
 scopes = "write_products,read_themes,write_themes,write_app_proxy,read_orders,write_orders,read_products"
 
 [auth]
-  redirect_urls = ["https://ab-optimizer-app.onrender.com/auth/callback"]
+  redirect_urls = ["https://ii-tiny-chile-untitled.trycloudflare.com/auth/callback", "https://ii-tiny-chile-untitled.trycloudflare.com/auth/shopify/callback", "https://ii-tiny-chile-untitled.trycloudflare.com/api/auth/callback"]
 
 [pos]
 embedded = false
@@ -42,4 +42,4 @@ embedded = false
 [app_proxy]
 subpath = "ab-optimizer-app"
 prefix = "apps"
-  url = "https://ab-optimizer-app.onrender.com"
+  url = "https://ii-tiny-chile-untitled.trycloudflare.com"

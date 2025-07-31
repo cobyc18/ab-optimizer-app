@@ -1,0 +1,92 @@
+{% comment %}
+{
+  "name": "A/B Test Block",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "ab_test_id",
+      "label": "A/B Test ID",
+      "default": "ab-123"
+    }
+  ]
+}
+{% endcomment %}
+
+{% comment %}
+  A/B Test Block: App proxy/metafield approach for unlimited widgets/settings.
+  Only widget_type and config_id are stored in the block settings.
+  Widget config is fetched from the app proxy endpoint and rendered with JavaScript.
+{% endcomment %}
+
+{% assign widget_type = block.settings.widget_type %}
+{% assign config_id = block.settings.config_id %}
+
+{% if request.design_mode %}
+  <div>Widget will appear here on the live store.</div>
+{% else %}
+  {% if config_id != blank and config_id != 'Enter config ID' and config_id != 'none' %}
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var configId = "{{ config_id }}";
+        var widgetType = "{{ widget_type }}";
+        var container = document.getElementById('ab-widget-{{ config_id }}');
+        if (!container) return;
+
+        // Defensive: Only fetch if configId looks valid
+        if (!configId || configId === 'Enter config ID' || configId === 'none') return;
+
+        fetch('/apps/api/widget-config/{{ config_id }}')
+          .then(res => res.text())
+          .then(text => {
+            let config;
+            try {
+              config = JSON.parse(text);
+            } catch (e) {
+              container.innerHTML = '<div style="color:red;">Widget config not found or invalid.</div>';
+              return;
+            }
+            if (!config || !config.config) {
+              container.innerHTML = '<div style="color:red;">Widget config not found or invalid.</div>';
+              return;
+            }
+            if (widgetType === "recipe_widget") {
+              container.innerHTML = `<div style="background:${config.config.cta_background_color};color:${config.config.cta_text_color};padding:10px;text-align:center;">
+                <strong>${config.config.cta_text}</strong>
+              </div>`;
+            } else if (widgetType === "star_rating") {
+              container.innerHTML = `<span style="color:${config.config.colour};">⭐️⭐️⭐️⭐️⭐️</span>`;
+            }
+          });
+      });
+    </script>
+    <div id="ab-widget-{{ config_id }}"></div>
+  {% else %}
+    <div>Please configure this widget in the app and enter the Config ID.</div>
+  {% endif %}
+{% endif %}
+
+{% schema %}
+{
+  "name": "A/B Test Block",
+  "target": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "widget_type",
+      "label": "Widget Type",
+      "options": [
+        { "value": "recipe_widget", "label": "Recipe Widget" },
+        { "value": "star_rating", "label": "Star Rating" }
+      ],
+      "default": "recipe_widget"
+    },
+    {
+      "type": "text",
+      "id": "config_id",
+      "label": "Widget Config ID",
+      "default": "Enter config ID"
+    }
+  ]
+}
+{% endschema %} 
