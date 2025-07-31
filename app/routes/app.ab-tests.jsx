@@ -234,22 +234,35 @@ export const action = async ({ request }) => {
   const testName = form.get("testName");
   let productId = form.get("productId");
 
+  console.log("🔍 Creating A/B test with data:", {
+    shop,
+    testName,
+    productId,
+    templateA: form.get("templateA"),
+    templateB: form.get("templateB"),
+    trafficSplit: form.get("trafficSplit")
+  });
+
   // Validate test name
   if (!testName || testName.trim() === "") {
+    console.log("❌ Test name validation failed");
     return json({ error: "Test name is required" }, { status: 400 });
   }
 
   // Check if test name already exists
+  console.log("🔍 Checking for existing test with name:", testName.trim());
   const existingTest = await prisma.aBTest.findUnique({
     where: { name: testName.trim() }
   });
 
   if (existingTest) {
+    console.log("❌ Test name already exists");
     return json({ error: "A test with this name already exists. Please choose a different name." }, { status: 400 });
   }
 
   // If no productId provided, use the first product as fallback
   if (!productId) {
+    console.log("🔍 No productId provided, fetching first product");
     const { session, admin } = await authenticate.admin(request);
     const productsRes = await admin.graphql(`
       query {
@@ -263,6 +276,7 @@ export const action = async ({ request }) => {
     const productsJson = await productsRes.json();
     productId = productsJson.data.products.nodes[0]?.id;
     if (!productId) {
+      console.log("❌ No products found");
       return json({ error: "No products found" }, { status: 400 });
     }
   }
@@ -288,14 +302,46 @@ export const action = async ({ request }) => {
   const templateB = getTemplateSuffix(form.get("templateB"));
   const trafficSplit = parseInt(form.get("trafficSplit"), 10);
 
+  console.log("🔍 Processed template data:", { templateA, templateB, trafficSplit });
+
   // Validate that we have valid template suffixes
   if (!templateA) {
+    console.log("❌ Invalid Template A selected");
     return json({ error: "Invalid Template A selected" }, { status: 400 });
   }
   if (!templateB) {
+    console.log("❌ Invalid Template B selected");
     return json({ error: "Invalid Template B selected" }, { status: 400 });
   }
 
+  // First, ensure the shop exists in our database
+  console.log("🔍 Checking if shop exists in database:", shop);
+  let shopRecord = await prisma.shop.findUnique({
+    where: { shop }
+  });
+
+  if (!shopRecord) {
+    console.log("🔍 Shop not found, creating new shop record");
+    // Create shop record if it doesn't exist
+    const { session } = await authenticate.admin(request);
+    shopRecord = await prisma.shop.create({
+      data: {
+        shop,
+        accessToken: session.accessToken,
+        scope: session.scope || '',
+        isActive: true,
+        installedAt: new Date(),
+        settings: {},
+        metadata: {}
+      }
+    });
+    console.log("✅ Shop record created:", shopRecord.id);
+  } else {
+    console.log("✅ Shop record found:", shopRecord.id);
+  }
+
+  // Now create the A/B test
+  console.log("🔍 Creating A/B test record...");
   const abTest = await prisma.aBTest.create({
     data: {
       shop,
@@ -306,6 +352,7 @@ export const action = async ({ request }) => {
       trafficSplit,
     },
   });
+  console.log("✅ A/B test created successfully:", abTest.id);
 
   return json({ success: true, abTest });
 };
