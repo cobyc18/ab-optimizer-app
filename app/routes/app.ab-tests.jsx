@@ -5,85 +5,54 @@ import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 
 export const loader = async ({ request }) => {
-  const { session, admin } = await authenticate.admin(request);
-
-  // Get shop info
-  const shopRes = await admin.graphql(`query { shop { myshopifyDomain } }`);
-  const shopJson = await shopRes.json();
-  const shopDomain = shopJson.data.shop.myshopifyDomain;
-
-  // Get main theme
-  const themeRes = await admin.graphql(`query { themes(first: 5) { nodes { id name role } } }`);
-  const themeJson = await themeRes.json();
-  const mainTheme = themeJson.data.themes.nodes.find(t => t.role === "MAIN");
-  if (!mainTheme) throw new Error("No main theme found");
-  const themeId = mainTheme.id.replace("gid://shopify/OnlineStoreTheme/", "");
-  const themeGid = mainTheme.id; // Keep the full GID for GraphQL queries
-
-  // Get product templates
-  const restRes = await fetch(
-    `https://${shopDomain}/admin/api/2024-01/themes/${themeId}/assets.json`,
-    {
-      headers: {
-        "X-Shopify-Access-Token": session.accessToken,
-        "Content-Type": "application/json",
-        "Accept": "application/json",
-      },
-    }
-  );
-  const restJson = await restRes.json();
-  const assets = restJson.assets || [];
-  const productTemplates = assets
-    .map(a => a.key)
-    .filter(key =>
-      (key.startsWith("templates/product") && (key.endsWith(".liquid") || key.endsWith(".json"))) ||
-      (key === "templates/product.liquid" || key === "templates/product.json")
-    );
-
-  // Get products
-  const productsRes = await admin.graphql(`
-    query {
-      products(first: 50) {
-        nodes {
-          id
-          handle
-          title
-          templateSuffix
-        }
-      }
-    }
-  `);
-  const productsJson = await productsRes.json();
-  const products = productsJson.data.products.nodes;
-
-  return json({ shopDomain, themeId, themeGid, productTemplates, products });
-};
-
-export const action = async ({ request }) => {
-  const form = await request.formData();
-  const actionType = form.get("actionType");
-
-  if (actionType === "getProductForTemplate") {
+  try {
+    console.log("🔍 Loader called for A/B tests page");
     const { session, admin } = await authenticate.admin(request);
-    const template = form.get("template");
-    
-    // Handle both suffixed templates and default product template
-    let templateSuffix = null;
-    
-    if (template === "templates/product.liquid" || template === "templates/product.json") {
-      // Default product template - no suffix
-      templateSuffix = null;
-    } else {
-      // Extract template suffix from template filename
-      const match = template.match(/^templates\/product\.([^.]+)\.(liquid|json)$/);
-      if (!match) return json({ error: "Invalid template selected" }, { status: 400 });
-      templateSuffix = match[1];
-    }
 
-    // Query all products to find which one has this template suffix
+    // Get shop info
+    console.log("🔍 Fetching shop info");
+    const shopRes = await admin.graphql(`query { shop { myshopifyDomain } }`);
+    const shopJson = await shopRes.json();
+    const shopDomain = shopJson.data.shop.myshopifyDomain;
+    console.log("✅ Shop domain:", shopDomain);
+
+    // Get main theme
+    console.log("🔍 Fetching theme info");
+    const themeRes = await admin.graphql(`query { themes(first: 5) { nodes { id name role } } }`);
+    const themeJson = await themeRes.json();
+    const mainTheme = themeJson.data.themes.nodes.find(t => t.role === "MAIN");
+    if (!mainTheme) throw new Error("No main theme found");
+    const themeId = mainTheme.id.replace("gid://shopify/OnlineStoreTheme/", "");
+    const themeGid = mainTheme.id; // Keep the full GID for GraphQL queries
+    console.log("✅ Theme ID:", themeId);
+
+    // Get product templates
+    console.log("🔍 Fetching product templates");
+    const restRes = await fetch(
+      `https://${shopDomain}/admin/api/2024-01/themes/${themeId}/assets.json`,
+      {
+        headers: {
+          "X-Shopify-Access-Token": session.accessToken,
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+      }
+    );
+    const restJson = await restRes.json();
+    const assets = restJson.assets || [];
+    const productTemplates = assets
+      .map(a => a.key)
+      .filter(key =>
+        (key.startsWith("templates/product") && (key.endsWith(".liquid") || key.endsWith(".json"))) ||
+        (key === "templates/product.liquid" || key === "templates/product.json")
+      );
+    console.log("✅ Product templates found:", productTemplates.length);
+
+    // Get products
+    console.log("🔍 Fetching products");
     const productsRes = await admin.graphql(`
       query {
-        products(first: 250) {
+        products(first: 50) {
           nodes {
             id
             handle
@@ -95,266 +64,323 @@ export const action = async ({ request }) => {
     `);
     const productsJson = await productsRes.json();
     const products = productsJson.data.products.nodes;
+    console.log("✅ Products found:", products.length);
 
-    // Find product with matching template suffix
-    const matchingProduct = products.find(p => p.templateSuffix === templateSuffix);
-    
-    if (matchingProduct) {
-      return json({ 
-        success: true, 
-        productHandle: matchingProduct.handle,
-        productTitle: matchingProduct.title 
-      });
-    } else {
-      // If no product has this template suffix, return the first product as fallback
-      return json({ 
-        success: true, 
-        productHandle: products[0]?.handle || "example-product",
-        productTitle: products[0]?.title || "Example Product",
-        fallback: true
-      });
-    }
+    const result = { shopDomain, themeId, themeGid, productTemplates, products };
+    console.log("✅ Loader completed successfully");
+    return json(result);
+  } catch (error) {
+    console.error("❌ Error in loader:", error);
+    throw error;
   }
+};
 
-  if (actionType === "duplicateTemplate") {
-    try {
-      // Duplicate template logic from set-variant-a.server.js
+export const action = async ({ request }) => {
+  try {
+    const form = await request.formData();
+    const actionType = form.get("actionType");
+
+    console.log("🔍 Action called with actionType:", actionType);
+
+    if (actionType === "getProductForTemplate") {
       const { session, admin } = await authenticate.admin(request);
       const template = form.get("template");
-      const newName = form.get("newName");
-      const themeId = form.get("themeId");
-      const shop = session.shop;
-      const accessToken = session.accessToken;
+      
+      // Handle both suffixed templates and default product template
+      let templateSuffix = null;
+      
+      if (template === "templates/product.liquid" || template === "templates/product.json") {
+        // Default product template - no suffix
+        templateSuffix = null;
+      } else {
+        // Extract template suffix from template filename
+        const match = template.match(/^templates\/product\.([^.]+)\.(liquid|json)$/);
+        if (!match) return json({ error: "Invalid template selected" }, { status: 400 });
+        templateSuffix = match[1];
+      }
 
-      console.log("Duplicate template request:", { template, newName, themeId, shop });
+      // Query all products to find which one has this template suffix
+      const productsRes = await admin.graphql(`
+        query {
+          products(first: 250) {
+            nodes {
+              id
+              handle
+              title
+              templateSuffix
+            }
+          }
+        }
+      `);
+      const productsJson = await productsRes.json();
+      const products = productsJson.data.products.nodes;
 
-      // 1. Get the file content (GraphQL)
-      const fileRes = await admin.graphql(
-        `query getFile($themeId: ID!, $filename: String!) {
-          theme(id: $themeId) {
-            files(filenames: [$filename]) {
-              nodes {
-                filename
-                body { 
-                  ... on OnlineStoreThemeFileBodyText { 
-                    content 
-                  } 
+      // Find product with matching template suffix
+      const matchingProduct = products.find(p => p.templateSuffix === templateSuffix);
+      
+      if (matchingProduct) {
+        return json({ 
+          success: true, 
+          productHandle: matchingProduct.handle,
+          productTitle: matchingProduct.title 
+        });
+      } else {
+        // If no product has this template suffix, return the first product as fallback
+        return json({ 
+          success: true, 
+          productHandle: products[0]?.handle || "example-product",
+          productTitle: products[0]?.title || "Example Product",
+          fallback: true
+        });
+      }
+    }
+
+    if (actionType === "duplicateTemplate") {
+      try {
+        // Duplicate template logic from set-variant-a.server.js
+        const { session, admin } = await authenticate.admin(request);
+        const template = form.get("template");
+        const newName = form.get("newName");
+        const themeId = form.get("themeId");
+        const shop = session.shop;
+        const accessToken = session.accessToken;
+
+        console.log("Duplicate template request:", { template, newName, themeId, shop });
+
+        // 1. Get the file content (GraphQL)
+        const fileRes = await admin.graphql(
+          `query getFile($themeId: ID!, $filename: String!) {
+            theme(id: $themeId) {
+              files(filenames: [$filename]) {
+                nodes {
+                  filename
+                  body { 
+                    ... on OnlineStoreThemeFileBodyText { 
+                      content 
+                    } 
+                  }
                 }
               }
             }
+          }`,
+          { 
+            variables: { 
+              themeId: themeId, 
+              filename: template 
+            } 
           }
-        }`,
-        { 
-          variables: { 
-            themeId: themeId, 
-            filename: template 
-          } 
+        );
+        
+        const fileJson = await fileRes.json();
+        console.log("GraphQL response:", JSON.stringify(fileJson, null, 2));
+        
+        if (fileJson.errors) {
+          console.error("GraphQL errors:", fileJson.errors);
+          return json({ error: `GraphQL error: ${fileJson.errors[0]?.message}` }, { status: 400 });
         }
-      );
-      
-      const fileJson = await fileRes.json();
-      console.log("GraphQL response:", JSON.stringify(fileJson, null, 2));
-      
-      if (fileJson.errors) {
-        console.error("GraphQL errors:", fileJson.errors);
-        return json({ error: `GraphQL error: ${fileJson.errors[0]?.message}` }, { status: 400 });
-      }
-      
-      const fileNode = fileJson.data.theme.files.nodes[0];
-      const content = fileNode?.body?.content;
-      
-      if (!content) {
-        console.error("No content found in file node:", fileNode);
-        return json({ error: "Could not read template content" }, { status: 400 });
-      }
-
-      // 2. Create new template file using GraphQL themeFilesCopy mutation
-      const ext = template.endsWith(".json") ? ".json" : ".liquid";
-      const newFilename = `templates/product.${newName}${ext}`;
-
-      console.log("Creating new template:", newFilename);
-
-      // Use GraphQL themeFilesCopy mutation for proper file duplication
-      const copyMutation = `
-        mutation themeFilesCopy($themeId: ID!, $files: [ThemeFilesCopyFileInput!]!) {
-          themeFilesCopy(themeId: $themeId, files: $files) {
-            copiedThemeFiles {
-              filename
-            }
-            userErrors {
-              field
-              message
-            }
-          }
+        
+        const fileNode = fileJson.data.theme.files.nodes[0];
+        const content = fileNode?.body?.content;
+        
+        if (!content) {
+          console.error("No content found in file node:", fileNode);
+          return json({ error: "Could not read template content" }, { status: 400 });
         }
-      `;
 
-      const copyVariables = {
-        themeId: themeId,
-        files: [
-          {
-            srcFilename: template,
-            dstFilename: newFilename
+        // 2. Create new template file using GraphQL themeFilesCopy mutation
+        const ext = template.endsWith(".json") ? ".json" : ".liquid";
+        const newFilename = `templates/product.${newName}${ext}`;
+
+        console.log("Creating new template:", newFilename);
+
+        // Use GraphQL themeFilesCopy mutation for proper file duplication
+        const copyMutation = `
+          mutation themeFilesCopy($themeId: ID!, $files: [ThemeFilesCopyFileInput!]!) {
+            themeFilesCopy(themeId: $themeId, files: $files) {
+              copiedThemeFiles {
+                filename
+              }
+              userErrors {
+                field
+                message
+              }
+            }
           }
-        ]
-      };
+        `;
 
-      console.log("GraphQL copy mutation variables:", JSON.stringify(copyVariables, null, 2));
+        const copyVariables = {
+          themeId: themeId,
+          files: [
+            {
+              srcFilename: template,
+              dstFilename: newFilename
+            }
+          ]
+        };
 
-      const copyResponse = await admin.graphql(copyMutation, {
-        variables: copyVariables
-      });
+        console.log("GraphQL copy mutation variables:", JSON.stringify(copyVariables, null, 2));
 
-      const copyJson = await copyResponse.json();
-      console.log("GraphQL copy response:", JSON.stringify(copyJson, null, 2));
+        const copyResponse = await admin.graphql(copyMutation, {
+          variables: copyVariables
+        });
 
-      if (copyJson.errors) {
-        console.error("GraphQL copy errors:", copyJson.errors);
-        return json({ error: `GraphQL copy error: ${copyJson.errors[0]?.message || 'Unknown error'}` }, { status: 400 });
+        const copyJson = await copyResponse.json();
+        console.log("GraphQL copy response:", JSON.stringify(copyJson, null, 2));
+
+        if (copyJson.errors) {
+          console.error("GraphQL copy errors:", copyJson.errors);
+          return json({ error: `GraphQL copy error: ${copyJson.errors[0]?.message || 'Unknown error'}` }, { status: 400 });
+        }
+
+        if (copyJson.data?.themeFilesCopy?.userErrors?.length > 0) {
+          console.error("Theme copy user errors:", copyJson.data.themeFilesCopy.userErrors);
+          return json({ error: `Theme copy error: ${copyJson.data.themeFilesCopy.userErrors[0]?.message || 'Unknown error'}` }, { status: 400 });
+        }
+
+        if (!copyJson.data?.themeFilesCopy?.copiedThemeFiles?.length) {
+          return json({ error: "No files were copied" }, { status: 400 });
+        }
+        
+        return json({ success: true, newFilename });
+      } catch (error) {
+        console.error("Error in duplicateTemplate:", error);
+        return json({ error: `Server error: ${error.message}` }, { status: 500 });
       }
-
-      if (copyJson.data?.themeFilesCopy?.userErrors?.length > 0) {
-        console.error("Theme copy user errors:", copyJson.data.themeFilesCopy.userErrors);
-        return json({ error: `Theme copy error: ${copyJson.data.themeFilesCopy.userErrors[0]?.message || 'Unknown error'}` }, { status: 400 });
-      }
-
-      if (!copyJson.data?.themeFilesCopy?.copiedThemeFiles?.length) {
-        return json({ error: "No files were copied" }, { status: 400 });
-      }
-      
-      return json({ success: true, newFilename });
-    } catch (error) {
-      console.error("Error in duplicateTemplate:", error);
-      return json({ error: `Server error: ${error.message}` }, { status: 500 });
     }
-  }
 
-  // Existing A/B test creation logic
-  const shop = form.get("shop");
-  const testName = form.get("testName");
-  let productId = form.get("productId");
+    // Existing A/B test creation logic
+    const shop = form.get("shop");
+    const testName = form.get("testName");
+    let productId = form.get("productId");
 
-  console.log("🔍 Creating A/B test with data:", {
-    shop,
-    testName,
-    productId,
-    templateA: form.get("templateA"),
-    templateB: form.get("templateB"),
-    trafficSplit: form.get("trafficSplit")
-  });
+    console.log("🔍 Creating A/B test with data:", {
+      shop,
+      testName,
+      productId,
+      templateA: form.get("templateA"),
+      templateB: form.get("templateB"),
+      trafficSplit: form.get("trafficSplit")
+    });
 
-  // Validate test name
-  if (!testName || testName.trim() === "") {
-    console.log("❌ Test name validation failed");
-    return json({ error: "Test name is required" }, { status: 400 });
-  }
+    // Validate test name
+    if (!testName || testName.trim() === "") {
+      console.log("❌ Test name validation failed");
+      return json({ error: "Test name is required" }, { status: 400 });
+    }
 
-  // Check if test name already exists
-  console.log("🔍 Checking for existing test with name:", testName.trim());
-  const existingTest = await prisma.aBTest.findUnique({
-    where: { name: testName.trim() }
-  });
+    // Check if test name already exists
+    console.log("🔍 Checking for existing test with name:", testName.trim());
+    const existingTest = await prisma.aBTest.findUnique({
+      where: { name: testName.trim() }
+    });
 
-  if (existingTest) {
-    console.log("❌ Test name already exists");
-    return json({ error: "A test with this name already exists. Please choose a different name." }, { status: 400 });
-  }
+    if (existingTest) {
+      console.log("❌ Test name already exists");
+      return json({ error: "A test with this name already exists. Please choose a different name." }, { status: 400 });
+    }
 
-  // If no productId provided, use the first product as fallback
-  if (!productId) {
-    console.log("🔍 No productId provided, fetching first product");
-    const { session, admin } = await authenticate.admin(request);
-    const productsRes = await admin.graphql(`
-      query {
-        products(first: 1) {
-          nodes {
-            id
-          }
-        }
-      }
-    `);
-    const productsJson = await productsRes.json();
-    productId = productsJson.data.products.nodes[0]?.id;
+    // If no productId provided, use the first product as fallback
     if (!productId) {
-      console.log("❌ No products found");
-      return json({ error: "No products found" }, { status: 400 });
+      console.log("🔍 No productId provided, fetching first product");
+      const { session, admin } = await authenticate.admin(request);
+      const productsRes = await admin.graphql(`
+        query {
+          products(first: 1) {
+            nodes {
+              id
+            }
+          }
+        }
+      `);
+      const productsJson = await productsRes.json();
+      productId = productsJson.data.products.nodes[0]?.id;
+      if (!productId) {
+        console.log("❌ No products found");
+        return json({ error: "No products found" }, { status: 400 });
+      }
     }
-  }
 
-  // If productId is a global ID, extract the numeric part
-  if (typeof productId === "string" && productId.startsWith("gid://")) {
-    const match = productId.match(/Product\/(\d+)/);
-    if (match) productId = match[1];
-  }
-
-  // Extract template suffixes
-  function getTemplateSuffix(template) {
-    // Handle default product template (no suffix)
-    if (template === "templates/product.liquid" || template === "templates/product.json") {
-      return "default"; // Use "default" as the suffix for the default template
+    // If productId is a global ID, extract the numeric part
+    if (typeof productId === "string" && productId.startsWith("gid://")) {
+      const match = productId.match(/Product\/(\d+)/);
+      if (match) productId = match[1];
     }
-    // Handle suffixed templates
-    const match = template.match(/product\.([^.]+)\.(json|liquid)$/);
-    return match ? match[1] : "";
-  }
 
-  const templateA = getTemplateSuffix(form.get("templateA"));
-  const templateB = getTemplateSuffix(form.get("templateB"));
-  const trafficSplit = parseInt(form.get("trafficSplit"), 10);
+    // Extract template suffixes
+    function getTemplateSuffix(template) {
+      // Handle default product template (no suffix)
+      if (template === "templates/product.liquid" || template === "templates/product.json") {
+        return "default"; // Use "default" as the suffix for the default template
+      }
+      // Handle suffixed templates
+      const match = template.match(/product\.([^.]+)\.(json|liquid)$/);
+      return match ? match[1] : "";
+    }
 
-  console.log("🔍 Processed template data:", { templateA, templateB, trafficSplit });
+    const templateA = getTemplateSuffix(form.get("templateA"));
+    const templateB = getTemplateSuffix(form.get("templateB"));
+    const trafficSplit = parseInt(form.get("trafficSplit"), 10);
 
-  // Validate that we have valid template suffixes
-  if (!templateA) {
-    console.log("❌ Invalid Template A selected");
-    return json({ error: "Invalid Template A selected" }, { status: 400 });
-  }
-  if (!templateB) {
-    console.log("❌ Invalid Template B selected");
-    return json({ error: "Invalid Template B selected" }, { status: 400 });
-  }
+    console.log("🔍 Processed template data:", { templateA, templateB, trafficSplit });
 
-  // First, ensure the shop exists in our database
-  console.log("🔍 Checking if shop exists in database:", shop);
-  let shopRecord = await prisma.shop.findUnique({
-    where: { shop }
-  });
+    // Validate that we have valid template suffixes
+    if (!templateA) {
+      console.log("❌ Invalid Template A selected");
+      return json({ error: "Invalid Template A selected" }, { status: 400 });
+    }
+    if (!templateB) {
+      console.log("❌ Invalid Template B selected");
+      return json({ error: "Invalid Template B selected" }, { status: 400 });
+    }
 
-  if (!shopRecord) {
-    console.log("🔍 Shop not found, creating new shop record");
-    // Create shop record if it doesn't exist
-    const { session } = await authenticate.admin(request);
-    shopRecord = await prisma.shop.create({
+    // First, ensure the shop exists in our database
+    console.log("🔍 Checking if shop exists in database:", shop);
+    let shopRecord = await prisma.shop.findUnique({
+      where: { shop }
+    });
+
+    if (!shopRecord) {
+      console.log("🔍 Shop not found, creating new shop record");
+      // Create shop record if it doesn't exist
+      const { session } = await authenticate.admin(request);
+      shopRecord = await prisma.shop.create({
+        data: {
+          shop,
+          accessToken: session.accessToken,
+          scope: session.scope || '',
+          isActive: true,
+          installedAt: new Date(),
+          settings: {},
+          metadata: {}
+        }
+      });
+      console.log("✅ Shop record created:", shopRecord.id);
+    } else {
+      console.log("✅ Shop record found:", shopRecord.id);
+    }
+
+    // Now create the A/B test
+    console.log("🔍 Creating A/B test record...");
+    const abTest = await prisma.aBTest.create({
       data: {
         shop,
-        accessToken: session.accessToken,
-        scope: session.scope || '',
-        isActive: true,
-        installedAt: new Date(),
-        settings: {},
-        metadata: {}
-      }
+        name: testName.trim(),
+        productId,
+        templateA,
+        templateB,
+        trafficSplit,
+      },
     });
-    console.log("✅ Shop record created:", shopRecord.id);
-  } else {
-    console.log("✅ Shop record found:", shopRecord.id);
+    console.log("✅ A/B test created successfully:", abTest.id);
+
+    return json({ success: true, abTest });
+  } catch (error) {
+    console.error("❌ Unhandled error in action:", error);
+    return json({ 
+      error: `Server error: ${error.message}`,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
+    }, { status: 500 });
   }
-
-  // Now create the A/B test
-  console.log("🔍 Creating A/B test record...");
-  const abTest = await prisma.aBTest.create({
-    data: {
-      shop,
-      name: testName.trim(),
-      productId,
-      templateA,
-      templateB,
-      trafficSplit,
-    },
-  });
-  console.log("✅ A/B test created successfully:", abTest.id);
-
-  return json({ success: true, abTest });
 };
 
 export default function ABTesting() {
@@ -471,6 +497,15 @@ export default function ABTesting() {
     e.preventDefault();
     setError(null);
 
+    console.log("🔍 Submitting A/B test form with data:", {
+      shop: shopDomain,
+      testName,
+      productId: selectedProductId,
+      templateA,
+      templateB,
+      trafficSplit
+    });
+
     const formData = new FormData();
     formData.append("shop", shopDomain);
     formData.append("testName", testName);
@@ -480,14 +515,30 @@ export default function ABTesting() {
     formData.append("trafficSplit", trafficSplit);
 
     try {
+      console.log("🔍 Sending POST request to /app/ab-tests");
       const response = await fetch("/app/ab-tests", {
         method: "POST",
         body: formData
       });
 
+      console.log("🔍 Response status:", response.status);
+      console.log("🔍 Response headers:", Object.fromEntries(response.headers.entries()));
+
+      // Check if response is JSON
+      const contentType = response.headers.get("content-type");
+      if (!contentType || !contentType.includes("application/json")) {
+        // Response is not JSON, likely an HTML error page
+        const text = await response.text();
+        console.error("❌ Server returned non-JSON response:", text.substring(0, 500));
+        setError("Server error: Received HTML instead of JSON response. Check server logs.");
+        return;
+      }
+
       const data = await response.json();
+      console.log("🔍 Response data:", data);
 
       if (data.success) {
+        console.log("✅ A/B test created successfully");
         // Reset form on success
         setTestName("");
         setTemplateA(productTemplates[0] || "");
@@ -495,11 +546,12 @@ export default function ABTesting() {
         setTrafficSplit("50");
         setSelectedProductId(products[0]?.id || "");
       } else {
+        console.log("❌ A/B test creation failed:", data.error);
         setError(data.error || "Failed to create A/B test");
       }
     } catch (error) {
-      console.error("Error creating A/B test:", error);
-      setError("Failed to create A/B test");
+      console.error("❌ Error creating A/B test:", error);
+      setError(`Failed to create A/B test: ${error.message}`);
     }
   };
 
