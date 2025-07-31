@@ -1451,10 +1451,17 @@ function detectPurchase() {
 
 // Function to determine the current A/B test variant
 function determineCurrentVariant() {
-  // First, try to use the stored variant from the A/B test
+  // First, try to use the stored variant from the A/B test (this should be the actual template name)
   if (window.currentVariant) {
     console.log("Using stored current variant:", window.currentVariant);
     return window.currentVariant;
+  }
+  
+  // Use the global function that returns the actual template name
+  if (window.getABTestVariant) {
+    var variant = window.getABTestVariant();
+    console.log("Using getABTestVariant():", variant);
+    return variant;
   }
   
   // Check if we have a stored bucket for this test
@@ -1473,39 +1480,13 @@ function determineCurrentVariant() {
   var currentView = url.searchParams.get('view') || "";
   
   if (currentView) {
-    // Try to match the current view with the test variants
     console.log("Determining variant from view parameter:", currentView);
-    
-    // Get the test configuration to match templates
-    if (window.currentTestId) {
-      // Fetch test config to get template mappings
-      fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent({{ product.id | json }}))
-        .then(res => res.json())
-        .then(config => {
-          if (config.testId) {
-            console.log("Test config:", config);
-            // Match current view with template variants
-            if (currentView === config.templateA || currentView === "default") {
-              return "A";
-            } else if (currentView === config.templateB) {
-              return "B";
-            }
-          }
-        })
-        .catch(e => console.log("Failed to fetch test config:", e));
-    }
-    
-    // Simple fallback mapping
-    if (currentView === "default") {
-      return "A"; // Assuming default template is variant A
-    } else {
-      return "B"; // Assuming custom templates are variant B
-    }
+    return currentView; // Return the actual view parameter (template name)
   }
   
   // Fallback to variant A if we can't determine
-  console.log("Could not determine variant, using fallback A");
-  return "A";
+  console.log("Could not determine variant, using fallback");
+  return "default"; // Return the default template name instead of "A"
 }
 
 // Set up cart tracking after testId is available
