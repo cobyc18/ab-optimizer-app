@@ -738,6 +738,7 @@ async function updateCartCountAndLog(action) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
+      testId: window.currentTestId, // Add testId
       eventType: 'cart_updated', 
       productId: String({{ product.id | json }}),
       variant: currentVariant,
@@ -799,6 +800,7 @@ function trackAddToCart(event) {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
+        testId: window.currentTestId, // Add testId
         eventType: 'add_to_cart', 
         productId: String({{ product.id | json }}),
         variant: currentVariant,
@@ -1230,6 +1232,7 @@ function trackCartView() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
+        testId: window.currentTestId, // Add testId
         eventType: 'checkout_initiated', 
         productId: String({{ product.id | json }}),
         variant: currentVariant
@@ -1262,6 +1265,7 @@ function trackPurchase(orderData) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ 
+      testId: window.currentTestId, // Add testId
       eventType: 'purchase', 
       productId: String({{ product.id | json }}),
       variant: currentVariant,
