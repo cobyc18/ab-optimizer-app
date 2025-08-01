@@ -406,13 +406,15 @@ export default function ABTesting() {
   const actionData = useActionData();
   const { user } = useOutletContext();
   
-  const [templateA, setTemplateA] = useState(productTemplates[0] || "");
+  // Form state with proper defaults
+  const [templateA, setTemplateA] = useState("");
   const [templateB, setTemplateB] = useState("");
   const [trafficSplit, setTrafficSplit] = useState("50");
   const [testName, setTestName] = useState("");
   const [error, setError] = useState(null);
-  const [selectedProductId, setSelectedProductId] = useState(products[0]?.id || "");
+  const [selectedProductId, setSelectedProductId] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
+  const [validationErrors, setValidationErrors] = useState({});
 
   // Template preview state
   const [selectedTemplate, setSelectedTemplate] = useState(productTemplates[0] || "");
@@ -434,6 +436,50 @@ export default function ABTesting() {
       setTemplateB("");
     }
   }, [productTemplates, templateB]);
+
+  // Function to reset form fields
+  const resetForm = () => {
+    setTestName("");
+    setTemplateA("");
+    setTemplateB("");
+    setTrafficSplit("50");
+    setSelectedProductId("");
+    setError(null);
+    setSuccessMessage(null);
+    setValidationErrors({});
+  };
+
+  // Function to validate form
+  const validateForm = () => {
+    const errors = {};
+
+    if (!testName.trim()) {
+      errors.testName = "Test name is required";
+    }
+
+    if (!selectedProductId) {
+      errors.product = "Please select a product";
+    }
+
+    if (!templateA) {
+      errors.templateA = "Please select Template A";
+    }
+
+    if (!templateB) {
+      errors.templateB = "Please select Template B";
+    }
+
+    if (templateA && templateB && templateA === templateB) {
+      errors.templateB = "Template A and Template B must be different";
+    }
+
+    if (!trafficSplit || trafficSplit < 1 || trafficSplit > 99) {
+      errors.trafficSplit = "Traffic split must be between 1 and 99";
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
+  };
 
   // When template selection changes, fetch the associated product
   useEffect(() => {
@@ -516,25 +562,10 @@ export default function ABTesting() {
     e.preventDefault();
     setError(null);
     setSuccessMessage(null);
+    setValidationErrors({});
 
     // Client-side validation
-    if (!testName.trim()) {
-      setError("Test name is required");
-      return;
-    }
-
-    if (!templateA) {
-      setError("Please select Template A");
-      return;
-    }
-
-    if (!templateB) {
-      setError("Please select Template B (Second Variant)");
-      return;
-    }
-
-    if (templateA === templateB) {
-      setError("Template A and Template B must be different");
+    if (!validateForm()) {
       return;
     }
 
@@ -572,14 +603,8 @@ export default function ABTesting() {
         if (response.status === 200) {
           // Even though we got HTML, the status is 200, which means the A/B test was likely created
           console.log("✅ A/B test created successfully (received HTML but status 200)");
-          // Reset form on success
-          setTestName("");
-          setTemplateA(productTemplates[0] || "");
-          setTemplateB("");
-          setTrafficSplit("50");
-          setSelectedProductId(products[0]?.id || "");
           
-          // Show success message
+          // Show success message but DON'T reset form
           const successMessage = `✅ A/B test "${testName}" created successfully!`;
           setSuccessMessage(successMessage);
           setTimeout(() => setSuccessMessage(null), 5000);
@@ -598,26 +623,20 @@ export default function ABTesting() {
 
       if (data.success) {
         console.log("✅ A/B test created successfully");
-        // Show success message
+        // Show success message but DON'T reset form
         setError(null);
-        // Reset form on success
-        setTestName("");
-        setTemplateA(productTemplates[0] || "");
-        setTemplateB("");
-        setTrafficSplit("50");
-        setSelectedProductId(products[0]?.id || "");
         
         // Show success message in the UI
         const successMessage = `✅ A/B test "${data.abTest.name}" created successfully!`;
-        setSuccessMessage(successMessage); // Use successMessage state for success
-        setTimeout(() => setSuccessMessage(null), 5000); // Clear after 5 seconds
+        setSuccessMessage(successMessage);
+        setTimeout(() => setSuccessMessage(null), 5000);
       } else {
         console.log("❌ A/B test creation failed:", data.error);
         setError(data.error || "Failed to create A/B test");
       }
     } catch (error) {
-      console.error("❌ Error creating A/B test:", error);
-      setError(`Failed to create A/B test: ${error.message}`);
+      console.error("❌ Error submitting form:", error);
+      setError("Network error: Failed to submit form");
     }
   };
 
@@ -771,12 +790,42 @@ export default function ABTesting() {
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           border: '1px solid #e5e7eb'
         }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
-            🧪 Create A/B Test
-          </h2>
-          <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '24px' }}>
-            Select two different templates to compare their performance. Both templates are required.
-          </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div>
+              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+                🧪 Create A/B Test
+              </h2>
+              <p style={{ fontSize: '14px', color: '#6b7280' }}>
+                Select two different templates to compare their performance. All fields marked with <span style={{ color: '#ef4444' }}>*</span> are required.
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={resetForm}
+              style={{
+                padding: '8px 16px',
+                background: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #4b5563 0%, #374151 100%)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+              }}
+            >
+              <span>+</span> Add Test
+            </button>
+          </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <input type="hidden" name="shop" value={shopDomain} />
@@ -792,15 +841,19 @@ export default function ABTesting() {
                 onChange={(e) => setTestName(e.target.value)}
                 name="testName"
                 placeholder="Enter a unique name for this A/B test"
-                required
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #d1d5db',
+                  border: validationErrors.testName ? '1px solid #ef4444' : '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px'
                 }}
               />
+              {validationErrors.testName && (
+                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                  {validationErrors.testName}
+                </p>
+              )}
               <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
                 Enter a unique name for this A/B test
               </p>
@@ -809,7 +862,7 @@ export default function ABTesting() {
             {/* Product */}
             <div>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Product
+                Product <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <select
                 value={selectedProductId}
@@ -818,16 +871,22 @@ export default function ABTesting() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #d1d5db',
+                  border: validationErrors.product ? '1px solid #ef4444' : '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px',
                   background: 'white'
                 }}
               >
+                <option value="">Select Product</option>
                 {productOptions.map(option => (
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
+              {validationErrors.product && (
+                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                  {validationErrors.product}
+                </p>
+              )}
               <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
                 Select the product to run the A/B test on
               </p>
@@ -842,11 +901,10 @@ export default function ABTesting() {
                 value={templateA}
                 onChange={(e) => setTemplateA(e.target.value)}
                 name="templateA"
-                required
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #d1d5db',
+                  border: validationErrors.templateA ? '1px solid #ef4444' : '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px',
                   background: 'white'
@@ -857,6 +915,11 @@ export default function ABTesting() {
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
+              {validationErrors.templateA && (
+                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                  {validationErrors.templateA}
+                </p>
+              )}
             </div>
 
             {/* Template B */}
@@ -868,11 +931,10 @@ export default function ABTesting() {
                 value={templateB}
                 onChange={(e) => setTemplateB(e.target.value)}
                 name="templateB"
-                required
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: templateB ? '1px solid #d1d5db' : '1px solid #ef4444',
+                  border: validationErrors.templateB ? '1px solid #ef4444' : '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px',
                   background: 'white'
@@ -883,9 +945,9 @@ export default function ABTesting() {
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
-              {!templateB && (
+              {validationErrors.templateB && (
                 <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
-                  Template B is required for A/B testing
+                  {validationErrors.templateB}
                 </p>
               )}
             </div>
@@ -893,7 +955,7 @@ export default function ABTesting() {
             {/* Traffic Split */}
             <div>
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Traffic Split (A %)
+                Traffic Split (A %) <span style={{ color: '#ef4444' }}>*</span>
               </label>
               <input
                 type="number"
@@ -902,14 +964,23 @@ export default function ABTesting() {
                 name="trafficSplit"
                 min="1"
                 max="99"
+                placeholder="50"
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: '1px solid #d1d5db',
+                  border: validationErrors.trafficSplit ? '1px solid #ef4444' : '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px'
                 }}
               />
+              {validationErrors.trafficSplit && (
+                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                  {validationErrors.trafficSplit}
+                </p>
+              )}
+              <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                Percentage of traffic to show Template A (1-99)
+              </p>
             </div>
 
             {/* Error Messages */}
@@ -949,6 +1020,12 @@ export default function ABTesting() {
                 fontWeight: '500',
                 cursor: 'pointer',
                 transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #059669 0%, #047857 100%)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
               }}
             >
               Create A/B Test
