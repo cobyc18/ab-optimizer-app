@@ -194,19 +194,19 @@ export const action = async ({ request }) => {
   return json({ success: false, error: "Invalid action" });
 };
 
-const QuickActionCard = ({ title, description, color = "blue" }) => {
+const QuickActionCard = ({ title, description, color = "green" }) => {
   const colorStyles = {
-    blue: { 
-      background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-      hoverBg: 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)'
-    },
     green: { 
-      background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-      hoverBg: 'linear-gradient(135deg, #059669 0%, #047857 100%)'
+      background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+      hoverBg: 'linear-gradient(135deg, #228b22 0%, #006400 100%)'
     },
-    purple: { 
-      background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-      hoverBg: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
+    lime: { 
+      background: 'linear-gradient(135deg, #9acd32 0%, #6b8e23 100%)',
+      hoverBg: 'linear-gradient(135deg, #6b8e23 0%, #556b2f 100%)'
+    },
+    dark: { 
+      background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
+      hoverBg: 'linear-gradient(135deg, #1a1a1a 0%, #000000 100%)'
     }
   };
 
@@ -234,7 +234,7 @@ const QuickActionCard = ({ title, description, color = "blue" }) => {
         </div>
         <div className="ml-4 flex-1">
           <h3 className="text-lg font-semibold text-white">{title}</h3>
-          <p className="text-sm text-blue-100">{description}</p>
+          <p className="text-sm text-green-100">{description}</p>
         </div>
         <span className="text-white/70 text-lg">→</span>
       </div>
@@ -287,49 +287,49 @@ export default function Dashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #32cd32 100%)',
       padding: '24px',
       fontFamily: 'system-ui, -apple-system, sans-serif'
     }}>
       {/* Header */}
       <div style={{
-        background: 'rgba(255, 255, 255, 0.9)',
+        background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(10px)',
         padding: '24px',
         borderRadius: '16px',
         marginBottom: '32px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
-        border: '1px solid rgba(255, 255, 255, 0.2)'
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
+        border: '1px solid rgba(50, 205, 50, 0.3)'
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <div>
-            <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', margin: '0 0 8px 0' }}>
+            <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#000000', margin: '0 0 8px 0' }}>
               A/B Testing Dashboard
             </h1>
-            <p style={{ color: '#6b7280', margin: '0', fontSize: '16px' }}>
+            <p style={{ color: '#374151', margin: '0', fontSize: '16px' }}>
               Welcome back, {user?.firstName || 'User'}! Here's your testing overview.
             </p>
           </div>
           <div style={{
-            background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
+            background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
             padding: '20px',
             borderRadius: '12px',
-            border: '1px solid #93c5fd'
+            border: '1px solid #32cd32'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-              <div style={{ width: '8px', height: '8px', background: '#3b82f6', borderRadius: '50%', marginRight: '8px' }}></div>
-              <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Your Progress</span>
+              <div style={{ width: '8px', height: '8px', background: '#ffffff', borderRadius: '50%', marginRight: '8px' }}></div>
+              <span style={{ fontSize: '14px', fontWeight: '500', color: '#ffffff' }}>Your Progress</span>
             </div>
-            <div style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937', marginBottom: '16px' }}>
+            <div style={{ fontSize: '18px', fontWeight: '600', color: '#ffffff', marginBottom: '16px' }}>
               Data Scientist
             </div>
             <div style={{ marginBottom: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#ffffff', marginBottom: '4px' }}>
                 <span>Level Progress</span>
                 <span>1250 / 1750 XP</span>
               </div>
-              <div style={{ height: '8px', background: '#e5e7eb', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: '71%', height: '100%', background: '#3b82f6', borderRadius: '4px' }}></div>
+              <div style={{ height: '8px', background: 'rgba(255, 255, 255, 0.3)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{ width: '71%', height: '100%', background: '#ffffff', borderRadius: '4px' }}></div>
               </div>
             </div>
           </div>
@@ -338,17 +338,17 @@ export default function Dashboard() {
 
       {/* Gamified Hero Tile */}
       <div style={{
-        background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+        background: 'linear-gradient(135deg, #000000 0%, #32cd32 100%)',
         color: 'white',
         padding: '32px',
         borderRadius: '16px',
         marginBottom: '32px',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '50%', transform: 'translate(64px, -64px)' }}></div>
-        <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '50%', transform: 'translate(-48px, 48px)' }}></div>
+        <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'rgba(50, 205, 50, 0.2)', borderRadius: '50%', transform: 'translate(64px, -64px)' }}></div>
+        <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'rgba(50, 205, 50, 0.1)', borderRadius: '50%', transform: 'translate(-48px, 48px)' }}></div>
         
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -356,7 +356,7 @@ export default function Dashboard() {
               <div style={{
                 width: '64px',
                 height: '64px',
-                background: 'rgba(255, 255, 255, 0.2)',
+                background: 'rgba(50, 205, 50, 0.3)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -371,7 +371,7 @@ export default function Dashboard() {
                 right: '-4px',
                 width: '24px',
                 height: '24px',
-                background: '#f59e0b',
+                background: '#32cd32',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -387,15 +387,15 @@ export default function Dashboard() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', textAlign: 'center' }}>
-            <div style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
+            <div style={{ background: 'rgba(50, 205, 50, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>2</div>
               <p style={{ fontSize: '14px', opacity: 0.8 }}>Tests this week</p>
             </div>
-            <div style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
+            <div style={{ background: 'rgba(50, 205, 50, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>8</div>
               <p style={{ fontSize: '14px', opacity: 0.8 }}>Variants created</p>
             </div>
-            <div style={{ background: 'rgba(255, 255, 255, 0.1)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
+            <div style={{ background: 'rgba(50, 205, 50, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>450</div>
               <p style={{ fontSize: '14px', opacity: 0.8 }}>Points earned</p>
             </div>
@@ -410,51 +410,51 @@ export default function Dashboard() {
         borderRadius: '16px',
         marginBottom: '32px',
         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        border: '1px solid rgba(255, 255, 255, 0.2)'
+        border: '1px solid rgba(50, 205, 50, 0.2)'
       }}>
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', display: 'flex', alignItems: 'center' }}>
             <span style={{ marginRight: '8px' }}>⚡</span>
             Quick Actions
           </h2>
-          <p style={{ color: '#6b7280', marginTop: '4px' }}>Get started with common tasks</p>
+          <p style={{ color: '#374151', marginTop: '4px' }}>Get started with common tasks</p>
         </div>
         
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
           <QuickActionCard
             title="Create New Test"
             description="Set up a new A/B test for your products"
-            color="blue"
+            color="green"
           />
           <QuickActionCard
             title="View Analytics"
             description="Check detailed performance metrics"
-            color="green"
+            color="lime"
           />
           <QuickActionCard
             title="Manage Tests"
             description="View and edit existing A/B tests"
-            color="purple"
+            color="dark"
           />
         </div>
       </div>
 
       {/* Webhook Status Tile */}
       <div style={{
-        background: 'rgba(255, 255, 255, 0.8)',
+        background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(8px)',
         padding: '24px',
         borderRadius: '16px',
         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        border: '1px solid rgba(255, 255, 255, 0.2)',
+        border: '1px solid rgba(50, 205, 50, 0.3)',
         marginBottom: '24px'
       }}>
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', display: 'flex', alignItems: 'center' }}>
             <span style={{ marginRight: '8px' }}>🔗</span>
             A/B Testing Webhook Setup
           </h2>
-          <p style={{ color: '#6b7280', marginTop: '4px' }}>
+          <p style={{ color: '#374151', marginTop: '4px' }}>
             Register webhooks to track purchase events for A/B testing. This will allow the app to automatically detect when customers complete purchases.
           </p>
         </div>
@@ -464,7 +464,7 @@ export default function Dashboard() {
             <div style={{
               padding: '12px',
               borderRadius: '8px',
-              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
               color: 'white',
               fontSize: '14px'
             }}>
@@ -474,7 +474,7 @@ export default function Dashboard() {
             <div style={{
               padding: '12px',
               borderRadius: '8px',
-              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
               color: 'white',
               fontSize: '14px',
               display: 'flex',
@@ -487,7 +487,7 @@ export default function Dashboard() {
             <div style={{
               padding: '12px',
               borderRadius: '8px',
-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              background: 'linear-gradient(135deg, #9acd32 0%, #6b8e23 100%)',
               color: 'white',
               fontSize: '14px',
               display: 'flex',
@@ -504,7 +504,7 @@ export default function Dashboard() {
             onClick={() => fetcher.submit({ action: "register_webhooks" }, { method: "POST" })}
             disabled={isLoading}
             style={{
-              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+              background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
               color: 'white',
               border: 'none',
               padding: '12px 24px',
@@ -518,13 +518,13 @@ export default function Dashboard() {
             }}
             onMouseEnter={(e) => {
               if (!isLoading) {
-                e.target.style.background = 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)';
+                e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
                 e.target.style.transform = 'translateY(-1px)';
               }
             }}
             onMouseLeave={(e) => {
               if (!isLoading) {
-                e.target.style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+                e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
                 e.target.style.transform = 'translateY(0)';
               }
             }}

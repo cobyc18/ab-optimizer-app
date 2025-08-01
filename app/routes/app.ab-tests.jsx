@@ -644,12 +644,12 @@ export default function ABTesting() {
     <div style={{ padding: '20px', fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 0%, #ec4899 100%)',
+        background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #32cd32 100%)',
         color: 'white',
         padding: '32px',
         borderRadius: '16px',
         marginBottom: '32px',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
       }}>
         <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>🧪 Create A/B Test</h1>
         <p style={{ fontSize: '18px', opacity: 0.9 }}>Set up experiments to optimize your product pages</p>
@@ -662,16 +662,16 @@ export default function ABTesting() {
           padding: '24px',
           borderRadius: '16px',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          border: '1px solid #e5e7eb'
+          border: '1px solid rgba(50, 205, 50, 0.2)'
         }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', marginBottom: '24px' }}>
             📝 Create Duplicate Template
           </h2>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             {/* Base Product Template */}
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
                 Base Product Template
               </label>
               <select
@@ -697,7 +697,7 @@ export default function ABTesting() {
 
             {/* Duplicate Template Name */}
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
                 Duplicate Template Name
               </label>
               <input
@@ -722,10 +722,10 @@ export default function ABTesting() {
             {isLoadingProduct && (
               <div style={{
                 padding: '12px',
-                background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
-                border: '1px solid #93c5fd',
+                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                border: '1px solid #32cd32',
                 borderRadius: '8px',
-                color: '#1e40af'
+                color: 'white'
               }}>
                 🔍 Finding associated product...
               </div>
@@ -735,11 +735,11 @@ export default function ABTesting() {
               <div style={{
                 padding: '12px',
                 background: associatedProduct.isFallback 
-                  ? 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)'
-                  : 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
-                border: associatedProduct.isFallback ? '1px solid #fcd34d' : '1px solid #6ee7b7',
+                  ? 'linear-gradient(135deg, #9acd32 0%, #6b8e23 100%)'
+                  : 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                border: associatedProduct.isFallback ? '1px solid #9acd32' : '1px solid #32cd32',
                 borderRadius: '8px',
-                color: associatedProduct.isFallback ? '#92400e' : '#065f46'
+                color: 'white'
               }}>
                 {associatedProduct.isFallback 
                   ? `⚠️ No specific product found for this template. Will use "${associatedProduct.title}" as fallback.`
@@ -751,10 +751,10 @@ export default function ABTesting() {
             {previewError && (
               <div style={{
                 padding: '12px',
-                background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
-                border: '1px solid #f87171',
+                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                border: '1px solid #dc2626',
                 borderRadius: '8px',
-                color: '#991b1b'
+                color: 'white'
               }}>
                 ❌ {previewError}
               </div>
@@ -767,7 +767,7 @@ export default function ABTesting() {
                 padding: '12px 24px',
                 background: isCreatingTemplate || !selectedTemplate || !duplicateTemplateName.trim()
                   ? '#9ca3af'
-                  : 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                  : 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
@@ -788,15 +788,15 @@ export default function ABTesting() {
           padding: '24px',
           borderRadius: '16px',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          border: '1px solid #e5e7eb'
+          border: '1px solid rgba(50, 205, 50, 0.2)'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
-              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', marginBottom: '8px' }}>
+              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', marginBottom: '8px' }}>
                 🧪 Create A/B Test
               </h2>
-              <p style={{ fontSize: '14px', color: '#6b7280' }}>
-                Select two different templates to compare their performance. All fields marked with <span style={{ color: '#ef4444' }}>*</span> are required.
+              <p style={{ fontSize: '14px', color: '#374151' }}>
+                Select two different templates to compare their performance. All fields marked with <span style={{ color: '#dc2626' }}>*</span> are required.
               </p>
             </div>
             <button
@@ -804,7 +804,7 @@ export default function ABTesting() {
               onClick={resetForm}
               style={{
                 padding: '8px 16px',
-                background: 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)',
+                background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '6px',
@@ -817,10 +817,10 @@ export default function ABTesting() {
                 gap: '4px'
               }}
               onMouseEnter={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #4b5563 0%, #374151 100%)';
+                e.target.style.background = 'linear-gradient(135deg, #1a1a1a 0%, #000000 100%)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #6b7280 0%, #4b5563 100%)';
+                e.target.style.background = 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)';
               }}
             >
               <span>+</span> Add Test
@@ -832,8 +832,8 @@ export default function ABTesting() {
 
             {/* Test Name */}
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Test Name <span style={{ color: '#ef4444' }}>*</span>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Test Name <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <input
                 type="text"
@@ -844,13 +844,13 @@ export default function ABTesting() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: validationErrors.testName ? '1px solid #ef4444' : '1px solid #d1d5db',
+                  border: validationErrors.testName ? '1px solid #dc2626' : '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px'
                 }}
               />
               {validationErrors.testName && (
-                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
                   {validationErrors.testName}
                 </p>
               )}
@@ -861,8 +861,8 @@ export default function ABTesting() {
 
             {/* Product */}
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Product <span style={{ color: '#ef4444' }}>*</span>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Product <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <select
                 value={selectedProductId}
@@ -871,7 +871,7 @@ export default function ABTesting() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: validationErrors.product ? '1px solid #ef4444' : '1px solid #d1d5db',
+                  border: validationErrors.product ? '1px solid #dc2626' : '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px',
                   background: 'white'
@@ -883,7 +883,7 @@ export default function ABTesting() {
                 ))}
               </select>
               {validationErrors.product && (
-                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
                   {validationErrors.product}
                 </p>
               )}
@@ -894,8 +894,8 @@ export default function ABTesting() {
 
             {/* Template A */}
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Template A (First Variant) <span style={{ color: '#ef4444' }}>*</span>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Template A (First Variant) <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <select
                 value={templateA}
@@ -904,7 +904,7 @@ export default function ABTesting() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: validationErrors.templateA ? '1px solid #ef4444' : '1px solid #d1d5db',
+                  border: validationErrors.templateA ? '1px solid #dc2626' : '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px',
                   background: 'white'
@@ -916,7 +916,7 @@ export default function ABTesting() {
                 ))}
               </select>
               {validationErrors.templateA && (
-                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
                   {validationErrors.templateA}
                 </p>
               )}
@@ -924,8 +924,8 @@ export default function ABTesting() {
 
             {/* Template B */}
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Template B (Second Variant) <span style={{ color: '#ef4444' }}>*</span>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Template B (Second Variant) <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <select
                 value={templateB}
@@ -934,7 +934,7 @@ export default function ABTesting() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: validationErrors.templateB ? '1px solid #ef4444' : '1px solid #d1d5db',
+                  border: validationErrors.templateB ? '1px solid #dc2626' : '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px',
                   background: 'white'
@@ -946,7 +946,7 @@ export default function ABTesting() {
                 ))}
               </select>
               {validationErrors.templateB && (
-                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
                   {validationErrors.templateB}
                 </p>
               )}
@@ -954,8 +954,8 @@ export default function ABTesting() {
 
             {/* Traffic Split */}
             <div>
-              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#374151', marginBottom: '8px' }}>
-                Traffic Split (A %) <span style={{ color: '#ef4444' }}>*</span>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Traffic Split (A %) <span style={{ color: '#dc2626' }}>*</span>
               </label>
               <input
                 type="number"
@@ -968,13 +968,13 @@ export default function ABTesting() {
                 style={{
                   width: '100%',
                   padding: '12px',
-                  border: validationErrors.trafficSplit ? '1px solid #ef4444' : '1px solid #d1d5db',
+                  border: validationErrors.trafficSplit ? '1px solid #dc2626' : '1px solid #d1d5db',
                   borderRadius: '8px',
                   fontSize: '14px'
                 }}
               />
               {validationErrors.trafficSplit && (
-                <p style={{ fontSize: '12px', color: '#ef4444', marginTop: '4px' }}>
+                <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
                   {validationErrors.trafficSplit}
                 </p>
               )}
@@ -987,10 +987,10 @@ export default function ABTesting() {
             {error && (
               <div style={{
                 padding: '12px',
-                background: 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)',
-                border: '1px solid #f87171',
+                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                border: '1px solid #dc2626',
                 borderRadius: '8px',
-                color: '#991b1b'
+                color: 'white'
               }}>
                 ❌ {error}
               </div>
@@ -999,10 +999,10 @@ export default function ABTesting() {
             {successMessage && (
               <div style={{
                 padding: '12px',
-                background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
-                border: '1px solid #6ee7b7',
+                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                border: '1px solid #32cd32',
                 borderRadius: '8px',
-                color: '#065f46'
+                color: 'white'
               }}>
                 {successMessage}
               </div>
@@ -1012,7 +1012,7 @@ export default function ABTesting() {
               type="submit"
               style={{
                 padding: '12px 24px',
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
                 color: 'white',
                 border: 'none',
                 borderRadius: '8px',
@@ -1022,10 +1022,10 @@ export default function ABTesting() {
                 transition: 'all 0.2s ease'
               }}
               onMouseEnter={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #059669 0%, #047857 100%)';
+                e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
               }}
               onMouseLeave={(e) => {
-                e.target.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+                e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
               }}
             >
               Create A/B Test
