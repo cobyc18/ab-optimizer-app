@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server.js";
-import { prisma } from "../db.server.js";
+import prisma from "../db.server.js";
 
 export const action = async ({ request }) => {
   const { topic, shop, session, admin } = await authenticate.webhook(request);
