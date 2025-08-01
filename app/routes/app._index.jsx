@@ -12,7 +12,10 @@ export const loader = async ({ request }) => {
       path: "webhooks.json",
     });
     
-    const webhooks = webhooksResponse.data.webhooks || [];
+    console.log("🔍 Webhook API Response:", JSON.stringify(webhooksResponse, null, 2));
+    
+    // Handle different response structures
+    const webhooks = webhooksResponse.data?.webhooks || webhooksResponse.body?.webhooks || [];
     const requiredWebhooks = [
       "orders/create",
       "orders/updated", 
@@ -41,6 +44,11 @@ export const loader = async ({ request }) => {
     });
   } catch (error) {
     console.error("❌ Error checking webhook status:", error);
+    console.error("Error details:", {
+      message: error.message,
+      status: error.response?.status,
+      data: error.response?.data
+    });
     webhookStatus.error = error.message;
   }
 
@@ -71,25 +79,28 @@ export const action = async ({ request }) => {
     const webhooksToRegister = [
       {
         topic: "ORDERS_CREATE",
-        address: `${process.env.SHOPIFY_APP_URL}/webhooks/orders/create`,
+        address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/orders/create`,
         format: "JSON"
       },
       {
         topic: "ORDERS_UPDATED",
-        address: `${process.env.SHOPIFY_APP_URL}/webhooks/orders/updated`,
+        address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/orders/updated`,
         format: "JSON"
       },
       {
         topic: "ORDERS_FULFILLED",
-        address: `${process.env.SHOPIFY_APP_URL}/webhooks/orders/fulfilled`,
+        address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/orders/fulfilled`,
         format: "JSON"
       },
       {
         topic: "ORDER_TRANSACTIONS_CREATE",
-        address: `${process.env.SHOPIFY_APP_URL}/webhooks/order_transactions/create`,
+        address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/order_transactions/create`,
         format: "JSON"
       }
     ];
+
+    console.log("🔗 Webhooks to register:", JSON.stringify(webhooksToRegister, null, 2));
+    console.log("🌐 App URL:", process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com");
 
     const results = [];
     
@@ -110,8 +121,22 @@ export const action = async ({ request }) => {
         console.log(`✅ Successfully registered webhook: ${webhook.topic} (ID: ${response.data.webhook.id})`);
       } catch (error) {
         console.error(`❌ Failed to register webhook ${webhook.topic}:`, error);
+        console.error("Error details:", {
+          status: error.response?.status,
+          statusText: error.response?.statusText,
+          data: error.response?.data,
+          message: error.message
+        });
         
         if (error.response?.status === 422) {
+          // Try to get the error response body
+          try {
+            const errorText = await error.response.text();
+            console.error("422 Error response body:", errorText);
+          } catch (textError) {
+            console.error("Could not read error response body:", textError);
+          }
+          
           results.push({
             topic: webhook.topic,
             success: true,
