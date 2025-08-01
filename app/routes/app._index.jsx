@@ -1,7 +1,49 @@
 import { json } from "@remix-run/node";
-import { useLoaderData, useOutletContext } from "@remix-run/react";
+import { useLoaderData, useOutletContext, Form } from "@remix-run/react";
+import { authenticate } from "../shopify.server.js";
 
 export const loader = async ({ request }) => {
+  const { admin, session } = await authenticate.admin(request);
+  
+  // Check webhook status
+  let webhookStatus = { registered: false, webhooks: [] };
+  try {
+    const webhooksResponse = await admin.rest.get({
+      path: "webhooks.json",
+    });
+    
+    const webhooks = webhooksResponse.data.webhooks || [];
+    const requiredWebhooks = [
+      "orders/create",
+      "orders/updated", 
+      "orders/fulfilled",
+      "order_transactions/create"
+    ];
+    
+    const registeredWebhooks = webhooks.filter(webhook => 
+      requiredWebhooks.includes(webhook.topic)
+    );
+    
+    webhookStatus = {
+      registered: registeredWebhooks.length === requiredWebhooks.length,
+      webhooks: registeredWebhooks,
+      required: requiredWebhooks,
+      missing: requiredWebhooks.filter(topic => 
+        !registeredWebhooks.find(w => w.topic === topic)
+      )
+    };
+    
+    console.log("🔍 Webhook Status Check:", {
+      total: webhooks.length,
+      registered: registeredWebhooks.length,
+      required: requiredWebhooks.length,
+      missing: webhookStatus.missing
+    });
+  } catch (error) {
+    console.error("❌ Error checking webhook status:", error);
+    webhookStatus.error = error.message;
+  }
+
   // Mock data - in a real app, you'd fetch this from your database
   const stats = {
     totalTests: 12,
@@ -15,7 +57,82 @@ export const loader = async ({ request }) => {
     ]
   };
 
-  return json({ stats });
+  return json({ stats, webhookStatus });
+};
+
+export const action = async ({ request }) => {
+  const { admin, session } = await authenticate.admin(request);
+  const formData = await request.formData();
+  const action = formData.get("action");
+
+  if (action === "register_webhooks") {
+    console.log("🚀 Registering webhooks...");
+    
+    const webhooksToRegister = [
+      {
+        topic: "ORDERS_CREATE",
+        address: `${process.env.SHOPIFY_APP_URL}/webhooks/orders/create`,
+        format: "JSON"
+      },
+      {
+        topic: "ORDERS_UPDATED",
+        address: `${process.env.SHOPIFY_APP_URL}/webhooks/orders/updated`,
+        format: "JSON"
+      },
+      {
+        topic: "ORDERS_FULFILLED",
+        address: `${process.env.SHOPIFY_APP_URL}/webhooks/orders/fulfilled`,
+        format: "JSON"
+      },
+      {
+        topic: "ORDER_TRANSACTIONS_CREATE",
+        address: `${process.env.SHOPIFY_APP_URL}/webhooks/order_transactions/create`,
+        format: "JSON"
+      }
+    ];
+
+    const results = [];
+    
+    for (const webhook of webhooksToRegister) {
+      try {
+        console.log(`📡 Registering webhook: ${webhook.topic}`);
+        const response = await admin.rest.post({
+          path: "webhooks.json",
+          data: { webhook }
+        });
+        
+        results.push({
+          topic: webhook.topic,
+          success: true,
+          id: response.data.webhook.id
+        });
+        
+        console.log(`✅ Successfully registered webhook: ${webhook.topic} (ID: ${response.data.webhook.id})`);
+      } catch (error) {
+        console.error(`❌ Failed to register webhook ${webhook.topic}:`, error);
+        
+        if (error.response?.status === 422) {
+          results.push({
+            topic: webhook.topic,
+            success: true,
+            message: "Already exists"
+          });
+          console.log(`ℹ️ Webhook ${webhook.topic} already exists`);
+        } else {
+          results.push({
+            topic: webhook.topic,
+            success: false,
+            error: error.message
+          });
+        }
+      }
+    }
+    
+    console.log("🎯 Webhook registration complete:", results);
+    return json({ success: true, results });
+  }
+
+  return json({ success: false, error: "Invalid action" });
 };
 
 const QuickActionCard = ({ title, description, color = "blue" }) => {
@@ -80,7 +197,7 @@ const getActivityIcon = (iconType) => {
 };
 
 export default function Dashboard() {
-  const { stats } = useLoaderData();
+  const { stats, webhookStatus } = useLoaderData();
   const { user } = useOutletContext();
 
   // Mock experiments data
@@ -357,6 +474,120 @@ export default function Dashboard() {
             color="purple"
           />
         </div>
+      </div>
+
+      {/* Webhook Status Tile */}
+      <div style={{
+        background: 'rgba(255, 255, 255, 0.8)',
+        backdropFilter: 'blur(8px)',
+        padding: '24px',
+        borderRadius: '16px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid rgba(255, 255, 255, 0.2)',
+        marginTop: '24px'
+      }}>
+        <div style={{ marginBottom: '24px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center' }}>
+            <span style={{ marginRight: '8px' }}>🔗</span>
+            Webhook Status
+          </h2>
+          <p style={{ color: '#6b7280', marginTop: '4px' }}>
+            Purchase tracking requires webhooks to be registered
+          </p>
+        </div>
+        
+        <div style={{ marginBottom: '20px' }}>
+          {webhookStatus.error ? (
+            <div style={{
+              padding: '12px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+              color: 'white',
+              fontSize: '14px'
+            }}>
+              ❌ Error checking webhook status: {webhookStatus.error}
+            </div>
+          ) : webhookStatus.registered ? (
+            <div style={{
+              padding: '12px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+              color: 'white',
+              fontSize: '14px',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <span style={{ marginRight: '8px' }}>✅</span>
+              All required webhooks are registered ({webhookStatus.webhooks.length}/{webhookStatus.required.length})
+            </div>
+          ) : (
+            <div style={{
+              padding: '12px',
+              borderRadius: '8px',
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              color: 'white',
+              fontSize: '14px',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
+              <span style={{ marginRight: '8px' }}>⚠️</span>
+              Missing webhooks: {webhookStatus.missing.join(', ')}
+            </div>
+          )}
+        </div>
+
+        {!webhookStatus.registered && (
+          <Form method="post" style={{ marginTop: '16px' }}>
+            <input type="hidden" name="action" value="register_webhooks" />
+            <button
+              type="submit"
+              style={{
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)';
+                e.target.style.transform = 'translateY(-1px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+                e.target.style.transform = 'translateY(0)';
+              }}
+            >
+              🔗 Register Webhooks
+            </button>
+          </Form>
+        )}
+
+        {webhookStatus.webhooks.length > 0 && (
+          <div style={{ marginTop: '20px' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '12px' }}>
+              Registered Webhooks:
+            </h3>
+            <div style={{ display: 'grid', gap: '8px' }}>
+              {webhookStatus.webhooks.map((webhook, index) => (
+                <div key={index} style={{
+                  padding: '8px 12px',
+                  borderRadius: '6px',
+                  background: 'rgba(16, 185, 129, 0.1)',
+                  border: '1px solid rgba(16, 185, 129, 0.2)',
+                  fontSize: '13px',
+                  color: '#065f46'
+                }}>
+                  ✅ {webhook.topic} (ID: {webhook.id})
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Recent Activity Tile */}

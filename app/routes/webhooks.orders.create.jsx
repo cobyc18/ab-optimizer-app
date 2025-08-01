@@ -4,34 +4,48 @@ import prisma from "../db.server.js";
 
 export const action = async ({ request }) => {
   try {
+    console.log("🔔 ORDERS_CREATE WEBHOOK RECEIVED - START");
+    
     // Clone the request to avoid "Body has already been read" error
     const clonedRequest = request.clone();
     const { topic, shop, session, admin } = await authenticate.webhook(request);
 
     if (!topic || !shop || !session) {
-      console.error("Webhook authentication failed");
+      console.error("❌ Webhook authentication failed");
+      console.error("Topic:", topic);
+      console.error("Shop:", shop);
+      console.error("Session:", !!session);
       return json({ status: "error", message: "Authentication failed" }, { status: 401 });
     }
 
-    const payload = await clonedRequest.json();
-    console.log("=== ORDERS_CREATE WEBHOOK RECEIVED ===");
+    console.log("✅ Webhook authentication successful");
     console.log("Shop:", shop);
     console.log("Topic:", topic);
-    console.log("Order ID:", payload.id);
-    console.log("Order Name:", payload.name);
-    console.log("Total Price:", payload.total_price);
-    console.log("Financial Status:", payload.financial_status);
-    console.log("Fulfillment Status:", payload.fulfillment_status);
-    console.log("Line Items:", payload.line_items?.length || 0);
+
+    const payload = await clonedRequest.json();
+    console.log("📦 Order payload received:");
+    console.log("- Order ID:", payload.id);
+    console.log("- Order Name:", payload.name);
+    console.log("- Total Price:", payload.total_price);
+    console.log("- Financial Status:", payload.financial_status);
+    console.log("- Fulfillment Status:", payload.fulfillment_status);
+    console.log("- Line Items Count:", payload.line_items?.length || 0);
+    console.log("- Customer Email:", payload.email);
+    console.log("- Customer ID:", payload.customer?.id);
 
     // Only process paid orders
     if (payload.financial_status !== "paid") {
-      console.log("Order not paid, skipping A/B test tracking");
+      console.log("⏭️ Order not paid, skipping A/B test tracking");
+      console.log("Financial status:", payload.financial_status);
       return json({ status: "skipped", reason: "order_not_paid" });
     }
 
+    console.log("💰 Order is paid, processing line items...");
+
     // Process each line item in the order
     if (payload.line_items && payload.line_items.length > 0) {
+      console.log(`📋 Processing ${payload.line_items.length} line items...`);
+      
       for (const lineItem of payload.line_items) {
         const productId = lineItem.product_id;
         const variantId = lineItem.variant_id;
@@ -39,11 +53,17 @@ export const action = async ({ request }) => {
         const price = parseFloat(lineItem.price) || 0;
         const totalPrice = price * quantity;
 
-        console.log(`Processing line item - Product ID: ${productId}, Variant ID: ${variantId}, Quantity: ${quantity}, Price: ${price}`);
+        console.log(`\n🛍️ Processing line item:`);
+        console.log("- Product ID:", productId);
+        console.log("- Variant ID:", variantId);
+        console.log("- Quantity:", quantity);
+        console.log("- Unit Price:", price);
+        console.log("- Total Price:", totalPrice);
 
         // Check if this product has an active A/B test
         let activeTest = null;
         try {
+          console.log(`🔍 Checking for active A/B test for product ${productId}...`);
           activeTest = await prisma.aBTest.findFirst({
             where: {
               productId: String(productId),
@@ -55,8 +75,20 @@ export const action = async ({ request }) => {
               ]
             }
           });
+          
+          if (activeTest) {
+            console.log(`✅ Found active A/B test:`, {
+              testId: activeTest.id,
+              testName: activeTest.name,
+              templateA: activeTest.templateA,
+              templateB: activeTest.templateB,
+              status: activeTest.status
+            });
+          } else {
+            console.log(`❌ No active A/B test found for product ${productId}`);
+          }
         } catch (prismaError) {
-          console.error(`Error querying A/B test for product ${productId}:`, prismaError);
+          console.error(`❌ Error querying A/B test for product ${productId}:`, prismaError);
           continue; // Skip this line item if we can't query the database
         }
 
@@ -122,10 +154,11 @@ export const action = async ({ request }) => {
             }
           }
 
-          console.log(`Determined variant: ${variant}`);
+          console.log(`🎯 Determined variant: ${variant}`);
 
           // Log the purchase event
           try {
+            console.log(`💾 Creating purchase event in database...`);
             const purchaseEvent = await prisma.aBEvent.create({
               data: {
                 testId: activeTest.id,
@@ -151,21 +184,35 @@ export const action = async ({ request }) => {
               }
             });
 
-            console.log(`Successfully logged purchase event:`, purchaseEvent.id);
+            console.log(`✅ Successfully logged purchase event:`, {
+              eventId: purchaseEvent.id,
+              testId: activeTest.id,
+              productId: productId,
+              variant: variant,
+              value: totalPrice
+            });
           } catch (purchaseError) {
-            console.error(`Error logging purchase event for product ${productId}:`, purchaseError);
+            console.error(`❌ Error logging purchase event for product ${productId}:`, purchaseError);
+            console.error("Error details:", {
+              message: purchaseError.message,
+              code: purchaseError.code,
+              meta: purchaseError.meta
+            });
           }
         } else {
-          console.log(`No active A/B test found for product ${productId}`);
+          console.log(`⏭️ No active A/B test found for product ${productId}, skipping purchase tracking`);
         }
       }
+    } else {
+      console.log("⚠️ No line items found in order, skipping A/B test tracking");
     }
 
-    console.log("=== ORDERS_CREATE WEBHOOK PROCESSING COMPLETE ===");
+    console.log("🎉 ORDERS_CREATE WEBHOOK PROCESSING COMPLETE");
     return json({ status: "success" });
 
   } catch (error) {
-    console.error("Error processing ORDERS_CREATE webhook:", error);
+    console.error("💥 Error processing ORDERS_CREATE webhook:", error);
+    console.error("Error stack:", error.stack);
     return json({ status: "error", message: error.message }, { status: 500 });
   }
 }; 
