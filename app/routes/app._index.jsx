@@ -1,26 +1,39 @@
 import { json } from "@remix-run/node";
-import { useLoaderData, useOutletContext, Form } from "@remix-run/react";
+import { useLoaderData, useOutletContext, useFetcher } from "@remix-run/react";
 import { authenticate } from "../shopify.server.js";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
   
-  // Check webhook status
+  // Check webhook status using GraphQL
   let webhookStatus = { registered: false, webhooks: [] };
   try {
-    const webhooksResponse = await admin.rest.get({
-      path: "webhooks.json",
-    });
+    const webhooksResponse = await admin.graphql(
+      `query {
+        webhookSubscriptions(first: 50) {
+          nodes {
+            id
+            topic
+            endpoint {
+              __typename
+              ... on WebhookHttpEndpoint {
+                callbackUrl
+              }
+            }
+          }
+        }
+      }`
+    );
     
-    console.log("🔍 Webhook API Response:", JSON.stringify(webhooksResponse, null, 2));
+    const responseJson = await webhooksResponse.json();
+    console.log("🔍 Webhook GraphQL Response:", JSON.stringify(responseJson, null, 2));
     
-    // Handle different response structures
-    const webhooks = webhooksResponse.data?.webhooks || webhooksResponse.body?.webhooks || [];
+    const webhooks = responseJson.data?.webhookSubscriptions?.nodes || [];
     const requiredWebhooks = [
-      "orders/create",
-      "orders/updated", 
-      "orders/fulfilled",
-      "order_transactions/create"
+      "ORDERS_CREATE",
+      "ORDERS_UPDATED", 
+      "ORDERS_FULFILLED",
+      "ORDER_TRANSACTIONS_CREATE"
     ];
     
     const registeredWebhooks = webhooks.filter(webhook => 
@@ -46,8 +59,7 @@ export const loader = async ({ request }) => {
     console.error("❌ Error checking webhook status:", error);
     console.error("Error details:", {
       message: error.message,
-      status: error.response?.status,
-      data: error.response?.data
+      stack: error.stack
     });
     webhookStatus.error = error.message;
   }
@@ -74,87 +86,109 @@ export const action = async ({ request }) => {
   const action = formData.get("action");
 
   if (action === "register_webhooks") {
-    console.log("🚀 Registering webhooks...");
-    
-    const webhooksToRegister = [
-      {
-        topic: "ORDERS_CREATE",
-        address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/orders/create`,
-        format: "JSON"
-      },
-      {
-        topic: "ORDERS_UPDATED",
-        address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/orders/updated`,
-        format: "JSON"
-      },
-      {
-        topic: "ORDERS_FULFILLED",
-        address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/orders/fulfilled`,
-        format: "JSON"
-      },
-      {
-        topic: "ORDER_TRANSACTIONS_CREATE",
-        address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/order_transactions/create`,
-        format: "JSON"
-      }
-    ];
+    try {
+      console.log("=== REGISTERING WEBHOOKS FROM MAIN APP ===");
+      
+      const webhooksToRegister = [
+        {
+          topic: "ORDERS_CREATE",
+          address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/orders/create`,
+          format: "JSON"
+        },
+        {
+          topic: "ORDERS_UPDATED",
+          address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/orders/updated`,
+          format: "JSON"
+        },
+        {
+          topic: "ORDERS_FULFILLED",
+          address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/orders/fulfilled`,
+          format: "JSON"
+        },
+        {
+          topic: "ORDER_TRANSACTIONS_CREATE",
+          address: `${process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"}/webhooks/order_transactions/create`,
+          format: "JSON"
+        }
+      ];
 
-    console.log("🔗 Webhooks to register:", JSON.stringify(webhooksToRegister, null, 2));
-    console.log("🌐 App URL:", process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com");
+      const results = [];
 
-    const results = [];
-    
-    for (const webhook of webhooksToRegister) {
-      try {
-        console.log(`📡 Registering webhook: ${webhook.topic}`);
-        const response = await admin.rest.post({
-          path: "webhooks.json",
-          data: { webhook }
-        });
-        
-        results.push({
-          topic: webhook.topic,
-          success: true,
-          id: response.data.webhook.id
-        });
-        
-        console.log(`✅ Successfully registered webhook: ${webhook.topic} (ID: ${response.data.webhook.id})`);
-      } catch (error) {
-        console.error(`❌ Failed to register webhook ${webhook.topic}:`, error);
-        console.error("Error details:", {
-          status: error.response?.status,
-          statusText: error.response?.statusText,
-          data: error.response?.data,
-          message: error.message
-        });
-        
-        if (error.response?.status === 422) {
-          // Try to get the error response body
-          try {
-            const errorText = await error.response.text();
-            console.error("422 Error response body:", errorText);
-          } catch (textError) {
-            console.error("Could not read error response body:", textError);
-          }
+      for (const webhook of webhooksToRegister) {
+        try {
+          console.log(`Registering webhook for ${webhook.topic}...`);
           
+          const response = await admin.graphql(
+            `mutation webhookSubscriptionCreate($topic: WebhookSubscriptionTopic!, $webhookSubscription: WebhookSubscriptionInput!) {
+              webhookSubscriptionCreate(topic: $topic, webhookSubscription: $webhookSubscription) {
+                webhookSubscription {
+                  id
+                }
+                userErrors {
+                  field
+                  message
+                }
+              }
+            }`,
+            {
+              variables: {
+                topic: webhook.topic,
+                webhookSubscription: {
+                  callbackUrl: webhook.address,
+                  format: webhook.format
+                }
+              }
+            }
+          );
+
+          const responseJson = await response.json();
+          console.log(`Response for ${webhook.topic}:`, responseJson);
+
+          if (responseJson.data?.webhookSubscriptionCreate?.webhookSubscription?.id) {
+            results.push({
+              topic: webhook.topic,
+              status: "success",
+              id: responseJson.data.webhookSubscriptionCreate.webhookSubscription.id
+            });
+            console.log(`✅ Webhook registered successfully: ${responseJson.data.webhookSubscriptionCreate.webhookSubscription.id}`);
+          } else if (responseJson.data?.webhookSubscriptionCreate?.userErrors?.length > 0) {
+            results.push({
+              topic: webhook.topic,
+              status: "error",
+              errors: responseJson.data.webhookSubscriptionCreate.userErrors
+            });
+            console.log(`❌ Webhook registration failed:`, responseJson.data.webhookSubscriptionCreate.userErrors);
+          }
+        } catch (error) {
           results.push({
             topic: webhook.topic,
-            success: true,
-            message: "Already exists"
-          });
-          console.log(`ℹ️ Webhook ${webhook.topic} already exists`);
-        } else {
-          results.push({
-            topic: webhook.topic,
-            success: false,
+            status: "error",
             error: error.message
           });
+          console.log(`❌ Error registering webhook for ${webhook.topic}:`, error);
         }
       }
+
+      return json({
+        webhookResults: {
+          message: "Webhook registration completed",
+          results: results,
+          timestamp: new Date().toISOString(),
+          appUrl: process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"
+        }
+      });
+
+    } catch (error) {
+      console.error("Error in webhook registration:", error);
+      return json({
+        webhookResults: {
+          message: "Error registering webhooks",
+          error: error.message,
+          timestamp: new Date().toISOString(),
+          appUrl: process.env.SHOPIFY_APP_URL || "https://ab-optimizer-app.onrender.com"
+        }
+      });
     }
-    
-    console.log("🎯 Webhook registration complete:", results);
-    return json({ success: true, results });
   }
 
   return json({ success: false, error: "Invalid action" });
@@ -224,6 +258,9 @@ const getActivityIcon = (iconType) => {
 export default function Dashboard() {
   const { stats, webhookStatus } = useLoaderData();
   const { user } = useOutletContext();
+  const fetcher = useFetcher();
+  const webhookResults = fetcher.data?.webhookResults;
+  const isLoading = ["loading", "submitting"].includes(fetcher.state) && fetcher.formMethod === "POST";
 
   // Mock experiments data
   const experiments = [
@@ -241,137 +278,38 @@ export default function Dashboard() {
       name: "Checkout Button Color",
       description: "Blue vs Green button test",
       status: "completed",
-      createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000),
+      createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000),
       lift: 8.7,
-      revenueLift: 1200
+      revenueLift: 1800
     }
   ];
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Inter, system-ui, sans-serif' }}>
-      {/* Header Tile */}
+    <div style={{
+      minHeight: '100vh',
+      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+      padding: '24px',
+      fontFamily: 'system-ui, -apple-system, sans-serif'
+    }}>
+      {/* Header */}
       <div style={{
-        background: 'linear-gradient(135deg, #4f46e5 0%, #7c3aed 0%, #ec4899 100%)',
-        color: 'white',
-        padding: '32px',
-        borderRadius: '16px',
-        marginBottom: '32px',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
-      }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>Welcome back! 👋</h1>
-            <p style={{ fontSize: '18px', opacity: 0.9 }}>Here's what's happening with your experiments today.</p>
-          </div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-            <button style={{
-              background: 'rgba(255, 255, 255, 0.2)',
-              color: 'white',
-              border: '1px solid rgba(255, 255, 255, 0.3)',
-              padding: '12px 24px',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              fontSize: '16px',
-              fontWeight: '500',
-              backdropFilter: 'blur(8px)',
-              transition: 'all 0.2s'
-            }}>
-              <span style={{ marginRight: '8px' }}>+</span>
-              New Experiment
-            </button>
-            <div style={{
-              width: '48px',
-              height: '48px',
-              background: 'rgba(255, 255, 255, 0.2)',
-              borderRadius: '50%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.3)'
-            }}>
-              <span style={{ color: 'white', fontWeight: '600' }}>
-                {user?.firstName ? user.firstName.charAt(0) : 'U'}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Performance Overview Tile */}
-      <div style={{
-        background: 'white',
+        background: 'rgba(255, 255, 255, 0.9)',
+        backdropFilter: 'blur(10px)',
         padding: '24px',
         borderRadius: '16px',
         marginBottom: '32px',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        border: '1px solid #e5e7eb'
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1)',
+        border: '1px solid rgba(255, 255, 255, 0.2)'
       }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '8px' }}>📊</span>
-            Performance Overview
-          </h2>
-          <p style={{ color: '#6b7280', marginTop: '4px' }}>Your key metrics at a glance</p>
-        </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px' }}>
-          {/* Active Experiments */}
-          <div style={{
-            background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
-            padding: '20px',
-            borderRadius: '12px',
-            border: '1px solid #bae6fd'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-              <div style={{ width: '8px', height: '8px', background: '#3b82f6', borderRadius: '50%', marginRight: '8px' }}></div>
-              <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Active Experiments</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', marginBottom: '16px' }}>
-              {experiments.filter(exp => exp.status === "running").length}
-            </div>
-            <div style={{ height: '20px', background: 'linear-gradient(90deg, rgba(59, 130, 246, 0.2) 0%, rgba(59, 130, 246, 0.4) 100%)', borderRadius: '4px' }}></div>
-            <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>Currently running</p>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div>
+            <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#1f2937', margin: '0 0 8px 0' }}>
+              A/B Testing Dashboard
+            </h1>
+            <p style={{ color: '#6b7280', margin: '0', fontSize: '16px' }}>
+              Welcome back, {user?.firstName || 'User'}! Here's your testing overview.
+            </p>
           </div>
-
-          {/* Wins This Month */}
-          <div style={{
-            background: 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)',
-            padding: '20px',
-            borderRadius: '12px',
-            border: '1px solid #fcd34d'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-              <div style={{ width: '8px', height: '8px', background: '#f59e0b', borderRadius: '50%', marginRight: '8px' }}></div>
-              <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Wins This Month</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', marginBottom: '8px' }}>
-              {experiments.filter(exp => exp.status === "completed").length}
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <span style={{ color: '#10b981', marginRight: '4px' }}>↗</span>
-              <p style={{ fontSize: '12px', color: '#10b981' }}>+25% from last month</p>
-            </div>
-          </div>
-
-          {/* Revenue Lift */}
-          <div style={{
-            background: 'linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%)',
-            padding: '20px',
-            borderRadius: '12px',
-            border: '1px solid #6ee7b7'
-          }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-              <div style={{ width: '8px', height: '8px', background: '#10b981', borderRadius: '50%', marginRight: '8px' }}></div>
-              <span style={{ fontSize: '14px', fontWeight: '500', color: '#374151' }}>Revenue Lift</span>
-            </div>
-            <div style={{ fontSize: '24px', fontWeight: '600', color: '#1f2937', marginBottom: '8px' }}>
-              ${experiments.reduce((sum, exp) => sum + (exp.revenueLift || 0), 0).toLocaleString()}
-            </div>
-            <p style={{ fontSize: '12px', color: '#10b981' }}>+15.2% total lift</p>
-          </div>
-
-          {/* Your Progress */}
           <div style={{
             background: 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)',
             padding: '20px',
@@ -472,7 +410,7 @@ export default function Dashboard() {
         borderRadius: '16px',
         marginBottom: '32px',
         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        border: '1px solid #e5e7eb'
+        border: '1px solid rgba(255, 255, 255, 0.2)'
       }}>
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center' }}>
@@ -509,15 +447,15 @@ export default function Dashboard() {
         borderRadius: '16px',
         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
         border: '1px solid rgba(255, 255, 255, 0.2)',
-        marginTop: '24px'
+        marginBottom: '24px'
       }}>
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center' }}>
             <span style={{ marginRight: '8px' }}>🔗</span>
-            Webhook Status
+            A/B Testing Webhook Setup
           </h2>
           <p style={{ color: '#6b7280', marginTop: '4px' }}>
-            Purchase tracking requires webhooks to be registered
+            Register webhooks to track purchase events for A/B testing. This will allow the app to automatically detect when customers complete purchases.
           </p>
         </div>
         
@@ -561,55 +499,105 @@ export default function Dashboard() {
           )}
         </div>
 
-        {!webhookStatus.registered && (
-          <Form method="post" style={{ marginTop: '16px' }}>
-            <input type="hidden" name="action" value="register_webhooks" />
-            <button
-              type="submit"
-              style={{
-                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
-                color: 'white',
-                border: 'none',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
-              }}
-              onMouseEnter={(e) => {
+        <div style={{ marginTop: '16px' }}>
+          <button
+            onClick={() => fetcher.submit({ action: "register_webhooks" }, { method: "POST" })}
+            disabled={isLoading}
+            style={{
+              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+              color: 'white',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: isLoading ? 'not-allowed' : 'pointer',
+              transition: 'all 0.2s ease',
+              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+              opacity: isLoading ? 0.7 : 1
+            }}
+            onMouseEnter={(e) => {
+              if (!isLoading) {
                 e.target.style.background = 'linear-gradient(135deg, #2563eb 0%, #1e40af 100%)';
                 e.target.style.transform = 'translateY(-1px)';
-              }}
-              onMouseLeave={(e) => {
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!isLoading) {
                 e.target.style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
                 e.target.style.transform = 'translateY(0)';
-              }}
-            >
-              🔗 Register Webhooks
-            </button>
-          </Form>
-        )}
+              }
+            }}
+          >
+            {isLoading ? '🔄 Registering...' : '🔗 Register Webhooks'}
+          </button>
+        </div>
 
-        {webhookStatus.webhooks.length > 0 && (
-          <div style={{ marginTop: '20px' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '12px' }}>
-              Registered Webhooks:
+        {/* Webhook Results Display */}
+        {webhookResults && (
+          <div style={{ marginTop: '24px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#374151', marginBottom: '16px' }}>
+              Webhook Registration Results
             </h3>
-            <div style={{ display: 'grid', gap: '8px' }}>
-              {webhookStatus.webhooks.map((webhook, index) => (
-                <div key={index} style={{
-                  padding: '8px 12px',
-                  borderRadius: '6px',
-                  background: 'rgba(16, 185, 129, 0.1)',
-                  border: '1px solid rgba(16, 185, 129, 0.2)',
-                  fontSize: '13px',
-                  color: '#065f46'
-                }}>
-                  ✅ {webhook.topic} (ID: {webhook.id})
+            <div style={{
+              padding: '16px',
+              borderRadius: '8px',
+              background: 'rgba(255, 255, 255, 0.9)',
+              border: '1px solid rgba(0, 0, 0, 0.1)'
+            }}>
+              <div style={{ marginBottom: '12px' }}>
+                <strong>Message:</strong> {webhookResults.message}
+              </div>
+              <div style={{ marginBottom: '12px' }}>
+                <strong>App URL:</strong> {webhookResults.appUrl}
+              </div>
+              <div style={{ marginBottom: '12px' }}>
+                <strong>Timestamp:</strong> {webhookResults.timestamp}
+              </div>
+
+              {webhookResults.error && (
+                <div style={{ marginBottom: '12px', color: '#dc2626' }}>
+                  <strong>Error:</strong> {webhookResults.error}
                 </div>
-              ))}
+              )}
+
+              {webhookResults.results && webhookResults.results.length > 0 && (
+                <div style={{ marginTop: '16px' }}>
+                  <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '12px' }}>Webhook Results:</h4>
+                  <div style={{ display: 'grid', gap: '12px' }}>
+                    {webhookResults.results.map((result, index) => (
+                      <div key={index} style={{
+                        padding: '12px',
+                        borderRadius: '6px',
+                        background: result.status === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+                        border: result.status === 'success' ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(239, 68, 68, 0.2)'
+                      }}>
+                        <div style={{ marginBottom: '4px' }}>
+                          <strong>Topic:</strong> {result.topic}
+                        </div>
+                        <div style={{ marginBottom: '4px' }}>
+                          <strong>Status:</strong> {result.status}
+                        </div>
+                        {result.id && (
+                          <div style={{ marginBottom: '4px' }}>
+                            <strong>ID:</strong> {result.id}
+                          </div>
+                        )}
+                        {result.errors && (
+                          <div style={{ color: '#dc2626' }}>
+                            <strong>Errors:</strong> {JSON.stringify(result.errors)}
+                          </div>
+                        )}
+                        {result.error && (
+                          <div style={{ color: '#dc2626' }}>
+                            <strong>Error:</strong> {result.error}
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
             </div>
           </div>
         )}
