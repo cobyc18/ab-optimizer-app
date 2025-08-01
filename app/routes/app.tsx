@@ -61,11 +61,11 @@ export default function App() {
             padding: '12px 16px',
             margin: '4px 8px',
             borderRadius: '12px',
-            color: isActiveItem ? '#1e40af' : '#6b7280',
+            color: isActiveItem ? '#ffffff' : '#374151',
             background: isActiveItem 
-              ? 'linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%)' 
+              ? 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)' 
               : 'transparent',
-            border: isActiveItem ? '1px solid #93c5fd' : '1px solid transparent',
+            border: isActiveItem ? '1px solid #32cd32' : '1px solid transparent',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             position: 'relative',
@@ -73,14 +73,16 @@ export default function App() {
           }}
           onMouseEnter={(e) => {
             if (!isActiveItem) {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)';
+              e.currentTarget.style.background = 'linear-gradient(135deg, #9acd32 0%, #6b8e23 100%)';
+              e.currentTarget.style.color = '#ffffff';
               e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.2)';
             }
           }}
           onMouseLeave={(e) => {
             if (!isActiveItem) {
               e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = '#374151';
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = 'none';
             }
@@ -101,7 +103,7 @@ export default function App() {
               {item.badge && (
                 <span style={{
                   fontSize: '10px',
-                  background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                  background: 'linear-gradient(135deg, #9acd32 0%, #6b8e23 100%)',
                   color: 'white',
                   padding: '2px 8px',
                   borderRadius: '10px',
@@ -120,7 +122,7 @@ export default function App() {
               top: '0',
               bottom: '0',
               width: '4px',
-              background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+              background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
               borderRadius: '0 2px 2px 0'
             }} />
           )}
@@ -133,11 +135,11 @@ export default function App() {
     <div style={{ display: 'flex', height: '100vh', background: '#f9fafb' }}>
       {/* Beautiful Sidebar */}
       <div style={{
-        background: 'linear-gradient(180deg, #ffffff 0%, #f8fafc 100%)',
-        boxShadow: '4px 0 20px rgba(0, 0, 0, 0.1)',
+        background: 'linear-gradient(180deg, #000000 0%, #1a1a1a 100%)',
+        boxShadow: '4px 0 20px rgba(0, 0, 0, 0.3)',
         display: 'flex',
         flexDirection: 'column',
-        borderRight: '1px solid #e5e7eb',
+        borderRight: '1px solid #32cd32',
         transition: 'all 0.3s ease',
         width: isSidebarCollapsed ? '80px' : '280px',
         position: 'relative',
@@ -146,21 +148,21 @@ export default function App() {
         {/* Sidebar Header */}
         <div style={{
           padding: '24px 20px',
-          borderBottom: '1px solid #e5e7eb',
-          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          borderBottom: '1px solid #32cd32',
+          background: 'linear-gradient(135deg, #000000 0%, #32cd32 100%)',
           color: 'white'
         }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div style={{
               width: '40px',
               height: '40px',
-              background: 'rgba(255, 255, 255, 0.2)',
+              background: 'rgba(50, 205, 50, 0.3)',
               borderRadius: '12px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.3)'
+              border: '1px solid rgba(50, 205, 50, 0.5)'
             }}>
               <span style={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }}>AB</span>
             </div>
@@ -180,7 +182,7 @@ export default function App() {
               <div style={{
                 fontSize: '11px',
                 fontWeight: '600',
-                color: '#9ca3af',
+                color: '#9acd32',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 marginBottom: '8px',
@@ -200,8 +202,8 @@ export default function App() {
         {/* Sidebar Toggle */}
         <div style={{
           padding: '16px 12px',
-          borderTop: '1px solid #e5e7eb',
-          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)'
+          borderTop: '1px solid #32cd32',
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #000000 100%)'
         }}>
           <button
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -211,9 +213,9 @@ export default function App() {
               alignItems: 'center',
               justifyContent: 'center',
               padding: '12px',
-              color: '#6b7280',
-              background: 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)',
-              border: '1px solid #e5e7eb',
+              color: '#ffffff',
+              background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+              border: '1px solid #32cd32',
               borderRadius: '12px',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
@@ -221,12 +223,12 @@ export default function App() {
               fontWeight: '500'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)';
+              e.currentTarget.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
               e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.3)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #ffffff 0%, #f9fafb 100%)';
+              e.currentTarget.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = 'none';
             }}
@@ -255,11 +257,11 @@ export default function App() {
                 <div style={{
                   width: '8px',
                   height: '8px',
-                  background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
+                  background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
                   borderRadius: '50%',
                   animation: 'pulse 2s infinite'
                 }}></div>
-                <span style={{ fontSize: '14px', color: '#6b7280', fontWeight: '500' }}>
+                <span style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>
                   {user.shop}
                 </span>
               </div>
@@ -268,12 +270,12 @@ export default function App() {
               <div style={{
                 width: '40px',
                 height: '40px',
-                background: 'linear-gradient(135deg, #3b82f6 0%, #8b5cf6 100%)',
+                background: 'linear-gradient(135deg, #000000 0%, #32cd32 100%)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)'
+                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)'
               }}>
                 <span style={{ 
                   color: 'white', 
