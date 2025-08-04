@@ -84,6 +84,45 @@ export const action = async ({ request }) => {
       });
     }
 
+    if (actionType === "deleteTest") {
+      const testId = formData.get("testId");
+
+      if (!testId) {
+        return json({ 
+          success: false, 
+          error: "Test ID is required" 
+        });
+      }
+
+      // Get test info before deletion for confirmation message
+      const testToDelete = await prisma.aBTest.findUnique({
+        where: { id: testId }
+      });
+
+      if (!testToDelete) {
+        return json({ 
+          success: false, 
+          error: "Test not found" 
+        });
+      }
+
+      // Delete all associated events first (due to foreign key constraint)
+      await prisma.aBEvent.deleteMany({
+        where: { testId: testId }
+      });
+
+      // Delete the test
+      await prisma.aBTest.delete({
+        where: { id: testId }
+      });
+
+      return json({ 
+        success: true, 
+        message: `Test "${testToDelete.name}" has been deleted successfully!`,
+        deletedTestName: testToDelete.name
+      });
+    }
+
     return json({ success: false, error: "Invalid action" });
   } catch (error) {
     console.error("Error in Manage A/B Tests action:", error);
@@ -101,6 +140,11 @@ export default function ManageABTests() {
   const [selectedTestState, setSelectedTestState] = useState(selectedTestId || "");
   const [trafficSplit, setTrafficSplit] = useState(selectedTest?.trafficSplit || 50);
   const [isUpdating, setIsUpdating] = useState(false);
+  
+  // Delete confirmation state
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [testToDelete, setTestToDelete] = useState(null);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleTestChange = (testId) => {
     setSelectedTestState(testId);
@@ -122,6 +166,38 @@ export default function ManageABTests() {
       { method: "post" }
     );
     setIsUpdating(false);
+  };
+
+  const handleDeleteClick = (test) => {
+    setTestToDelete(test);
+    setShowDeleteConfirm(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!testToDelete) return;
+    
+    setIsDeleting(true);
+    submit(
+      { 
+        actionType: "deleteTest", 
+        testId: testToDelete.id
+      }, 
+      { method: "post" }
+    );
+    setIsDeleting(false);
+    setShowDeleteConfirm(false);
+    setTestToDelete(null);
+    
+    // Reset form if the deleted test was selected
+    if (selectedTestState === testToDelete.id) {
+      setSelectedTestState("");
+      setTrafficSplit(50);
+    }
+  };
+
+  const handleDeleteCancel = () => {
+    setShowDeleteConfirm(false);
+    setTestToDelete(null);
   };
 
   const formatDate = (dateString) => {
@@ -403,6 +479,42 @@ export default function ManageABTests() {
               {isUpdating ? '🔄 Updating...' : trafficSplit === selectedTest.trafficSplit ? 'No Changes' : 'Update Traffic Split'}
             </button>
           </div>
+
+          {/* Delete Test Section */}
+          <div style={{
+            padding: '24px',
+            background: '#fef2f2',
+            borderRadius: '12px',
+            border: '1px solid #fecaca'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#dc2626', marginBottom: '16px' }}>⚠️ Delete Test</h3>
+            <p style={{ fontSize: '14px', color: '#991b1b', marginBottom: '24px' }}>
+              This action cannot be undone. Deleting this test will permanently remove all test data and analytics.
+            </p>
+            
+            <button
+              onClick={() => handleDeleteClick(selectedTest)}
+              style={{
+                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #b91c1c 0%, #991b1b 100%)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+              }}
+            >
+              🗑️ Delete Test
+            </button>
+          </div>
         </div>
       )}
 
@@ -474,6 +586,121 @@ export default function ManageABTests() {
           >
             Create Your First Test
           </button>
+        </div>
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteConfirm && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: 'white',
+            padding: '32px',
+            borderRadius: '16px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)'
+          }}>
+            <div style={{ textAlign: 'center', marginBottom: '24px' }}>
+              <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚠️</div>
+              <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#000000', marginBottom: '8px' }}>
+                Delete A/B Test
+              </h2>
+              <p style={{ fontSize: '16px', color: '#6b7280' }}>
+                Are you sure you want to delete <strong>"{testToDelete?.name}"</strong>?
+              </p>
+            </div>
+            
+            <div style={{ marginBottom: '24px' }}>
+              <div style={{
+                padding: '16px',
+                background: '#fef2f2',
+                borderRadius: '8px',
+                border: '1px solid #fecaca'
+              }}>
+                <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#dc2626', marginBottom: '8px' }}>
+                  This action will permanently:
+                </h3>
+                <ul style={{ fontSize: '14px', color: '#991b1b', margin: 0, paddingLeft: '20px' }}>
+                  <li>Delete all test data and analytics</li>
+                  <li>Remove all associated events and metrics</li>
+                  <li>Cannot be undone</li>
+                </ul>
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+              <button
+                onClick={handleDeleteCancel}
+                disabled={isDeleting}
+                style={{
+                  padding: '12px 24px',
+                  background: '#f3f4f6',
+                  color: '#374151',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: isDeleting ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease',
+                  opacity: isDeleting ? 0.7 : 1
+                }}
+                onMouseEnter={(e) => {
+                  if (!isDeleting) {
+                    e.target.style.background = '#e5e7eb';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isDeleting) {
+                    e.target.style.background = '#f3f4f6';
+                  }
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDeleteConfirm}
+                disabled={isDeleting}
+                style={{
+                  padding: '12px 24px',
+                  background: isDeleting 
+                    ? '#9ca3af' 
+                    : 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: isDeleting ? 'not-allowed' : 'pointer',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (!isDeleting) {
+                    e.target.style.background = 'linear-gradient(135deg, #b91c1c 0%, #991b1b 100%)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!isDeleting) {
+                    e.target.style.background = isDeleting 
+                      ? '#9ca3af' 
+                      : 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)';
+                  }
+                }}
+              >
+                {isDeleting ? '🔄 Deleting...' : 'Yes, Delete Test'}
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>
