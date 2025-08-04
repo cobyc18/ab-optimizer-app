@@ -592,7 +592,7 @@ export default function Dashboard() {
             title="View Analytics"
             description="Check detailed performance metrics"
             color="blue"
-            to="/app/badges"
+            to="/app/analytics"
             icon="📊"
           />
           <QuickActionCard
