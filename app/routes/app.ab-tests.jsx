@@ -1180,25 +1180,83 @@ export default function ABTesting() {
                   <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
                     End Date <span style={{ color: '#dc2626' }}>*</span>
                   </label>
-                  <input
-                    type="datetime-local"
-                    value={endDate}
-                    onChange={(e) => setEndDate(e.target.value)}
-                    name="endDate"
-                    style={{
-                      width: '100%',
-                      padding: '12px',
-                      border: validationErrors.endDate ? '1px solid #dc2626' : '1px solid #d1d5db',
-                      borderRadius: '8px',
-                      fontSize: '14px'
-                    }}
-                  />
+                  <div style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}>
+                    <input
+                      type="date"
+                      value={endDate.split('T')[0] || ''}
+                      onChange={(e) => {
+                        const date = e.target.value;
+                        const time = endDate.split('T')[1] || '23:59';
+                        setEndDate(`${date}T${time}`);
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '12px 12px 12px 40px',
+                        border: validationErrors.endDate ? '1px solid #dc2626' : '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        background: 'white',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      left: '12px',
+                      color: '#6b7280',
+                      pointerEvents: 'none'
+                    }}>
+                      📅
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginTop: '8px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#6b7280', marginBottom: '4px' }}>
+                      End Time
+                    </label>
+                    <div style={{
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      <input
+                        type="time"
+                        value={endDate.split('T')[1] || '23:59'}
+                        onChange={(e) => {
+                          const date = endDate.split('T')[0] || '';
+                          const time = e.target.value;
+                          setEndDate(`${date}T${time}`);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px 8px 40px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          background: 'white',
+                          cursor: 'pointer'
+                        }}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        left: '12px',
+                        color: '#6b7280',
+                        pointerEvents: 'none'
+                      }}>
+                        🕐
+                      </div>
+                    </div>
+                  </div>
+                  
                   {validationErrors.endDate && (
                     <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
                       {validationErrors.endDate}
                     </p>
                   )}
-                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>
                     When the test should end and winner be determined
                   </p>
                 </div>
