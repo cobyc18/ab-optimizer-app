@@ -145,8 +145,32 @@ export default function RecipeLibrary() {
   const [previewMode, setPreviewMode] = useState(false);
 
   const openThemeEditor = (widgetId) => {
-    const themeEditorUrl = `https://admin.shopify.com/store/${shopDomain.replace('.myshopify.com', '')}/themes/${themeId}/editor?context=apps&template=product&activateAppId=ab-optimizer-app/${widgetId}`;
+    // Open theme editor directly to the Apps section
+    const themeEditorUrl = `https://admin.shopify.com/store/${shopDomain.replace('.myshopify.com', '')}/themes/${themeId}/editor?context=apps&template=product`;
     window.open(themeEditorUrl, '_blank');
+  };
+
+  const openThemeEditorWithInstructions = (widgetId) => {
+    const widget = widgets.find(w => w.id === widgetId);
+    const themeEditorUrl = `https://admin.shopify.com/store/${shopDomain.replace('.myshopify.com', '')}/themes/${themeId}/editor?context=apps&template=product`;
+    
+    // Show instructions modal
+    const instructions = `
+🎯 How to Add ${widget.name} to Your Product Page:
+
+1. The theme editor will open in a new tab
+2. Look for the "Apps" section in the left sidebar
+3. Find "AB Optimizer App" in the Apps list
+4. Click on it to add the widget to your product page
+5. Customize the widget settings as needed
+6. Click "Save" to apply changes
+
+💡 Tip: You can drag and drop the widget to reposition it on the page!
+    `;
+    
+    if (confirm(instructions)) {
+      window.open(themeEditorUrl, '_blank');
+    }
   };
 
   const renderPreview = (widget) => {
@@ -411,6 +435,40 @@ export default function RecipeLibrary() {
         )}
       </div>
 
+      {/* Instructions */}
+      <div style={{
+        background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+        border: '1px solid #0ea5e9',
+        padding: '20px',
+        borderRadius: '12px',
+        marginBottom: '24px'
+      }}>
+        <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#0c4a6e', margin: '0 0 12px 0' }}>
+          🚀 How to Add Widgets to Your Product Pages
+        </h3>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px', fontSize: '14px', color: '#0c4a6e' }}>
+          <div>
+            <strong>1. Select a Widget</strong><br/>
+            Choose from the dropdown or browse categories below
+          </div>
+          <div>
+            <strong>2. Preview & Test</strong><br/>
+            See how it looks on your actual product page
+          </div>
+          <div>
+            <strong>3. Add to Theme</strong><br/>
+            Click "Add to Theme Editor" to open Shopify's editor
+          </div>
+          <div>
+            <strong>4. Customize & Save</strong><br/>
+            Position, customize settings, and save your changes
+          </div>
+        </div>
+        <div style={{ marginTop: '12px', padding: '8px 12px', background: 'rgba(14, 165, 233, 0.1)', borderRadius: '6px', fontSize: '13px' }}>
+          💡 <strong>Pro Tip:</strong> The theme editor will open directly to the Apps section where you'll find "AB Optimizer App" ready to add to your product page!
+        </div>
+      </div>
+
       {/* Widget Selection */}
       <div style={{
         background: 'white',
@@ -483,7 +541,7 @@ export default function RecipeLibrary() {
               </button>
               
               <button
-                onClick={() => openThemeEditor(selectedWidget.id)}
+                onClick={() => openThemeEditorWithInstructions(selectedWidget.id)}
                 style={{
                   padding: '8px 16px',
                   background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
