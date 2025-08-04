@@ -33,8 +33,6 @@ const navigation: NavigationItem[] = [
   { name: "Recipe Library", href: "/app/recipe-library", icon: "📚" },
   { name: "Badges & Leaderboard", href: "/app/badges", icon: "🏆" },
   { name: "Insights & Reports", href: "/app/analytics", icon: "📈" },
-  { name: "Live Themes", href: "/app/themes", icon: "🎨" },
-  { name: "Settings", href: "/app/settings", icon: "⚙️" },
 ];
 
 export default function App() {

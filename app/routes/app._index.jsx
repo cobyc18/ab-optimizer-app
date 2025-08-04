@@ -1,6 +1,7 @@
 import { json } from "@remix-run/node";
-import { useLoaderData, useOutletContext, useFetcher } from "@remix-run/react";
+import { useLoaderData, useOutletContext, useFetcher, Link } from "@remix-run/react";
 import { authenticate } from "../shopify.server.js";
+import prisma from "../db.server.js";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
@@ -64,20 +65,118 @@ export const loader = async ({ request }) => {
     webhookStatus.error = error.message;
   }
 
-  // Mock data - in a real app, you'd fetch this from your database
-  const stats = {
-    totalTests: 12,
-    activeTests: 5,
-    totalConversions: 1247,
-    conversionRate: 3.2,
-    recentActivity: [
-      { id: 1, type: 'test_created', message: 'New A/B test created for Product Page', time: '2 hours ago', iconType: 'beaker', color: 'blue' },
-      { id: 2, type: 'test_completed', message: 'Product Title test completed - Variant B won', time: '1 day ago', iconType: 'chart', color: 'green' },
-      { id: 3, type: 'conversion', message: 'Checkout button test showing 15% improvement', time: '2 days ago', iconType: 'fire', color: 'orange' },
-    ]
+  // Fetch real data from database
+  let stats = {
+    totalTests: 0,
+    activeTests: 0,
+    totalConversions: 0,
+    conversionRate: 0,
+    totalRevenue: 0,
+    totalImpressions: 0,
+    recentActivity: []
   };
 
+  try {
+    const shop = session.shop;
+    
+    // Get all tests for this shop
+    const tests = await prisma.aBTest.findMany({
+      where: { shop },
+      include: {
+        events: true
+      },
+      orderBy: { startDate: 'desc' }
+    });
+
+    // Get all events for this shop
+    const events = await prisma.aBEvent.findMany({
+      where: {
+        test: {
+          shop: shop
+        }
+      },
+      orderBy: { timestamp: 'desc' },
+      take: 50
+    });
+
+    // Calculate statistics
+    stats.totalTests = tests.length;
+    stats.activeTests = tests.filter(test => test.status === 'running').length;
+    
+    // Calculate conversions and revenue
+    const purchaseEvents = events.filter(event => event.eventType === 'purchase');
+    stats.totalConversions = purchaseEvents.length;
+    stats.totalRevenue = purchaseEvents.reduce((sum, event) => sum + (event.value || 0), 0);
+    
+    // Calculate impressions
+    const impressionEvents = events.filter(event => event.eventType === 'impression');
+    stats.totalImpressions = impressionEvents.length;
+    
+    // Calculate conversion rate
+    stats.conversionRate = stats.totalImpressions > 0 
+      ? (stats.totalConversions / stats.totalImpressions * 100).toFixed(1)
+      : 0;
+
+    // Generate recent activity from events
+    const recentEvents = events.slice(0, 5).map(event => {
+      const test = tests.find(t => t.id === event.testId);
+      let message = '';
+      let iconType = 'beaker';
+      let color = 'blue';
+
+      switch (event.eventType) {
+        case 'purchase':
+          message = `Purchase from ${test?.name || 'A/B Test'} - $${event.value?.toFixed(2) || '0.00'}`;
+          iconType = 'fire';
+          color = 'orange';
+          break;
+        case 'impression':
+          message = `Impression recorded for ${test?.name || 'A/B Test'} (Variant ${event.variant})`;
+          iconType = 'eye';
+          color = 'blue';
+          break;
+        case 'add_to_cart':
+          message = `Add to cart from ${test?.name || 'A/B Test'} (Variant ${event.variant})`;
+          iconType = 'cart';
+          color = 'green';
+          break;
+        default:
+          message = `${event.eventType} event from ${test?.name || 'A/B Test'}`;
+          iconType = 'chart';
+          color = 'purple';
+      }
+
+      return {
+        id: event.id,
+        type: event.eventType,
+        message,
+        time: getTimeAgo(event.timestamp),
+        iconType,
+        color
+      };
+    });
+
+    stats.recentActivity = recentEvents;
+
+  } catch (error) {
+    console.error("❌ Error fetching test data:", error);
+    // Keep default stats if database query fails
+  }
+
   return json({ stats, webhookStatus });
+};
+
+// Helper function to format time ago
+const getTimeAgo = (date) => {
+  const now = new Date();
+  const past = new Date(date);
+  const diffInSeconds = Math.floor((now - past) / 1000);
+  
+  if (diffInSeconds < 60) return 'Just now';
+  if (diffInSeconds < 3600) return `${Math.floor(diffInSeconds / 60)} minutes ago`;
+  if (diffInSeconds < 86400) return `${Math.floor(diffInSeconds / 3600)} hours ago`;
+  if (diffInSeconds < 2592000) return `${Math.floor(diffInSeconds / 86400)} days ago`;
+  return `${Math.floor(diffInSeconds / 2592000)} months ago`;
 };
 
 export const action = async ({ request }) => {
@@ -194,7 +293,7 @@ export const action = async ({ request }) => {
   return json({ success: false, error: "Invalid action" });
 };
 
-const QuickActionCard = ({ title, description, color = "green" }) => {
+const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
   const colorStyles = {
     green: { 
       background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
@@ -212,7 +311,7 @@ const QuickActionCard = ({ title, description, color = "green" }) => {
 
   const styles = colorStyles[color];
 
-  return (
+  const CardContent = () => (
     <div 
       className="rounded-xl shadow-lg p-6 cursor-pointer transition-all duration-200 text-white hover:scale-105"
       style={{ 
@@ -230,7 +329,7 @@ const QuickActionCard = ({ title, description, color = "green" }) => {
     >
       <div className="flex items-center">
         <div className="p-3 rounded-lg bg-white/20 backdrop-blur-sm">
-          <span className="text-white text-lg">+</span>
+          <span className="text-white text-lg">{icon}</span>
         </div>
         <div className="ml-4 flex-1">
           <h3 className="text-lg font-semibold text-white">{title}</h3>
@@ -240,6 +339,16 @@ const QuickActionCard = ({ title, description, color = "green" }) => {
       </div>
     </div>
   );
+
+  if (to) {
+    return (
+      <Link to={to} style={{ textDecoration: 'none' }}>
+        <CardContent />
+      </Link>
+    );
+  }
+
+  return <CardContent />;
 };
 
 const getActivityIcon = (iconType) => {
@@ -250,6 +359,10 @@ const getActivityIcon = (iconType) => {
       return '📊';
     case 'fire':
       return '🔥';
+    case 'eye':
+      return '👁️';
+    case 'cart':
+      return '🛒';
     default:
       return '🧪';
   }
@@ -326,10 +439,15 @@ export default function Dashboard() {
             <div style={{ marginBottom: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#ffffff', marginBottom: '4px' }}>
                 <span>Level Progress</span>
-                <span>1250 / 1750 XP</span>
+                <span>{stats.totalTests} / {Math.max(stats.totalTests + 5, 10)} Tests</span>
               </div>
               <div style={{ height: '8px', background: 'rgba(255, 255, 255, 0.3)', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ width: '71%', height: '100%', background: '#ffffff', borderRadius: '4px' }}></div>
+                <div style={{ 
+                  width: `${Math.min((stats.totalTests / Math.max(stats.totalTests + 5, 10)) * 100, 100)}%`, 
+                  height: '100%', 
+                  background: '#ffffff', 
+                  borderRadius: '4px' 
+                }}></div>
               </div>
             </div>
           </div>
@@ -388,16 +506,16 @@ export default function Dashboard() {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', textAlign: 'center' }}>
             <div style={{ background: 'rgba(50, 205, 50, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>2</div>
-              <p style={{ fontSize: '14px', opacity: 0.8 }}>Tests this week</p>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>{stats.activeTests}</div>
+              <p style={{ fontSize: '14px', opacity: 0.8 }}>Active tests</p>
             </div>
             <div style={{ background: 'rgba(50, 205, 50, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>8</div>
-              <p style={{ fontSize: '14px', opacity: 0.8 }}>Variants created</p>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>{stats.totalConversions}</div>
+              <p style={{ fontSize: '14px', opacity: 0.8 }}>Conversions</p>
             </div>
             <div style={{ background: 'rgba(50, 205, 50, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>450</div>
-              <p style={{ fontSize: '14px', opacity: 0.8 }}>Points earned</p>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>${stats.totalRevenue.toFixed(0)}</div>
+              <p style={{ fontSize: '14px', opacity: 0.8 }}>Revenue generated</p>
             </div>
           </div>
         </div>
@@ -425,16 +543,22 @@ export default function Dashboard() {
             title="Create New Test"
             description="Set up a new A/B test for your products"
             color="green"
+            to="/app/ab-tests"
+            icon="🧪"
           />
           <QuickActionCard
             title="View Analytics"
             description="Check detailed performance metrics"
             color="lime"
+            to="/app/badges"
+            icon="📊"
           />
           <QuickActionCard
             title="Manage Tests"
             description="View and edit existing A/B tests"
             color="dark"
+            to="/app/ab-tests"
+            icon="⚙️"
           />
         </div>
       </div>
