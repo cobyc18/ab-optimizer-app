@@ -253,13 +253,23 @@ export const action = async ({ request }) => {
     const testName = form.get("testName");
     let productId = form.get("productId");
 
+    // Get end result configuration
+    const endResultType = form.get("endResultType");
+    const endDate = form.get("endDate");
+    const impressionThreshold = form.get("impressionThreshold");
+    const conversionThreshold = form.get("conversionThreshold");
+
     console.log("🔍 Creating A/B test with data:", {
       shop,
       testName,
       productId,
       templateA: form.get("templateA"),
       templateB: form.get("templateB"),
-      trafficSplit: form.get("trafficSplit")
+      trafficSplit: form.get("trafficSplit"),
+      endResultType,
+      endDate,
+      impressionThreshold,
+      conversionThreshold
     });
 
     // Validate test name
@@ -361,6 +371,16 @@ export const action = async ({ request }) => {
 
     // Now create the A/B test
     console.log("🔍 Creating A/B test record...");
+    
+    // Prepare end result data based on type
+    const endResultData = {
+      endResultType,
+      endDate: endResultType === "date" && endDate ? new Date(endDate) : null,
+      impressionThreshold: endResultType === "impressions" && impressionThreshold ? parseInt(impressionThreshold, 10) : null,
+      conversionThreshold: endResultType === "conversions" && conversionThreshold ? parseInt(conversionThreshold, 10) : null,
+      winner: null // No winner initially
+    };
+
     const abTest = await prisma.aBTest.create({
       data: {
         shop,
@@ -369,6 +389,7 @@ export const action = async ({ request }) => {
         templateA,
         templateB,
         trafficSplit,
+        ...endResultData
       },
     });
     console.log("✅ A/B test created successfully:", abTest.id);
@@ -416,6 +437,12 @@ export default function ABTesting() {
   const [successMessage, setSuccessMessage] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
 
+  // End result options state
+  const [endResultType, setEndResultType] = useState("manual");
+  const [endDate, setEndDate] = useState("");
+  const [impressionThreshold, setImpressionThreshold] = useState("1000");
+  const [conversionThreshold, setConversionThreshold] = useState("100");
+
   // Template preview state
   const [selectedTemplate, setSelectedTemplate] = useState(productTemplates[0] || "");
   const [duplicateTemplateName, setDuplicateTemplateName] = useState("");
@@ -444,6 +471,10 @@ export default function ABTesting() {
     setTemplateB("");
     setTrafficSplit("50");
     setSelectedProductId("");
+    setEndResultType("manual");
+    setEndDate("");
+    setImpressionThreshold("1000");
+    setConversionThreshold("100");
     setError(null);
     setSuccessMessage(null);
     setValidationErrors({});
@@ -475,6 +506,19 @@ export default function ABTesting() {
 
     if (!trafficSplit || trafficSplit < 1 || trafficSplit > 99) {
       errors.trafficSplit = "Traffic split must be between 1 and 99";
+    }
+
+    // Validate end result options based on selected type
+    if (endResultType === "date" && !endDate) {
+      errors.endDate = "Please select an end date";
+    }
+
+    if (endResultType === "impressions" && (!impressionThreshold || impressionThreshold < 100)) {
+      errors.impressionThreshold = "Impression threshold must be at least 100";
+    }
+
+    if (endResultType === "conversions" && (!conversionThreshold || conversionThreshold < 10)) {
+      errors.conversionThreshold = "Conversion threshold must be at least 10";
     }
 
     setValidationErrors(errors);
@@ -575,7 +619,11 @@ export default function ABTesting() {
       productId: selectedProductId,
       templateA,
       templateB,
-      trafficSplit
+      trafficSplit,
+      endResultType,
+      endDate,
+      impressionThreshold,
+      conversionThreshold
     });
 
     const formData = new FormData();
@@ -585,6 +633,10 @@ export default function ABTesting() {
     formData.append("templateA", templateA);
     formData.append("templateB", templateB);
     formData.append("trafficSplit", trafficSplit);
+    formData.append("endResultType", endResultType);
+    formData.append("endDate", endDate);
+    formData.append("impressionThreshold", impressionThreshold);
+    formData.append("conversionThreshold", conversionThreshold);
 
     try {
       console.log("🔍 Sending POST request to /app/ab-tests");
@@ -981,6 +1033,238 @@ export default function ABTesting() {
               <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
                 Percentage of traffic to show Template A (1-99)
               </p>
+            </div>
+
+            {/* End Result Options */}
+            <div style={{
+              padding: '20px',
+              background: '#f8fafc',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '16px' }}>
+                🎯 End Result Configuration
+              </h3>
+              <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px' }}>
+                Choose how the test will determine a winner or when it should end.
+              </p>
+
+              {/* End Result Type Selection */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '12px' }}>
+                  End Result Type
+                </label>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {/* Manual Option */}
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    background: endResultType === 'manual' ? '#f0fdf4' : 'white',
+                    border: endResultType === 'manual' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <input
+                      type="radio"
+                      name="endResultType"
+                      value="manual"
+                      checked={endResultType === 'manual'}
+                      onChange={(e) => setEndResultType(e.target.value)}
+                      style={{ marginRight: '12px' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                        Manual Control
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                        You decide when to end the test and declare a winner
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Date Option */}
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    background: endResultType === 'date' ? '#f0fdf4' : 'white',
+                    border: endResultType === 'date' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <input
+                      type="radio"
+                      name="endResultType"
+                      value="date"
+                      checked={endResultType === 'date'}
+                      onChange={(e) => setEndResultType(e.target.value)}
+                      style={{ marginRight: '12px' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                        End Date
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                        Test ends on a specific date and winner is determined
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Impressions Option */}
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    background: endResultType === 'impressions' ? '#f0fdf4' : 'white',
+                    border: endResultType === 'impressions' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <input
+                      type="radio"
+                      name="endResultType"
+                      value="impressions"
+                      checked={endResultType === 'impressions'}
+                      onChange={(e) => setEndResultType(e.target.value)}
+                      style={{ marginRight: '12px' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                        Impression Count
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                        Test ends when one variant reaches target impressions
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Conversions Option */}
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    background: endResultType === 'conversions' ? '#f0fdf4' : 'white',
+                    border: endResultType === 'conversions' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <input
+                      type="radio"
+                      name="endResultType"
+                      value="conversions"
+                      checked={endResultType === 'conversions'}
+                      onChange={(e) => setEndResultType(e.target.value)}
+                      style={{ marginRight: '12px' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                        Conversion Count
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                        Test ends when one variant reaches target conversions
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Conditional Fields Based on Selection */}
+              {endResultType === 'date' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                    End Date <span style={{ color: '#dc2626' }}>*</span>
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    name="endDate"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: validationErrors.endDate ? '1px solid #dc2626' : '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                  {validationErrors.endDate && (
+                    <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                      {validationErrors.endDate}
+                    </p>
+                  )}
+                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                    When the test should end and winner be determined
+                  </p>
+                </div>
+              )}
+
+              {endResultType === 'impressions' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                    Impression Threshold <span style={{ color: '#dc2626' }}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={impressionThreshold}
+                    onChange={(e) => setImpressionThreshold(e.target.value)}
+                    name="impressionThreshold"
+                    min="100"
+                    placeholder="1000"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: validationErrors.impressionThreshold ? '1px solid #dc2626' : '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                  {validationErrors.impressionThreshold && (
+                    <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                      {validationErrors.impressionThreshold}
+                    </p>
+                  )}
+                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                    Number of impressions needed for one variant to win (minimum 100)
+                  </p>
+                </div>
+              )}
+
+              {endResultType === 'conversions' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                    Conversion Threshold <span style={{ color: '#dc2626' }}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={conversionThreshold}
+                    onChange={(e) => setConversionThreshold(e.target.value)}
+                    name="conversionThreshold"
+                    min="10"
+                    placeholder="100"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: validationErrors.conversionThreshold ? '1px solid #dc2626' : '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                  {validationErrors.conversionThreshold && (
+                    <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                      {validationErrors.conversionThreshold}
+                    </p>
+                  )}
+                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                    Number of conversions needed for one variant to win (minimum 10)
+                  </p>
+                </div>
+              )}
             </div>
 
             {/* Error Messages */}

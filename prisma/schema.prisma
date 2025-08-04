@@ -36,9 +36,15 @@ model ABTest {
   templateA    String
   templateB    String
   trafficSplit Int        @default(50)
-  status       String     @default("running") // "running", "completed", etc.
+  status       String     @default("running") // "running", "completed", "paused", etc.
   startDate    DateTime   @default(now())
   endDate      DateTime?
+  
+  // End result configuration
+  endResultType String?   // "date", "impressions", "conversions", "manual"
+  impressionThreshold Int? // Number of impressions to determine winner
+  conversionThreshold Int? // Number of conversions to determine winner
+  winner       String?    // "A", "B", or null if no winner yet
 
   events       ABEvent[]  @relation("TestEvents")
   shopData     Shop       @relation(fields: [shop], references: [shop], onDelete: Cascade)
