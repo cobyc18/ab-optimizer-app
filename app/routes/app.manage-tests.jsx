@@ -1,0 +1,481 @@
+import { json } from "@remix-run/node";
+import { useLoaderData, useSubmit, useActionData } from "@remix-run/react";
+import { useState } from "react";
+import { authenticate } from "../shopify.server.js";
+import prisma from "../db.server.js";
+
+export const loader = async ({ request }) => {
+  try {
+    const { admin } = await authenticate.admin(request);
+    
+    console.log("Manage A/B Tests loader started");
+    
+    // Get all running A/B tests
+    const tests = await prisma.aBTest.findMany({
+      where: { status: "running" },
+      select: {
+        id: true,
+        name: true,
+        productId: true,
+        templateA: true,
+        templateB: true,
+        trafficSplit: true,
+        status: true,
+        startDate: true,
+        endDate: true
+      },
+      orderBy: { startDate: "desc" }
+    });
+    
+    console.log("Found running tests:", tests.length);
+
+    // Get URL parameters
+    const url = new URL(request.url);
+    const selectedTestId = url.searchParams.get("testId");
+
+    let selectedTest = null;
+    if (selectedTestId) {
+      selectedTest = tests.find(test => test.id === selectedTestId);
+    }
+
+    return json({
+      tests,
+      selectedTest,
+      selectedTestId
+    });
+  } catch (error) {
+    console.error("Error in Manage A/B Tests loader:", error);
+    return json({
+      tests: [],
+      selectedTest: null,
+      selectedTestId: null,
+      error: error.message
+    });
+  }
+};
+
+export const action = async ({ request }) => {
+  try {
+    const { admin } = await authenticate.admin(request);
+    const formData = await request.formData();
+    const actionType = formData.get("actionType");
+
+    if (actionType === "updateTrafficSplit") {
+      const testId = formData.get("testId");
+      const trafficSplit = parseInt(formData.get("trafficSplit"));
+
+      if (!testId || trafficSplit < 0 || trafficSplit > 100) {
+        return json({ 
+          success: false, 
+          error: "Invalid traffic split value. Must be between 0 and 100." 
+        });
+      }
+
+      // Update the traffic split in the database
+      await prisma.aBTest.update({
+        where: { id: testId },
+        data: { trafficSplit }
+      });
+
+      return json({ 
+        success: true, 
+        message: "Traffic split updated successfully!",
+        trafficSplit 
+      });
+    }
+
+    return json({ success: false, error: "Invalid action" });
+  } catch (error) {
+    console.error("Error in Manage A/B Tests action:", error);
+    return json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+};
+
+export default function ManageABTests() {
+  const { tests, selectedTest, selectedTestId, error } = useLoaderData();
+  const actionData = useActionData();
+  const submit = useSubmit();
+  const [selectedTestState, setSelectedTestState] = useState(selectedTestId || "");
+  const [trafficSplit, setTrafficSplit] = useState(selectedTest?.trafficSplit || 50);
+  const [isUpdating, setIsUpdating] = useState(false);
+
+  const handleTestChange = (testId) => {
+    setSelectedTestState(testId);
+    if (testId) {
+      submit({ testId }, { method: "get" });
+    }
+  };
+
+  const handleTrafficSplitUpdate = async () => {
+    if (!selectedTest) return;
+    
+    setIsUpdating(true);
+    submit(
+      { 
+        actionType: "updateTrafficSplit", 
+        testId: selectedTest.id, 
+        trafficSplit: trafficSplit.toString() 
+      }, 
+      { method: "post" }
+    );
+    setIsUpdating(false);
+  };
+
+  const formatDate = (dateString) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  console.log("ManageABTests component rendered", { tests, selectedTest, selectedTestId });
+
+  return (
+    <div style={{ padding: '20px', fontFamily: 'Inter, system-ui, sans-serif' }}>
+      {/* Header */}
+      <div style={{
+        background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #32cd32 100%)',
+        color: 'white',
+        padding: '32px',
+        borderRadius: '16px',
+        marginBottom: '32px',
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
+      }}>
+        <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>⚙️ Manage A/B Tests</h1>
+        <p style={{ fontSize: '18px', opacity: 0.9 }}>Edit and configure your running experiments</p>
+      </div>
+
+      {/* Test Selection */}
+      <div style={{
+        background: 'white',
+        padding: '24px',
+        borderRadius: '16px',
+        marginBottom: '32px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid rgba(50, 205, 50, 0.2)'
+      }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000' }}>Select Test to Manage</h2>
+          <div style={{
+            background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+            color: 'white',
+            padding: '4px 12px',
+            borderRadius: '12px',
+            fontSize: '12px',
+            fontWeight: '600'
+          }}>
+            {tests.length} Running Tests
+          </div>
+        </div>
+        <select
+          value={selectedTestState}
+          onChange={(e) => handleTestChange(e.target.value)}
+          style={{
+            width: '100%',
+            padding: '12px',
+            border: '1px solid #d1d5db',
+            borderRadius: '8px',
+            fontSize: '14px',
+            background: 'white'
+          }}
+        >
+          <option value="">Choose a test to manage...</option>
+          {tests.map((test) => (
+            <option key={test.id} value={test.id}>{test.name}</option>
+          ))}
+        </select>
+        <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>
+          Select an A/B test to view details and edit settings
+        </p>
+      </div>
+
+      {/* Success/Error Messages */}
+      {actionData && (
+        <div style={{
+          padding: '16px',
+          borderRadius: '8px',
+          marginBottom: '24px',
+          background: actionData.success 
+            ? 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)' 
+            : 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+          color: 'white',
+          fontSize: '14px'
+        }}>
+          {actionData.success ? '✅ ' : '❌ '}
+          {actionData.message || actionData.error}
+        </div>
+      )}
+
+      {/* Test Details */}
+      {selectedTest && (
+        <div style={{
+          background: 'white',
+          padding: '24px',
+          borderRadius: '16px',
+          marginBottom: '32px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          border: '1px solid rgba(50, 205, 50, 0.2)'
+        }}>
+          <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#000000', marginBottom: '24px' }}>
+            Test Details: {selectedTest.name}
+          </h2>
+
+          {/* Test Information */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '24px', marginBottom: '32px' }}>
+            <div style={{
+              padding: '16px',
+              background: '#f9fafb',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb'
+            }}>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Status</div>
+              <div style={{ fontSize: '16px', fontWeight: '600', color: '#32cd32' }}>
+                {selectedTest.status.charAt(0).toUpperCase() + selectedTest.status.slice(1)}
+              </div>
+            </div>
+
+            <div style={{
+              padding: '16px',
+              background: '#f9fafb',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb'
+            }}>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Started</div>
+              <div style={{ fontSize: '16px', fontWeight: '600', color: '#000000' }}>
+                {formatDate(selectedTest.startDate)}
+              </div>
+            </div>
+
+            <div style={{
+              padding: '16px',
+              background: '#f9fafb',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb'
+            }}>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Product ID</div>
+              <div style={{ fontSize: '16px', fontWeight: '600', color: '#000000' }}>
+                {selectedTest.productId}
+              </div>
+            </div>
+
+            <div style={{
+              padding: '16px',
+              background: '#f9fafb',
+              borderRadius: '8px',
+              border: '1px solid #e5e7eb'
+            }}>
+              <div style={{ fontSize: '12px', color: '#6b7280', marginBottom: '4px' }}>Current Traffic Split</div>
+              <div style={{ fontSize: '16px', fontWeight: '600', color: '#32cd32' }}>
+                {selectedTest.trafficSplit}% / {100 - selectedTest.trafficSplit}%
+              </div>
+            </div>
+          </div>
+
+          {/* Template Information */}
+          <div style={{ marginBottom: '32px' }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#000000', marginBottom: '16px' }}>Template Configuration</h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px' }}>
+              <div style={{
+                padding: '16px',
+                background: '#f0fdf4',
+                borderRadius: '8px',
+                border: '1px solid #bbf7d0'
+              }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: '#166534', marginBottom: '8px' }}>Template A (Control)</div>
+                <div style={{ fontSize: '12px', color: '#15803d', fontFamily: 'monospace' }}>
+                  {selectedTest.templateA}
+                </div>
+              </div>
+              <div style={{
+                padding: '16px',
+                background: '#fef3c7',
+                borderRadius: '8px',
+                border: '1px solid #fde68a'
+              }}>
+                <div style={{ fontSize: '14px', fontWeight: '600', color: '#92400e', marginBottom: '8px' }}>Template B (Variant)</div>
+                <div style={{ fontSize: '12px', color: '#a16207', fontFamily: 'monospace' }}>
+                  {selectedTest.templateB}
+                </div>
+              </div>
+            </div>
+          </div>
+
+          {/* Traffic Split Editor */}
+          <div style={{
+            padding: '24px',
+            background: '#f8fafc',
+            borderRadius: '12px',
+            border: '1px solid #e2e8f0'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#000000', marginBottom: '16px' }}>Edit Traffic Split</h3>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '24px' }}>
+              Adjust the percentage of traffic that sees each variant. Changes take effect immediately.
+            </p>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+              <label style={{ fontSize: '14px', fontWeight: '500', color: '#374151', minWidth: '120px' }}>
+                Traffic Split:
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={trafficSplit}
+                onChange={(e) => setTrafficSplit(parseInt(e.target.value))}
+                style={{
+                  flex: 1,
+                  height: '6px',
+                  background: '#e5e7eb',
+                  borderRadius: '3px',
+                  outline: 'none',
+                  cursor: 'pointer'
+                }}
+              />
+              <div style={{
+                background: 'white',
+                padding: '8px 12px',
+                borderRadius: '6px',
+                border: '1px solid #d1d5db',
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#000000',
+                minWidth: '60px',
+                textAlign: 'center'
+              }}>
+                {trafficSplit}%
+              </div>
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px', marginBottom: '24px' }}>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: '16px', fontWeight: '600', color: '#166534', marginBottom: '4px' }}>
+                  Template A (Control)
+                </div>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#166534' }}>
+                  {trafficSplit}%
+                </div>
+              </div>
+              <div style={{ fontSize: '20px', color: '#6b7280' }}>vs</div>
+              <div style={{ flex: 1, textAlign: 'center' }}>
+                <div style={{ fontSize: '16px', fontWeight: '600', color: '#92400e', marginBottom: '4px' }}>
+                  Template B (Variant)
+                </div>
+                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#92400e' }}>
+                  {100 - trafficSplit}%
+                </div>
+              </div>
+            </div>
+
+            <button
+              onClick={handleTrafficSplitUpdate}
+              disabled={isUpdating || trafficSplit === selectedTest.trafficSplit}
+              style={{
+                background: trafficSplit === selectedTest.trafficSplit 
+                  ? '#e5e7eb' 
+                  : 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                color: trafficSplit === selectedTest.trafficSplit ? '#6b7280' : 'white',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: trafficSplit === selectedTest.trafficSplit ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease',
+                opacity: isUpdating ? 0.7 : 1
+              }}
+              onMouseEnter={(e) => {
+                if (trafficSplit !== selectedTest.trafficSplit && !isUpdating) {
+                  e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (trafficSplit !== selectedTest.trafficSplit && !isUpdating) {
+                  e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
+                }
+              }}
+            >
+              {isUpdating ? '🔄 Updating...' : trafficSplit === selectedTest.trafficSplit ? 'No Changes' : 'Update Traffic Split'}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Error Display */}
+      {error && (
+        <div style={{
+          background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+          color: 'white',
+          padding: '16px',
+          borderRadius: '8px',
+          marginBottom: '24px'
+        }}>
+          <p>Error Loading Tests: {error}</p>
+        </div>
+      )}
+
+      {/* No Test Selected */}
+      {!selectedTest && !error && (
+        <div style={{
+          background: 'white',
+          padding: '48px 24px',
+          borderRadius: '16px',
+          textAlign: 'center',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          border: '1px solid rgba(50, 205, 50, 0.2)'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>⚙️</div>
+          <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#000000', marginBottom: '8px' }}>No Test Selected</h2>
+          <p style={{ fontSize: '16px', color: '#6b7280' }}>
+            Please select an A/B test from the dropdown above to manage its settings.
+          </p>
+        </div>
+      )}
+
+      {/* No Tests Available */}
+      {!error && tests.length === 0 && (
+        <div style={{
+          background: 'white',
+          padding: '48px 24px',
+          borderRadius: '16px',
+          textAlign: 'center',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          border: '1px solid rgba(50, 205, 50, 0.2)'
+        }}>
+          <div style={{ fontSize: '48px', marginBottom: '16px' }}>❌</div>
+          <h2 style={{ fontSize: '24px', fontWeight: '600', color: '#000000', marginBottom: '8px' }}>No Running Tests</h2>
+          <p style={{ fontSize: '16px', color: '#6b7280', marginBottom: '24px' }}>
+            You don't have any running A/B tests. Create a test to start managing experiments.
+          </p>
+          <button
+            onClick={() => window.location.href = '/app/ab-tests'}
+            style={{
+              background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+              color: 'white',
+              border: 'none',
+              padding: '12px 24px',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
+            }}
+            onMouseLeave={(e) => {
+              e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
+            }}
+          >
+            Create Your First Test
+          </button>
+        </div>
+      )}
+    </div>
+  );
+} 

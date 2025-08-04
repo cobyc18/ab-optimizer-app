@@ -599,7 +599,7 @@ export default function Dashboard() {
             title="Manage Tests"
             description="View and edit existing A/B tests"
             color="purple"
-            to="/app/ab-tests"
+            to="/app/manage-tests"
             icon="⚙️"
           />
         </div>
