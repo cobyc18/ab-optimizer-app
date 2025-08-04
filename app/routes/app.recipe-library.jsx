@@ -45,10 +45,7 @@ export const loader = async ({ request }) => {
             variants(first: 1) {
               nodes {
                 compareAtPrice
-                price {
-                  amount
-                  currencyCode
-                }
+                price
               }
             }
             totalInventory
@@ -159,7 +156,7 @@ export default function RecipeLibrary() {
     const product = sampleProduct || {
       title: "Sample Product",
       priceRangeV2: { minVariantPrice: { amount: "99.99", currencyCode: "USD" } },
-      variants: { nodes: [{ compareAtPrice: "129.99", price: { amount: "99.99", currencyCode: "USD" } }] },
+      variants: { nodes: [{ compareAtPrice: "129.99", price: "99.99" }] },
       featuredImage: { url: null, altText: "Sample Product" },
       totalInventory: 5,
       createdAt: new Date().toISOString()
