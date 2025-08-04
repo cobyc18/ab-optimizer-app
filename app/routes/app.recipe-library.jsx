@@ -44,10 +44,7 @@ export const loader = async ({ request }) => {
             }
             variants(first: 1) {
               nodes {
-                compareAtPrice {
-                  amount
-                  currencyCode
-                }
+                compareAtPrice
                 price {
                   amount
                   currencyCode
@@ -162,7 +159,7 @@ export default function RecipeLibrary() {
     const product = sampleProduct || {
       title: "Sample Product",
       priceRangeV2: { minVariantPrice: { amount: "99.99", currencyCode: "USD" } },
-      variants: { nodes: [{ compareAtPrice: { amount: "129.99", currencyCode: "USD" }, price: { amount: "99.99", currencyCode: "USD" } }] },
+      variants: { nodes: [{ compareAtPrice: "129.99", price: { amount: "99.99", currencyCode: "USD" } }] },
       featuredImage: { url: null, altText: "Sample Product" },
       totalInventory: 5,
       createdAt: new Date().toISOString()
@@ -170,7 +167,7 @@ export default function RecipeLibrary() {
     
     const price = product.priceRangeV2?.minVariantPrice?.amount || "99.99";
     const variant = product.variants?.nodes?.[0];
-    const comparePrice = variant?.compareAtPrice?.amount;
+    const comparePrice = variant?.compareAtPrice;
     const isOnSale = comparePrice && parseFloat(comparePrice) > parseFloat(price);
     const productAge = Math.floor((Date.now() - new Date(product.createdAt).getTime()) / (1000 * 60 * 60 * 24));
     const isNew = productAge <= 30;
