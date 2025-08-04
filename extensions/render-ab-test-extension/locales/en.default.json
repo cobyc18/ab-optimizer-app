@@ -6,5 +6,52 @@
     "home": {
       "recommendationText": "Recommended Product!"
     }
+  },
+  "widgets": {
+    "product_badge": {
+      "name": "Product Badge",
+      "description": "Display customizable badges on product pages"
+    },
+    "social_proof": {
+      "name": "Social Proof",
+      "description": "Show social proof elements like reviews and testimonials"
+    },
+    "countdown_timer": {
+      "name": "Countdown Timer",
+      "description": "Create urgency with countdown timers"
+    },
+    "enhanced_star_rating": {
+      "name": "Enhanced Star Rating",
+      "description": "Display customizable star ratings with review counts"
+    },
+    "progress_bar": {
+      "name": "Progress Bar",
+      "description": "Show progress bars for stock levels and goals"
+    },
+    "star_rating": {
+      "name": "Star Rating",
+      "description": "Basic star rating display"
+    }
+  },
+  "badges": {
+    "sale": "SALE",
+    "new": "NEW",
+    "popular": "POPULAR",
+    "limited": "LIMITED",
+    "custom": "SPECIAL"
+  },
+  "social_proof": {
+    "recent_purchase": "Someone in {location} just purchased this {time_ago}",
+    "review_count": "{count} happy customers",
+    "trust_badge": "100% Secure Checkout",
+    "stock_warning": "Only {count} left in stock!"
+  },
+  "progress": {
+    "low_stock": "Low stock - order soon!",
+    "medium_stock": "Stock is running out!",
+    "high_stock": "In stock and ready to ship!",
+    "goal_complete": "Goal achieved!",
+    "goal_close": "Almost there!",
+    "goal_progress": "Keep going!"
   }
 }

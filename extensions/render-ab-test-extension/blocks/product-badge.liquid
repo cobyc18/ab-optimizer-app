@@ -1,0 +1,126 @@
+{% comment %}
+  Product Badge Widget
+  Displays customizable badges on product pages
+{% endcomment %}
+
+<div class="ab-optimizer-badge" 
+     style="
+       display: inline-block;
+       padding: {{ block.settings.padding }}px;
+       background: {{ block.settings.background_color }};
+       color: {{ block.settings.text_color }};
+       border-radius: {{ block.settings.border_radius }}px;
+       font-size: {{ block.settings.font_size }}px;
+       font-weight: bold;
+       border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+       margin: {{ block.settings.margin }}px;
+     ">
+  
+  {% case block.settings.badge_type %}
+    {% when 'custom' %}
+      {{ block.settings.custom_text }}
+    {% when 'sale' %}
+      {% if product.compare_at_price > product.price %}
+        SALE
+      {% endif %}
+    {% when 'new' %}
+      {% assign product_age = 'now' | date: '%s' | minus: product.created_at | date: '%s' | divided_by: 86400 %}
+      {% if product_age <= 30 %}
+        NEW
+      {% endif %}
+    {% when 'limited' %}
+      {% if product.available and product.inventory_quantity <= 10 %}
+        LIMITED
+      {% endif %}
+  {% endcase %}
+</div>
+
+{% schema %}
+{
+  "name": "Product Badge",
+  "target": "section",
+  "settings": [
+    {
+      "type": "select",
+      "id": "badge_type",
+      "label": "Badge Type",
+      "options": [
+        { "value": "custom", "label": "Custom Text" },
+        { "value": "sale", "label": "Sale Badge" },
+        { "value": "new", "label": "New Product" },
+        { "value": "limited", "label": "Limited Stock" }
+      ],
+      "default": "custom"
+    },
+    {
+      "type": "text",
+      "id": "custom_text",
+      "label": "Custom Badge Text",
+      "default": "SPECIAL"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#32cd32"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#228b22"
+    },
+    {
+      "type": "range",
+      "id": "border_width",
+      "label": "Border Width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border Radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Padding",
+      "min": 4,
+      "max": 20,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "margin",
+      "label": "Margin",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font Size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "default": 12
+    }
+  ]
+}
+{% endschema %} 
