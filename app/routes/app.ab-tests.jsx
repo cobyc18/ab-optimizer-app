@@ -70,7 +70,7 @@ export const loader = async ({ request }) => {
     console.log("✅ Loader completed successfully");
     return json(result);
   } catch (error) {
-    console.error("❌ Error IN loader:", error);
+    console.error("❌ Error in ab-tests loader:", error);
     throw error;
   }
 };
