@@ -296,16 +296,32 @@ export const action = async ({ request }) => {
 const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
   const colorStyles = {
     green: { 
-      background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-      hoverBg: 'linear-gradient(135deg, #228b22 0%, #006400 100%)'
+      background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
+      border: '1px solid #bbf7d0',
+      iconBg: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
+      textColor: '#166534',
+      descriptionColor: '#15803d'
     },
-    lime: { 
-      background: 'linear-gradient(135deg, #9acd32 0%, #6b8e23 100%)',
-      hoverBg: 'linear-gradient(135deg, #6b8e23 0%, #556b2f 100%)'
+    blue: { 
+      background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
+      border: '1px solid #bfdbfe',
+      iconBg: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+      textColor: '#1e40af',
+      descriptionColor: '#1d4ed8'
     },
-    dark: { 
-      background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
-      hoverBg: 'linear-gradient(135deg, #1a1a1a 0%, #000000 100%)'
+    purple: { 
+      background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
+      border: '1px solid #d8b4fe',
+      iconBg: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+      textColor: '#5b21b6',
+      descriptionColor: '#6d28d9'
+    },
+    orange: { 
+      background: 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)',
+      border: '1px solid #fed7aa',
+      iconBg: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
+      textColor: '#c2410c',
+      descriptionColor: '#dc2626'
     }
   };
 
@@ -313,29 +329,55 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
 
   const CardContent = () => (
     <div 
-      className="rounded-xl shadow-lg p-6 cursor-pointer transition-all duration-200 text-white hover:scale-105"
+      className="rounded-xl shadow-sm p-6 cursor-pointer transition-all duration-300 hover:shadow-lg"
       style={{ 
         background: styles.background,
+        border: styles.border,
         transform: 'translateY(0)',
       }}
       onMouseEnter={(e) => {
-        e.target.style.background = styles.hoverBg;
-        e.target.style.transform = 'translateY(-4px) scale(1.02)';
+        e.target.style.transform = 'translateY(-2px)';
+        e.target.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
       }}
       onMouseLeave={(e) => {
-        e.target.style.background = styles.background;
-        e.target.style.transform = 'translateY(0) scale(1)';
+        e.target.style.transform = 'translateY(0)';
+        e.target.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
       }}
     >
       <div className="flex items-center">
-        <div className="p-3 rounded-lg bg-white/20 backdrop-blur-sm">
-          <span className="text-white text-lg">{icon}</span>
+        <div 
+          className="p-3 rounded-xl shadow-sm"
+          style={{ 
+            background: styles.iconBg,
+            width: '48px',
+            height: '48px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <span className="text-white text-xl">{icon}</span>
         </div>
         <div className="ml-4 flex-1">
-          <h3 className="text-lg font-semibold text-white">{title}</h3>
-          <p className="text-sm text-green-100">{description}</p>
+          <h3 
+            className="text-lg font-semibold mb-1"
+            style={{ color: styles.textColor }}
+          >
+            {title}
+          </h3>
+          <p 
+            className="text-sm leading-relaxed"
+            style={{ color: styles.descriptionColor }}
+          >
+            {description}
+          </p>
         </div>
-        <span className="text-white/70 text-lg">→</span>
+        <div 
+          className="text-lg font-medium"
+          style={{ color: styles.textColor }}
+        >
+          →
+        </div>
       </div>
     </div>
   );
@@ -549,14 +591,14 @@ export default function Dashboard() {
           <QuickActionCard
             title="View Analytics"
             description="Check detailed performance metrics"
-            color="lime"
+            color="blue"
             to="/app/badges"
             icon="📊"
           />
           <QuickActionCard
             title="Manage Tests"
             description="View and edit existing A/B tests"
-            color="dark"
+            color="purple"
             to="/app/ab-tests"
             icon="⚙️"
           />
