@@ -248,6 +248,30 @@ export const action = async ({ request }) => {
       }
     }
 
+    if (actionType === "checkProductAvailability") {
+      const productId = form.get("productId");
+      
+      if (!productId) {
+        return json({ error: "Product ID is required" }, { status: 400 });
+      }
+
+      // Check if product is already part of a running test
+      const existingRunningTest = await prisma.aBTest.findFirst({
+        where: { 
+          productId: productId,
+          status: "running"
+        }
+      });
+
+      if (existingRunningTest) {
+        return json({ 
+          error: `This product is already part of a running test called "${existingRunningTest.name}". Please select a different product.` 
+        }, { status: 400 });
+      }
+
+      return json({ success: true, message: "Product is available for testing" });
+    }
+
     // Existing A/B test creation logic
     const shop = form.get("shop");
     const testName = form.get("testName");
@@ -287,6 +311,22 @@ export const action = async ({ request }) => {
     if (existingTest) {
       console.log("❌ Test name already exists");
       return json({ error: "A test with this name already exists. Please choose a different name." }, { status: 400 });
+    }
+
+    // Check if product is already part of a running test
+    console.log("🔍 Checking if product is already part of a running test:", productId);
+    const existingRunningTest = await prisma.aBTest.findFirst({
+      where: { 
+        productId: productId,
+        status: "running"
+      }
+    });
+
+    if (existingRunningTest) {
+      console.log("❌ Product is already part of a running test");
+      return json({ 
+        error: `This product is already part of a running test called "${existingRunningTest.name}". Please select a different product or wait for the current test to complete.` 
+      }, { status: 400 });
     }
 
     // If no productId provided, use the first product as fallback
@@ -443,6 +483,10 @@ export default function ABTesting() {
   const [impressionThreshold, setImpressionThreshold] = useState("1000");
   const [conversionThreshold, setConversionThreshold] = useState("100");
 
+  // Product validation state
+  const [isCheckingProduct, setIsCheckingProduct] = useState(false);
+  const [productValidationError, setProductValidationError] = useState(null);
+
   // Template preview state
   const [selectedTemplate, setSelectedTemplate] = useState(productTemplates[0] || "");
   const [duplicateTemplateName, setDuplicateTemplateName] = useState("");
@@ -490,6 +534,10 @@ export default function ABTesting() {
 
     if (!selectedProductId) {
       errors.product = "Please select a product";
+    }
+
+    if (productValidationError) {
+      errors.product = productValidationError;
     }
 
     if (!templateA) {
@@ -556,6 +604,50 @@ export default function ABTesting() {
       });
     }
   }, [selectedTemplate]);
+
+  // Function to check if product is already part of a running test
+  const checkProductAvailability = async (productId) => {
+    if (!productId) {
+      setProductValidationError(null);
+      return;
+    }
+
+    setIsCheckingProduct(true);
+    setProductValidationError(null);
+
+    try {
+      const formData = new FormData();
+      formData.append("actionType", "checkProductAvailability");
+      formData.append("productId", productId);
+
+      const response = await fetch("/app/ab-tests", {
+        method: "POST",
+        body: formData
+      });
+
+      const data = await response.json();
+
+      if (data.error) {
+        setProductValidationError(data.error);
+      } else {
+        setProductValidationError(null);
+      }
+    } catch (error) {
+      console.error("Error checking product availability:", error);
+      setProductValidationError("Error checking product availability");
+    } finally {
+      setIsCheckingProduct(false);
+    }
+  };
+
+  // Check product availability when product selection changes
+  useEffect(() => {
+    if (selectedProductId) {
+      checkProductAvailability(selectedProductId);
+    } else {
+      setProductValidationError(null);
+    }
+  }, [selectedProductId]);
 
   // Handler for OK button (create duplicate template and open in theme editor)
   const handleOk = async () => {
@@ -916,24 +1008,38 @@ export default function ABTesting() {
               <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
                 Product <span style={{ color: '#dc2626' }}>*</span>
               </label>
-              <select
-                value={selectedProductId}
-                onChange={(e) => setSelectedProductId(e.target.value)}
-                name="productId"
-                style={{
-                  width: '100%',
-                  padding: '12px',
-                  border: validationErrors.product ? '1px solid #dc2626' : '1px solid #d1d5db',
-                  borderRadius: '8px',
-                  fontSize: '14px',
-                  background: 'white'
-                }}
-              >
-                <option value="">Select Product</option>
-                {productOptions.map(option => (
-                  <option key={option.value} value={option.value}>{option.label}</option>
-                ))}
-              </select>
+              <div style={{ position: 'relative' }}>
+                <select
+                  value={selectedProductId}
+                  onChange={(e) => setSelectedProductId(e.target.value)}
+                  name="productId"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    paddingRight: isCheckingProduct ? '40px' : '12px',
+                    border: validationErrors.product ? '1px solid #dc2626' : '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    background: 'white'
+                  }}
+                >
+                  <option value="">Select Product</option>
+                  {productOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+                {isCheckingProduct && (
+                  <div style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#32cd32'
+                  }}>
+                    🔄
+                  </div>
+                )}
+              </div>
               {validationErrors.product && (
                 <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
                   {validationErrors.product}
