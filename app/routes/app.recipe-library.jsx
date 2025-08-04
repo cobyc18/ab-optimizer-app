@@ -152,20 +152,32 @@ export default function RecipeLibrary() {
 
   const openThemeEditorWithInstructions = (widgetId) => {
     const widget = widgets.find(w => w.id === widgetId);
-    const themeEditorUrl = `https://admin.shopify.com/store/${shopDomain.replace('.myshopify.com', '')}/themes/${themeId}/editor?context=apps&template=product`;
+    
+    // Get product handle for preview path
+    const productHandle = sampleProduct?.handle || 'sample-product';
+    const encodedProductPath = encodeURIComponent(`/products/${productHandle}`);
+    
+    // Generate unique block ID (similar to Shopify's format)
+    const timestamp = Date.now();
+    const randomId = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const blockId = `template--${timestamp}__main__ab_optimizer_app_${widgetId}_${randomId}`;
+    const sectionId = `template--${timestamp}__main`;
+    
+    // Construct the theme editor URL with proper parameters
+    const themeEditorUrl = `https://admin.shopify.com/store/${shopDomain.replace('.myshopify.com', '')}/themes/${themeId}/editor?previewPath=${encodedProductPath}&block=${blockId}&section=${sectionId}`;
     
     // Show instructions modal
     const instructions = `
 🎯 How to Add ${widget.name} to Your Product Page:
 
 1. The theme editor will open in a new tab
-2. Look for the "Apps" section in the left sidebar
-3. Find "AB Optimizer App" in the Apps list
-4. Click on it to add the widget to your product page
-5. Customize the widget settings as needed
-6. Click "Save" to apply changes
+2. You'll be taken directly to the product page with the widget ready to add
+3. The widget will be highlighted in the theme editor
+4. Click "Add block" or drag it to your desired position
+5. Customize the widget settings in the right sidebar
+6. Click "Save" to apply changes to your theme
 
-💡 Tip: You can drag and drop the widget to reposition it on the page!
+💡 Tip: You can drag and drop the widget to reposition it anywhere on the page!
     `;
     
     if (confirm(instructions)) {
@@ -457,7 +469,7 @@ export default function RecipeLibrary() {
           </div>
           <div>
             <strong>3. Add to Theme</strong><br/>
-            Click "Add to Theme Editor" to open Shopify's editor
+            Click "Add to Theme Editor" to open directly to the product page
           </div>
           <div>
             <strong>4. Customize & Save</strong><br/>
@@ -465,7 +477,7 @@ export default function RecipeLibrary() {
           </div>
         </div>
         <div style={{ marginTop: '12px', padding: '8px 12px', background: 'rgba(14, 165, 233, 0.1)', borderRadius: '6px', fontSize: '13px' }}>
-          💡 <strong>Pro Tip:</strong> The theme editor will open directly to the Apps section where you'll find "AB Optimizer App" ready to add to your product page!
+          💡 <strong>Pro Tip:</strong> The theme editor will open directly to your product page with the widget ready to add - no need to navigate through menus!
         </div>
       </div>
 
