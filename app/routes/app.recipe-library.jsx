@@ -18,7 +18,7 @@ export const loader = async ({ request }) => {
     const mainTheme = themeJson.data.themes.nodes.find(t => t.role === "MAIN");
     const themeId = mainTheme?.id.replace("gid://shopify/OnlineStoreTheme/", "") || "";
     
-    // Get a sample product for realistic preview
+    // Get a sample product for realistic preview with correct field names
     const productRes = await admin.graphql(`
       query {
         products(first: 1) {
@@ -42,13 +42,19 @@ export const loader = async ({ request }) => {
                 altText
               }
             }
-            compareAtPriceRangeV2 {
-              minVariantPrice {
-                amount
-                currencyCode
+            variants(first: 1) {
+              nodes {
+                compareAtPrice {
+                  amount
+                  currencyCode
+                }
+                price {
+                  amount
+                  currencyCode
+                }
               }
             }
-            inventoryQuantity
+            totalInventory
             createdAt
           }
         }
@@ -156,18 +162,19 @@ export default function RecipeLibrary() {
     const product = sampleProduct || {
       title: "Sample Product",
       priceRangeV2: { minVariantPrice: { amount: "99.99", currencyCode: "USD" } },
-      compareAtPriceRangeV2: { minVariantPrice: { amount: "129.99", currencyCode: "USD" } },
+      variants: { nodes: [{ compareAtPrice: { amount: "129.99", currencyCode: "USD" }, price: { amount: "99.99", currencyCode: "USD" } }] },
       featuredImage: { url: null, altText: "Sample Product" },
-      inventoryQuantity: 5,
+      totalInventory: 5,
       createdAt: new Date().toISOString()
     };
     
     const price = product.priceRangeV2?.minVariantPrice?.amount || "99.99";
-    const comparePrice = product.compareAtPriceRangeV2?.minVariantPrice?.amount;
+    const variant = product.variants?.nodes?.[0];
+    const comparePrice = variant?.compareAtPrice?.amount;
     const isOnSale = comparePrice && parseFloat(comparePrice) > parseFloat(price);
     const productAge = Math.floor((Date.now() - new Date(product.createdAt).getTime()) / (1000 * 60 * 60 * 24));
     const isNew = productAge <= 30;
-    const isLowStock = product.inventoryQuantity <= 10;
+    const isLowStock = (product.totalInventory || 0) <= 10;
     
     return (
       <div style={{
