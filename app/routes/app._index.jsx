@@ -338,12 +338,16 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
         padding: '24px',
       }}
       onMouseEnter={(e) => {
-        e.target.style.transform = 'translateY(-4px)';
-        e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+        // Only apply hover effects to the outer container
+        const container = e.currentTarget;
+        container.style.transform = 'translateY(-4px)';
+        container.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
       }}
       onMouseLeave={(e) => {
-        e.target.style.transform = 'translateY(0)';
-        e.target.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
+        // Reset hover effects on the outer container
+        const container = e.currentTarget;
+        container.style.transform = 'translateY(0)';
+        container.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
       }}
     >
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>

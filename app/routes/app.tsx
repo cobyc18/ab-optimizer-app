@@ -71,10 +71,10 @@ export default function App() {
           }}
           onMouseEnter={(e) => {
             if (!isActiveItem) {
-              e.currentTarget.style.background = 'linear-gradient(135deg, #9acd32 0%, #6b8e23 100%)';
-              e.currentTarget.style.color = '#ffffff';
+              e.currentTarget.style.background = 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)';
+              e.currentTarget.style.color = '#1f2937';
               e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.2)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
             }
           }}
           onMouseLeave={(e) => {
@@ -101,7 +101,7 @@ export default function App() {
               {item.badge && (
                 <span style={{
                   fontSize: '10px',
-                  background: 'linear-gradient(135deg, #9acd32 0%, #6b8e23 100%)',
+                  background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
                   color: 'white',
                   padding: '2px 8px',
                   borderRadius: '10px',
@@ -162,11 +162,11 @@ export default function App() {
               backdropFilter: 'blur(8px)',
               border: '1px solid rgba(50, 205, 50, 0.5)'
             }}>
-              <span style={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }}>AB</span>
+              <span style={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }}>TL</span>
             </div>
             {!isSidebarCollapsed && (
               <div style={{ marginLeft: '12px' }}>
-                <span style={{ fontWeight: '600', fontSize: '16px' }}>AB Optimizer</span>
+                <span style={{ fontWeight: '600', fontSize: '16px' }}>TryLabs Solutions</span>
                 <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '2px' }}>A/B Testing Pro</div>
               </div>
             )}
