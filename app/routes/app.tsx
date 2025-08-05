@@ -113,7 +113,7 @@ export default function App() {
             <>
               <span style={{ 
                 fontWeight: isActiveItem ? '600' : '500',
-                fontSize: '14px',
+                fontSize: '16px',
                 flex: 1
               }}>
                 {item.name}
@@ -168,45 +168,8 @@ export default function App() {
           padding: '24px 20px',
           borderBottom: '1px solid #32cd32',
           background: 'linear-gradient(135deg, #000000 0%, #32cd32 100%)',
-          color: 'white',
-          position: 'relative'
+          color: 'white'
         }}>
-          {/* Expand/Collapse Button - Top Right */}
-          <button
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            style={{
-              position: 'absolute',
-              top: '20px',
-              right: '12px',
-              width: '32px',
-              height: '32px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              color: '#ffffff',
-              background: 'rgba(255, 255, 255, 0.1)',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '8px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              fontSize: '14px',
-              fontWeight: '500',
-              backdropFilter: 'blur(4px)'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
-              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-              e.currentTarget.style.transform = 'scale(1.05)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            {isSidebarCollapsed ? '☰' : '✕'}
-          </button>
-          
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div style={{
               width: '40px',
@@ -235,7 +198,7 @@ export default function App() {
           <div style={{ marginBottom: '16px' }}>
             {!isSidebarCollapsed && (
               <div style={{
-                fontSize: '11px',
+                fontSize: '13px',
                 fontWeight: '600',
                 color: '#ffffff',
                 textTransform: 'uppercase',
@@ -254,6 +217,42 @@ export default function App() {
           </div>
         </nav>
       </div>
+
+      {/* Expand/Collapse Button - Positioned on the vertical line */}
+      <button
+        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        style={{
+          position: 'absolute',
+          top: '120px',
+          left: isSidebarCollapsed ? '60px' : '260px',
+          width: '32px',
+          height: '32px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#ffffff',
+          background: 'rgba(0, 0, 0, 0.8)',
+          border: '1px solid #32cd32',
+          borderRadius: '50%',
+          cursor: 'pointer',
+          transition: 'all 0.3s ease',
+          fontSize: '16px',
+          fontWeight: '500',
+          zIndex: 1000,
+          transform: 'translateX(-50%)',
+          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'rgba(50, 205, 50, 0.9)';
+          e.currentTarget.style.transform = 'translateX(-50%) scale(1.1)';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
+          e.currentTarget.style.transform = 'translateX(-50%) scale(1)';
+        }}
+      >
+        {isSidebarCollapsed ? '▶' : '◀'}
+      </button>
 
       {/* Main Content */}
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
