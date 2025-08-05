@@ -635,7 +635,7 @@ export default function ABTesting() {
       }
     } catch (error) {
       console.error("Error checking product availability:", error);
-      setProductValidationError("Error checking product availability");
+      setProductValidationError("Product already used in a running test. Please select a different product or wait for the current test to complete.");
     } finally {
       setIsCheckingProduct(false);
     }

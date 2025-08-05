@@ -298,28 +298,24 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
     green: { 
       background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
       border: '1px solid #bbf7d0',
-      iconBg: 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)',
       textColor: '#166534',
       descriptionColor: '#15803d'
     },
     blue: { 
       background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
       border: '1px solid #bfdbfe',
-      iconBg: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
       textColor: '#1e40af',
       descriptionColor: '#1d4ed8'
     },
     purple: { 
       background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
       border: '1px solid #d8b4fe',
-      iconBg: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
       textColor: '#5b21b6',
       descriptionColor: '#6d28d9'
     },
     orange: { 
       background: 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)',
       border: '1px solid #fed7aa',
-      iconBg: 'linear-gradient(135deg, #f97316 0%, #ea580c 100%)',
       textColor: '#c2410c',
       descriptionColor: '#dc2626'
     }
@@ -344,40 +340,19 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
         e.target.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
       }}
     >
-      <div className="flex items-center">
-        <div 
-          className="p-3 rounded-xl shadow-sm"
-          style={{ 
-            background: styles.iconBg,
-            width: '48px',
-            height: '48px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
-          }}
-        >
-          <span className="text-white text-xl">{icon}</span>
-        </div>
-        <div className="ml-4 flex-1">
-          <h3 
-            className="text-lg font-semibold mb-1"
-            style={{ color: styles.textColor }}
-          >
-            {title}
-          </h3>
-          <p 
-            className="text-sm leading-relaxed"
-            style={{ color: styles.descriptionColor }}
-          >
-            {description}
-          </p>
-        </div>
-        <div 
-          className="text-lg font-medium"
+      <div>
+        <h3 
+          className="text-lg font-semibold mb-2"
           style={{ color: styles.textColor }}
         >
-          →
-        </div>
+          {title}
+        </h3>
+        <p 
+          className="text-sm leading-relaxed"
+          style={{ color: styles.descriptionColor }}
+        >
+          {description}
+        </p>
       </div>
     </div>
   );
@@ -480,7 +455,7 @@ export default function Dashboard() {
             </div>
             <div style={{ marginBottom: '8px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#ffffff', marginBottom: '4px' }}>
-                <span>Level Progress</span>
+                <span>Level Progress </span>
                 <span>{stats.totalTests} / {Math.max(stats.totalTests + 5, 10)} Tests</span>
               </div>
               <div style={{ height: '8px', background: 'rgba(255, 255, 255, 0.3)', borderRadius: '4px', overflow: 'hidden' }}>
@@ -537,12 +512,17 @@ export default function Dashboard() {
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white' }}>3</span>
+                <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white' }}>1</span>
               </div>
             </div>
             <div style={{ marginLeft: '24px' }}>
               <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px' }}>🏅 Data Scientist</h2>
-              <p style={{ opacity: 0.9 }}>You've run a test for 5 days straight!</p>
+              <p style={{ opacity: 0.9 }}>
+                {stats.totalTests > 0 
+                  ? `You've run ${stats.totalTests} test${stats.totalTests > 1 ? 's' : ''} with ${stats.totalImpressions} total impressions!`
+                  : "Ready to start your first A/B test and optimize your store!"
+                }
+              </p>
             </div>
           </div>
 
@@ -605,7 +585,8 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Webhook Status Tile */}
+      {/* Webhook Status Tile - Hidden from end users */}
+      {/* 
       <div style={{
         background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(8px)',
@@ -629,46 +610,43 @@ export default function Dashboard() {
           {webhookStatus.error ? (
             <div style={{
               padding: '12px',
-              borderRadius: '8px',
               background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-              color: 'white',
-              fontSize: '14px'
+              border: '1px solid #dc2626',
+              borderRadius: '8px',
+              color: 'white'
             }}>
               ❌ Error checking webhook status: {webhookStatus.error}
             </div>
           ) : webhookStatus.registered ? (
             <div style={{
               padding: '12px',
-              borderRadius: '8px',
               background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-              color: 'white',
-              fontSize: '14px',
-              display: 'flex',
-              alignItems: 'center'
+              border: '1px solid #32cd32',
+              borderRadius: '8px',
+              color: 'white'
             }}>
-              <span style={{ marginRight: '8px' }}>✅</span>
-              All required webhooks are registered ({webhookStatus.webhooks.length}/{webhookStatus.required.length})
+              ✅ All required webhooks are registered and active
             </div>
           ) : (
             <div style={{
               padding: '12px',
+              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+              border: '1px solid #f59e0b',
               borderRadius: '8px',
-              background: 'linear-gradient(135deg, #9acd32 0%, #6b8e23 100%)',
-              color: 'white',
-              fontSize: '14px',
-              display: 'flex',
-              alignItems: 'center'
+              color: 'white'
             }}>
-              <span style={{ marginRight: '8px' }}>⚠️</span>
-              Missing webhooks: {webhookStatus.missing.join(', ')}
+              ⚠️ Missing webhooks: {webhookStatus.missing.join(', ')}
             </div>
           )}
         </div>
-
-        <div style={{ marginTop: '16px' }}>
+        
+        {!webhookStatus.registered && (
           <button
-            onClick={() => fetcher.submit({ action: "register_webhooks" }, { method: "POST" })}
-            disabled={isLoading}
+            onClick={() => {
+              const formData = new FormData();
+              formData.append('actionType', 'registerWebhooks');
+              submit(formData, { method: 'post' });
+            }}
             style={{
               background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
               color: 'white',
@@ -676,98 +654,22 @@ export default function Dashboard() {
               padding: '12px 24px',
               borderRadius: '8px',
               fontSize: '14px',
-              fontWeight: '600',
-              cursor: isLoading ? 'not-allowed' : 'pointer',
-              transition: 'all 0.2s ease',
-              boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-              opacity: isLoading ? 0.7 : 1
+              fontWeight: '500',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              if (!isLoading) {
-                e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
-                e.target.style.transform = 'translateY(-1px)';
-              }
+              e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
             }}
             onMouseLeave={(e) => {
-              if (!isLoading) {
-                e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
-                e.target.style.transform = 'translateY(0)';
-              }
+              e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
             }}
           >
-            {isLoading ? '🔄 Registering...' : '🔗 Register Webhooks'}
+            Register Webhooks
           </button>
-        </div>
-
-        {/* Webhook Results Display */}
-        {webhookResults && (
-          <div style={{ marginTop: '24px' }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#374151', marginBottom: '16px' }}>
-              Webhook Registration Results
-            </h3>
-            <div style={{
-              padding: '16px',
-              borderRadius: '8px',
-              background: 'rgba(255, 255, 255, 0.9)',
-              border: '1px solid rgba(0, 0, 0, 0.1)'
-            }}>
-              <div style={{ marginBottom: '12px' }}>
-                <strong>Message:</strong> {webhookResults.message}
-              </div>
-              <div style={{ marginBottom: '12px' }}>
-                <strong>App URL:</strong> {webhookResults.appUrl}
-              </div>
-              <div style={{ marginBottom: '12px' }}>
-                <strong>Timestamp:</strong> {webhookResults.timestamp}
-              </div>
-
-              {webhookResults.error && (
-                <div style={{ marginBottom: '12px', color: '#dc2626' }}>
-                  <strong>Error:</strong> {webhookResults.error}
-                </div>
-              )}
-
-              {webhookResults.results && webhookResults.results.length > 0 && (
-                <div style={{ marginTop: '16px' }}>
-                  <h4 style={{ fontSize: '16px', fontWeight: '600', color: '#374151', marginBottom: '12px' }}>Webhook Results:</h4>
-                  <div style={{ display: 'grid', gap: '12px' }}>
-                    {webhookResults.results.map((result, index) => (
-                      <div key={index} style={{
-                        padding: '12px',
-                        borderRadius: '6px',
-                        background: result.status === 'success' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)',
-                        border: result.status === 'success' ? '1px solid rgba(16, 185, 129, 0.2)' : '1px solid rgba(239, 68, 68, 0.2)'
-                      }}>
-                        <div style={{ marginBottom: '4px' }}>
-                          <strong>Topic:</strong> {result.topic}
-                        </div>
-                        <div style={{ marginBottom: '4px' }}>
-                          <strong>Status:</strong> {result.status}
-                        </div>
-                        {result.id && (
-                          <div style={{ marginBottom: '4px' }}>
-                            <strong>ID:</strong> {result.id}
-                          </div>
-                        )}
-                        {result.errors && (
-                          <div style={{ color: '#dc2626' }}>
-                            <strong>Errors:</strong> {JSON.stringify(result.errors)}
-                          </div>
-                        )}
-                        {result.error && (
-                          <div style={{ color: '#dc2626' }}>
-                            <strong>Error:</strong> {result.error}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
         )}
       </div>
+      */}
 
       {/* Recent Activity Tile */}
       <div style={{
