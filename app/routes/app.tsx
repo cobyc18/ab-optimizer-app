@@ -227,7 +227,7 @@ export default function App() {
         onClick={toggleSidebar}
         style={{
           position: 'absolute',
-          top: '160px',
+          top: '100px',
           left: isSidebarCollapsed ? '60px' : '260px',
           transform: 'translateX(-50%)',
           width: '24px',
