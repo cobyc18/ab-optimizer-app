@@ -240,7 +240,7 @@ export default function App() {
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          fontSize: '25px',
+          fontSize: '21px',
           fontWeight: 'bold',
           transition: 'all 0.2s ease',
           zIndex: 1000,

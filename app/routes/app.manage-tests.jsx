@@ -3,6 +3,7 @@ import { useLoaderData, useSubmit, useActionData } from "@remix-run/react";
 import { useState } from "react";
 import { authenticate } from "../shopify.server.js";
 import prisma from "../db.server.js";
+import React from "react"; // Added missing import
 
 export const loader = async ({ request }) => {
   try {
@@ -155,7 +156,7 @@ export const action = async ({ request }) => {
 
       return json({ 
         success: true, 
-        message: "Test configuration updated successfully!",
+        message: "Changes saved successfully!",
         trafficSplit,
         endResultType,
         endDate,
@@ -233,26 +234,45 @@ export default function ManageABTests() {
   const [testToDelete, setTestToDelete] = useState(null);
   const [isDeleting, setIsDeleting] = useState(false);
 
+  // Update form fields when selectedTest changes
+  React.useEffect(() => {
+    if (selectedTest) {
+      setTrafficSplit(selectedTest.trafficSplit || 50);
+      setEndResultType(selectedTest.endResultType || "manual");
+      setEndDate(selectedTest.endDate ? new Date(selectedTest.endDate).toISOString().slice(0, 16) : "");
+      setImpressionThreshold(selectedTest.impressionThreshold?.toString() || "1000");
+      setConversionThreshold(selectedTest.conversionThreshold?.toString() || "100");
+    }
+  }, [selectedTest]);
+
+  // Reset fields when end result type changes
+  const handleEndResultTypeChange = (newType) => {
+    setEndResultType(newType);
+    // Reset fields based on new type
+    if (newType === "date") {
+      setEndDate("");
+      setImpressionThreshold("1000");
+      setConversionThreshold("100");
+    } else if (newType === "impressions") {
+      setEndDate("");
+      setImpressionThreshold("1000");
+      setConversionThreshold("100");
+    } else if (newType === "conversions") {
+      setEndDate("");
+      setImpressionThreshold("1000");
+      setConversionThreshold("100");
+    } else if (newType === "manual") {
+      setEndDate("");
+      setImpressionThreshold("1000");
+      setConversionThreshold("100");
+    }
+  };
+
   const handleTestChange = (testId) => {
     setSelectedTestState(testId);
     if (testId) {
       submit({ testId }, { method: "get" });
     }
-  };
-
-  const handleTrafficSplitUpdate = async () => {
-    if (!selectedTest) return;
-    
-    setIsUpdating(true);
-    submit(
-      { 
-        actionType: "updateTrafficSplit", 
-        testId: selectedTest.id, 
-        trafficSplit: trafficSplit.toString() 
-      }, 
-      { method: "post" }
-    );
-    setIsUpdating(false);
   };
 
   const handleSaveConfiguration = async () => {
@@ -553,37 +573,6 @@ export default function ManageABTests() {
                 </div>
               </div>
             </div>
-
-            <button
-              onClick={handleTrafficSplitUpdate}
-              disabled={isUpdating || trafficSplit === selectedTest.trafficSplit}
-              style={{
-                background: trafficSplit === selectedTest.trafficSplit 
-                  ? '#e5e7eb' 
-                  : 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-                color: trafficSplit === selectedTest.trafficSplit ? '#6b7280' : 'white',
-                border: 'none',
-                padding: '12px 24px',
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: trafficSplit === selectedTest.trafficSplit ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s ease',
-                opacity: isUpdating ? 0.7 : 1
-              }}
-              onMouseEnter={(e) => {
-                if (trafficSplit !== selectedTest.trafficSplit && !isUpdating) {
-                  e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (trafficSplit !== selectedTest.trafficSplit && !isUpdating) {
-                  e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
-                }
-              }}
-            >
-              {isUpdating ? '🔄 Updating...' : trafficSplit === selectedTest.trafficSplit ? 'No Changes' : 'Update Traffic Split'}
-            </button>
           </div>
 
           {/* End Result Configuration Editor */}
@@ -611,7 +600,7 @@ export default function ManageABTests() {
                     name="endResultType"
                     value="date"
                     checked={endResultType === "date"}
-                    onChange={(e) => setEndResultType(e.target.value)}
+                    onChange={(e) => handleEndResultTypeChange(e.target.value)}
                     style={{ cursor: 'pointer' }}
                   />
                   <span style={{ fontSize: '14px', color: '#374151' }}>📅 End Date - Test ends on a specific date</span>
@@ -622,7 +611,7 @@ export default function ManageABTests() {
                     name="endResultType"
                     value="impressions"
                     checked={endResultType === "impressions"}
-                    onChange={(e) => setEndResultType(e.target.value)}
+                    onChange={(e) => handleEndResultTypeChange(e.target.value)}
                     style={{ cursor: 'pointer' }}
                   />
                   <span style={{ fontSize: '14px', color: '#374151' }}>👁️ Impression Count - Test ends when one variant reaches X impressions</span>
@@ -633,7 +622,7 @@ export default function ManageABTests() {
                     name="endResultType"
                     value="conversions"
                     checked={endResultType === "conversions"}
-                    onChange={(e) => setEndResultType(e.target.value)}
+                    onChange={(e) => handleEndResultTypeChange(e.target.value)}
                     style={{ cursor: 'pointer' }}
                   />
                   <span style={{ fontSize: '14px', color: '#374151' }}>💰 Conversion Rate - Test ends when one variant reaches X conversions</span>
@@ -644,7 +633,7 @@ export default function ManageABTests() {
                     name="endResultType"
                     value="manual"
                     checked={endResultType === "manual"}
-                    onChange={(e) => setEndResultType(e.target.value)}
+                    onChange={(e) => handleEndResultTypeChange(e.target.value)}
                     style={{ cursor: 'pointer' }}
                   />
                   <span style={{ fontSize: '14px', color: '#374151' }}>👤 Manual Control - You decide when to end the test</span>
@@ -758,7 +747,7 @@ export default function ManageABTests() {
                 }
               }}
             >
-              {isSaving ? '🔄 Saving...' : '💾 Save Configuration'}
+              {isSaving ? '🔄 Saving...' : '💾 Save Changes'}
             </button>
           </div>
 
