@@ -687,9 +687,10 @@ export default function ABTesting() {
         return;
       }
 
-      if (data.error) {
+      // Check if response indicates an error (400 status or error in data)
+      if (!response.ok || data.error) {
         console.log("❌ Client-side: Setting error:", data.error);
-        setProductValidationError(data.error);
+        setProductValidationError(data.error || "Product already used in a running test. Please select a different product.");
       } else {
         console.log("✅ Client-side: Product is available");
         setProductValidationError(null);
