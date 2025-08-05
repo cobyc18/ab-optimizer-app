@@ -93,11 +93,15 @@ export const action = async ({ request }) => {
           return json({ error: "Product ID is required" }, { status: 400 });
         }
 
+        // Extract numeric ID from Shopify GID
+        const numericProductId = productId.replace("gid://shopify/Product/", "");
+        console.log("🔍 Extracted numeric product ID:", numericProductId);
+
         // Check if product is already part of a running test
-        console.log("🔍 Querying database for running tests with productId:", productId);
+        console.log("🔍 Querying database for running tests with productId:", numericProductId);
         const existingRunningTest = await prisma.aBTest.findFirst({
           where: { 
-            productId: productId,
+            productId: numericProductId,
             status: "running"
           }
         });
@@ -107,7 +111,7 @@ export const action = async ({ request }) => {
         // Also check all tests for this product to debug
         const allTestsForProduct = await prisma.aBTest.findMany({
           where: { 
-            productId: productId
+            productId: numericProductId
           }
         });
         console.log("🔍 All tests for this product:", allTestsForProduct);
@@ -339,9 +343,18 @@ export const action = async ({ request }) => {
 
     // Check if product is already part of a running test
     console.log("🔍 Checking if product is already part of a running test:", productId);
+    
+    // Extract numeric ID from Shopify GID for database query
+    let numericProductId = productId;
+    if (typeof productId === "string" && productId.startsWith("gid://")) {
+      const match = productId.match(/Product\/(\d+)/);
+      if (match) numericProductId = match[1];
+    }
+    console.log("🔍 Using numeric product ID for database query:", numericProductId);
+    
     const existingRunningTest = await prisma.aBTest.findFirst({
       where: { 
-        productId: productId,
+        productId: numericProductId,
         status: "running"
       }
     });
