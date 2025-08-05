@@ -658,47 +658,25 @@ export default function ABTesting() {
       formData.append("actionType", "checkProductAvailability");
       formData.append("productId", productId);
 
-      console.log("🔍 Client-side: Sending request to server...");
       const response = await fetch("", {
         method: "POST",
         body: formData
       });
 
-      console.log("🔍 Client-side: Response status:", response.status);
-      console.log("🔍 Client-side: Response ok:", response.ok);
+      const responseText = await response.text();
+      console.log("🔍 Client-side: Response text:", responseText);
 
-      let data;
-      try {
-        data = await response.json();
-        console.log("🔍 Client-side: Server response:", data);
-      } catch (jsonError) {
-        console.error("❌ Client-side: Failed to parse JSON:", jsonError);
-        // If we can't parse JSON, check if it's an HTML error page
-        const responseText = await response.text();
-        console.error("❌ Client-side: Response text:", responseText);
-        
-        // Since server logs show the database query works, assume the product is available
-        // unless we get a specific error response
-        if (responseText.includes("already part of a running test")) {
-          setProductValidationError("This product is already part of a running test. Please select a different product.");
-        } else {
-          setProductValidationError(null);
-        }
-        return;
-      }
-
-      // Check if response indicates an error (400 status or error in data)
-      if (!response.ok || data.error) {
-        console.log("❌ Client-side: Setting error:", data.error);
-        setProductValidationError(data.error || "Product already used in a running test. Please select a different product.");
+      // Simple check: if server response contains "already part of a running test", show error
+      if (responseText.includes("already part of a running test")) {
+        console.log("❌ Client-side: Product is in running test - showing error");
+        setProductValidationError("This product is already part of a running test. Please select a different product.");
       } else {
         console.log("✅ Client-side: Product is available");
         setProductValidationError(null);
       }
     } catch (error) {
       console.error("❌ Client-side: Error checking product availability:", error);
-      // Since server logs show the database query works, assume the product is available
-      setProductValidationError(null);
+      setProductValidationError("Error checking product availability. Please try again.");
     } finally {
       setIsCheckingProduct(false);
     }
