@@ -168,8 +168,45 @@ export default function App() {
           padding: '24px 20px',
           borderBottom: '1px solid #32cd32',
           background: 'linear-gradient(135deg, #000000 0%, #32cd32 100%)',
-          color: 'white'
+          color: 'white',
+          position: 'relative'
         }}>
+          {/* Expand/Collapse Button - Top Right */}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            style={{
+              position: 'absolute',
+              top: '12px',
+              right: '12px',
+              width: '32px',
+              height: '32px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              color: '#ffffff',
+              background: 'rgba(255, 255, 255, 0.1)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              borderRadius: '8px',
+              cursor: 'pointer',
+              transition: 'all 0.2s ease',
+              fontSize: '14px',
+              fontWeight: '500',
+              backdropFilter: 'blur(4px)'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.2)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
+              e.currentTarget.style.transform = 'scale(1.05)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
+              e.currentTarget.style.transform = 'scale(1)';
+            }}
+          >
+            {isSidebarCollapsed ? '◀' : '▶'}
+          </button>
+          
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div style={{
               width: '40px',
@@ -216,42 +253,6 @@ export default function App() {
             </div>
           </div>
         </nav>
-
-        {/* Sidebar Toggle - Moved to top */}
-        <div style={{
-          padding: '16px 12px',
-          borderTop: '1px solid #32cd32',
-          background: 'linear-gradient(135deg, #1a1a1a 0%, #000000 100%)'
-        }}>
-          <button
-            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-            style={{
-              width: '100%',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '12px',
-              color: '#ffffff',
-              background: 'transparent',
-              border: '1px solid rgba(255, 255, 255, 0.2)',
-              borderRadius: '12px',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease',
-              fontSize: '16px',
-              fontWeight: '500'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
-              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
-            }}
-          >
-            {isSidebarCollapsed ? '→' : '←'}
-          </button>
-        </div>
       </div>
 
       {/* Main Content */}
