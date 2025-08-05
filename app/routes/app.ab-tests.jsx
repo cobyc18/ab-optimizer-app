@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { useLoaderData, useActionData, useOutletContext, useFetcher } from "@remix-run/react";
+import { useLoaderData, useActionData, useOutletContext } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
@@ -615,8 +615,6 @@ export default function ABTesting() {
     }
   }, [selectedTemplate]);
 
-  const fetcher = useFetcher();
-
   const checkProductAvailability = async (productId) => {
     if (!productId) {
       setProductValidationError(null);
@@ -633,32 +631,57 @@ export default function ABTesting() {
       formData.append("productId", productId);
 
       console.log("🔍 Client-side: Sending request to server...");
-      fetcher.submit(formData, { method: "post" });
+      const response = await fetch("", {
+        method: "POST",
+        body: formData
+      });
 
-      // The fetcher will handle the response automatically
-      console.log("🔍 Client-side: Request submitted via fetcher");
+      console.log("🔍 Client-side: Response status:", response.status);
+      console.log("🔍 Client-side: Response ok:", response.ok);
+
+      if (!response.ok) {
+        console.error("❌ Client-side: Response not ok:", response.status, response.statusText);
+        const errorText = await response.text();
+        console.error("❌ Client-side: Error response body:", errorText);
+        setProductValidationError("Server error occurred. Please try again.");
+        return;
+      }
+
+      const contentType = response.headers.get("content-type");
+      console.log("🔍 Client-side: Content-Type:", contentType);
+
+      if (!contentType || !contentType.includes("application/json")) {
+        console.error("❌ Client-side: Response is not JSON:", contentType);
+        const responseText = await response.text();
+        console.error("❌ Client-side: Response body:", responseText);
+        setProductValidationError("Invalid server response. Please try again.");
+        return;
+      }
+
+      const data = await response.json();
+      console.log("🔍 Client-side: Server response:", data);
+
+      if (data.error) {
+        console.log("❌ Client-side: Setting error:", data.error);
+        setProductValidationError(data.error);
+      } else {
+        console.log("✅ Client-side: Product is available");
+        setProductValidationError(null);
+      }
     } catch (error) {
       console.error("❌ Client-side: Error checking product availability:", error);
+      console.error("❌ Client-side: Error details:", {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
       setProductValidationError("Product already used in a running test. Please select a different product for this test.");
     } finally {
       setIsCheckingProduct(false);
     }
   };
 
-  // Handle fetcher response
-  useEffect(() => {
-    if (fetcher.data) {
-      console.log("🔍 Client-side: Fetcher response:", fetcher.data);
-      
-      if (fetcher.data.error) {
-        console.log("❌ Client-side: Setting error:", fetcher.data.error);
-        setProductValidationError(fetcher.data.error);
-      } else {
-        console.log("✅ Client-side: Product is available");
-        setProductValidationError(null);
-      }
-    }
-  }, [fetcher.data]);
+  // Remove the fetcher useEffect since we're going back to manual fetch
 
   // Check product availability when product selection changes
   useEffect(() => {
