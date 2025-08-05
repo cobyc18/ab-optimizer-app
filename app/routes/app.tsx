@@ -79,11 +79,11 @@ export default function App() {
             padding: '12px 16px',
             margin: '4px 8px',
             borderRadius: '12px',
-            color: isActiveItem ? '#1f2937' : '#374151',
+            color: isActiveItem ? '#1f2937' : '#ffffff',
             background: isActiveItem 
-              ? '#f3f4f6' 
+              ? '#ffffff' 
               : 'transparent',
-            border: isActiveItem ? '1px solid #d1d5db' : '1px solid transparent',
+            border: isActiveItem ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid transparent',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             position: 'relative',
@@ -91,7 +91,7 @@ export default function App() {
           }}
           onMouseEnter={(e) => {
             if (!isActiveItem) {
-              e.currentTarget.style.background = '#f3f4f6';
+              e.currentTarget.style.background = '#ffffff';
               e.currentTarget.style.color = '#1f2937';
               e.currentTarget.style.transform = 'translateY(-1px)';
               e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
@@ -100,7 +100,7 @@ export default function App() {
           onMouseLeave={(e) => {
             if (!isActiveItem) {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#374151';
+              e.currentTarget.style.color = '#ffffff';
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = 'none';
             }
@@ -153,11 +153,11 @@ export default function App() {
     <div style={{ display: 'flex', height: '100vh', background: '#f9fafb' }}>
       {/* Beautiful Sidebar */}
       <div style={{
-        background: '#ffffff',
-        boxShadow: '4px 0 20px rgba(0, 0, 0, 0.1)',
+        background: 'linear-gradient(180deg, #000000 0%, #1a1a1a 100%)',
+        boxShadow: '4px 0 20px rgba(0, 0, 0, 0.3)',
         display: 'flex',
         flexDirection: 'column',
-        borderRight: '1px solid #e5e7eb',
+        borderRight: '1px solid #32cd32',
         transition: 'all 0.3s ease',
         width: isSidebarCollapsed ? '80px' : '280px',
         position: 'relative',
@@ -166,27 +166,28 @@ export default function App() {
         {/* Sidebar Header */}
         <div style={{
           padding: '24px 20px',
-          borderBottom: '1px solid #e5e7eb',
-          background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%)',
-          color: '#1f2937'
+          borderBottom: '1px solid #32cd32',
+          background: 'linear-gradient(135deg, #000000 0%, #32cd32 100%)',
+          color: 'white'
         }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div style={{
               width: '40px',
               height: '40px',
-              background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+              background: 'rgba(50, 205, 50, 0.3)',
               borderRadius: '12px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              boxShadow: '0 4px 12px rgba(50, 205, 50, 0.3)'
+              backdropFilter: 'blur(8px)',
+              border: '1px solid rgba(50, 205, 50, 0.5)'
             }}>
               <span style={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }}>TL</span>
             </div>
             {!isSidebarCollapsed && (
               <div style={{ marginLeft: '12px' }}>
-                <span style={{ fontWeight: '600', fontSize: '16px', color: '#1f2937' }}>TryLabs Solutions</span>
-                <div style={{ fontSize: '12px', color: '#6b7280', marginTop: '2px' }}>A/B Testing Pro</div>
+                <span style={{ fontWeight: '600', fontSize: '16px' }}>TryLabs Solutions</span>
+                <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '2px' }}>A/B Testing Pro</div>
               </div>
             )}
           </div>
@@ -216,11 +217,11 @@ export default function App() {
           </div>
         </nav>
 
-        {/* Sidebar Toggle */}
+        {/* Sidebar Toggle - Moved to top */}
         <div style={{
           padding: '16px 12px',
-          borderTop: '1px solid #e5e7eb',
-          background: '#f8fafc'
+          borderTop: '1px solid #32cd32',
+          background: 'linear-gradient(135deg, #1a1a1a 0%, #000000 100%)'
         }}>
           <button
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
@@ -230,24 +231,22 @@ export default function App() {
               alignItems: 'center',
               justifyContent: 'center',
               padding: '12px',
-              color: '#6b7280',
-              background: '#ffffff',
-              border: '1px solid #d1d5db',
+              color: '#ffffff',
+              background: 'transparent',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
               borderRadius: '12px',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
-              fontSize: '14px',
+              fontSize: '16px',
               fontWeight: '500'
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = '#f3f4f6';
-              e.currentTarget.style.borderColor = '#9ca3af';
-              e.currentTarget.style.color = '#374151';
+              e.currentTarget.style.background = 'rgba(255, 255, 255, 0.1)';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.4)';
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = '#ffffff';
-              e.currentTarget.style.borderColor = '#d1d5db';
-              e.currentTarget.style.color = '#6b7280';
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.borderColor = 'rgba(255, 255, 255, 0.2)';
             }}
           >
             {isSidebarCollapsed ? '→' : '←'}
