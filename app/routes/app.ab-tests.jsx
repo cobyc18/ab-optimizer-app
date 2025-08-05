@@ -522,6 +522,7 @@ export default function ABTesting() {
     setError(null);
     setSuccessMessage(null);
     setValidationErrors({});
+    setProductValidationError(null);
   };
 
   // Function to validate form
@@ -1017,7 +1018,7 @@ export default function ABTesting() {
                     width: '100%',
                     padding: '12px',
                     paddingRight: isCheckingProduct ? '40px' : '12px',
-                    border: validationErrors.product ? '1px solid #dc2626' : '1px solid #d1d5db',
+                    border: (validationErrors.product || productValidationError) ? '1px solid #dc2626' : '1px solid #d1d5db',
                     borderRadius: '8px',
                     fontSize: '14px',
                     background: 'white'
@@ -1040,9 +1041,9 @@ export default function ABTesting() {
                   </div>
                 )}
               </div>
-              {validationErrors.product && (
+              {(validationErrors.product || productValidationError) && (
                 <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
-                  {validationErrors.product}
+                  {validationErrors.product || productValidationError}
                 </p>
               )}
               <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
