@@ -397,23 +397,6 @@ export default function ManageABTests() {
         </p>
       </div>
 
-      {/* Success/Error Messages */}
-      {actionData && (
-        <div style={{
-          padding: '16px',
-          borderRadius: '8px',
-          marginBottom: '24px',
-          background: actionData.success 
-            ? 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)' 
-            : 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-          color: 'white',
-          fontSize: '14px'
-        }}>
-          {actionData.success ? '✅ ' : '❌ '}
-          {actionData.message || actionData.error}
-        </div>
-      )}
-
       {/* Test Details */}
       {selectedTest && (
         <div style={{
@@ -749,6 +732,24 @@ export default function ManageABTests() {
             >
               {isSaving ? '🔄 Saving...' : '💾 Save Changes'}
             </button>
+
+            {/* Success/Error Messages */}
+            {actionData && (
+              <div style={{
+                padding: '16px',
+                borderRadius: '8px',
+                marginTop: '16px',
+                background: actionData.success 
+                  ? 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)' 
+                  : 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                color: 'white',
+                fontSize: '14px',
+                textAlign: 'center'
+              }}>
+                {actionData.success ? '✅ ' : '❌ '}
+                {actionData.message || actionData.error}
+              </div>
+            )}
           </div>
 
           {/* Delete Test Section */}
