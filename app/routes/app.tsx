@@ -202,7 +202,7 @@ export default function App() {
           <div style={{ marginBottom: '16px' }}>
             {!isSidebarCollapsed && (
               <div style={{
-                fontSize: '13px',
+                fontSize: '16px',
                 fontWeight: '600',
                 color: '#ffffff',
                 textTransform: 'uppercase',
@@ -227,7 +227,7 @@ export default function App() {
         onClick={toggleSidebar}
         style={{
           position: 'absolute',
-          top: '100px',
+          top: '105px',
           left: isSidebarCollapsed ? '60px' : '260px',
           transform: 'translateX(-50%)',
           width: '24px',
@@ -240,7 +240,7 @@ export default function App() {
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          fontSize: '14px',
+          fontSize: '18px',
           fontWeight: 'bold',
           transition: 'all 0.2s ease',
           zIndex: 1000,

@@ -251,11 +251,14 @@ export const action = async ({ request }) => {
     if (actionType === "checkProductAvailability") {
       const productId = form.get("productId");
       
+      console.log("🔍 Checking product availability for productId:", productId);
+      
       if (!productId) {
         return json({ error: "Product ID is required" }, { status: 400 });
       }
 
       // Check if product is already part of a running test
+      console.log("🔍 Querying database for running tests with productId:", productId);
       const existingRunningTest = await prisma.aBTest.findFirst({
         where: { 
           productId: productId,
@@ -263,12 +266,16 @@ export const action = async ({ request }) => {
         }
       });
 
+      console.log("🔍 Database query result:", existingRunningTest);
+
       if (existingRunningTest) {
+        console.log("❌ Found existing running test:", existingRunningTest.name);
         return json({ 
           error: `This product is already part of a running test called "${existingRunningTest.name}". Please select a different product.` 
         }, { status: 400 });
       }
 
+      console.log("✅ Product is available for testing");
       return json({ success: true, message: "Product is available for testing" });
     }
 
@@ -613,6 +620,7 @@ export default function ABTesting() {
       return;
     }
 
+    console.log("🔍 Client-side: Checking product availability for productId:", productId);
     setIsCheckingProduct(true);
     setProductValidationError(null);
 
@@ -627,14 +635,17 @@ export default function ABTesting() {
       });
 
       const data = await response.json();
+      console.log("🔍 Client-side: Server response:", data);
 
       if (data.error) {
+        console.log("❌ Client-side: Setting error:", data.error);
         setProductValidationError(data.error);
       } else {
+        console.log("✅ Client-side: Product is available");
         setProductValidationError(null);
       }
     } catch (error) {
-      console.error("Error checking product availability:", error);
+      console.error("❌ Client-side: Error checking product availability:", error);
       setProductValidationError("Product already used in a running test. Please select a different product for this test.");
     } finally {
       setIsCheckingProduct(false);
