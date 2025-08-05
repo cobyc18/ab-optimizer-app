@@ -176,7 +176,7 @@ export default function App() {
             onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
             style={{
               position: 'absolute',
-              top: '12px',
+              top: '20px',
               right: '12px',
               width: '32px',
               height: '32px',
@@ -204,7 +204,7 @@ export default function App() {
               e.currentTarget.style.transform = 'scale(1)';
             }}
           >
-            {isSidebarCollapsed ? '◀' : '▶'}
+            {isSidebarCollapsed ? '☰' : '✕'}
           </button>
           
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -237,7 +237,7 @@ export default function App() {
               <div style={{
                 fontSize: '11px',
                 fontWeight: '600',
-                color: '#32cd32',
+                color: '#ffffff',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 marginBottom: '8px',
