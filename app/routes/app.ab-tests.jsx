@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { useLoaderData, useActionData, useOutletContext } from "@remix-run/react";
+import { useLoaderData, useActionData, useOutletContext, useFetcher } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
@@ -276,7 +276,9 @@ export const action = async ({ request }) => {
       }
 
       console.log("✅ Product is available for testing");
-      return json({ success: true, message: "Product is available for testing" });
+      const response = { success: true, message: "Product is available for testing" };
+      console.log("🔍 Sending response:", response);
+      return json(response);
     }
 
     // Existing A/B test creation logic
@@ -613,7 +615,8 @@ export default function ABTesting() {
     }
   }, [selectedTemplate]);
 
-  // Function to check if product is already part of a running test
+  const fetcher = useFetcher();
+
   const checkProductAvailability = async (productId) => {
     if (!productId) {
       setProductValidationError(null);
@@ -629,21 +632,11 @@ export default function ABTesting() {
       formData.append("actionType", "checkProductAvailability");
       formData.append("productId", productId);
 
-      const response = await fetch("/app/ab-tests", {
-        method: "POST",
-        body: formData
-      });
+      console.log("🔍 Client-side: Sending request to server...");
+      fetcher.submit(formData, { method: "post" });
 
-      const data = await response.json();
-      console.log("🔍 Client-side: Server response:", data);
-
-      if (data.error) {
-        console.log("❌ Client-side: Setting error:", data.error);
-        setProductValidationError(data.error);
-      } else {
-        console.log("✅ Client-side: Product is available");
-        setProductValidationError(null);
-      }
+      // The fetcher will handle the response automatically
+      console.log("🔍 Client-side: Request submitted via fetcher");
     } catch (error) {
       console.error("❌ Client-side: Error checking product availability:", error);
       setProductValidationError("Product already used in a running test. Please select a different product for this test.");
@@ -651,6 +644,21 @@ export default function ABTesting() {
       setIsCheckingProduct(false);
     }
   };
+
+  // Handle fetcher response
+  useEffect(() => {
+    if (fetcher.data) {
+      console.log("🔍 Client-side: Fetcher response:", fetcher.data);
+      
+      if (fetcher.data.error) {
+        console.log("❌ Client-side: Setting error:", fetcher.data.error);
+        setProductValidationError(fetcher.data.error);
+      } else {
+        console.log("✅ Client-side: Product is available");
+        setProductValidationError(null);
+      }
+    }
+  }, [fetcher.data]);
 
   // Check product availability when product selection changes
   useEffect(() => {
