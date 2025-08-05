@@ -104,6 +104,14 @@ export const action = async ({ request }) => {
 
         console.log("🔍 Database query result:", existingRunningTest);
 
+        // Also check all tests for this product to debug
+        const allTestsForProduct = await prisma.aBTest.findMany({
+          where: { 
+            productId: productId
+          }
+        });
+        console.log("🔍 All tests for this product:", allTestsForProduct);
+
         if (existingRunningTest) {
           console.log("❌ Found existing running test:", existingRunningTest.name);
           return json({ 
