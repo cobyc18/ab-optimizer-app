@@ -190,7 +190,7 @@ export default function App() {
             </div>
             {!isSidebarCollapsed && (
               <div style={{ marginLeft: '12px' }}>
-                <span style={{ fontWeight: '600', fontSize: '16px' }}>TryLabs Solutions</span>
+                <span style={{ fontWeight: '600', fontSize: '16px' }}>TryLabs Inc.</span>
                 <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '2px' }}>A/B Testing Pro</div>
               </div>
             )}
