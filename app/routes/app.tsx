@@ -202,7 +202,7 @@ export default function App() {
           <div style={{ marginBottom: '16px' }}>
             {!isSidebarCollapsed && (
               <div style={{
-                fontSize: '16px',
+                fontSize: '20px',
                 fontWeight: '600',
                 color: '#ffffff',
                 textTransform: 'uppercase',
@@ -240,7 +240,7 @@ export default function App() {
           alignItems: 'center',
           justifyContent: 'center',
           cursor: 'pointer',
-          fontSize: '18px',
+          fontSize: '25px',
           fontWeight: 'bold',
           transition: 'all 0.2s ease',
           zIndex: 1000,

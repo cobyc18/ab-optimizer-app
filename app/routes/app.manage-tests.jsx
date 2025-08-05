@@ -22,7 +22,11 @@ export const loader = async ({ request }) => {
         trafficSplit: true,
         status: true,
         startDate: true,
-        endDate: true
+        endDate: true,
+        endResultType: true,
+        impressionThreshold: true,
+        conversionThreshold: true,
+        winner: true
       },
       orderBy: { startDate: "desc" }
     });
@@ -84,6 +88,82 @@ export const action = async ({ request }) => {
       });
     }
 
+    if (actionType === "updateTestConfiguration") {
+      const testId = formData.get("testId");
+      const trafficSplit = parseInt(formData.get("trafficSplit"));
+      const endResultType = formData.get("endResultType");
+      const endDate = formData.get("endDate");
+      const impressionThreshold = formData.get("impressionThreshold") ? parseInt(formData.get("impressionThreshold")) : null;
+      const conversionThreshold = formData.get("conversionThreshold") ? parseInt(formData.get("conversionThreshold")) : null;
+
+      if (!testId) {
+        return json({ 
+          success: false, 
+          error: "Test ID is required" 
+        });
+      }
+
+      if (trafficSplit < 0 || trafficSplit > 100) {
+        return json({ 
+          success: false, 
+          error: "Invalid traffic split value. Must be between 0 and 100." 
+        });
+      }
+
+      // Validate end result configuration based on type
+      if (endResultType === "date" && !endDate) {
+        return json({ 
+          success: false, 
+          error: "End date is required when end result type is 'date'" 
+        });
+      }
+
+      if (endResultType === "impressions" && (!impressionThreshold || impressionThreshold < 100)) {
+        return json({ 
+          success: false, 
+          error: "Impression threshold is required and must be at least 100 when end result type is 'impressions'" 
+        });
+      }
+
+      if (endResultType === "conversions" && (!conversionThreshold || conversionThreshold < 10)) {
+        return json({ 
+          success: false, 
+          error: "Conversion threshold is required and must be at least 10 when end result type is 'conversions'" 
+        });
+      }
+
+      // Prepare update data
+      const updateData = {
+        trafficSplit,
+        endResultType,
+        impressionThreshold,
+        conversionThreshold
+      };
+
+      // Add endDate only if it's provided and not empty
+      if (endDate && endDate.trim() !== "") {
+        updateData.endDate = new Date(endDate);
+      } else if (endResultType !== "date") {
+        updateData.endDate = null;
+      }
+
+      // Update the test configuration in the database
+      await prisma.aBTest.update({
+        where: { id: testId },
+        data: updateData
+      });
+
+      return json({ 
+        success: true, 
+        message: "Test configuration updated successfully!",
+        trafficSplit,
+        endResultType,
+        endDate,
+        impressionThreshold,
+        conversionThreshold
+      });
+    }
+
     if (actionType === "deleteTest") {
       const testId = formData.get("testId");
 
@@ -141,6 +221,13 @@ export default function ManageABTests() {
   const [trafficSplit, setTrafficSplit] = useState(selectedTest?.trafficSplit || 50);
   const [isUpdating, setIsUpdating] = useState(false);
   
+  // End result configuration state
+  const [endResultType, setEndResultType] = useState(selectedTest?.endResultType || "manual");
+  const [endDate, setEndDate] = useState(selectedTest?.endDate ? new Date(selectedTest.endDate).toISOString().slice(0, 16) : "");
+  const [impressionThreshold, setImpressionThreshold] = useState(selectedTest?.impressionThreshold?.toString() || "1000");
+  const [conversionThreshold, setConversionThreshold] = useState(selectedTest?.conversionThreshold?.toString() || "100");
+  const [isSaving, setIsSaving] = useState(false);
+  
   // Delete confirmation state
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [testToDelete, setTestToDelete] = useState(null);
@@ -166,6 +253,25 @@ export default function ManageABTests() {
       { method: "post" }
     );
     setIsUpdating(false);
+  };
+
+  const handleSaveConfiguration = async () => {
+    if (!selectedTest) return;
+    
+    setIsSaving(true);
+    submit(
+      { 
+        actionType: "updateTestConfiguration", 
+        testId: selectedTest.id, 
+        trafficSplit: trafficSplit.toString(),
+        endResultType,
+        endDate,
+        impressionThreshold,
+        conversionThreshold
+      }, 
+      { method: "post" }
+    );
+    setIsSaving(false);
   };
 
   const handleDeleteClick = (test) => {
@@ -477,6 +583,182 @@ export default function ManageABTests() {
               }}
             >
               {isUpdating ? '🔄 Updating...' : trafficSplit === selectedTest.trafficSplit ? 'No Changes' : 'Update Traffic Split'}
+            </button>
+          </div>
+
+          {/* End Result Configuration Editor */}
+          <div style={{
+            padding: '24px',
+            background: '#f0f9ff',
+            borderRadius: '12px',
+            border: '1px solid #bae6fd',
+            marginBottom: '24px'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '600', color: '#000000', marginBottom: '16px' }}>🎯 Edit End Result Configuration</h3>
+            <p style={{ fontSize: '14px', color: '#0369a1', marginBottom: '24px' }}>
+              Configure how the test will determine a winner and when it should end.
+            </p>
+
+            {/* End Result Type Selection */}
+            <div style={{ marginBottom: '24px' }}>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '12px' }}>
+                End Result Type <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="endResultType"
+                    value="date"
+                    checked={endResultType === "date"}
+                    onChange={(e) => setEndResultType(e.target.value)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '14px', color: '#374151' }}>📅 End Date - Test ends on a specific date</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="endResultType"
+                    value="impressions"
+                    checked={endResultType === "impressions"}
+                    onChange={(e) => setEndResultType(e.target.value)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '14px', color: '#374151' }}>👁️ Impression Count - Test ends when one variant reaches X impressions</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="endResultType"
+                    value="conversions"
+                    checked={endResultType === "conversions"}
+                    onChange={(e) => setEndResultType(e.target.value)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '14px', color: '#374151' }}>💰 Conversion Rate - Test ends when one variant reaches X conversions</span>
+                </label>
+                <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    name="endResultType"
+                    value="manual"
+                    checked={endResultType === "manual"}
+                    onChange={(e) => setEndResultType(e.target.value)}
+                    style={{ cursor: 'pointer' }}
+                  />
+                  <span style={{ fontSize: '14px', color: '#374151' }}>👤 Manual Control - You decide when to end the test</span>
+                </label>
+              </div>
+            </div>
+
+            {/* Conditional Fields Based on End Result Type */}
+            {endResultType === 'date' && (
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                  End Date & Time <span style={{ color: '#dc2626' }}>*</span>
+                </label>
+                <input
+                  type="datetime-local"
+                  value={endDate}
+                  onChange={(e) => setEndDate(e.target.value)}
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px'
+                  }}
+                />
+                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                  The test will automatically end and determine a winner on this date
+                </p>
+              </div>
+            )}
+
+            {endResultType === 'impressions' && (
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                  Impression Threshold <span style={{ color: '#dc2626' }}>*</span>
+                </label>
+                <input
+                  type="number"
+                  value={impressionThreshold}
+                  onChange={(e) => setImpressionThreshold(e.target.value)}
+                  min="100"
+                  placeholder="1000"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px'
+                  }}
+                />
+                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                  Number of impressions needed for one variant to win (minimum 100)
+                </p>
+              </div>
+            )}
+
+            {endResultType === 'conversions' && (
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                  Conversion Threshold <span style={{ color: '#dc2626' }}>*</span>
+                </label>
+                <input
+                  type="number"
+                  value={conversionThreshold}
+                  onChange={(e) => setConversionThreshold(e.target.value)}
+                  min="10"
+                  placeholder="100"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    border: '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px'
+                  }}
+                />
+                <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                  Number of conversions needed for one variant to win (minimum 10)
+                </p>
+              </div>
+            )}
+
+            {/* Save Configuration Button */}
+            <button
+              onClick={handleSaveConfiguration}
+              disabled={isSaving}
+              style={{
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                color: 'white',
+                border: 'none',
+                padding: '16px 32px',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: isSaving ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)',
+                opacity: isSaving ? 0.7 : 1
+              }}
+              onMouseEnter={(e) => {
+                if (!isSaving) {
+                  e.target.style.background = 'linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%)';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(59, 130, 246, 0.4)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isSaving) {
+                  e.target.style.background = 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.3)';
+                }
+              }}
+            >
+              {isSaving ? '🔄 Saving...' : '💾 Save Configuration'}
             </button>
           </div>
 

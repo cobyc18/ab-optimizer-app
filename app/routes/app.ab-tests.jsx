@@ -1503,24 +1503,34 @@ export default function ABTesting() {
             <button
               type="submit"
               style={{
-                padding: '12px 24px',
+                padding: '16px 32px',
                 background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
                 color: 'white',
                 border: 'none',
-                borderRadius: '8px',
-                fontSize: '14px',
-                fontWeight: '500',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease'
+                transition: 'all 0.3s ease',
+                boxShadow: '0 4px 12px rgba(50, 205, 50, 0.3)',
+                marginTop: '24px',
+                alignSelf: 'center',
+                minWidth: '200px',
+                position: 'relative',
+                overflow: 'hidden'
               }}
               onMouseEnter={(e) => {
                 e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 20px rgba(50, 205, 50, 0.4)';
               }}
               onMouseLeave={(e) => {
                 e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(50, 205, 50, 0.3)';
               }}
             >
-              Create A/B Test
+              🚀 Create New Test
             </button>
           </form>
         </div>
