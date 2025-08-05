@@ -67,6 +67,10 @@ export default function App() {
     return location.pathname.startsWith(path);
   };
 
+  const toggleSidebar = () => {
+    setIsSidebarCollapsed(!isSidebarCollapsed);
+  };
+
   const SidebarItem = ({ item }: { item: NavigationItem }) => {
     const isActiveItem = isActive(item.href);
     
@@ -218,32 +222,32 @@ export default function App() {
         </nav>
       </div>
 
-      {/* Expand/Collapse Button - Positioned on the vertical line */}
+      {/* Expand/Collapse Button */}
       <button
-        onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+        onClick={toggleSidebar}
         style={{
           position: 'absolute',
-          top: '120px',
+          top: '140px',
           left: isSidebarCollapsed ? '60px' : '260px',
-          width: '32px',
-          height: '32px',
+          transform: 'translateX(-50%)',
+          width: '24px',
+          height: '24px',
+          borderRadius: '50%',
+          background: 'rgba(0, 0, 0, 0.8)',
+          border: '1px solid #32cd32',
+          color: '#ffffff',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          color: '#ffffff',
-          background: 'rgba(0, 0, 0, 0.8)',
-          border: '1px solid #32cd32',
-          borderRadius: '50%',
           cursor: 'pointer',
-          transition: 'all 0.3s ease',
-          fontSize: '16px',
-          fontWeight: '500',
+          fontSize: '12px',
+          fontWeight: 'bold',
+          transition: 'all 0.2s ease',
           zIndex: 1000,
-          transform: 'translateX(-50%)',
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = 'rgba(50, 205, 50, 0.9)';
+          e.currentTarget.style.background = '#32cd32';
           e.currentTarget.style.transform = 'translateX(-50%) scale(1.1)';
         }}
         onMouseLeave={(e) => {
@@ -251,7 +255,7 @@ export default function App() {
           e.currentTarget.style.transform = 'translateX(-50%) scale(1)';
         }}
       >
-        {isSidebarCollapsed ? '▶' : '◀'}
+        {isSidebarCollapsed ? '→' : '←'}
       </button>
 
       {/* Main Content */}
