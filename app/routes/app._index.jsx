@@ -340,12 +340,10 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
       onMouseEnter={(e) => {
         e.target.style.transform = 'translateY(-4px)';
         e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
-        e.target.style.border = `2px solid ${styles.arrowColor}`;
       }}
       onMouseLeave={(e) => {
         e.target.style.transform = 'translateY(0)';
         e.target.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
-        e.target.style.border = styles.border;
       }}
     >
       <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
@@ -445,50 +443,152 @@ export default function Dashboard() {
       padding: '24px',
       fontFamily: 'system-ui, -apple-system, sans-serif'
     }}>
-      {/* Header */}
+      {/* TryLabs Dashboard */}
       <div style={{
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(10px)',
-        padding: '24px',
-        borderRadius: '16px',
+        background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
+        padding: '32px',
+        borderRadius: '20px',
         marginBottom: '32px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.2)',
-        border: '1px solid rgba(50, 205, 50, 0.3)'
+        boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.05)',
+        border: '1px solid rgba(50, 205, 50, 0.2)',
+        position: 'relative',
+        overflow: 'hidden'
       }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <div>
-            <h1 style={{ fontSize: '28px', fontWeight: '700', color: '#000000', margin: '0 0 8px 0' }}>
-              A/B Testing Dashboard
-            </h1>
-            <p style={{ color: '#374151', margin: '0', fontSize: '16px' }}>
-              Welcome back, {user?.firstName || 'User'}! Here's your testing overview.
-            </p>
+        {/* Background decorative elements */}
+        <div style={{
+          position: 'absolute',
+          top: '-20px',
+          right: '-20px',
+          width: '120px',
+          height: '120px',
+          background: 'linear-gradient(135deg, rgba(50, 205, 50, 0.1) 0%, rgba(34, 139, 34, 0.05) 100%)',
+          borderRadius: '50%',
+          transform: 'rotate(15deg)'
+        }}></div>
+        <div style={{
+          position: 'absolute',
+          bottom: '-30px',
+          left: '-30px',
+          width: '80px',
+          height: '80px',
+          background: 'linear-gradient(135deg, rgba(50, 205, 50, 0.08) 0%, rgba(34, 139, 34, 0.03) 100%)',
+          borderRadius: '50%',
+          transform: 'rotate(-10deg)'
+        }}></div>
+
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+          <div style={{ flex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+              <div style={{
+                width: '40px',
+                height: '40px',
+                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                borderRadius: '12px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                marginRight: '16px',
+                boxShadow: '0 4px 12px rgba(50, 205, 50, 0.3)'
+              }}>
+                <span style={{ fontSize: '20px' }}>🚀</span>
+              </div>
+              <div>
+                <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#1a1a1a', margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>
+                  TryLabs Dashboard
+                </h1>
+                <p style={{ color: '#6b7280', margin: '0', fontSize: '16px', fontWeight: '500' }}>
+                  Welcome back, <span style={{ color: '#32cd32', fontWeight: '600' }}>{user?.firstName || 'User'}</span>! Here's your testing overview.
+                </p>
+              </div>
+            </div>
           </div>
+
           <div style={{
             background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-            padding: '20px',
-            borderRadius: '12px',
-            border: '1px solid #32cd32'
+            padding: '28px',
+            borderRadius: '16px',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 8px 32px rgba(50, 205, 50, 0.3)',
+            minWidth: '280px',
+            position: 'relative',
+            overflow: 'hidden'
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '8px' }}>
-              <div style={{ width: '8px', height: '8px', background: '#ffffff', borderRadius: '50%', marginRight: '8px' }}></div>
-              <span style={{ fontSize: '14px', fontWeight: '500', color: '#ffffff' }}>Your Progress</span>
-            </div>
-            <div style={{ fontSize: '18px', fontWeight: '600', color: '#ffffff', marginBottom: '16px' }}>
-              Data Scientist
-            </div>
-            <div style={{ marginBottom: '8px' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#ffffff', marginBottom: '4px' }}>
-                <span>Level Progress </span>
-                <span>{stats.totalTests} / {Math.max(stats.totalTests + 5, 10)} Tests</span>
-              </div>
-              <div style={{ height: '8px', background: 'rgba(255, 255, 255, 0.3)', borderRadius: '4px', overflow: 'hidden' }}>
-                <div style={{ 
-                  width: `${Math.min((stats.totalTests / Math.max(stats.totalTests + 5, 10)) * 100, 100)}%`, 
-                  height: '100%', 
-                  background: '#ffffff', 
-                  borderRadius: '4px' 
+            {/* Progress card background decoration */}
+            <div style={{
+              position: 'absolute',
+              top: '-10px',
+              right: '-10px',
+              width: '60px',
+              height: '60px',
+              background: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '50%'
+            }}></div>
+            
+            <div style={{ position: 'relative', zIndex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{
+                  width: '12px',
+                  height: '12px',
+                  background: '#ffffff',
+                  borderRadius: '50%',
+                  marginRight: '10px',
+                  boxShadow: '0 0 8px rgba(255, 255, 255, 0.5)'
                 }}></div>
+                <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                  Your Progress
+                </span>
+              </div>
+              
+              <div style={{ 
+                fontSize: '24px', 
+                fontWeight: '700', 
+                color: '#ffffff', 
+                marginBottom: '20px',
+                textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+              }}>
+                🏆 Data Scientist
+              </div>
+              
+              <div style={{ marginBottom: '12px' }}>
+                <div style={{ 
+                  display: 'flex', 
+                  justifyContent: 'space-between', 
+                  fontSize: '13px', 
+                  color: '#ffffff', 
+                  marginBottom: '8px',
+                  fontWeight: '500'
+                }}>
+                  <span>Level Progress</span>
+                  <span>{stats.totalTests} / {Math.max(stats.totalTests + 5, 10)} Tests</span>
+                </div>
+                <div style={{ 
+                  height: '10px', 
+                  background: 'rgba(255, 255, 255, 0.2)', 
+                  borderRadius: '6px', 
+                  overflow: 'hidden',
+                  boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)'
+                }}>
+                  <div style={{ 
+                    width: `${Math.min((stats.totalTests / Math.max(stats.totalTests + 5, 10)) * 100, 100)}%`, 
+                    height: '100%', 
+                    background: 'linear-gradient(90deg, #ffffff 0%, #f0f0f0 100%)', 
+                    borderRadius: '6px',
+                    boxShadow: '0 2px 4px rgba(255, 255, 255, 0.3)',
+                    transition: 'width 0.8s ease-in-out'
+                  }}></div>
+                </div>
+              </div>
+              
+              <div style={{
+                fontSize: '12px',
+                color: 'rgba(255, 255, 255, 0.8)',
+                textAlign: 'center',
+                fontStyle: 'italic'
+              }}>
+                {stats.totalTests > 0 
+                  ? `${Math.max(stats.totalTests + 5, 10) - stats.totalTests} more tests to level up!`
+                  : "Start your first test to begin your journey!"
+                }
               </div>
             </div>
           </div>
