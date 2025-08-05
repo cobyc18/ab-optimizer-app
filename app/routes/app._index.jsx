@@ -299,25 +299,29 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
       background: 'linear-gradient(135deg, #f0fdf4 0%, #dcfce7 100%)',
       border: '1px solid #bbf7d0',
       textColor: '#166534',
-      descriptionColor: '#15803d'
+      descriptionColor: '#15803d',
+      arrowColor: '#22c55e'
     },
     blue: { 
       background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
       border: '1px solid #bfdbfe',
       textColor: '#1e40af',
-      descriptionColor: '#1d4ed8'
+      descriptionColor: '#1d4ed8',
+      arrowColor: '#3b82f6'
     },
     purple: { 
       background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
       border: '1px solid #d8b4fe',
       textColor: '#5b21b6',
-      descriptionColor: '#6d28d9'
+      descriptionColor: '#6d28d9',
+      arrowColor: '#8b5cf6'
     },
     orange: { 
       background: 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)',
       border: '1px solid #fed7aa',
       textColor: '#c2410c',
-      descriptionColor: '#dc2626'
+      descriptionColor: '#dc2626',
+      arrowColor: '#f97316'
     }
   };
 
@@ -325,34 +329,54 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
 
   const CardContent = () => (
     <div 
-      className="rounded-xl shadow-sm p-6 cursor-pointer transition-all duration-300 hover:shadow-lg"
+      className="rounded-xl shadow-sm cursor-pointer transition-all duration-300 relative overflow-hidden"
       style={{ 
         background: styles.background,
         border: styles.border,
         transform: 'translateY(0)',
+        minHeight: '120px',
+        padding: '24px',
       }}
       onMouseEnter={(e) => {
-        e.target.style.transform = 'translateY(-2px)';
-        e.target.style.boxShadow = '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+        e.target.style.transform = 'translateY(-4px)';
+        e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)';
+        e.target.style.border = `2px solid ${styles.arrowColor}`;
       }}
       onMouseLeave={(e) => {
         e.target.style.transform = 'translateY(0)';
         e.target.style.boxShadow = '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)';
+        e.target.style.border = styles.border;
       }}
     >
-      <div>
-        <h3 
-          className="text-lg font-semibold mb-2"
-          style={{ color: styles.textColor }}
+      <div style={{ height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+        <div>
+          <h3 
+            className="text-lg font-semibold mb-2"
+            style={{ color: styles.textColor }}
+          >
+            {title}
+          </h3>
+          <p 
+            className="text-sm leading-relaxed"
+            style={{ color: styles.descriptionColor }}
+          >
+            {description}
+          </p>
+        </div>
+        
+        <div 
+          style={{
+            position: 'absolute',
+            bottom: '16px',
+            right: '16px',
+            fontSize: '16px',
+            fontWeight: 'bold',
+            color: styles.arrowColor,
+            transition: 'all 0.3s ease'
+          }}
         >
-          {title}
-        </h3>
-        <p 
-          className="text-sm leading-relaxed"
-          style={{ color: styles.descriptionColor }}
-        >
-          {description}
-        </p>
+          →
+        </div>
       </div>
     </div>
   );
