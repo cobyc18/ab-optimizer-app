@@ -1,132 +1,67 @@
 {% comment %}
   Social Proof Widget
-  Displays social proof elements like reviews, testimonials, and trust badges with desktop and mobile settings
+  Displays social proof elements like reviews, testimonials, and trust badges
 {% endcomment %}
-
-<style>
-  .ab-optimizer-social-proof {
-    box-sizing: border-box;
-  }
-  
-  .ab-optimizer-social-proof .recent-purchase-notification,
-  .ab-optimizer-social-proof .review-count,
-  .ab-optimizer-social-proof .testimonial,
-  .ab-optimizer-social-proof .trust-badge,
-  .ab-optimizer-social-proof .stock-warning,
-  .ab-optimizer-social-proof .custom-proof {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-  
-  /* Desktop styles */
-  @media (min-width: 768px) {
-    .ab-optimizer-social-proof {
-      font-family: {{ block.settings.desktop_font_family }};
-      font-size: {{ block.settings.desktop_font_size }}px;
-      line-height: {{ block.settings.desktop_line_height }};
-      text-align: {{ block.settings.desktop_content_alignment }};
-      width: {{ block.settings.desktop_width }}%;
-      padding: {{ block.settings.desktop_padding_vertical }}px {{ block.settings.desktop_padding_horizontal }}px;
-      margin: {{ block.settings.desktop_margin }}px 0;
-      gap: {{ block.settings.desktop_gap }}px;
-      border-radius: {{ block.settings.desktop_roundness }}px;
-      border: {{ block.settings.desktop_border_thickness }}px solid {{ block.settings.border_color }};
-      box-shadow: {{ block.settings.desktop_shadow_style }};
-    }
-    
-    .ab-optimizer-social-proof .recent-purchase-notification,
-    .ab-optimizer-social-proof .review-count,
-    .ab-optimizer-social-proof .testimonial,
-    .ab-optimizer-social-proof .trust-badge,
-    .ab-optimizer-social-proof .stock-warning,
-    .ab-optimizer-social-proof .custom-proof {
-      gap: {{ block.settings.desktop_gap }}px;
-    }
-  }
-  
-  /* Mobile styles */
-  @media (max-width: 767px) {
-    .ab-optimizer-social-proof {
-      font-family: {{ block.settings.mobile_font_family }};
-      font-size: {{ block.settings.mobile_font_size }}px;
-      line-height: {{ block.settings.mobile_line_height }};
-      text-align: {{ block.settings.mobile_content_alignment }};
-      width: {{ block.settings.mobile_width }}%;
-      padding: {{ block.settings.mobile_padding_vertical }}px {{ block.settings.mobile_padding_horizontal }}px;
-      margin: {{ block.settings.mobile_margin }}px 0;
-      gap: {{ block.settings.mobile_gap }}px;
-      border-radius: {{ block.settings.mobile_roundness }}px;
-      border: {{ block.settings.mobile_border_thickness }}px solid {{ block.settings.border_color }};
-      box-shadow: {{ block.settings.mobile_shadow_style }};
-    }
-    
-    .ab-optimizer-social-proof .recent-purchase-notification,
-    .ab-optimizer-social-proof .review-count,
-    .ab-optimizer-social-proof .testimonial,
-    .ab-optimizer-social-proof .trust-badge,
-    .ab-optimizer-social-proof .stock-warning,
-    .ab-optimizer-social-proof .custom-proof {
-      gap: {{ block.settings.mobile_gap }}px;
-    }
-  }
-</style>
 
 <div class="ab-optimizer-social-proof" 
      style="
+       padding: {{ block.settings.padding }}px;
        background: {{ block.settings.background_color }};
-       color: {{ block.settings.text_color }};
+       border-radius: {{ block.settings.border_radius }}px;
+       border: {{ block.settings.border_width }}px solid {{ block.settings.border_color }};
+       margin: {{ block.settings.margin }}px 0;
+       text-align: {{ block.settings.text_align }};
      ">
 
   {% case block.settings.proof_type %}
     {% when 'recent_purchase' %}
-      <div class="recent-purchase-notification">
+      <div class="recent-purchase-notification" style="color: {{ block.settings.text_color }};">
         <span style="font-size: {{ block.settings.icon_size }}px;">🛒</span>
-        <span>
+        <span style="font-size: {{ block.settings.font_size }}px; margin-left: 8px;">
           Someone in your area just purchased this 2 minutes ago
         </span>
       </div>
 
     {% when 'review_count' %}
-      <div class="review-count">
+      <div class="review-count" style="color: {{ block.settings.text_color }};">
         <span style="font-size: {{ block.settings.icon_size }}px;">⭐</span>
-        <span>
+        <span style="font-size: {{ block.settings.font_size }}px; margin-left: 8px;">
           1,234 happy customers
         </span>
       </div>
 
     {% when 'testimonial' %}
-      <div class="testimonial">
-        <div style="font-style: italic; margin-bottom: 8px;">
+      <div class="testimonial" style="color: {{ block.settings.text_color }};">
+        <div style="font-style: italic; font-size: {{ block.settings.font_size }}px; margin-bottom: 8px;">
           "This product exceeded my expectations!"
         </div>
-        <div style="opacity: 0.8;">
+        <div style="font-size: {{ block.settings.font_size | minus: 2 }}px; opacity: 0.8;">
           - Sarah M.
         </div>
       </div>
 
     {% when 'trust_badge' %}
-      <div class="trust-badge">
+      <div class="trust-badge" style="color: {{ block.settings.text_color }};">
         <span style="font-size: {{ block.settings.icon_size }}px;">🔒</span>
-        <span>
+        <span style="font-size: {{ block.settings.font_size }}px; margin-left: 8px;">
           100% Secure Checkout
         </span>
       </div>
 
     {% when 'stock_warning' %}
       {% if product.available and product.inventory_quantity <= 5 %}
-        <div class="stock-warning">
+        <div class="stock-warning" style="color: {{ block.settings.text_color }};">
           <span style="font-size: {{ block.settings.icon_size }}px;">⚠️</span>
-          <span>
+          <span style="font-size: {{ block.settings.font_size }}px; margin-left: 8px;">
             Only {{ product.inventory_quantity }} left in stock!
           </span>
         </div>
       {% endif %}
 
     {% when 'custom' %}
-      <div class="custom-proof">
+      <div class="custom-proof" style="color: {{ block.settings.text_color }};">
         <span style="font-size: {{ block.settings.icon_size }}px;">✨</span>
-        <span>
+        <span style="font-size: {{ block.settings.font_size }}px; margin-left: 8px;">
           {{ block.settings.custom_text | default: 'Custom social proof message' }}
         </span>
       </div>
@@ -178,6 +113,51 @@
     },
     {
       "type": "range",
+      "id": "border_width",
+      "label": "Border Width",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border Radius",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Padding",
+      "min": 8,
+      "max": 32,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "margin",
+      "label": "Margin",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font Size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "default": 14
+    },
+    {
+      "type": "range",
       "id": "icon_size",
       "label": "Icon Size",
       "min": 12,
@@ -186,271 +166,15 @@
       "default": 16
     },
     {
-      "type": "header",
-      "content": "Desktop Settings"
-    },
-    {
       "type": "select",
-      "id": "desktop_alignment",
-      "label": "Desktop Alignment",
+      "id": "text_align",
+      "label": "Text Alignment",
       "options": [
         { "value": "left", "label": "Left" },
         { "value": "center", "label": "Center" },
         { "value": "right", "label": "Right" }
       ],
       "default": "left"
-    },
-    {
-      "type": "select",
-      "id": "desktop_font_family",
-      "label": "Desktop Font Family",
-      "options": [
-        { "value": "Arial, sans-serif", "label": "Arial" },
-        { "value": "Helvetica, sans-serif", "label": "Helvetica" },
-        { "value": "Georgia, serif", "label": "Georgia" },
-        { "value": "Times New Roman, serif", "label": "Times New Roman" },
-        { "value": "Verdana, sans-serif", "label": "Verdana" },
-        { "value": "Courier New, monospace", "label": "Courier New" }
-      ],
-      "default": "Arial, sans-serif"
-    },
-    {
-      "type": "range",
-      "id": "desktop_font_size",
-      "label": "Desktop Font Size",
-      "min": 12,
-      "max": 28,
-      "step": 1,
-      "default": 14
-    },
-    {
-      "type": "range",
-      "id": "desktop_line_height",
-      "label": "Desktop Line Height",
-      "min": 1.0,
-      "max": 2.0,
-      "step": 0.1,
-      "default": 1.4
-    },
-    {
-      "type": "range",
-      "id": "desktop_margin",
-      "label": "Desktop Margin",
-      "min": 0,
-      "max": 40,
-      "step": 1,
-      "default": 12
-    },
-    {
-      "type": "range",
-      "id": "desktop_gap",
-      "label": "Desktop Gap",
-      "min": 4,
-      "max": 24,
-      "step": 1,
-      "default": 8
-    },
-    {
-      "type": "range",
-      "id": "desktop_width",
-      "label": "Desktop Width (%)",
-      "min": 20,
-      "max": 100,
-      "step": 5,
-      "default": 100
-    },
-    {
-      "type": "range",
-      "id": "desktop_padding_vertical",
-      "label": "Desktop Padding Vertical",
-      "min": 8,
-      "max": 40,
-      "step": 1,
-      "default": 16
-    },
-    {
-      "type": "range",
-      "id": "desktop_padding_horizontal",
-      "label": "Desktop Padding Horizontal",
-      "min": 12,
-      "max": 48,
-      "step": 1,
-      "default": 20
-    },
-    {
-      "type": "range",
-      "id": "desktop_border_thickness",
-      "label": "Desktop Border Thickness",
-      "min": 0,
-      "max": 8,
-      "step": 1,
-      "default": 1
-    },
-    {
-      "type": "range",
-      "id": "desktop_roundness",
-      "label": "Desktop Roundness",
-      "min": 0,
-      "max": 30,
-      "step": 1,
-      "default": 8
-    },
-    {
-      "type": "select",
-      "id": "desktop_shadow_style",
-      "label": "Desktop Shadow Style",
-      "options": [
-        { "value": "none", "label": "None" },
-        { "value": "0 1px 3px rgba(0,0,0,0.12)", "label": "Subtle" },
-        { "value": "0 2px 8px rgba(0,0,0,0.15)", "label": "Medium" },
-        { "value": "0 4px 12px rgba(0,0,0,0.2)", "label": "Strong" },
-        { "value": "0 8px 25px rgba(0,0,0,0.25)", "label": "Heavy" }
-      ],
-      "default": "0 1px 3px rgba(0,0,0,0.12)"
-    },
-    {
-      "type": "select",
-      "id": "desktop_content_alignment",
-      "label": "Desktop Content Alignment",
-      "options": [
-        { "value": "left", "label": "Left" },
-        { "value": "center", "label": "Center" },
-        { "value": "right", "label": "Right" }
-      ],
-      "default": "left"
-    },
-    {
-      "type": "header",
-      "content": "Mobile Settings"
-    },
-    {
-      "type": "select",
-      "id": "mobile_alignment",
-      "label": "Mobile Alignment",
-      "options": [
-        { "value": "left", "label": "Left" },
-        { "value": "center", "label": "Center" },
-        { "value": "right", "label": "Right" }
-      ],
-      "default": "center"
-    },
-    {
-      "type": "select",
-      "id": "mobile_font_family",
-      "label": "Mobile Font Family",
-      "options": [
-        { "value": "Arial, sans-serif", "label": "Arial" },
-        { "value": "Helvetica, sans-serif", "label": "Helvetica" },
-        { "value": "Georgia, serif", "label": "Georgia" },
-        { "value": "Times New Roman, serif", "label": "Times New Roman" },
-        { "value": "Verdana, sans-serif", "label": "Verdana" },
-        { "value": "Courier New, monospace", "label": "Courier New" }
-      ],
-      "default": "Arial, sans-serif"
-    },
-    {
-      "type": "range",
-      "id": "mobile_font_size",
-      "label": "Mobile Font Size",
-      "min": 10,
-      "max": 20,
-      "step": 1,
-      "default": 12
-    },
-    {
-      "type": "range",
-      "id": "mobile_line_height",
-      "label": "Mobile Line Height",
-      "min": 1.0,
-      "max": 2.0,
-      "step": 0.1,
-      "default": 1.3
-    },
-    {
-      "type": "range",
-      "id": "mobile_margin",
-      "label": "Mobile Margin",
-      "min": 0,
-      "max": 30,
-      "step": 1,
-      "default": 8
-    },
-    {
-      "type": "range",
-      "id": "mobile_gap",
-      "label": "Mobile Gap",
-      "min": 3,
-      "max": 16,
-      "step": 1,
-      "default": 6
-    },
-    {
-      "type": "range",
-      "id": "mobile_width",
-      "label": "Mobile Width (%)",
-      "min": 30,
-      "max": 100,
-      "step": 5,
-      "default": 100
-    },
-    {
-      "type": "range",
-      "id": "mobile_padding_vertical",
-      "label": "Mobile Padding Vertical",
-      "min": 6,
-      "max": 28,
-      "step": 1,
-      "default": 12
-    },
-    {
-      "type": "range",
-      "id": "mobile_padding_horizontal",
-      "label": "Mobile Padding Horizontal",
-      "min": 8,
-      "max": 36,
-      "step": 1,
-      "default": 16
-    },
-    {
-      "type": "range",
-      "id": "mobile_border_thickness",
-      "label": "Mobile Border Thickness",
-      "min": 0,
-      "max": 6,
-      "step": 1,
-      "default": 1
-    },
-    {
-      "type": "range",
-      "id": "mobile_roundness",
-      "label": "Mobile Roundness",
-      "min": 0,
-      "max": 20,
-      "step": 1,
-      "default": 6
-    },
-    {
-      "type": "select",
-      "id": "mobile_shadow_style",
-      "label": "Mobile Shadow Style",
-      "options": [
-        { "value": "none", "label": "None" },
-        { "value": "0 1px 2px rgba(0,0,0,0.1)", "label": "Subtle" },
-        { "value": "0 2px 6px rgba(0,0,0,0.15)", "label": "Medium" },
-        { "value": "0 3px 10px rgba(0,0,0,0.2)", "label": "Strong" }
-      ],
-      "default": "0 1px 2px rgba(0,0,0,0.1)"
-    },
-    {
-      "type": "select",
-      "id": "mobile_content_alignment",
-      "label": "Mobile Content Alignment",
-      "options": [
-        { "value": "left", "label": "Left" },
-        { "value": "center", "label": "Center" },
-        { "value": "right", "label": "Right" }
-      ],
-      "default": "center"
     }
   ]
 }

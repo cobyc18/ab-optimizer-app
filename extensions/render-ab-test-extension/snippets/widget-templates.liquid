@@ -1,0 +1,46 @@
+{% comment %}
+  Widget Templates - Separate file to reduce main liquid file size
+{% endcomment %}
+
+{% assign widget_templates = '{
+  "product_badge": {
+    "type": "product_badge",
+    "text": "HOT SALE!",
+    "backgroundColor": "#ff6b6b",
+    "textColor": "white"
+  },
+  "social_proof": {
+    "type": "social_proof",
+    "message": "Join 1,234+ happy customers!",
+    "backgroundColor": "#f8f9fa",
+    "borderColor": "#e9ecef",
+    "textColor": "#495057"
+  },
+  "countdown_timer": {
+    "type": "countdown_timer",
+    "message": "Limited Time Offer!",
+    "endTime": "23:59:59",
+    "backgroundColor": "#dc3545",
+    "textColor": "white"
+  },
+  "enhanced_star_rating": {
+    "type": "enhanced_star_rating",
+    "message": "Rated 4.8/5 by 500+ customers",
+    "backgroundColor": "#fff3cd",
+    "borderColor": "#ffeaa7",
+    "textColor": "#856404"
+  },
+  "progress_bar": {
+    "type": "progress_bar",
+    "message": "Limited Stock",
+    "current": 15,
+    "total": 50,
+    "backgroundColor": "#e9ecef",
+    "progressColor": "#28a745",
+    "textColor": "#495057"
+  }
+}' %}
+
+<script>
+window.widgetTemplates = {{ widget_templates }};
+</script> 
