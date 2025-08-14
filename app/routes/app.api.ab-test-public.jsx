@@ -3,7 +3,10 @@ import prisma from "../db.server";
 
 export async function loader({ request }) {
   console.log("🔍 A/B Test Public API GET called:", request.url);
-  return json({ message: "A/B Test Public API is working", timestamp: new Date().toISOString() });
+  return json({ 
+    message: "A/B Test Public API is working", 
+    timestamp: new Date().toISOString()
+  });
 }
 
 export async function action({ request }) {
@@ -26,10 +29,16 @@ export async function action({ request }) {
     switch (action) {
       case "getTest":
         console.log("🔍 Getting test for product:", productId);
-        // Get A/B test for a product
+        
+        // Validate product ID exists
+        if (!productId) {
+          return json({ error: "Product ID is required" }, { status: 400 });
+        }
+        
+        // Get A/B test for a product (productId is stored as string in DB)
         const test = await prisma.aBTest.findFirst({
           where: {
-            productId: parseInt(productId),
+            productId: productId.toString(), // Ensure it's a string
             status: "running"
           },
           select: {
@@ -67,13 +76,25 @@ export async function action({ request }) {
 
       case "logEvent":
         console.log("📝 Logging event:", { testId, eventType, variant, productId });
+        
+        // Validate required fields
+        if (!testId || !eventType) {
+          return json({ error: "Test ID and event type are required" }, { status: 400 });
+        }
+        
+        // Validate event type
+        const validEventTypes = ['impression', 'add_to_cart', 'cart_update', 'checkout_initiated', 'purchase'];
+        if (!validEventTypes.includes(eventType)) {
+          return json({ error: "Invalid event type" }, { status: 400 });
+        }
+        
         // Log A/B test event
         await prisma.aBEvent.create({
           data: {
-            testId: parseInt(testId),
+            testId: testId,
             eventType,
-            variant,
-            productId: parseInt(productId),
+            variant: variant || "A",
+            productId: productId ? productId.toString() : "", // Ensure it's a string
             timestamp: new Date()
           }
         });
@@ -83,9 +104,15 @@ export async function action({ request }) {
 
       case "getVariant":
         console.log("🎯 Getting variant for test:", testId);
+        
+        // Validate test ID exists
+        if (!testId) {
+          return json({ error: "Test ID is required" }, { status: 400 });
+        }
+        
         // Get variant for a specific test
         const variantTest = await prisma.aBTest.findUnique({
-          where: { id: parseInt(testId) },
+          where: { id: testId },
           select: {
             id: true,
             templateA: true,
