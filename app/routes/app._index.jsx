@@ -498,7 +498,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#1a1a1a', margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>
-                  TryLabs Dashboard
+                  TryLabs Coby Dashboard
                 </h1>
                 <p style={{ color: '#6b7280', margin: '0', fontSize: '16px', fontWeight: '500' }}>
                   Welcome back, <span style={{ color: '#32cd32', fontWeight: '600' }}>{user?.firstName || 'User'}</span>! Here's your testing overview.
