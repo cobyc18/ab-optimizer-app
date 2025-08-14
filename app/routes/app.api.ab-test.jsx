@@ -2,7 +2,14 @@ import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
 
+export async function loader({ request }) {
+  console.log("🔍 A/B Test API GET called:", request.url);
+  return json({ message: "A/B Test API is working", timestamp: new Date().toISOString() });
+}
+
 export async function action({ request }) {
+  console.log("🔍 A/B Test API called:", request.url);
+  
   const { admin } = await authenticate.admin(request);
   
   if (request.method !== "POST") {
@@ -16,9 +23,12 @@ export async function action({ request }) {
   const testId = formData.get("testId");
   const eventType = formData.get("eventType");
 
+  console.log("📝 API Request data:", { action, productId, variant, testId, eventType });
+
   try {
     switch (action) {
       case "getTest":
+        console.log("🔍 Getting test for product:", productId);
         // Get A/B test for a product
         const test = await prisma.aBTest.findFirst({
           where: {
@@ -38,6 +48,8 @@ export async function action({ request }) {
           }
         });
         
+        console.log("📊 Found test:", test);
+        
         if (!test) {
           return json({ test: null });
         }
@@ -45,6 +57,8 @@ export async function action({ request }) {
         // Determine variant based on traffic split
         const random = Math.random() * 100;
         const variant = random <= test.trafficSplit ? "A" : "B";
+        
+        console.log("🎯 Selected variant:", variant);
         
         return json({ 
           test: {
@@ -55,6 +69,7 @@ export async function action({ request }) {
         });
 
       case "logEvent":
+        console.log("📝 Logging event:", { testId, eventType, variant, productId });
         // Log A/B test event
         await prisma.aBEvent.create({
           data: {
@@ -66,9 +81,11 @@ export async function action({ request }) {
           }
         });
         
+        console.log("✅ Event logged successfully");
         return json({ success: true });
 
       case "getVariant":
+        console.log("🎯 Getting variant for test:", testId);
         // Get variant for a specific test
         const variantTest = await prisma.aBTest.findUnique({
           where: { id: parseInt(testId) },
@@ -87,16 +104,19 @@ export async function action({ request }) {
         const variantRandom = Math.random() * 100;
         const selectedVariant = variantRandom <= variantTest.trafficSplit ? "A" : "B";
         
+        console.log("🎯 Selected variant:", selectedVariant);
+        
         return json({
           variant: selectedVariant,
           template: selectedVariant === "A" ? variantTest.templateA : variantTest.templateB
         });
 
       default:
+        console.log("❌ Invalid action:", action);
         return json({ error: "Invalid action" }, { status: 400 });
     }
   } catch (error) {
-    console.error("A/B Test API Error:", error);
+    console.error("❌ A/B Test API Error:", error);
     return json({ error: "Internal server error" }, { status: 500 });
   }
 } 
