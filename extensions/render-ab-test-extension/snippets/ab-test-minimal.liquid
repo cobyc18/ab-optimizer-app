@@ -8,7 +8,7 @@
   'use strict';
   
   // Configuration
-  const API_BASE = 'https://ab-optimizer-app.onrender.com/app/api/ab-test';
+  const API_BASE = 'https://ab-optimizer-app.onrender.com/app/api/ab-test-public';
   const PRODUCT_ID = {{ product.id }};
   
   // Global variables
@@ -18,16 +18,39 @@
   // Initialize A/B test
   async function initializeABTest() {
     try {
+      console.log('🚀 Initializing A/B test for product:', PRODUCT_ID);
+      
       const formData = new FormData();
       formData.append('action', 'getTest');
       formData.append('productId', PRODUCT_ID);
+      
+      console.log('📡 Calling API:', API_BASE);
       
       const response = await fetch(API_BASE, {
         method: 'POST',
         body: formData
       });
       
-      const data = await response.json();
+      console.log('📥 Response status:', response.status);
+      console.log('📥 Response headers:', response.headers);
+      
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+      
+      const responseText = await response.text();
+      console.log('📥 Response text:', responseText);
+      
+      let data;
+      try {
+        data = JSON.parse(responseText);
+      } catch (parseError) {
+        console.error('❌ Failed to parse JSON:', parseError);
+        console.error('❌ Response text was:', responseText);
+        return;
+      }
+      
+      console.log('📊 Parsed data:', data);
       
       if (data.test) {
         currentTest = data.test;
@@ -45,9 +68,15 @@
         
         // Log impression
         logEvent('impression');
+      } else {
+        console.log('ℹ️ No active A/B test found for this product');
       }
     } catch (error) {
       console.error('❌ A/B Test initialization failed:', error);
+      console.error('❌ Error details:', {
+        message: error.message,
+        stack: error.stack
+      });
     }
   }
   
