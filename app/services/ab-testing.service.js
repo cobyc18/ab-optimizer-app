@@ -185,11 +185,28 @@ class ABTestingService {
    * Determine variant from order data
    */
   determineVariantFromOrder(orderData, activeTest) {
+    console.log("🔍 Determining variant from order data...");
+    console.log("Order note:", orderData.note);
+    console.log("Order tags:", orderData.tags);
+    console.log("Order note_attributes:", orderData.note_attributes);
+    console.log("Active test templates:", activeTest.templateA, "vs", activeTest.templateB);
+
     // Method 1: Check order note for variant information
     if (orderData.note) {
       const variantMatch = orderData.note.match(/ab_variant:([AB])/i);
       if (variantMatch) {
-        return variantMatch[1].toUpperCase();
+        const variant = variantMatch[1].toUpperCase();
+        console.log("✅ Found variant in order note:", variant);
+        return variant;
+      }
+      
+      // Check for template names in the note
+      if (orderData.note.includes(activeTest.templateA)) {
+        console.log("✅ Found template A in order note:", activeTest.templateA);
+        return "A";
+      } else if (orderData.note.includes(activeTest.templateB)) {
+        console.log("✅ Found template B in order note:", activeTest.templateB);
+        return "B";
       }
     }
 
@@ -197,7 +214,18 @@ class ABTestingService {
     if (orderData.tags) {
       const variantMatch = orderData.tags.match(/ab_variant:([AB])/i);
       if (variantMatch) {
-        return variantMatch[1].toUpperCase();
+        const variant = variantMatch[1].toUpperCase();
+        console.log("✅ Found variant in order tags:", variant);
+        return variant;
+      }
+      
+      // Check for template names in tags
+      if (orderData.tags.includes(activeTest.templateA)) {
+        console.log("✅ Found template A in order tags:", activeTest.templateA);
+        return "A";
+      } else if (orderData.tags.includes(activeTest.templateB)) {
+        console.log("✅ Found template B in order tags:", activeTest.templateB);
+        return "B";
       }
     }
 
@@ -207,12 +235,77 @@ class ABTestingService {
         attr.name && attr.name.toLowerCase().includes('ab_variant')
       );
       if (variantAttr && variantAttr.value) {
-        return variantAttr.value.toUpperCase();
+        const variant = variantAttr.value.toUpperCase();
+        console.log("✅ Found variant in order attributes:", variant);
+        return variant;
+      }
+      
+      // Check for template names in attributes
+      const templateAAttr = orderData.note_attributes.find(attr => 
+        attr.value && attr.value.includes(activeTest.templateA)
+      );
+      if (templateAAttr) {
+        console.log("✅ Found template A in order attributes:", activeTest.templateA);
+        return "A";
+      }
+      
+      const templateBAttr = orderData.note_attributes.find(attr => 
+        attr.value && attr.value.includes(activeTest.templateB)
+      );
+      if (templateBAttr) {
+        console.log("✅ Found template B in order attributes:", activeTest.templateB);
+        return "B";
       }
     }
 
-    // Default to variant A
+    // Method 4: Check for any other metadata that might contain variant info
+    if (orderData.metadata) {
+      console.log("Checking order metadata for variant info:", orderData.metadata);
+      // Add any additional metadata checks here
+    }
+
+    // Method 5: Check for form fields that might have been added during checkout
+    if (orderData.note_attributes) {
+      const abVariantAttr = orderData.note_attributes.find(attr => 
+        attr.name && attr.name.toLowerCase() === 'ab_variant'
+      );
+      if (abVariantAttr && abVariantAttr.value) {
+        console.log("✅ Found ab_variant in note attributes:", abVariantAttr.value);
+        return abVariantAttr.value.toUpperCase();
+      }
+      
+      const abTestIdAttr = orderData.note_attributes.find(attr => 
+        attr.name && attr.name.toLowerCase() === 'ab_test_id'
+      );
+      if (abTestIdAttr) {
+        console.log("✅ Found ab_test_id in note attributes:", abTestIdAttr.value);
+      }
+    }
+
+    // Method 6: Check for any custom fields that might contain variant info
+    if (orderData.note) {
+      // Look for any mention of the template names
+      const templateAMatch = orderData.note.match(new RegExp(activeTest.templateA.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
+      if (templateAMatch) {
+        console.log("✅ Found template A in order note:", activeTest.templateA);
+        return "A";
+      }
+      
+      const templateBMatch = orderData.note.match(new RegExp(activeTest.templateB.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'));
+      if (templateBMatch) {
+        console.log("✅ Found template B in order note:", activeTest.templateB);
+        return "B";
+      }
+    }
+
+    // Default to variant A with warning
     console.log("⚠️ Could not determine variant from order, defaulting to A");
+    console.log("Available order data:", {
+      note: orderData.note,
+      tags: orderData.tags,
+      note_attributes: orderData.note_attributes,
+      metadata: orderData.metadata
+    });
     return "A";
   }
 

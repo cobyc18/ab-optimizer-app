@@ -31,85 +31,37 @@ export const action = async ({ request }) => {
 
       try {
         // Fetch the order details using the Admin API
-        const orderResponse = await admin.graphql(`
-          query getOrder($id: ID!) {
-            order(id: $id) {
-              id
-              name
-              totalPriceSet {
-                shopMoney {
-                  amount
-                  currencyCode
-                }
-              }
-              financialStatus
-              fulfillmentStatus
-              email
-              customer {
-                id
-                email
-              }
-              lineItems(first: 10) {
-                edges {
-                  node {
-                    id
-                    product {
-                      id
-                    }
-                    variant {
-                      id
-                    }
-                    quantity
-                    originalUnitPriceSet {
-                      shopMoney {
-                        amount
-                        currencyCode
-                      }
-                    }
-                  }
-                }
-              }
-              note
-              tags
-              noteAttributes {
-                name
-                value
-              }
-            }
-          }
-        `, {
-          variables: {
-            id: `gid://shopify/Order/${payload.order_id}`
-          }
+        const orderResponse = await admin.rest({
+          path: `orders/${payload.order_id}.json`
         });
 
         const orderData = await orderResponse.json();
         
-        if (orderData.data?.order) {
-          const order = orderData.data.order;
+        if (orderData.order) {
+          const order = orderData.order;
           
           // Transform the order data to match our expected format
           const transformedOrder = {
-            id: order.id.split('/').pop(),
+            id: order.id.toString(),
             name: order.name,
-            total_price: order.totalPriceSet?.shopMoney?.amount || "0",
-            financial_status: order.financialStatus?.toLowerCase(),
-            fulfillment_status: order.fulfillmentStatus?.toLowerCase(),
+            total_price: order.total_price || "0",
+            financial_status: order.financial_status,
+            fulfillment_status: order.fulfillment_status,
             email: order.email,
             customer: order.customer ? {
-              id: order.customer.id.split('/').pop(),
+              id: order.customer.id.toString(),
               email: order.customer.email
             } : null,
-            line_items: order.lineItems?.edges?.map(edge => ({
-              id: edge.node.id.split('/').pop(),
-              product_id: edge.node.product?.id?.split('/').pop(),
-              variant_id: edge.node.variant?.id?.split('/').pop(),
-              quantity: edge.node.quantity,
-              price: edge.node.originalUnitPriceSet?.shopMoney?.amount || "0"
+            line_items: order.line_items?.map(item => ({
+              id: item.id.toString(),
+              product_id: item.product_id.toString(),
+              variant_id: item.variant_id.toString(),
+              quantity: item.quantity,
+              price: item.price
             })) || [],
             note: order.note,
             tags: order.tags,
-            note_attributes: order.noteAttributes?.map(attr => ({
+            note_attributes: order.note_attributes?.map(attr => ({
               name: attr.name,
               value: attr.value
             })) || []
