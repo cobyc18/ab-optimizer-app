@@ -67,14 +67,18 @@ model ABEvent {
 }
 
 model WidgetConfig {
-  id        String   @id @default(uuid())
-  shop      String
-  widget    String   // e.g. "recipe_widget" or "star_rating"
-  config    Json     // All widget settings as JSON
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id         String   @id @default(uuid())
+  shop       String
+  widgetType String   // e.g. "countdown_timer", "product_badge", "social_proof", etc.
+  name       String   // Human-readable name for the widget
+  config     Json     // All widget settings as JSON
+  isActive   Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
-  shopData  Shop     @relation(fields: [shop], references: [shop], onDelete: Cascade)
+  shopData   Shop     @relation(fields: [shop], references: [shop], onDelete: Cascade)
+  
+  @@map("widget_configs")
 }
 
 // Additional models for the standalone app
@@ -95,6 +99,7 @@ model Shop {
   webhookEvents WebhookEvent[]
   abTests       ABTest[]
   widgetConfigs WidgetConfig[]
+  injectedSections InjectedSection[]
 
   @@map("shops")
 }
@@ -135,4 +140,20 @@ model WebhookEvent {
   shopData      Shop     @relation(fields: [shop], references: [shop], onDelete: Cascade)
 
   @@map("webhook_events")
+}
+
+model InjectedSection {
+  id              String   @id @default(uuid())
+  shop            String
+  sectionType     String   // e.g. "countdown_timer", "product_badge"
+  sectionName     String   // Human-readable name
+  sectionKey      String   // File path in theme (e.g. "sections/countdown-timer.liquid")
+  sectionSettings Json     // Settings used to generate the section
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  shopData        Shop     @relation(fields: [shop], references: [shop], onDelete: Cascade)
+  
+  @@map("injected_sections")
 }

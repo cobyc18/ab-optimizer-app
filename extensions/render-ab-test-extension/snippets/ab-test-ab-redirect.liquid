@@ -7,6 +7,7 @@
 <script>
 // Global A/B test tracking system that works on all pages
 (function() {
+  console.log("=== GLOBAL A/B TEST TRACKING INITIALIZED LIATE !!===");
   
   // Function to determine the current A/B test variant (global version)
   function determineCurrentVariantGlobal() {
@@ -17,6 +18,7 @@
     if (testKeys.length > 0) {
       var bucket = localStorage.getItem(testKeys[0]);
       if (bucket) {
+        console.log("Using stored bucket for variant:", bucket);
         return bucket;
       }
     }
@@ -26,6 +28,7 @@
     var currentView = url.searchParams.get('view') || "";
     
     if (currentView) {
+      console.log("Determining variant from view parameter:", currentView);
       if (currentView === "default") {
         return "A"; // Assuming default template is variant A
       } else {
@@ -34,11 +37,13 @@
     }
     
     // Fallback to variant A if we can't determine
+    console.log("Could not determine variant, using fallback A");
     return "A";
   }
   
   // Global purchase tracking function
   function trackPurchaseGlobal(orderData) {
+    console.log("Global purchase tracking triggered coby!:", orderData);
     
     // Try to get product ID from various sources
     var productId = null;
@@ -49,6 +54,7 @@
       var productMatch = window.location.pathname.match(/\/products\/([^\/]+)/);
       if (productMatch) {
         // We'll need to look up the product ID by handle
+        console.log("Product handle found:", productMatch[1]);
         // For now, we'll use a placeholder - in a real implementation, you'd look this up
         productId = "unknown";
       }
@@ -58,16 +64,19 @@
     var keys = Object.keys(localStorage);
     var productKeys = keys.filter(key => key.includes('product') || key.includes('ab_test'));
     if (productKeys.length > 0) {
+      console.log("Found product-related keys in localStorage:", productKeys);
     }
     
     // Method 3: Check sessionStorage for recent product visits
     var sessionKeys = Object.keys(sessionStorage);
     var sessionProductKeys = sessionKeys.filter(key => key.includes('product') || key.includes('ab_test'));
     if (sessionProductKeys.length > 0) {
+      console.log("Found product-related keys in sessionStorage:", sessionProductKeys);
     }
     
     // If we can't determine product ID, still log the purchase
     if (!productId) {
+      console.log("Could not determine product ID, logging purchase without product context");
       productId = "unknown";
     }
     
@@ -92,12 +101,15 @@
         }
       })
     }).then(r => r.json()).then(data => {
+      console.log("Logged global purchase event:", data);
     }).catch(e => {
+      console.log("Failed to log global purchase event", e);
     });
   }
   
   // Enhanced purchase detection for all pages
   function detectPurchaseGlobal() {
+    console.log("Global purchase detection checking page coby!!:", window.location.href);
     
     // Check multiple thank you page patterns
     var isThankYouPage = (
@@ -130,9 +142,11 @@
     }
     
     if (!isThankYouPage) {
+      console.log("Not on thank you page, skipping global purchase detection");
       return;
     }
     
+    console.log("Thank you page detected, looking for order data...");
     
     var orderData = {};
     
@@ -142,6 +156,7 @@
                     document.querySelector('meta[name="order_id"]');
     if (orderMeta) {
       orderData.order_id = orderMeta.getAttribute('content');
+      console.log("Found order ID in meta tag:", orderData.order_id);
     }
     
     // Method 2: Look for order data in script tags
@@ -164,6 +179,7 @@
               try {
                 var orderInfo = JSON.parse(match);
                 orderData = { ...orderData, ...orderInfo };
+                console.log("Found order data in script:", orderInfo);
               } catch (e) {
                 // Ignore parsing errors
               }
@@ -180,6 +196,7 @@
     var orderIdFromUrl = urlParams.get('order_id') || urlParams.get('order-id') || urlParams.get('id');
     if (orderIdFromUrl) {
       orderData.order_id = orderIdFromUrl;
+      console.log("Found order ID in URL:", orderIdFromUrl);
     }
     
     // Method 4: Look for order data in page content
@@ -190,6 +207,7 @@
                     element.textContent;
       if (orderId) {
         orderData.order_id = orderId.trim();
+        console.log("Found order ID in page content:", orderId);
       }
     });
     
@@ -201,14 +219,17 @@
         var price = parseFloat(priceText.replace(/[^0-9.]/g, ''));
         if (price > 0) {
           orderData.total_price = price;
+          console.log("Found total price in page content:", price);
         }
       }
     });
     
       // If we found any order data, log the purchase
   if (Object.keys(orderData).length > 0) {
+    console.log("Order data found:", orderData);
     trackPurchaseGlobal(orderData);
   } else {
+    console.log("No order data found, but on thank you page - logging basic purchase event");
     // Log a basic purchase event even without detailed order data
     trackPurchaseGlobal({ 
       order_id: 'unknown',
@@ -223,6 +244,7 @@
   
   // Purchase intent tracking - track when user starts checkout process
   function trackPurchaseIntent(productId, variant) {
+    console.log("Tracking purchase intent for product:", productId, "variant:", variant);
     
     // Store purchase intent in localStorage
     var purchaseIntent = {
@@ -233,6 +255,7 @@
     };
     
     localStorage.setItem('ab_purchase_intent', JSON.stringify(purchaseIntent));
+    console.log("Purchase intent stored:", purchaseIntent);
   }
   
   // Check for completed purchases by monitoring URL changes
@@ -244,18 +267,21 @@
         currentUrl.includes('/thank-you') || 
         currentUrl.includes('/checkouts') && currentUrl.includes('/thank')) {
       
+      console.log("Thank you page detected, checking for purchase intent...");
       
       // Get stored purchase intent
       var purchaseIntentStr = localStorage.getItem('ab_purchase_intent');
       if (purchaseIntentStr) {
         try {
           var purchaseIntent = JSON.parse(purchaseIntentStr);
+          console.log("Found purchase intent:", purchaseIntent);
           
           // Calculate time difference to ensure it's recent (within 1 hour)
           var timeDiff = Date.now() - purchaseIntent.timestamp;
           var oneHour = 60 * 60 * 1000; // 1 hour in milliseconds
           
           if (timeDiff < oneHour) {
+            console.log("Recent purchase intent found, logging purchase event");
             
             // Log the purchase event
             trackPurchaseGlobal({
@@ -268,13 +294,17 @@
             
             // Clear the purchase intent
             localStorage.removeItem('ab_purchase_intent');
+            console.log("Purchase intent cleared");
           } else {
+            console.log("Purchase intent too old, clearing");
             localStorage.removeItem('ab_purchase_intent');
           }
         } catch (e) {
+          console.log("Error parsing purchase intent:", e);
           localStorage.removeItem('ab_purchase_intent');
         }
       } else {
+        console.log("No purchase intent found");
       }
     }
   }
@@ -291,12 +321,14 @@
     setInterval(function() {
       if (window.location.href !== lastUrl) {
         lastUrl = window.location.href;
+        console.log("URL changed to:", lastUrl);
         checkForCompletedPurchase();
       }
     }, 1000); // Check every second
     
     // Also listen for popstate events (back/forward navigation)
     window.addEventListener('popstate', function() {
+      console.log("Popstate event, checking for purchase completion");
       setTimeout(checkForCompletedPurchase, 500);
     });
     
@@ -304,6 +336,7 @@
     window.addEventListener('beforeunload', function() {
       var purchaseIntentStr = localStorage.getItem('ab_purchase_intent');
       if (purchaseIntentStr) {
+        console.log("User leaving page with purchase intent");
       }
     });
   }
@@ -340,6 +373,7 @@
     checkForCompletedPurchase: checkForCompletedPurchase
   };
   
+  console.log("=== GLOBAL A/B TEST TRACKING SETUP COMPLETE ===");
 })();
 </script>
 
@@ -348,21 +382,30 @@
   // Prevent multiple executions of this script using sessionStorage
   var scriptId = 'ab-test-script-' + {{ product.id | json }};
   if (sessionStorage.getItem(scriptId)) {
+    console.log("A/B test script already executed for this product, skipping...");
   } else {
     sessionStorage.setItem(scriptId, 'true');
     (async function() {
+      console.log("=== A/B TEST DEBUG START ===");
+      console.log("Current URL:", window.location.href);
+      console.log("Hostname:", window.location.hostname);
+      console.log("Pathname:", window.location.pathname);
       var rawId = {{ product.id | json }};
       var productId = rawId;
       if (typeof rawId === "string" && rawId.startsWith("gid://")) {
         var match = rawId.match(/Product\/(\\d+)/);
         if (match) productId = match[1];
       }
+      console.log("Product ID:", productId);
       
       // Check current URL parameters
       var url = new URL(window.location.href);
       var currentView = url.searchParams.get('view') || "";
       var previewPath = url.searchParams.get('previewPath') || "";
       var noRedirect = url.searchParams.get('no_redirect') || "";
+      console.log("Current view parameter:", currentView);
+      console.log("Preview path parameter:", previewPath);
+      console.log("No redirect parameter:", noRedirect);
       
       var isThemeEditor = (
         window.location.hostname === "admin.shopify.com" &&
@@ -374,16 +417,22 @@
       ) || (
         window.location.href.includes("context=apps")
       );
+      console.log("Is theme editor:", isThemeEditor);
       
       if (isThemeEditor) {
+        console.log("In Shopify theme editor - NEVER redirecting");
+        console.log("=== A/B TEST DEBUG END ===");
         return;
       }
       
       if (noRedirect === "true") {
+        console.log("No redirect parameter detected - skipping A/B test redirect");
+        console.log("=== A/B TEST DEBUG END ===");
         return;
       }
       
       if (currentView && currentView !== "") {
+        console.log("User is manually viewing template:", currentView, "- no redirect");
         var res = await fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
         if (res.ok) {
           var config = await res.json();
@@ -393,10 +442,13 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ testId: config.testId, variant: currentView, eventType: 'impression', productId: String(productId) })
             }).then(r => r.json()).then(data => {
+              console.log("Logged impression event for manual view:", data);
             }).catch(e => {
+              console.log("Failed to log impression event", e);
             });
           }
         }
+        console.log("=== A/B TEST DEBUG END ===");
         return;
       }
       
@@ -405,24 +457,35 @@
         var referrerUrl = new URL(document.referrer);
         var referrerView = referrerUrl.searchParams.get('view');
         if (referrerView && referrerView !== "") {
+          console.log("User navigated from template with view parameter:", referrerView, "- treating as manual navigation");
           isManualNavigation = true;
         }
       }
       
       if (isManualNavigation) {
+        console.log("Manual navigation detected - skipping A/B test redirect");
+        console.log("=== A/B TEST DEBUG END ===");
         return;
       }
       
+      console.log("Fetching A/B test config...");
       try {
         var res = await fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
+        console.log("A/B test config response status:", res.status);
+        console.log("A/B test config response ok:", res.ok);
         
         if (!res.ok) {
+          console.log("Failed to fetch test config - response not ok");
+          console.log("=== A/B TEST DEBUG END ===");
           return;
         }
         
         var config = await res.json();
+        console.log("Fetched config:", config);
         
         if (!config.testId) {
+          console.log("No testId in config");
+          console.log("=== A/B TEST DEBUG END ===");
           return;
         }
         
@@ -432,24 +495,35 @@
         var bucketKey = 'ab_test_' + testId;
         var bucket = localStorage.getItem(bucketKey);
         
+        console.log("Test ID:", testId);
+        console.log("Variant A:", variantA);
+        console.log("Variant B:", variantB);
+        console.log("Bucket key:", bucketKey);
+        console.log("Existing bucket:", bucket);
         
         if (!bucket) {
           bucket = Math.random() < config.trafficSplit / 100 ? variantA : variantB;
           localStorage.setItem(bucketKey, bucket);
+          console.log("Assigned bucket:", bucket);
         } else {
+          console.log("Existing bucket:", bucket);
         }
         
         // Store test ID globally for tracking functions
         window.currentTestId = testId;
         window.currentVariant = bucket;
+        console.log("🔍 Set global testId:", window.currentTestId);
+        console.log("🔍 Set global variant:", window.currentVariant);
         
         // Store testId in localStorage for persistence across page loads
         localStorage.setItem('current_test_id', testId);
         localStorage.setItem('current_variant', bucket);
+        console.log("🔍 Stored testId in localStorage:", testId);
         
         // Also store in a global variable for immediate access
         window.abTestId = testId;
         window.abTestVariant = bucket;
+        console.log("🔍 Set global abTestId:", window.abTestId);
         
         // CRITICAL: Set a global function that returns the current testId
         window.getABTestId = function() {
@@ -458,36 +532,49 @@
         window.getABTestVariant = function() {
           return bucket; // Direct access to the variable from this scope
         };
+        console.log("🔍 Set global getABTestId function");
         
         // Only redirect for actual customer visits (not manual navigation)
         if (bucket && bucket !== "" && !currentView) {
           url.searchParams.set('view', bucket);
+          console.log("Redirecting to variant:", url.toString());
           window.location.replace(url.toString());
         } else {
+          console.log("No redirect needed. Current view:", currentView, "Bucket:", bucket);
         }
         
         // Log impression event (only once per page load using sessionStorage)
         var impressionKey = 'impression-' + productId + '-' + Date.now();
         if (!sessionStorage.getItem(impressionKey)) {
           sessionStorage.setItem(impressionKey, 'true');
+          console.log("Logging impression event...");
           fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ testId, variant: bucket, eventType: 'impression', productId: String(productId) })
           }).then(r => {
+            console.log("Impression response status:", r.status);
+            console.log("Impression response ok:", r.ok);
             if (!r.ok) {
               return r.text().then(text => {
+                console.log("Impression error response:", text);
                 throw new Error(`HTTP ${r.status}: ${text}`);
               });
             }
             return r.json();
           }).then(data => {
+            console.log("✅ Logged impression event:", data);
           }).catch(e => {
+            console.log("❌ Failed to log impression event", e);
           });
         } else {
+          console.log("Impression already logged, skipping...");
         }
         
+        console.log("=== A/B TEST DEBUG END ===");
       } catch (error) {
+        console.log("❌ Error in A/B test initialization:", error);
+        console.log("=== A/B TEST DEBUG END ===");
       }
     })();
   }
@@ -503,6 +590,7 @@ var timeOnPageLogged = false;
 
 function startTimeTracking() {
   if (window.timeTrackingStarted) {
+    console.log("Time tracking already started, skipping...");
     return;
   }
   window.timeTrackingStarted = true;
@@ -512,9 +600,11 @@ function startTimeTracking() {
   timeTrackingStopped = false;
   timeOnPageLogged = false;
   
+  console.log("Started time tracking for product page");
   
   timeTrackingInterval = setInterval(function() {
     var timeSpent = Math.floor((Date.now() - pageStartTime) / 1000); // seconds
+    console.log("Time on page:", timeSpent, "seconds");
   }, 5000); // Log every 5 seconds
 }
 
@@ -523,6 +613,7 @@ function stopTimeTracking() {
     clearInterval(timeTrackingInterval);
     timeTrackingStopped = true;
     var totalTimeSpent = Math.floor((Date.now() - pageStartTime) / 1000);
+    console.log("Total time on page:", totalTimeSpent, "seconds");
     
     // Send time on page event (only once per page visit)
     if (!timeOnPageLogged && totalTimeSpent > 0) {
@@ -541,7 +632,9 @@ function stopTimeTracking() {
           metadata: { timeSpent: totalTimeSpent }
         })
       }).then(r => r.json()).then(data => {
+        console.log("Logged time on page event:", data);
       }).catch(e => {
+        console.log("Failed to log time on page event", e);
       });
     }
   }
@@ -582,6 +675,7 @@ function setupNavigationTracking() {
     
     if (href && !href.includes(window.location.hostname + window.location.pathname)) {
       // User is navigating to a different page
+      console.log("Navigation detected to:", href);
       trackPageNavigation();
     }
   });
@@ -590,6 +684,7 @@ function setupNavigationTracking() {
   document.addEventListener('submit', function(event) {
     var form = event.target;
     if (form && form.action && !form.action.includes(window.location.pathname)) {
+      console.log("Form submission detected that might navigate away");
       trackPageNavigation();
     }
   });
@@ -598,26 +693,31 @@ function setupNavigationTracking() {
 
 // Helper function to get current test ID - SIMPLE AND BULLETPROOF
 function getCurrentTestId() {
+  console.log("🔍 getCurrentTestId() called");
   
   // Method 1: Use the global function that has direct access to the testId
   if (window.getABTestId && typeof window.getABTestId === 'function') {
     var testId = window.getABTestId();
+    console.log("✅ Using window.getABTestId():", testId);
     if (testId) return testId;
   }
   
   // Method 2: Use global variable
   if (window.currentTestId) {
+    console.log("✅ Using window.currentTestId:", window.currentTestId);
     return window.currentTestId;
   }
   
   // Method 3: Use abTestId variable
   if (window.abTestId) {
+    console.log("✅ Using window.abTestId:", window.abTestId);
     return window.abTestId;
   }
   
   // Method 4: Check localStorage for current_test_id
   var storedTestId = localStorage.getItem('current_test_id');
   if (storedTestId) {
+    console.log("✅ Using localStorage current_test_id:", storedTestId);
     return storedTestId;
   }
   
@@ -628,9 +728,11 @@ function getCurrentTestId() {
     // Extract testId from the first ab_test_ key
     var testKey = testKeys[0];
     var testIdFromKey = testKey.replace('ab_test_', '');
+    console.log("✅ Using testId from localStorage key:", testIdFromKey);
     return testIdFromKey;
   }
   
+  console.log("❌ No testId found - this should not happen!");
   return null;
 }
 
@@ -640,13 +742,17 @@ function waitForTestId(callback, maxAttempts = 10) {
   
   function checkTestId() {
     attempts++;
+    console.log(`🔍 Waiting for testId... attempt ${attempts}/${maxAttempts}`);
     
     var testId = getCurrentTestId();
     if (testId) {
+      console.log("✅ testId found:", testId);
       callback(testId);
     } else if (attempts < maxAttempts) {
+      console.log("⏳ testId not ready, retrying in 100ms...");
       setTimeout(checkTestId, 100);
     } else {
+      console.log("❌ testId not available after maximum attempts");
       callback(null);
     }
   }
@@ -662,19 +768,24 @@ var lastCartUpdateTime = 0; // Track last cart update to prevent duplicates
 // Function to get current cart count for this specific product
 function getProductCartCount() {
   return new Promise((resolve) => {
+    console.log("Getting cart count for product:", {{ product.id | json }});
     
     // Method 1: Fetch cart data via AJAX (most reliable)
     fetch('/cart.js')
       .then(response => response.json())
       .then(cart => {
+        console.log("Fetched cart data:", cart);
         var productItem = cart.items.find(item => item.product_id == {{ product.id | json }});
         if (productItem) {
+          console.log("Found product in cart with quantity:", productItem.quantity);
           resolve(productItem.quantity || 0);
         } else {
+          console.log("Product not found in cart, count is 0");
           resolve(0);
         }
       })
       .catch(e => {
+        console.log("Error fetching cart:", e);
         resolve(0);
       });
   });
@@ -685,6 +796,7 @@ async function updateCartCountAndLog(action) {
   // Prevent duplicate events within 2 seconds
   var currentTime = Date.now();
   if (currentTime - lastCartUpdateTime < 2000) {
+    console.log("Skipping cart update - too soon after last update");
     return;
   }
   lastCartUpdateTime = currentTime;
@@ -696,6 +808,7 @@ async function updateCartCountAndLog(action) {
   var newCount = await getProductCartCount();
   currentCartCount = newCount;
   
+  console.log(`Cart count updated: ${oldCount} -> ${newCount} (action: ${action})`);
   
   // Store current count in sessionStorage
   sessionStorage.setItem('cart-count-' + {{ product.id | json }}, newCount.toString());
@@ -703,11 +816,14 @@ async function updateCartCountAndLog(action) {
   // Wait for testId to be available before logging
   waitForTestId(function(testId) {
     if (!testId) {
+      console.log("❌ Cannot log cart event - no testId available");
       return;
     }
     
     // Log the cart update event
     var currentVariant = determineCurrentVariant();
+    console.log("🔍 Cart update - testId:", testId);
+    console.log("🔍 Cart update - variant:", currentVariant);
     var cartValue = 0;
     
     // Get cart value if available
@@ -740,14 +856,19 @@ async function updateCartCountAndLog(action) {
         }
       })
     }).then(r => {
+      console.log("🔍 Cart update response status:", r.status);
+      console.log("🔍 Cart update response ok:", r.ok);
       if (!r.ok) {
         return r.text().then(text => {
+          console.log("❌ Cart update error response:", text);
           throw new Error(`HTTP ${r.status}: ${text}`);
         });
       }
       return r.json();
     }).then(data => {
+      console.log("✅ Logged cart update event:", data);
     }).catch(e => {
+      console.log("❌ Failed to log cart update event:", e);
     });
   });
   
@@ -765,6 +886,7 @@ function trackAddToCart(event) {
     event.preventDefault();
   }
   
+  console.log("Add to cart event detected");
   
   // Get current cart count before adding
   var previousCount = currentCartCount;
@@ -777,10 +899,13 @@ function trackAddToCart(event) {
     // Wait for testId to be available before logging
     waitForTestId(function(testId) {
       if (!testId) {
+        console.log("❌ Cannot log add to cart event - no testId available");
         return;
       }
       
       var currentVariant = determineCurrentVariant();
+      console.log("🔍 Add to cart - testId:", testId);
+      console.log("🔍 Add to cart - variant:", currentVariant);
       var cartValue = 0;
       
       // Get cart value if available
@@ -810,14 +935,19 @@ function trackAddToCart(event) {
           }
         })
       }).then(r => {
+        console.log("🔍 Add to cart response status:", r.status);
+        console.log("🔍 Add to cart response ok:", r.ok);
         if (!r.ok) {
           return r.text().then(text => {
+            console.log("❌ Add to cart error response:", text);
             throw new Error(`HTTP ${r.status}: ${text}`);
           });
         }
         return r.json();
       }).then(data => {
+        console.log("✅ Logged initial add to cart event:", data);
       }).catch(e => {
+        console.log("❌ Failed to log add to cart event:", e);
       });
     });
   }
@@ -830,6 +960,7 @@ function trackAddToCart(event) {
 
 // Track cart removal events
 function trackCartRemoval() {
+  console.log("Cart removal event detected");
   updateCartCountAndLog('remove');
 }
 
@@ -845,6 +976,7 @@ function setupCartRemovalMonitoring() {
     var targetAriaLabel = target.getAttribute('aria-label') || '';
     
     // Debug: Log all clicks to see what we're missing
+    console.log("Click detected on:", {
       tagName: target.tagName,
       text: targetText,
       class: targetClass,
@@ -906,6 +1038,7 @@ function setupCartRemovalMonitoring() {
       target.closest('.delete-btn') ||
       target.closest('.cart-delete')
     )) {
+      console.log("Remove button/link clicked:", targetText, targetClass);
       setTimeout(function() {
         updateCartCountAndLog('remove');
       }, 1000);
@@ -923,6 +1056,7 @@ function setupCartRemovalMonitoring() {
       targetText.includes('remove all') ||
       targetText.includes('delete all')
     )) {
+      console.log("Clear cart button clicked");
       setTimeout(function() {
         updateCartCountAndLog('remove');
       }, 1000);
@@ -935,6 +1069,7 @@ function setupCartRemovalMonitoring() {
     var formAction = form.action || '';
     var formData = new FormData(form);
     
+    console.log("Form submission detected:", {
       action: formAction,
       method: form.method,
       data: Object.fromEntries(formData)
@@ -946,6 +1081,7 @@ function setupCartRemovalMonitoring() {
       formAction.includes('/cart/delete') ||
       formData.has('quantity') && formData.get('quantity') === '0'
     )) {
+      console.log("Cart removal form detected");
       setTimeout(function() {
         updateCartCountAndLog('remove');
       }, 1000);
@@ -962,6 +1098,7 @@ function setupCartRemovalMonitoring() {
       url.includes('/cart/delete') ||
       url.includes('/cart/update')
     )) {
+      console.log("Cart removal AJAX request detected:", url);
       setTimeout(function() {
         updateCartCountAndLog('remove');
       }, 1000);
@@ -984,6 +1121,7 @@ function setupQuantityMonitoring() {
       target.classList.contains('quantity-input') ||
       target.type === 'number'
     )) {
+      console.log("Quantity input change detected");
       setTimeout(function() {
         updateCartCountAndLog('update');
       }, 1000);
@@ -1020,6 +1158,7 @@ function setupQuantityMonitoring() {
       target.closest('[data-action="decrease"]') ||
       target.closest('[data-action="minus"]')
     )) {
+      console.log("Quantity button clicked:", targetText, targetClass);
       setTimeout(function() {
         updateCartCountAndLog('update');
       }, 1000);
@@ -1035,6 +1174,7 @@ function setupQuantityMonitoring() {
       form.querySelector('[name*="quantity"]') ||
       form.querySelector('[data-quantity]')
     )) {
+      console.log("Cart form submission detected");
       setTimeout(function() {
         updateCartCountAndLog('update');
       }, 1000);
@@ -1046,9 +1186,11 @@ function setupQuantityMonitoring() {
 function setupCartMonitoring() {
   // Monitor for cart update events
   document.addEventListener('cart:updated', function(event) {
+    console.log("Cart updated event detected");
     
     // Skip if this is a manual cart update
     if (isManualCartUpdate) {
+      console.log("Skipping cart update event (manual update in progress)");
       return;
     }
     
@@ -1065,9 +1207,11 @@ function setupCartMonitoring() {
   
   // Monitor for cart removal events
   document.addEventListener('cart:removed', function(event) {
+    console.log("Cart removed event detected");
     
     // Skip if this is a manual cart update
     if (isManualCartUpdate) {
+      console.log("Skipping cart removal event (manual update in progress)");
       return;
     }
     
@@ -1089,6 +1233,7 @@ function setupCartMonitoring() {
       target.getAttribute('data-quantity') ||
       target.classList.contains('quantity-input')
     )) {
+      console.log("Quantity change detected");
       
       // Clear any existing timeout
       if (cartUpdateTimeout) {
@@ -1110,6 +1255,7 @@ function setupCartMonitoring() {
       target.getAttribute('data-action') === 'remove' ||
       target.closest('[data-action="remove"]')
     )) {
+      console.log("Remove button clicked");
       
       // Clear any existing timeout
       if (cartUpdateTimeout) {
@@ -1128,10 +1274,12 @@ function setupCartMonitoring() {
 function trackCartView() {
   var cartViewKey = 'cart-view-' + {{ product.id | json }} + '-' + Date.now();
   if (sessionStorage.getItem(cartViewKey)) {
+    console.log("Cart view already logged, skipping...");
     return;
   }
   sessionStorage.setItem(cartViewKey, 'true');
   
+  console.log("Cart view event detected");
   
   // Determine the current variant
   var currentVariant = determineCurrentVariant();
@@ -1145,7 +1293,9 @@ function trackCartView() {
       variant: currentVariant
     })
   }).then(r => r.json()).then(data => {
+    console.log("Logged cart view event:", data);
   }).catch(e => {
+    console.log("Failed to log cart view event", e);
   });
 }
 */
@@ -1155,21 +1305,26 @@ function trackCartView() {
     // Check if we already logged a checkout initiated event for this product in this session
     var checkoutKey = 'checkout-initiated-logged-' + {{ product.id | json }};
     if (sessionStorage.getItem(checkoutKey)) {
+      console.log("Checkout initiated already logged for this product in this session, skipping...");
       return;
     }
     
     // Mark as logged for this session
     sessionStorage.setItem(checkoutKey, 'true');
     
+    console.log("Checkout initiated event detected");
     
     // Wait for testId to be available before logging
     waitForTestId(function(testId) {
       if (!testId) {
+        console.log("❌ Cannot log checkout initiated event - no testId available");
         return;
       }
       
       // Determine the current variant
       var currentVariant = determineCurrentVariant();
+      console.log("🔍 Checkout initiated - testId:", testId);
+      console.log("🔍 Checkout initiated - variant:", currentVariant);
 
       // --- ADDED: Set cart note with variant for server-side purchase tracking ---
       function setCartNoteWithVariant(variant) {
@@ -1178,7 +1333,9 @@ function trackCartView() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ note: 'ab_variant:' + variant })
         }).then(res => res.json()).then(data => {
+          console.log('Cart note updated with variant:', variant, data);
         }).catch(e => {
+          console.log('Failed to update cart note with variant', e);
         });
       }
       setCartNoteWithVariant(currentVariant);
@@ -1196,6 +1353,7 @@ function trackCartView() {
         timestamp: Date.now()
       };
       localStorage.setItem('ab_test_variant_' + {{ product.id | json }}, JSON.stringify(variantInfo));
+      console.log("Stored variant info for webhook access:", variantInfo);
       
       // Also try to add variant info to cart attributes if possible
       try {
@@ -1206,9 +1364,11 @@ function trackCartView() {
             cartNote += (cartNote ? ' ' : '') + 'ab_variant:' + currentVariant;
             // Note: We can't directly update cart note here, but we can store it for later use
             localStorage.setItem('ab_cart_note_' + {{ product.id | json }}, cartNote);
+            console.log("Stored cart note with variant info:", cartNote);
           }
         }
       } catch (e) {
+        console.log("Could not update cart note:", e);
       }
       
       fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
@@ -1221,14 +1381,19 @@ function trackCartView() {
           variant: currentVariant
         })
       }).then(r => {
+        console.log("🔍 Checkout initiated response status:", r.status);
+        console.log("🔍 Checkout initiated response ok:", r.ok);
         if (!r.ok) {
           return r.text().then(text => {
+            console.log("❌ Checkout initiated error response:", text);
             throw new Error(`HTTP ${r.status}: ${text}`);
           });
         }
         return r.json();
       }).then(data => {
+        console.log("✅ Logged checkout initiated event:", data);
       }).catch(e => {
+        console.log("❌ Failed to log checkout initiated event", e);
       });
     });
   }
@@ -1237,10 +1402,12 @@ function trackCartView() {
 function trackPurchase(orderData) {
   var purchaseKey = 'purchase-' + {{ product.id | json }} + '-' + Date.now();
   if (sessionStorage.getItem(purchaseKey)) {
+    console.log("Purchase already logged, skipping...");
     return;
   }
   sessionStorage.setItem(purchaseKey, 'true');
   
+  console.log("Purchase event detected", orderData);
   
   var orderValue = orderData.total_price || orderData.totalPrice || orderData.price || 0;
   var orderId = orderData.id || orderData.order_id || orderData.orderId || null;
@@ -1248,11 +1415,14 @@ function trackPurchase(orderData) {
   // Wait for testId to be available before logging
   waitForTestId(function(testId) {
     if (!testId) {
+      console.log("❌ Cannot log purchase event - no testId available");
       return;
     }
     
     // Determine the current variant
     var currentVariant = determineCurrentVariant();
+    console.log("🔍 Purchase - testId:", testId);
+    console.log("🔍 Purchase - variant:", currentVariant);
     
     fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
       method: 'POST',
@@ -1270,20 +1440,26 @@ function trackPurchase(orderData) {
         }
       })
     }).then(r => {
+      console.log("🔍 Purchase response status:", r.status);
+      console.log("🔍 Purchase response ok:", r.ok);
       if (!r.ok) {
         return r.text().then(text => {
+          console.log("❌ Purchase error response:", text);
           throw new Error(`HTTP ${r.status}: ${text}`);
         });
       }
       return r.json();
     }).then(data => {
+      console.log("✅ Logged purchase event:", data);
     }).catch(e => {
+      console.log("❌ Failed to log purchase event", e);
     });
   });
 }
 
 // Enhanced purchase detection
 function detectPurchase() {
+  console.log("Checking for purchase on page:", window.location.href);
   
   // Check multiple thank you page patterns
   var isThankYouPage = (
@@ -1301,9 +1477,11 @@ function detectPurchase() {
   );
   
   if (!isThankYouPage) {
+    console.log("Not on thank you page, skipping purchase detection");
     return;
   }
   
+  console.log("Thank you page detected, looking for order data...");
   
   var orderData = {};
   
@@ -1313,6 +1491,7 @@ function detectPurchase() {
                   document.querySelector('meta[name="order_id"]');
   if (orderMeta) {
     orderData.order_id = orderMeta.getAttribute('content');
+    console.log("Found order ID in meta tag:", orderData.order_id);
   }
   
   // Method 2: Look for order data in script tags
@@ -1335,6 +1514,7 @@ function detectPurchase() {
             try {
               var orderInfo = JSON.parse(match);
               orderData = { ...orderData, ...orderInfo };
+              console.log("Found order data in script:", orderInfo);
             } catch (e) {
               // Ignore parsing errors
             }
@@ -1351,6 +1531,7 @@ function detectPurchase() {
   var orderIdFromUrl = urlParams.get('order_id') || urlParams.get('order-id') || urlParams.get('id');
   if (orderIdFromUrl) {
     orderData.order_id = orderIdFromUrl;
+    console.log("Found order ID in URL:", orderIdFromUrl);
   }
   
   // Method 4: Look for order data in page content
@@ -1361,6 +1542,7 @@ function detectPurchase() {
                   element.textContent;
     if (orderId) {
       orderData.order_id = orderId.trim();
+      console.log("Found order ID in page content:", orderId);
     }
   });
   
@@ -1372,14 +1554,17 @@ function detectPurchase() {
       var price = parseFloat(priceText.replace(/[^0-9.]/g, ''));
       if (price > 0) {
         orderData.total_price = price;
+        console.log("Found total price in page content:", price);
       }
     }
   });
   
   // If we found any order data, log the purchase
   if (Object.keys(orderData).length > 0) {
+    console.log("Order data found:", orderData);
     trackPurchase(orderData);
   } else {
+    console.log("No order data found, but on thank you page - logging basic purchase event");
     // Log a basic purchase event even without detailed order data
     trackPurchase({ 
       order_id: 'unknown',
@@ -1391,15 +1576,18 @@ function detectPurchase() {
 
 // Function to determine the current A/B test variant
 function determineCurrentVariant() {
+  console.log("🔍 determineCurrentVariant() called");
   
   // First, try to use the stored variant from the A/B test (this should be the actual template name)
   if (window.currentVariant) {
+    console.log("✅ Using stored current variant:", window.currentVariant);
     return window.currentVariant;
   }
   
   // Use the global function that returns the actual template name
   if (window.getABTestVariant && typeof window.getABTestVariant === 'function') {
     var variant = window.getABTestVariant();
+    console.log("✅ Using getABTestVariant():", variant);
     if (variant) return variant;
   }
   
@@ -1409,6 +1597,7 @@ function determineCurrentVariant() {
     var bucketKey = 'ab_test_' + testId;
     var bucket = localStorage.getItem(bucketKey);
     if (bucket) {
+      console.log("✅ Using stored bucket for variant:", bucket);
       return bucket;
     }
   }
@@ -1418,15 +1607,18 @@ function determineCurrentVariant() {
   var currentView = url.searchParams.get('view') || "";
   
   if (currentView) {
+    console.log("✅ Determining variant from view parameter:", currentView);
     return currentView; // Return the actual view parameter (template name)
   }
   
   // Fallback to variant A if we can't determine
+  console.log("❌ Could not determine variant, using fallback 'default'");
   return "default"; // Return the default template name instead of "A"
 }
 
 // Set up cart tracking after testId is available
 function setupCartTracking() {
+  console.log("🔍 Setting up cart tracking...");
   
   // If the global function doesn't exist, create it from localStorage
   if (!window.getABTestId) {
@@ -1440,9 +1632,11 @@ function setupCartTracking() {
       window.getABTestVariant = function() {
         return storedVariant;
       };
+      console.log("🔍 Created global functions from localStorage:", storedTestId);
     }
   }
   
+  console.log("🔍 Cart tracking setup complete. getABTestId available:", !!window.getABTestId);
   
   // Set up quantity change monitoring
   setupQuantityMonitoring();
@@ -1454,6 +1648,7 @@ function setupCartTracking() {
   // Method 1: Form submissions
   document.addEventListener('submit', function(event) {
     var form = event.target;
+    console.log("Form submitted:", form);
     
     if (form && (
       form.action.includes('/cart/add') || 
@@ -1463,6 +1658,7 @@ function setupCartTracking() {
       form.querySelector('[data-action="add-to-cart"]') ||
       form.getAttribute('action') && form.getAttribute('action').includes('/cart/add')
     )) {
+      console.log("Add to cart form detected");
       // Don't prevent default here - let the form submit normally
       trackAddToCart();
     }
@@ -1477,6 +1673,8 @@ function setupCartTracking() {
       form.querySelector('[data-action="checkout"]') ||
       form.querySelector('[data-action="go-to-checkout"]')
     )) {
+      console.log("✅ Checkout form detected - triggering trackCheckoutInitiated");
+      console.log("🔍 Checkout form details:", {
         action: form.action,
         class: form.className,
         method: form.method
@@ -1504,6 +1702,7 @@ function setupCartTracking() {
       target.getAttribute('data-action') === 'add-to-bag' ||
       target.getAttribute('aria-label') && target.getAttribute('aria-label').toLowerCase().includes('add to cart')
     )) {
+      console.log("Add to cart button clicked");
       
       // Debounce to prevent multiple events
       clearTimeout(addToCartClickTimeout);
@@ -1522,6 +1721,7 @@ function setupCartTracking() {
     var targetId = target.id ? target.id.toLowerCase() : '';
     
     // Debug: Log all clicks to see what we're missing
+    console.log("🔍 Click detected on:", {
       tagName: target.tagName,
       text: targetText,
       class: targetClass,
@@ -1541,6 +1741,7 @@ function setupCartTracking() {
       target.getAttribute('data-action') === 'add-to-cart' ||
       target.getAttribute('data-action') === 'add-to-bag'
     )) {
+      console.log("🚫 Excluding add to cart button from checkout detection");
       return;
     }
     
@@ -1578,6 +1779,8 @@ function setupCartTracking() {
     }
     
     if (isCheckoutButton) {
+      console.log("✅ " + checkoutReason + " - triggering trackCheckoutInitiated");
+      console.log("🔍 Checkout button details:", {
         text: targetText,
         class: targetClass,
         id: targetId,
@@ -1585,19 +1788,23 @@ function setupCartTracking() {
       });
       trackCheckoutInitiated();
     } else {
+      console.log("🚫 Not a checkout button - skipping");
     }
   });
   
+  console.log("✅ Cart tracking setup complete");
 }
 
 // Set up event listeners when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
   // Prevent multiple setups
   if (window.abTestTrackingSetup) {
+    console.log("Cart tracking already set up, skipping...");
     return;
   }
   window.abTestTrackingSetup = true;
   
+  console.log("🔍 Setting up cart tracking...");
   
   // Wait a bit for A/B test initialization to complete
   setTimeout(function() {
@@ -1613,9 +1820,11 @@ document.addEventListener('DOMContentLoaded', function() {
         window.getABTestVariant = function() {
           return storedVariant;
         };
+        console.log("🔍 Created global functions from localStorage:", storedTestId);
       }
     }
     
+    console.log("🔍 Cart tracking setup complete. getABTestId available:", !!window.getABTestId);
     
     // Set up quantity change monitoring
     setupQuantityMonitoring();
@@ -1627,6 +1836,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Method 1: Form submissions
     document.addEventListener('submit', function(event) {
       var form = event.target;
+      console.log("Form submitted:", form);
       
       if (form && (
         form.action.includes('/cart/add') || 
@@ -1636,6 +1846,7 @@ document.addEventListener('DOMContentLoaded', function() {
         form.querySelector('[data-action="add-to-cart"]') ||
         form.getAttribute('action') && form.getAttribute('action').includes('/cart/add')
       )) {
+        console.log("Add to cart form detected");
         // Don't prevent default here - let the form submit normally
         trackAddToCart();
       }
@@ -1650,6 +1861,8 @@ document.addEventListener('DOMContentLoaded', function() {
         form.querySelector('[data-action="checkout"]') ||
         form.querySelector('[data-action="go-to-checkout"]')
       )) {
+        console.log("✅ Checkout form detected - triggering trackCheckoutInitiated");
+        console.log("🔍 Checkout form details:", {
           action: form.action,
           class: form.className,
           method: form.method
@@ -1677,6 +1890,7 @@ document.addEventListener('DOMContentLoaded', function() {
         target.getAttribute('data-action') === 'add-to-bag' ||
         target.getAttribute('aria-label') && target.getAttribute('aria-label').toLowerCase().includes('add to cart')
       )) {
+        console.log("Add to cart button clicked");
         
         // Debounce to prevent multiple events
         clearTimeout(addToCartClickTimeout);
@@ -1695,6 +1909,7 @@ document.addEventListener('DOMContentLoaded', function() {
       var targetId = target.id ? target.id.toLowerCase() : '';
       
       // Debug: Log all clicks to see what we're missing
+      console.log("Click detected on:", {
         tagName: target.tagName,
         text: targetText,
         class: targetClass,
@@ -1714,6 +1929,7 @@ document.addEventListener('DOMContentLoaded', function() {
         target.getAttribute('data-action') === 'add-to-cart' ||
         target.getAttribute('data-action') === 'add-to-bag'
       )) {
+        console.log("🚫 Excluding add to cart button from checkout detection");
         return;
       }
       
@@ -1751,6 +1967,8 @@ document.addEventListener('DOMContentLoaded', function() {
       }
       
       if (isCheckoutButton) {
+        console.log("✅ " + checkoutReason + " - triggering trackCheckoutInitiated");
+        console.log("🔍 Checkout button details:", {
           text: targetText,
           class: targetClass,
           id: targetId,
@@ -1758,9 +1976,11 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         trackCheckoutInitiated();
       } else {
+        console.log("🚫 Not a checkout button - skipping");
       }
     });
     
+    console.log("✅ Cart tracking setup complete");
   }, 500); // Wait 500ms for A/B test initialization
 });
 
