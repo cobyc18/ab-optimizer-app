@@ -44,16 +44,6 @@ const navigation: NavigationItem[] = [
     icon: "⚙️"
   },
   {
-    name: "Theme Injector",
-    href: "/app/theme-injector",
-    icon: "🎨"
-  },
-  {
-    name: "Widget Manager",
-    href: "/app/widget-manager",
-    icon: "⚙️"
-  },
-  {
     name: "Analytics",
     href: "/app/analytics",
     icon: "📈"
