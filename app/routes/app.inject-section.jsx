@@ -63,8 +63,6 @@ export const action = async ({ request }) => {
             }
             upsertedThemeFiles {
               filename
-              size
-              createdAt
             }
             userErrors {
               field
@@ -119,7 +117,7 @@ export const action = async ({ request }) => {
         message: `Section ${sectionName} successfully added to your theme!`,
         sectionName,
         themeId: themeId.replace("gid://shopify/OnlineStoreTheme/", ""),
-        files: result.data?.themeFilesUpsert?.upsertedThemeFiles
+        files: result.data?.themeFilesUpsert?.upsertedThemeFiles?.map(file => file.filename)
       });
       
     } catch (error) {
