@@ -52,6 +52,12 @@ const navigation: NavigationItem[] = [
     name: "Recipe Library",
     href: "/app/recipe-library",
     icon: "📚"
+  },
+  {
+    name: "Section Injector",
+    href: "/app/inject-section",
+    icon: "🚀",
+    badge: "NEW"
   }
 ];
 

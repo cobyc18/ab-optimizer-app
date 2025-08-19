@@ -226,11 +226,11 @@ export const action = async ({ request }) => {
                 userErrors {
                   field
                   message
-                }
-              }
-            }`,
-            {
-              variables: {
+        }
+      }
+    }`,
+    {
+      variables: {
                 topic: webhook.topic,
                 webhookSubscription: {
                   callbackUrl: webhook.address,
@@ -794,7 +794,7 @@ export default function Dashboard() {
             }}
           >
             Register Webhooks
-          </button>
+        </button>
         )}
       </div>
       */}
