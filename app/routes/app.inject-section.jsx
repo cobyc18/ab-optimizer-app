@@ -58,33 +58,63 @@ export const action = async ({ request }) => {
       const themeIdNumeric = themeId.replace("gid://shopify/OnlineStoreTheme/", "");
       console.log("🎨 Using theme ID:", themeIdNumeric);
       
-      // Create the snippet file using Assets API REST
-      const response = await admin.rest.put({
-        path: `themes/${themeIdNumeric}/assets.json`,
-        data: {
-          asset: {
-            key: `snippets/${sectionName}.liquid`,
-            value: snippetContent
+      // Try to create the snippet file using Assets API REST
+      try {
+        const response = await admin.rest.put({
+          path: `themes/${themeIdNumeric}/assets`,
+          data: {
+            asset: {
+              key: `snippets/${sectionName}.liquid`,
+              value: snippetContent
+            }
           }
-        }
-      });
-      
-      console.log("✅ Snippet created successfully:", response.body.asset.key);
-      
-      return json({ 
-        success: true, 
-        message: `Snippet ${sectionName} successfully added to your theme!`,
-        sectionName,
-        themeId: themeIdNumeric,
-        snippetKey: response.body.asset.key,
-        instructions: getSnippetInstructions(sectionName)
-      });
+        });
+        
+        console.log("✅ Snippet created successfully via API:", response.body.asset.key);
+        
+        return json({ 
+          success: true, 
+          message: `Snippet ${sectionName} successfully added to your theme via API!`,
+          sectionName,
+          themeId: themeIdNumeric,
+          snippetKey: response.body.asset.key,
+          instructions: getSnippetInstructions(sectionName),
+          method: "api"
+        });
+        
+      } catch (apiError) {
+        console.log("⚠️ Assets API failed, providing manual installation option:", apiError.message);
+        
+        // Fallback: Provide the code for manual installation
+        return json({ 
+          success: true, 
+          message: `Assets API requires special permissions. Here's the snippet code for manual installation:`,
+          sectionName,
+          themeId: themeIdNumeric,
+          snippetContent,
+          instructions: getManualInstallInstructions(sectionName),
+          method: "manual"
+        });
+      }
       
     } catch (error) {
-      console.error("❌ Error injecting snippet:", error);
+      console.error("❌ Error generating snippet:", error);
+      
+      // Try to get more detailed error information
+      let errorDetails = error.message;
+      if (error.response) {
+        try {
+          const errorBody = await error.response.text();
+          console.error("❌ Error response body:", errorBody);
+          errorDetails = `HTTP ${error.response.status}: ${errorBody}`;
+        } catch (e) {
+          errorDetails = `HTTP ${error.response.status}: ${error.message}`;
+        }
+      }
+      
       return json({ 
         success: false, 
-        error: `Failed to inject snippet: ${error.message}`,
+        error: `Failed to generate snippet: ${errorDetails}`,
         details: error.stack
       });
     }
@@ -221,6 +251,21 @@ function getSnippetInstructions(sectionName) {
     "4. The snippet will automatically adapt to desktop and mobile",
     "5. You can find it in your theme's snippets folder",
     "6. To customize further, edit the snippet file directly in your theme"
+  ];
+}
+
+function getManualInstallInstructions(sectionName) {
+  return [
+    "1. Copy the snippet code below",
+    "2. Go to your Shopify admin → Online Store → Themes",
+    "3. Click 'Actions' → 'Edit code' on your theme",
+    "4. In the left sidebar, click 'Snippets'",
+    "5. Click 'Add a new snippet'",
+    `6. Name it: ${sectionName}`,
+    "7. Paste the code below into the snippet file",
+    "8. Click 'Save'",
+    "9. To use the snippet, add this to any template:",
+    `   {% render '${sectionName}' %}`
   ];
 }
 
@@ -515,6 +560,49 @@ export default function InjectSection() {
                   <li key={index} style={{ marginBottom: '4px' }}>{instruction}</li>
                 ))}
               </ul>
+            </div>
+          )}
+
+          {actionData?.success && actionData.method === "manual" && actionData.snippetContent && (
+            <div style={{ marginTop: '24px' }}>
+              <h3 style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '16px' }}>
+                📄 Snippet Code for Manual Installation
+              </h3>
+              <div style={{
+                background: '#1a1a1a',
+                color: '#00ff00',
+                padding: '16px',
+                borderRadius: '8px',
+                fontFamily: 'monospace',
+                fontSize: '12px',
+                overflow: 'auto',
+                maxHeight: '400px',
+                border: '1px solid #333'
+              }}>
+                <pre style={{ margin: 0, whiteSpace: 'pre-wrap' }}>
+                  {actionData.snippetContent}
+                </pre>
+              </div>
+              
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(actionData.snippetContent);
+                  alert('Snippet code copied to clipboard!');
+                }}
+                style={{
+                  marginTop: '16px',
+                  padding: '12px 24px',
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer'
+                }}
+              >
+                📋 Copy Snippet Code
+              </button>
             </div>
           )}
 
