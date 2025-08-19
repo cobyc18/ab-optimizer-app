@@ -6,17 +6,32 @@ import { authenticate } from "../shopify.server.js";
 export const loader = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
   
-  // Get shop and theme info
-  const shopRes = await admin.graphql(`query { shop { myshopifyDomain } }`);
-  const shopJson = await shopRes.json();
-  const shopDomain = shopJson.data.shop.myshopifyDomain;
-  
-  const themeRes = await admin.graphql(`query { themes(first: 5) { nodes { id name role } } }`);
-  const themeJson = await themeRes.json();
-  const mainTheme = themeJson.data.themes.nodes.find(t => t.role === "MAIN");
-  const themeId = mainTheme?.id.replace("gid://shopify/OnlineStoreTheme/", "") || "";
-  
-  return json({ shopDomain, themeId });
+  try {
+    // Get shop and theme info
+    const shopRes = await admin.graphql(`query { shop { myshopifyDomain } }`);
+    const shopJson = await shopRes.json();
+    const shopDomain = shopJson.data.shop.myshopifyDomain;
+    
+    const themeRes = await admin.graphql(`query { themes(first: 10) { nodes { id name role } } }`);
+    const themeJson = await themeRes.json();
+    const themes = themeJson.data.themes.nodes;
+    
+    console.log("🔍 Available themes:", themes);
+    
+    return json({ 
+      shopDomain, 
+      themes,
+      mainTheme: themes.find(t => t.role === "MAIN"),
+      publishedTheme: themes.find(t => t.role === "PUBLISHED")
+    });
+  } catch (error) {
+    console.error("❌ Error in loader:", error);
+    return json({ 
+      shopDomain: "", 
+      themes: [],
+      error: error.message 
+    });
+  }
 };
 
 export const action = async ({ request }) => {
@@ -24,56 +39,95 @@ export const action = async ({ request }) => {
   const formData = await request.formData();
   const actionType = formData.get("actionType");
   
+  console.log("🚀 Action triggered:", actionType);
+  
   if (actionType === "inject_section") {
     const sectionType = formData.get("sectionType");
     const sectionName = formData.get("sectionName");
+    const themeId = formData.get("themeId");
+    
+    console.log("📝 Injecting section:", { sectionType, sectionName, themeId });
     
     try {
       // Generate the section content based on type
       const sectionContent = generateSectionContent(sectionType, sectionName);
+      console.log("📄 Generated section content length:", sectionContent.length);
       
-      // Create the section file in the theme
+      // Create the section file in the theme using GraphQL mutation
       const mutation = `
-        mutation themeFileCreate($files: [FileCreateInput!]!) {
-          themeFileCreate(files: $files) {
-            files {
-              key
+        mutation themeFilesUpsert($themeId: ID!, $files: [OnlineStoreThemeFilesUpsertFileInput!]!) {
+          themeFilesUpsert(themeId: $themeId, files: $files) {
+            job {
+              done
+              id
+            }
+            upsertedThemeFiles {
+              filename
+              size
+              createdAt
             }
             userErrors {
               field
               message
+              code
             }
           }
         }
       `;
       
       const variables = {
+        themeId: themeId,
         files: [{
-          key: `sections/${sectionName}.liquid`,
-          value: sectionContent
+          filename: `sections/${sectionName}.liquid`,
+          body: {
+            type: "TEXT",
+            value: sectionContent
+          }
         }]
       };
+      
+      console.log("🎨 Using GraphQL mutation with variables:", JSON.stringify(variables, null, 2));
       
       const response = await admin.graphql(mutation, { variables });
       const result = await response.json();
       
-      if (result.data?.themeFileCreate?.userErrors?.length > 0) {
+      console.log("📊 GraphQL response:", JSON.stringify(result, null, 2));
+      
+      if (result.data?.themeFilesUpsert?.userErrors?.length > 0) {
+        const error = result.data.themeFilesUpsert.userErrors[0];
+        console.error("❌ GraphQL error:", error);
         return json({ 
           success: false, 
-          error: result.data.themeFileCreate.userErrors[0].message 
+          error: `Failed to inject section: ${error.message}`,
+          code: error.code
         });
       }
+      
+      if (result.errors) {
+        console.error("❌ GraphQL errors:", result.errors);
+        return json({ 
+          success: false, 
+          error: `GraphQL error: ${result.errors[0].message}`,
+          details: result.errors
+        });
+      }
+      
+      console.log("✅ Section created successfully:", result.data?.themeFilesUpsert?.upsertedThemeFiles);
       
       return json({ 
         success: true, 
         message: `Section ${sectionName} successfully added to your theme!`,
-        sectionName
+        sectionName,
+        themeId: themeId.replace("gid://shopify/OnlineStoreTheme/", ""),
+        files: result.data?.themeFilesUpsert?.upsertedThemeFiles
       });
       
     } catch (error) {
+      console.error("❌ Error injecting section:", error);
       return json({ 
         success: false, 
-        error: `Failed to inject section: ${error.message}` 
+        error: `Failed to inject section: ${error.message}`,
+        details: error.stack
       });
     }
   }
@@ -82,6 +136,8 @@ export const action = async ({ request }) => {
 };
 
 function generateSectionContent(sectionType, sectionName) {
+  console.log("🔧 Generating content for:", sectionType, sectionName);
+  
   const widgetContent = generateWidgetContent(sectionType);
   
   return `{% comment %}
@@ -185,6 +241,8 @@ function generateSectionContent(sectionType, sectionName) {
 }
 
 function generateWidgetContent(sectionType) {
+  console.log("🎨 Generating widget content for:", sectionType);
+  
   const content = {
     "product-badge": `
 <div class="ab-optimizer-badge-widget" 
@@ -200,9 +258,6 @@ function generateWidgetContent(sectionType) {
        font-weight: {{ block.settings.font_weight | default: 'bold' }};
        text-transform: {{ block.settings.text_transform | default: 'uppercase' }};
        opacity: {{ block.settings.opacity | default: 1 }};
-       {% if block.settings.enable_gradient %}
-         background: linear-gradient({{ block.settings.gradient_angle | default: 45 }}deg, {{ block.settings.gradient_color_1 | default: '#32cd32' }}, {{ block.settings.gradient_color_2 | default: '#228b22' }}) !important;
-       {% endif %}
      ">
   
   {% case block.settings.badge_type %}
@@ -290,226 +345,7 @@ function generateWidgetContent(sectionType) {
       border-radius: {{ block.settings.mobile_border_radius | default: 8 }}px !important;
     }
   }
-</style>`,
-
-    "countdown-timer": `
-<div class="ab-optimizer-countdown-widget" 
-     style="
-       text-align: center;
-       padding: {{ block.settings.desktop_padding | default: 24 }}px;
-       background: {{ block.settings.desktop_background | default: '#f8f9fa' }};
-       color: {{ block.settings.desktop_text_color | default: '#000000' }};
-       border: {{ block.settings.border_width | default: 1 }}px solid {{ block.settings.border_color | default: '#e5e7eb' }};
-       border-radius: {{ block.settings.desktop_border_radius | default: 12 }}px;
-       margin: {{ block.settings.desktop_margin | default: 8 }}px 0;
-       font-size: {{ block.settings.desktop_font_size | default: 16 }}px;
-       opacity: {{ block.settings.opacity | default: 1 }};
-     ">
-
-  {% if block.settings.show_message %}
-    <div style="font-weight: {{ block.settings.message_font_weight | default: 'bold' }}; margin-bottom: 16px;">
-      {{ block.settings.countdown_message | default: 'Limited Time Offer!' }}
-    </div>
-  {% endif %}
-
-  <div id="countdown-{{ block.id }}" style="display: flex; justify-content: center; gap: 8px; margin: 16px 0;">
-    <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
-      <div style="
-        background: {{ block.settings.time_unit_background | default: '#32cd32' }};
-        color: {{ block.settings.time_unit_text_color | default: '#ffffff' }};
-        border-radius: 8px;
-        padding: 12px;
-        font-weight: bold;
-        font-size: {{ block.settings.desktop_time_value_font_size | default: 24 }}px;
-      ">
-        <span id="days-{{ block.id }}">00</span>
-      </div>
-      <div style="font-size: 12px; margin-top: 4px; opacity: 0.8;">{{ block.settings.days_label | default: 'Days' }}</div>
-    </div>
-    
-    <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
-      <div style="
-        background: {{ block.settings.time_unit_background | default: '#32cd32' }};
-        color: {{ block.settings.time_unit_text_color | default: '#ffffff' }};
-        border-radius: 8px;
-        padding: 12px;
-        font-weight: bold;
-        font-size: {{ block.settings.desktop_time_value_font_size | default: 24 }}px;
-      ">
-        <span id="hours-{{ block.id }}">00</span>
-      </div>
-      <div style="font-size: 12px; margin-top: 4px; opacity: 0.8;">{{ block.settings.hours_label | default: 'Hours' }}</div>
-    </div>
-    
-    <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
-      <div style="
-        background: {{ block.settings.time_unit_background | default: '#32cd32' }};
-        color: {{ block.settings.time_unit_text_color | default: '#ffffff' }};
-        border-radius: 8px;
-        padding: 12px;
-        font-weight: bold;
-        font-size: {{ block.settings.desktop_time_value_font_size | default: 24 }}px;
-      ">
-        <span id="minutes-{{ block.id }}">00</span>
-      </div>
-      <div style="font-size: 12px; margin-top: 4px; opacity: 0.8;">{{ block.settings.minutes_label | default: 'Minutes' }}</div>
-    </div>
-    
-    <div style="display: flex; flex-direction: column; align-items: center; min-width: 60px;">
-      <div style="
-        background: {{ block.settings.time_unit_background | default: '#32cd32' }};
-        color: {{ block.settings.time_unit_text_color | default: '#ffffff' }};
-        border-radius: 8px;
-        padding: 12px;
-        font-weight: bold;
-        font-size: {{ block.settings.desktop_time_value_font_size | default: 24 }}px;
-      ">
-        <span id="seconds-{{ block.id }}">00</span>
-      </div>
-      <div style="font-size: 12px; margin-top: 4px; opacity: 0.8;">{{ block.settings.seconds_label | default: 'Seconds' }}</div>
-    </div>
-  </div>
-
-  <div id="expired-{{ block.id }}" style="display: none; font-size: 18px; font-weight: bold; color: #dc2626;">
-    {{ block.settings.expired_message | default: 'This offer has expired!' }}
-  </div>
-</div>
-
-<style>
-  @media (max-width: 768px) {
-    .ab-optimizer-countdown-widget {
-      font-size: {{ block.settings.mobile_font_size | default: 12 }}px !important;
-      padding: {{ block.settings.mobile_padding | default: 12 }}px !important;
-      background: {{ block.settings.mobile_background | default: block.settings.desktop_background }} !important;
-      color: {{ block.settings.mobile_text_color | default: block.settings.desktop_text_color }} !important;
-      border-radius: {{ block.settings.mobile_border_radius | default: 8 }}px !important;
-    }
-  }
-</style>
-
-<script>
-(function() {
-  const blockId = '{{ block.id }}';
-  const endDate = new Date('{{ block.settings.end_date | default: "2024-12-31T23:59:59" }}').getTime();
-  
-  function updateCountdown() {
-    const now = new Date().getTime();
-    const distance = endDate - now;
-    
-    if (distance < 0) {
-      document.getElementById(\`countdown-\${blockId}\`).style.display = 'none';
-      document.getElementById(\`expired-\${blockId}\`).style.display = 'block';
-      return;
-    }
-    
-    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-    
-    document.getElementById(\`days-\${blockId}\`).textContent = days.toString().padStart(2, '0');
-    document.getElementById(\`hours-\${blockId}\`).textContent = hours.toString().padStart(2, '0');
-    document.getElementById(\`minutes-\${blockId}\`).textContent = minutes.toString().padStart(2, '0');
-    document.getElementById(\`seconds-\${blockId}\`).textContent = seconds.toString().padStart(2, '0');
-  }
-  
-  updateCountdown();
-  setInterval(updateCountdown, 1000);
-})();
-</script>`,
-
-    "progress-bar": `
-<div class="ab-optimizer-progress-widget" 
-     style="
-       padding: {{ block.settings.desktop_padding | default: 24 }}px;
-       background: {{ block.settings.desktop_background | default: '#f8f9fa' }};
-       color: {{ block.settings.desktop_text_color | default: '#000000' }};
-       border: {{ block.settings.border_width | default: 1 }}px solid {{ block.settings.border_color | default: '#e5e7eb' }};
-       border-radius: {{ block.settings.desktop_border_radius | default: 12 }}px;
-       margin: {{ block.settings.desktop_margin | default: 8 }}px 0;
-       font-size: {{ block.settings.desktop_font_size | default: 16 }}px;
-       opacity: {{ block.settings.opacity | default: 1 }};
-     ">
-
-  {% if block.settings.show_header %}
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-      <div style="font-weight: {{ block.settings.label_font_weight | default: 'bold' }};">
-        {{ block.settings.progress_label | default: 'Progress' }}
-      </div>
-      <div style="font-weight: {{ block.settings.percentage_font_weight | default: 'bold' }};">
-        <span id="percentage-{{ block.id }}">{{ block.settings.progress_value | default: 75 }}%</span>
-      </div>
-    </div>
-  {% endif %}
-
-  <div style="position: relative; border-radius: 8px; overflow: hidden; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);">
-    <div style="height: {{ block.settings.progress_height | default: 12 }}px; background: {{ block.settings.progress_background | default: '#e5e7eb' }}; position: relative;">
-      <div id="progress-fill-{{ block.id }}" style="
-        height: 100%;
-        background: {{ block.settings.progress_fill_color | default: '#32cd32' }};
-        border-radius: 8px;
-        width: {{ block.settings.progress_value | default: 75 }}%;
-        transition: width 1s ease;
-        position: relative;
-      ">
-        {% if block.settings.show_progress_text %}
-          <div style="
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: {{ block.settings.progress_text_color | default: '#ffffff' }};
-            font-weight: {{ block.settings.progress_text_font_weight | default: 'bold' }};
-            font-size: {{ block.settings.progress_text_font_size | default: 12 }}px;
-            text-shadow: 0 1px 2px rgba(0,0,0,0.3);
-          ">
-            {{ block.settings.progress_value | default: 75 }}%
-          </div>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
-  {% if block.settings.show_description %}
-    <div style="margin-top: 8px; font-size: 14px; opacity: 0.8;">
-      {{ block.settings.progress_description | default: 'This shows the current progress of your goal.' }}
-    </div>
-  {% endif %}
-</div>
-
-<style>
-  @media (max-width: 768px) {
-    .ab-optimizer-progress-widget {
-      font-size: {{ block.settings.mobile_font_size | default: 12 }}px !important;
-      padding: {{ block.settings.mobile_padding | default: 12 }}px !important;
-      background: {{ block.settings.mobile_background | default: block.settings.desktop_background }} !important;
-      color: {{ block.settings.mobile_text_color | default: block.settings.desktop_text_color }} !important;
-      border-radius: {{ block.settings.mobile_border_radius | default: 8 }}px !important;
-    }
-  }
-</style>
-
-<script>
-(function() {
-  const blockId = '{{ block.id }}';
-  const targetProgress = {{ block.settings.progress_value | default: 75 }};
-  let currentStep = 0;
-  
-  function animateProgress() {
-    if (currentStep < 100) {
-      currentStep++;
-      const newProgress = Math.min(currentStep, targetProgress);
-      
-      document.getElementById(\`progress-fill-\${blockId}\`).style.width = newProgress + '%';
-      document.getElementById(\`percentage-\${blockId}\`).textContent = Math.round(newProgress) + '%';
-      
-      setTimeout(animateProgress, 20);
-    }
-  }
-  
-  setTimeout(animateProgress, 500);
-})();
-</script>`
+</style>`
   };
   
   return content[sectionType] || content["product-badge"];
@@ -631,12 +467,6 @@ function generateWidgetSettings(sectionType) {
       {
         "type": "header",
         "content": "Advanced Effects"
-      },
-      {
-        "type": "checkbox",
-        "id": "enable_gradient",
-        "label": "Enable Gradient Background",
-        "default": false
       },
       {
         "type": "range",
@@ -764,11 +594,12 @@ function generateWidgetSettings(sectionType) {
 }
 
 export default function InjectSection() {
-  const { shopDomain, themeId } = useLoaderData();
+  const { shopDomain, themes, mainTheme, publishedTheme, error } = useLoaderData();
   const actionData = useActionData();
   const submit = useSubmit();
   const [selectedSection, setSelectedSection] = useState("");
   const [sectionName, setSectionName] = useState("");
+  const [selectedThemeId, setSelectedThemeId] = useState("");
   const [isInjecting, setIsInjecting] = useState(false);
 
   const sections = [
@@ -785,39 +616,49 @@ export default function InjectSection() {
       description: "Social proof widgets with extensive customization options",
       icon: "⭐",
       settings: "25+ settings"
-    },
-    {
-      id: "countdown-timer",
-      name: "Enhanced Countdown Timer",
-      description: "Advanced countdown timers with multiple styles and animations",
-      icon: "⏰",
-      settings: "35+ settings"
-    },
-    {
-      id: "progress-bar",
-      name: "Enhanced Progress Bar",
-      description: "Progress bars with multiple styles and customization options",
-      icon: "📊",
-      settings: "20+ settings"
     }
   ];
 
   const handleInjectSection = async () => {
-    if (!selectedSection || !sectionName) return;
+    if (!selectedSection || !sectionName || !selectedThemeId) {
+      console.log("❌ Missing required fields:", { selectedSection, sectionName, selectedThemeId });
+      return;
+    }
     
+    console.log("🚀 Starting injection:", { selectedSection, sectionName, selectedThemeId });
     setIsInjecting(true);
+    
     const formData = new FormData();
     formData.append("actionType", "inject_section");
     formData.append("sectionType", selectedSection);
     formData.append("sectionName", sectionName);
+    formData.append("themeId", selectedThemeId);
     
     submit(formData, { method: "post" });
   };
 
-  const handleOpenThemeEditor = (sectionName) => {
-    const themeEditorUrl = `https://admin.shopify.com/store/${shopDomain}/themes/${themeId}/editor?previewPath=/products/sample-product&addAppBlockId=ab-optimizer-${sectionName}`;
+  const handleOpenThemeEditor = (sectionName, themeId) => {
+    const themeIdNumeric = themeId.replace("gid://shopify/OnlineStoreTheme/", "");
+    const themeEditorUrl = `https://admin.shopify.com/store/${shopDomain}/themes/${themeIdNumeric}/editor?previewPath=/products/sample-product&addAppBlockId=ab-optimizer-${sectionName}`;
+    console.log("🎨 Opening theme editor:", themeEditorUrl);
     window.open(themeEditorUrl, '_blank');
   };
+
+  if (error) {
+    return (
+      <div style={{ padding: '24px', textAlign: 'center' }}>
+        <div style={{ 
+          background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+          color: 'white',
+          padding: '32px',
+          borderRadius: '16px'
+        }}>
+          <h1 style={{ fontSize: '24px', marginBottom: '16px' }}>❌ Error Loading Page</h1>
+          <p>{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ padding: '24px', maxWidth: '1200px', margin: '0 auto' }}>
@@ -852,6 +693,17 @@ export default function InjectSection() {
         }}>
           {actionData.success ? '✅ ' : '❌ '}
           {actionData.message || actionData.error}
+          {actionData.code && (
+            <div style={{ marginTop: '8px', fontSize: '14px', opacity: 0.9 }}>
+              Error Code: {actionData.code}
+            </div>
+          )}
+          {actionData.details && (
+            <details style={{ marginTop: '8px', textAlign: 'left' }}>
+              <summary>Debug Details</summary>
+              <pre style={{ fontSize: '12px', whiteSpace: 'pre-wrap' }}>{JSON.stringify(actionData.details, null, 2)}</pre>
+            </details>
+          )}
         </div>
       )}
 
@@ -926,6 +778,30 @@ export default function InjectSection() {
           
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
+              Select Theme:
+            </label>
+            <select
+              value={selectedThemeId}
+              onChange={(e) => setSelectedThemeId(e.target.value)}
+              style={{
+                width: '100%',
+                padding: '12px 16px',
+                border: '2px solid #e5e7eb',
+                borderRadius: '8px',
+                fontSize: '16px'
+              }}
+            >
+              <option value="">Select a theme...</option>
+              {themes.map((theme) => (
+                <option key={theme.id} value={theme.id}>
+                  {theme.name} {theme.role === "MAIN" ? "(Main)" : theme.role === "PUBLISHED" ? "(Published)" : ""}
+                </option>
+              ))}
+            </select>
+          </div>
+          
+          <div style={{ marginBottom: '24px' }}>
+            <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
               Section Name (will be used in theme editor):
             </label>
             <input
@@ -946,10 +822,10 @@ export default function InjectSection() {
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <button
               onClick={handleInjectSection}
-              disabled={!sectionName || isInjecting}
+              disabled={!sectionName || !selectedThemeId || isInjecting}
               style={{
                 padding: '16px 32px',
-                background: isInjecting || !sectionName
+                background: isInjecting || !sectionName || !selectedThemeId
                   ? '#9ca3af'
                   : 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
                 color: 'white',
@@ -957,7 +833,7 @@ export default function InjectSection() {
                 borderRadius: '12px',
                 fontSize: '16px',
                 fontWeight: '600',
-                cursor: isInjecting || !sectionName ? 'not-allowed' : 'pointer',
+                cursor: isInjecting || !sectionName || !selectedThemeId ? 'not-allowed' : 'pointer',
                 transition: 'all 0.3s ease'
               }}
             >
@@ -966,7 +842,7 @@ export default function InjectSection() {
 
             {actionData?.success && (
               <button
-                onClick={() => handleOpenThemeEditor(sectionName)}
+                onClick={() => handleOpenThemeEditor(sectionName, selectedThemeId)}
                 style={{
                   padding: '16px 32px',
                   background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
