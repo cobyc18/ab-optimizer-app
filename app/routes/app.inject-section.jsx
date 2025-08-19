@@ -22,7 +22,8 @@ export const loader = async ({ request }) => {
       shopDomain, 
       themes,
       mainTheme: themes.find(t => t.role === "MAIN"),
-      publishedTheme: themes.find(t => t.role === "PUBLISHED")
+      publishedTheme: themes.find(t => t.role === "PUBLISHED"),
+      message: "Snippet injection using Assets API - works with standard app permissions!"
     });
   } catch (error) {
     console.error("❌ Error in loader:", error);
@@ -41,90 +42,49 @@ export const action = async ({ request }) => {
   
   console.log("🚀 Action triggered:", actionType);
   
-  if (actionType === "inject_section") {
+  if (actionType === "inject_snippet") {
     const sectionType = formData.get("sectionType");
     const sectionName = formData.get("sectionName");
     const themeId = formData.get("themeId");
     
-    console.log("📝 Injecting section:", { sectionType, sectionName, themeId });
+    console.log("📝 Injecting snippet:", { sectionType, sectionName, themeId });
     
     try {
-      // Generate the section content based on type
-      const sectionContent = generateSectionContent(sectionType, sectionName);
-      console.log("📄 Generated section content length:", sectionContent.length);
+      // Generate the snippet content based on type
+      const snippetContent = generateSnippetContent(sectionType, sectionName);
+      console.log("📄 Generated snippet content length:", snippetContent.length);
       
-      // Create the section file in the theme using GraphQL mutation
-      const mutation = `
-        mutation themeFilesUpsert($themeId: ID!, $files: [OnlineStoreThemeFilesUpsertFileInput!]!) {
-          themeFilesUpsert(themeId: $themeId, files: $files) {
-            job {
-              done
-              id
-            }
-            upsertedThemeFiles {
-              filename
-            }
-            userErrors {
-              field
-              message
-              code
-            }
+      // Extract numeric theme ID from GID
+      const themeIdNumeric = themeId.replace("gid://shopify/OnlineStoreTheme/", "");
+      console.log("🎨 Using theme ID:", themeIdNumeric);
+      
+      // Create the snippet file using Assets API REST
+      const response = await admin.rest.put({
+        path: `themes/${themeIdNumeric}/assets.json`,
+        data: {
+          asset: {
+            key: `snippets/${sectionName}.liquid`,
+            value: snippetContent
           }
         }
-      `;
+      });
       
-      const variables = {
-        themeId: themeId,
-        files: [{
-          filename: `sections/${sectionName}.liquid`,
-          body: {
-            type: "TEXT",
-            value: sectionContent
-          }
-        }]
-      };
-      
-      console.log("🎨 Using GraphQL mutation with variables:", JSON.stringify(variables, null, 2));
-      
-      const response = await admin.graphql(mutation, { variables });
-      const result = await response.json();
-      
-      console.log("📊 GraphQL response:", JSON.stringify(result, null, 2));
-      
-      if (result.data?.themeFilesUpsert?.userErrors?.length > 0) {
-        const error = result.data.themeFilesUpsert.userErrors[0];
-        console.error("❌ GraphQL error:", error);
-        return json({ 
-          success: false, 
-          error: `Failed to inject section: ${error.message}`,
-          code: error.code
-        });
-      }
-      
-      if (result.errors) {
-        console.error("❌ GraphQL errors:", result.errors);
-        return json({ 
-          success: false, 
-          error: `GraphQL error: ${result.errors[0].message}`,
-          details: result.errors
-        });
-      }
-      
-      console.log("✅ Section created successfully:", result.data?.themeFilesUpsert?.upsertedThemeFiles);
+      console.log("✅ Snippet created successfully:", response.body.asset.key);
       
       return json({ 
         success: true, 
-        message: `Section ${sectionName} successfully added to your theme!`,
+        message: `Snippet ${sectionName} successfully added to your theme!`,
         sectionName,
-        themeId: themeId.replace("gid://shopify/OnlineStoreTheme/", ""),
-        files: result.data?.themeFilesUpsert?.upsertedThemeFiles?.map(file => file.filename)
+        themeId: themeIdNumeric,
+        snippetKey: response.body.asset.key,
+        instructions: getSnippetInstructions(sectionName)
       });
       
     } catch (error) {
-      console.error("❌ Error injecting section:", error);
+      console.error("❌ Error injecting snippet:", error);
       return json({ 
         success: false, 
-        error: `Failed to inject section: ${error.message}`,
+        error: `Failed to inject snippet: ${error.message}`,
         details: error.stack
       });
     }
@@ -133,109 +93,41 @@ export const action = async ({ request }) => {
   return json({ success: false, error: "Invalid action" });
 };
 
-function generateSectionContent(sectionType, sectionName) {
-  console.log("🔧 Generating content for:", sectionType, sectionName);
+function generateSnippetContent(sectionType, sectionName) {
+  console.log("🔧 Generating snippet content for:", sectionType, sectionName);
   
   const widgetContent = generateWidgetContent(sectionType);
   
   return `{% comment %}
-  ${sectionName} - Enhanced Widget Section
+  ${sectionName} - Enhanced Widget Snippet
   Generated by AB Optimizer App
+  This snippet can be included in any section or template
 {% endcomment %}
 
-<div class="ab-optimizer-section" id="ab-optimizer-${sectionName}">
-  {% for block in section.blocks %}
-    {% case block.type %}
-      {% when 'widget' %}
-        ${widgetContent}
-    {% endcase %}
-  {% endfor %}
+<div class="ab-optimizer-snippet" id="ab-optimizer-${sectionName}">
+  ${widgetContent}
 </div>
 
 <style>
-  .ab-optimizer-section {
-    margin: {{ section.settings.section_margin }}px 0;
-    padding: {{ section.settings.section_padding }}px;
+  .ab-optimizer-snippet {
+    margin: 0;
+    padding: 0;
   }
   
-  @media (max-width: 768px) {
-    .ab-optimizer-section {
-      margin: {{ section.settings.mobile_section_margin }}px 0;
-      padding: {{ section.settings.mobile_section_padding }}px;
+  /* Desktop styles */
+  @media (min-width: 769px) {
+    .ab-optimizer-snippet {
+      /* Desktop-specific styles can be added here */
     }
   }
-</style>
-
-{% schema %}
-{
-  "name": "${sectionName}",
-  "tag": "section",
-  "class": "ab-optimizer-section",
-  "settings": [
-    {
-      "type": "header",
-      "content": "Section Layout"
-    },
-    {
-      "type": "range",
-      "id": "section_margin",
-      "label": "Section Margin",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "default": 20
-    },
-    {
-      "type": "range",
-      "id": "section_padding",
-      "label": "Section Padding",
-      "min": 0,
-      "max": 100,
-      "step": 5,
-      "default": 20
-    },
-    {
-      "type": "header",
-      "content": "Mobile Layout"
-    },
-    {
-      "type": "range",
-      "id": "mobile_section_margin",
-      "label": "Mobile Section Margin",
-      "min": 0,
-      "max": 50,
-      "step": 5,
-      "default": 10
-    },
-    {
-      "type": "range",
-      "id": "mobile_section_padding",
-      "label": "Mobile Section Padding",
-      "min": 0,
-      "max": 50,
-      "step": 5,
-      "default": 10
+  
+  /* Mobile styles */
+  @media (max-width: 768px) {
+    .ab-optimizer-snippet {
+      /* Mobile-specific styles can be added here */
     }
-  ],
-  "blocks": [
-    {
-      "type": "widget",
-      "name": "Widget",
-      "settings": ${generateWidgetSettings(sectionType)}
-    }
-  ],
-  "presets": [
-    {
-      "name": "${sectionName}",
-      "blocks": [
-        {
-          "type": "widget"
-        }
-      ]
-    }
-  ]
-}
-{% endschema %}`;
+  }
+</style>`;
 }
 
 function generateWidgetContent(sectionType) {
@@ -246,50 +138,41 @@ function generateWidgetContent(sectionType) {
 <div class="ab-optimizer-badge-widget" 
      style="
        display: inline-block;
-       background: {{ block.settings.desktop_background | default: '#32cd32' }};
-       color: {{ block.settings.desktop_text_color | default: '#ffffff' }};
-       border: {{ block.settings.border_width | default: 1 }}px solid {{ block.settings.border_color | default: '#228b22' }};
-       border-radius: {{ block.settings.desktop_border_radius | default: 4 }}px;
-       padding: {{ block.settings.desktop_padding | default: 8 }}px;
-       margin: {{ block.settings.desktop_margin | default: 4 }}px;
-       font-size: {{ block.settings.desktop_font_size | default: 12 }}px;
-       font-weight: {{ block.settings.font_weight | default: 'bold' }};
-       text-transform: {{ block.settings.text_transform | default: 'uppercase' }};
-       opacity: {{ block.settings.opacity | default: 1 }};
+       background: #32cd32;
+       color: #ffffff;
+       border: 1px solid #228b22;
+       border-radius: 4px;
+       padding: 8px;
+       margin: 4px;
+       font-size: 12px;
+       font-weight: bold;
+       text-transform: uppercase;
+       opacity: 1;
      ">
   
-  {% case block.settings.badge_type %}
-    {% when 'custom' %}
-      {{ block.settings.custom_text | default: 'SPECIAL' }}
-    {% when 'sale' %}
-      {% if product.compare_at_price > product.price %}
-        {{ block.settings.sale_text | default: 'SALE' }}
+  {% if product.compare_at_price > product.price %}
+    SALE
+  {% else %}
+    {% assign product_age = 'now' | date: '%s' | minus: product.created_at | date: '%s' | divided_by: 86400 %}
+    {% if product_age <= 30 %}
+      NEW
+    {% else %}
+      {% if product.available and product.inventory_quantity <= 10 %}
+        LIMITED
+      {% else %}
+        SPECIAL
       {% endif %}
-    {% when 'new' %}
-      {% assign product_age = 'now' | date: '%s' | minus: product.created_at | date: '%s' | divided_by: 86400 %}
-      {% if product_age <= block.settings.new_product_days | default: 30 %}
-        {{ block.settings.new_text | default: 'NEW' }}
-      {% endif %}
-    {% when 'limited' %}
-      {% if product.available and product.inventory_quantity <= block.settings.limited_stock_threshold | default: 10 %}
-        {{ block.settings.limited_text | default: 'LIMITED' }}
-      {% endif %}
-    {% when 'bestseller' %}
-      {{ block.settings.bestseller_text | default: 'BESTSELLER' }}
-    {% when 'trending' %}
-      {{ block.settings.trending_text | default: 'TRENDING' }}
-  {% endcase %}
+    {% endif %}
+  {% endif %}
 </div>
 
 <style>
   @media (max-width: 768px) {
     .ab-optimizer-badge-widget {
-      font-size: {{ block.settings.mobile_font_size | default: 10 }}px !important;
-      padding: {{ block.settings.mobile_padding | default: 6 }}px !important;
-      margin: {{ block.settings.mobile_margin | default: 2 }}px !important;
-      border-radius: {{ block.settings.mobile_border_radius | default: 3 }}px !important;
-      background: {{ block.settings.mobile_background | default: block.settings.desktop_background }} !important;
-      color: {{ block.settings.mobile_text_color | default: block.settings.desktop_text_color }} !important;
+      font-size: 10px !important;
+      padding: 6px !important;
+      margin: 2px !important;
+      border-radius: 3px !important;
     }
   }
 </style>`,
@@ -297,50 +180,29 @@ function generateWidgetContent(sectionType) {
     "social-proof": `
 <div class="ab-optimizer-social-proof-widget" 
      style="
-       padding: {{ block.settings.desktop_padding | default: 16 }}px;
-       background: {{ block.settings.desktop_background | default: '#f8f9fa' }};
-       color: {{ block.settings.desktop_text_color | default: '#000000' }};
-       border: {{ block.settings.border_width | default: 1 }}px solid {{ block.settings.border_color | default: '#e5e7eb' }};
-       border-radius: {{ block.settings.desktop_border_radius | default: 8 }}px;
-       margin: {{ block.settings.desktop_margin | default: 8 }}px 0;
-       font-size: {{ block.settings.desktop_font_size | default: 14 }}px;
-       text-align: {{ block.settings.text_align | default: 'left' }};
-       opacity: {{ block.settings.opacity | default: 1 }};
+       padding: 16px;
+       background: #f8f9fa;
+       color: #000000;
+       border: 1px solid #e5e7eb;
+       border-radius: 8px;
+       margin: 8px 0;
+       font-size: 14px;
+       text-align: left;
+       opacity: 1;
      ">
 
-  {% case block.settings.proof_type %}
-    {% when 'recent_purchase' %}
-      <span style="font-size: {{ block.settings.desktop_icon_size | default: 16 }}px;">🛒</span>
-      <span style="margin-left: 8px;">
-        {{ block.settings.recent_purchase_text | default: 'Someone in your area just purchased this 2 minutes ago' }}
-      </span>
-    {% when 'review_count' %}
-      <span style="font-size: {{ block.settings.desktop_icon_size | default: 16 }}px;">⭐</span>
-      <span style="margin-left: 8px;">
-        {{ block.settings.review_count_text | default: '1,234 happy customers' }}
-      </span>
-    {% when 'trust_badge' %}
-      <span style="font-size: {{ block.settings.desktop_icon_size | default: 16 }}px;">🔒</span>
-      <span style="margin-left: 8px;">
-        {{ block.settings.trust_badge_text | default: '100% Secure Checkout' }}
-      </span>
-    {% when 'custom' %}
-      <span style="font-size: {{ block.settings.desktop_icon_size | default: 16 }}px;">{{ block.settings.custom_icon | default: '✨' }}</span>
-      <span style="margin-left: 8px;">
-        {{ block.settings.custom_message | default: 'Custom social proof message' }}
-      </span>
-  {% endcase %}
+  <span style="font-size: 16px;">🛒</span>
+  <span style="margin-left: 8px;">
+    Someone in your area just purchased this 2 minutes ago
+  </span>
 </div>
 
 <style>
   @media (max-width: 768px) {
     .ab-optimizer-social-proof-widget {
-      font-size: {{ block.settings.mobile_font_size | default: 12 }}px !important;
-      padding: {{ block.settings.mobile_padding | default: 12 }}px !important;
-      margin: {{ block.settings.mobile_margin | default: 8 }}px 0 !important;
-      background: {{ block.settings.mobile_background | default: block.settings.desktop_background }} !important;
-      color: {{ block.settings.mobile_text_color | default: block.settings.desktop_text_color }} !important;
-      border-radius: {{ block.settings.mobile_border_radius | default: 8 }}px !important;
+      font-size: 12px !important;
+      padding: 12px !important;
+      margin: 8px 0 !important;
     }
   }
 </style>`
@@ -349,250 +211,21 @@ function generateWidgetContent(sectionType) {
   return content[sectionType] || content["product-badge"];
 }
 
-function generateWidgetSettings(sectionType) {
-  const settings = {
-    "product-badge": [
-      {
-        "type": "header",
-        "content": "Badge Content"
-      },
-      {
-        "type": "select",
-        "id": "badge_type",
-        "label": "Badge Type",
-        "options": [
-          { "value": "custom", "label": "Custom Text" },
-          { "value": "sale", "label": "Sale Badge" },
-          { "value": "new", "label": "New Product" },
-          { "value": "limited", "label": "Limited Stock" },
-          { "value": "bestseller", "label": "Bestseller" },
-          { "value": "trending", "label": "Trending" }
-        ],
-        "default": "custom"
-      },
-      {
-        "type": "text",
-        "id": "custom_text",
-        "label": "Custom Badge Text",
-        "default": "SPECIAL"
-      },
-      {
-        "type": "header",
-        "content": "Desktop Styling"
-      },
-      {
-        "type": "color",
-        "id": "desktop_background",
-        "label": "Background Color",
-        "default": "#32cd32"
-      },
-      {
-        "type": "color",
-        "id": "desktop_text_color",
-        "label": "Text Color",
-        "default": "#ffffff"
-      },
-      {
-        "type": "range",
-        "id": "desktop_font_size",
-        "label": "Font Size",
-        "min": 10,
-        "max": 48,
-        "step": 1,
-        "default": 12
-      },
-      {
-        "type": "range",
-        "id": "desktop_padding",
-        "label": "Padding",
-        "min": 4,
-        "max": 40,
-        "step": 1,
-        "default": 8
-      },
-      {
-        "type": "range",
-        "id": "desktop_border_radius",
-        "label": "Border Radius",
-        "min": 0,
-        "max": 50,
-        "step": 1,
-        "default": 4
-      },
-      {
-        "type": "header",
-        "content": "Mobile Styling"
-      },
-      {
-        "type": "color",
-        "id": "mobile_background",
-        "label": "Mobile Background",
-        "default": "#32cd32"
-      },
-      {
-        "type": "color",
-        "id": "mobile_text_color",
-        "label": "Mobile Text Color",
-        "default": "#ffffff"
-      },
-      {
-        "type": "range",
-        "id": "mobile_font_size",
-        "label": "Mobile Font Size",
-        "min": 8,
-        "max": 32,
-        "step": 1,
-        "default": 10
-      },
-      {
-        "type": "range",
-        "id": "mobile_padding",
-        "label": "Mobile Padding",
-        "min": 2,
-        "max": 20,
-        "step": 1,
-        "default": 6
-      },
-      {
-        "type": "range",
-        "id": "mobile_border_radius",
-        "label": "Mobile Border Radius",
-        "min": 0,
-        "max": 25,
-        "step": 1,
-        "default": 3
-      },
-      {
-        "type": "header",
-        "content": "Advanced Effects"
-      },
-      {
-        "type": "range",
-        "id": "opacity",
-        "label": "Opacity",
-        "min": 0.1,
-        "max": 1,
-        "step": 0.1,
-        "default": 1
-      }
-    ],
-    "social-proof": [
-      {
-        "type": "header",
-        "content": "Social Proof Content"
-      },
-      {
-        "type": "select",
-        "id": "proof_type",
-        "label": "Proof Type",
-        "options": [
-          { "value": "recent_purchase", "label": "Recent Purchase" },
-          { "value": "review_count", "label": "Review Count" },
-          { "value": "trust_badge", "label": "Trust Badge" },
-          { "value": "custom", "label": "Custom Message" }
-        ],
-        "default": "recent_purchase"
-      },
-      {
-        "type": "text",
-        "id": "recent_purchase_text",
-        "label": "Recent Purchase Text",
-        "default": "Someone in your area just purchased this 2 minutes ago"
-      },
-      {
-        "type": "text",
-        "id": "review_count_text",
-        "label": "Review Count Text",
-        "default": "1,234 happy customers"
-      },
-      {
-        "type": "text",
-        "id": "trust_badge_text",
-        "label": "Trust Badge Text",
-        "default": "100% Secure Checkout"
-      },
-      {
-        "type": "text",
-        "id": "custom_message",
-        "label": "Custom Message",
-        "default": "Custom social proof message"
-      },
-      {
-        "type": "header",
-        "content": "Desktop Styling"
-      },
-      {
-        "type": "color",
-        "id": "desktop_background",
-        "label": "Background Color",
-        "default": "#f8f9fa"
-      },
-      {
-        "type": "color",
-        "id": "desktop_text_color",
-        "label": "Text Color",
-        "default": "#000000"
-      },
-      {
-        "type": "range",
-        "id": "desktop_font_size",
-        "label": "Font Size",
-        "min": 12,
-        "max": 32,
-        "step": 1,
-        "default": 14
-      },
-      {
-        "type": "range",
-        "id": "desktop_padding",
-        "label": "Padding",
-        "min": 8,
-        "max": 40,
-        "step": 1,
-        "default": 16
-      },
-      {
-        "type": "header",
-        "content": "Mobile Styling"
-      },
-      {
-        "type": "color",
-        "id": "mobile_background",
-        "label": "Mobile Background",
-        "default": "#f8f9fa"
-      },
-      {
-        "type": "color",
-        "id": "mobile_text_color",
-        "label": "Mobile Text Color",
-        "default": "#000000"
-      },
-      {
-        "type": "range",
-        "id": "mobile_font_size",
-        "label": "Mobile Font Size",
-        "min": 10,
-        "max": 24,
-        "step": 1,
-        "default": 12
-      },
-      {
-        "type": "range",
-        "id": "mobile_padding",
-        "label": "Mobile Padding",
-        "min": 6,
-        "max": 20,
-        "step": 1,
-        "default": 12
-      }
-    ]
-  };
-  
-  return JSON.stringify(settings[sectionType] || settings["product-badge"]);
+function getSnippetInstructions(sectionName) {
+  return [
+    "1. The snippet has been successfully added to your theme!",
+    "2. To use this snippet in any section or template, add:",
+    `   {% render '${sectionName}' %}`,
+    "3. You can also pass parameters to customize it:",
+    `   {% render '${sectionName}', custom_param: 'value' %}`,
+    "4. The snippet will automatically adapt to desktop and mobile",
+    "5. You can find it in your theme's snippets folder",
+    "6. To customize further, edit the snippet file directly in your theme"
+  ];
 }
 
 export default function InjectSection() {
-  const { shopDomain, themes, mainTheme, publishedTheme, error } = useLoaderData();
+  const { shopDomain, themes, mainTheme, publishedTheme, message, error } = useLoaderData();
   const actionData = useActionData();
   const submit = useSubmit();
   const [selectedSection, setSelectedSection] = useState("");
@@ -604,30 +237,30 @@ export default function InjectSection() {
     {
       id: "product-badge",
       name: "Enhanced Product Badge",
-      description: "Advanced product badges with 30+ settings for desktop and mobile",
+      description: "Smart product badges that automatically show SALE, NEW, LIMITED, or SPECIAL",
       icon: "🏷️",
-      settings: "30+ settings"
+      settings: "Auto-detecting"
     },
     {
       id: "social-proof",
       name: "Enhanced Social Proof",
-      description: "Social proof widgets with extensive customization options",
+      description: "Social proof widget with recent purchase notifications",
       icon: "⭐",
-      settings: "25+ settings"
+      settings: "Ready to use"
     }
   ];
 
-  const handleInjectSection = async () => {
+  const handleInjectSnippet = async () => {
     if (!selectedSection || !sectionName || !selectedThemeId) {
       console.log("❌ Missing required fields:", { selectedSection, sectionName, selectedThemeId });
       return;
     }
     
-    console.log("🚀 Starting injection:", { selectedSection, sectionName, selectedThemeId });
+    console.log("🚀 Starting snippet injection:", { selectedSection, sectionName, selectedThemeId });
     setIsInjecting(true);
     
     const formData = new FormData();
-    formData.append("actionType", "inject_section");
+    formData.append("actionType", "inject_snippet");
     formData.append("sectionType", selectedSection);
     formData.append("sectionName", sectionName);
     formData.append("themeId", selectedThemeId);
@@ -637,7 +270,7 @@ export default function InjectSection() {
 
   const handleOpenThemeEditor = (sectionName, themeId) => {
     const themeIdNumeric = themeId.replace("gid://shopify/OnlineStoreTheme/", "");
-    const themeEditorUrl = `https://admin.shopify.com/store/${shopDomain}/themes/${themeIdNumeric}/editor?previewPath=/products/sample-product&addAppBlockId=ab-optimizer-${sectionName}`;
+    const themeEditorUrl = `https://admin.shopify.com/store/${shopDomain}/themes/${themeIdNumeric}/editor`;
     console.log("🎨 Opening theme editor:", themeEditorUrl);
     window.open(themeEditorUrl, '_blank');
   };
@@ -668,13 +301,27 @@ export default function InjectSection() {
         marginBottom: '32px'
       }}>
         <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '16px' }}>
-          🚀 Enhanced Section Injector
+          🚀 Snippet Injector (Assets API)
         </h1>
         <p style={{ fontSize: '18px', opacity: 0.9, lineHeight: '1.6' }}>
-          Add powerful sections to your theme with 30+ settings for desktop and mobile. 
-          These sections will be injected directly into your theme codebase, giving you 
-          extensive customization options while staying within Shopify's size limits.
+          {message}
         </p>
+        <div style={{ 
+          marginTop: '16px', 
+          padding: '16px', 
+          background: 'rgba(255,255,255,0.1)', 
+          borderRadius: '8px',
+          fontSize: '14px'
+        }}>
+          <strong>Why Snippets with Assets API?</strong>
+          <ul style={{ margin: '8px 0 0 20px', opacity: 0.9 }}>
+            <li>✅ Works with standard app permissions</li>
+            <li>✅ No special Shopify exemptions required</li>
+            <li>✅ Can be included in any section or template</li>
+            <li>✅ Reusable across your entire theme</li>
+            <li>✅ Easy to customize and maintain</li>
+          </ul>
+        </div>
       </div>
 
       {actionData && (
@@ -691,15 +338,10 @@ export default function InjectSection() {
         }}>
           {actionData.success ? '✅ ' : '❌ '}
           {actionData.message || actionData.error}
-          {actionData.code && (
-            <div style={{ marginTop: '8px', fontSize: '14px', opacity: 0.9 }}>
-              Error Code: {actionData.code}
-            </div>
-          )}
           {actionData.details && (
             <details style={{ marginTop: '8px', textAlign: 'left' }}>
               <summary>Debug Details</summary>
-              <pre style={{ fontSize: '12px', whiteSpace: 'pre-wrap' }}>{JSON.stringify(actionData.details, null, 2)}</pre>
+              <pre style={{ fontSize: '12px', whiteSpace: 'pre-wrap' }}>{actionData.details}</pre>
             </details>
           )}
         </div>
@@ -771,7 +413,7 @@ export default function InjectSection() {
           border: '2px solid #32cd32'
         }}>
           <h2 style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '24px' }}>
-            Inject Section to Theme
+            Inject Snippet to Theme
           </h2>
           
           <div style={{ marginBottom: '24px' }}>
@@ -800,7 +442,7 @@ export default function InjectSection() {
           
           <div style={{ marginBottom: '24px' }}>
             <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
-              Section Name (will be used in theme editor):
+              Snippet Name (will be used as filename):
             </label>
             <input
               type="text"
@@ -819,7 +461,7 @@ export default function InjectSection() {
 
           <div style={{ display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
             <button
-              onClick={handleInjectSection}
+              onClick={handleInjectSnippet}
               disabled={!sectionName || !selectedThemeId || isInjecting}
               style={{
                 padding: '16px 32px',
@@ -835,7 +477,7 @@ export default function InjectSection() {
                 transition: 'all 0.3s ease'
               }}
             >
-              {isInjecting ? '🔄 Injecting...' : '🚀 Inject Section'}
+              {isInjecting ? '🔄 Injecting...' : '🚀 Inject Snippet'}
             </button>
 
             {actionData?.success && (
@@ -853,10 +495,28 @@ export default function InjectSection() {
                   transition: 'all 0.3s ease'
                 }}
               >
-                🎨 Open in Theme Editor
+                🎨 Open Theme Editor
               </button>
             )}
           </div>
+
+          {actionData?.success && actionData.instructions && (
+            <div style={{ 
+              marginTop: '24px', 
+              padding: '16px', 
+              background: '#f8f9fa', 
+              borderRadius: '8px',
+              fontSize: '14px',
+              color: '#6b7280'
+            }}>
+              <strong>How to use this snippet:</strong>
+              <ul style={{ margin: '8px 0 0 20px' }}>
+                {actionData.instructions.map((instruction, index) => (
+                  <li key={index} style={{ marginBottom: '4px' }}>{instruction}</li>
+                ))}
+              </ul>
+            </div>
+          )}
 
           <div style={{ 
             marginTop: '24px', 
@@ -868,10 +528,10 @@ export default function InjectSection() {
           }}>
             <strong>What happens next:</strong>
             <ul style={{ margin: '8px 0 0 20px' }}>
-              <li>The section will be added to your theme's sections folder</li>
-              <li>You can then add it to any page via the theme editor</li>
-              <li>Each section comes with 30+ settings for desktop and mobile</li>
-              <li>Settings are organized into logical groups for easy customization</li>
+              <li>The snippet will be added to your theme's snippets folder</li>
+              <li>You can include it in any section or template using the render tag</li>
+              <li>Snippets are reusable and can be customized with parameters</li>
+              <li>They automatically adapt to desktop and mobile layouts</li>
             </ul>
           </div>
         </div>
