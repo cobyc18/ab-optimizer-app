@@ -505,8 +505,8 @@ export default function ABTesting() {
   const { user } = useOutletContext();
   
   // Step management - NEW
-  const [currentStep, setCurrentStep] = useState(1);
-  const [completedSteps, setCompletedSteps] = useState([]);
+  const [currentStep, setCurrentStep] = useState(2); // Changed default to step 2
+  const [completedSteps, setCompletedSteps] = useState([1]); // Mark step 1 as completed by default
   
   // Form state with proper defaults
   const [templateA, setTemplateA] = useState("");
@@ -558,8 +558,17 @@ export default function ABTesting() {
   };
 
   const goToStep = (step) => {
-    if (step <= currentStep || completedSteps.includes(step - 1)) {
-      setCurrentStep(step);
+    // Allow clicking on any step (1 or 2)
+    setCurrentStep(step);
+    // Mark previous steps as completed when going forward
+    if (step > currentStep) {
+      const newCompletedSteps = [...completedSteps];
+      for (let i = currentStep; i < step; i++) {
+        if (!newCompletedSteps.includes(i)) {
+          newCompletedSteps.push(i);
+        }
+      }
+      setCompletedSteps(newCompletedSteps);
     }
   };
 
@@ -586,8 +595,8 @@ export default function ABTesting() {
     setValidationErrors({});
     setProductValidationError(null);
     // Reset step management
-    setCurrentStep(1);
-    setCompletedSteps([]);
+    setCurrentStep(2); // Reset to step 2 as default
+    setCompletedSteps([1]); // Mark step 1 as completed by default
     setDuplicateTemplateName("");
     setSelectedTemplate(productTemplates[0] || "");
     setAssociatedProduct(null);
@@ -944,7 +953,7 @@ export default function ABTesting() {
           <div style={{
             display: 'flex',
             alignItems: 'center',
-            cursor: currentStep >= 2 || completedSteps.includes(1) ? 'pointer' : 'default'
+            cursor: 'pointer' // Always clickable
           }} onClick={() => goToStep(2)}>
             <div style={{
               width: '36px',
@@ -954,9 +963,7 @@ export default function ABTesting() {
                 ? 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)'
                 : completedSteps.includes(2)
                 ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                : currentStep >= 2 || completedSteps.includes(1)
-                ? '#e5e7eb'
-                : '#f3f4f6',
+                : '#e5e7eb',
               color: currentStep === 2 || completedSteps.includes(2) ? 'white' : '#6b7280',
               display: 'flex',
               alignItems: 'center',
@@ -971,7 +978,7 @@ export default function ABTesting() {
               <div style={{
                 fontSize: '14px',
                 fontWeight: '600',
-                color: currentStep === 2 ? '#000000' : completedSteps.includes(2) ? '#22c55e' : currentStep >= 2 || completedSteps.includes(1) ? '#6b7280' : '#9ca3af'
+                color: currentStep === 2 ? '#000000' : completedSteps.includes(2) ? '#22c55e' : '#6b7280'
               }}>
                 Create A/B Test
               </div>
