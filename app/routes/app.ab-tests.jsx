@@ -999,14 +999,14 @@ export default function ABTesting() {
             Create A/B Test
           </h2>
           <p style={{ fontSize: '14px', color: '#6b7280' }}>
-            Step {currentStep + 1} of {flowSteps.length}
+            Step {currentStep + 1} of 6
           </p>
         </div>
       </div>
 
       {/* Step indicator */}
       <div style={{ display: 'flex', gap: '8px', marginBottom: '32px' }}>
-        {[1, 2, 3, 4, 5].map((step) => (
+        {[1, 2, 3, 4, 5, 6].map((step) => (
           <div
             key={step}
             style={{
@@ -1049,162 +1049,505 @@ export default function ABTesting() {
         </div>
 
         {/* Step 2: Product Selection */}
-        {flowData.testName && (
-          <div style={{ opacity: currentStep >= 1 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
-            <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-              Product <span style={{ color: '#dc2626' }}>*</span>
-            </label>
-            <select
-              value={flowData.selectedProductId}
-              onChange={(e) => updateFlowData('selectedProductId', e.target.value)}
-              style={{
-                width: '100%',
-                padding: '16px',
-                border: (validationErrors.product || productValidationError) ? '2px solid #dc2626' : '2px solid #e5e7eb',
-                borderRadius: '12px',
-                fontSize: '16px',
-                background: 'white',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              <option value="">Select Product</option>
-              {productOptions.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-            {(validationErrors.product || productValidationError) && (
-              <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-                {validationErrors.product || productValidationError}
-              </p>
-            )}
-          </div>
-        )}
+        <div style={{ opacity: currentStep >= 1 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
+          <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
+            Product <span style={{ color: '#dc2626' }}>*</span>
+          </label>
+          <select
+            value={flowData.selectedProductId}
+            onChange={(e) => updateFlowData('selectedProductId', e.target.value)}
+            style={{
+              width: '100%',
+              padding: '16px',
+              border: (validationErrors.product || productValidationError) ? '2px solid #dc2626' : '2px solid #e5e7eb',
+              borderRadius: '12px',
+              fontSize: '16px',
+              background: 'white',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <option value="">Select Product</option>
+            {productOptions.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+          {(validationErrors.product || productValidationError) && (
+            <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
+              {validationErrors.product || productValidationError}
+            </p>
+          )}
+        </div>
 
         {/* Step 3: Template A */}
-        {flowData.selectedProductId && (
-          <div style={{ opacity: currentStep >= 2 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
-            <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-              Template A (First Variant) <span style={{ color: '#dc2626' }}>*</span>
-            </label>
-            <select
-              value={flowData.templateA}
-              onChange={(e) => updateFlowData('templateA', e.target.value)}
-              style={{
-                width: '100%',
-                padding: '16px',
-                border: validationErrors.templateA ? '2px solid #dc2626' : '2px solid #e5e7eb',
-                borderRadius: '12px',
-                fontSize: '16px',
-                background: 'white',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              <option value="">Select Template A</option>
-              {templateOptions.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-            {validationErrors.templateA && (
-              <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-                {validationErrors.templateA}
-              </p>
-            )}
-          </div>
-        )}
+        <div style={{ opacity: currentStep >= 2 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
+          <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
+            Template A (First Variant) <span style={{ color: '#dc2626' }}>*</span>
+          </label>
+          <select
+            value={flowData.templateA}
+            onChange={(e) => updateFlowData('templateA', e.target.value)}
+            style={{
+              width: '100%',
+              padding: '16px',
+              border: validationErrors.templateA ? '2px solid #dc2626' : '2px solid #e5e7eb',
+              borderRadius: '12px',
+              fontSize: '16px',
+              background: 'white',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <option value="">Select Template A</option>
+            {templateOptions.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+          {validationErrors.templateA && (
+            <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
+              {validationErrors.templateA}
+            </p>
+          )}
+        </div>
 
         {/* Step 4: Template B */}
-        {flowData.templateA && (
-          <div style={{ opacity: currentStep >= 3 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
-            <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-              Template B (Second Variant) <span style={{ color: '#dc2626' }}>*</span>
-            </label>
-            <select
-              value={flowData.templateB}
-              onChange={(e) => updateFlowData('templateB', e.target.value)}
-              style={{
-                width: '100%',
-                padding: '16px',
-                border: validationErrors.templateB ? '2px solid #dc2626' : '2px solid #e5e7eb',
-                borderRadius: '12px',
-                fontSize: '16px',
-                background: 'white',
-                transition: 'all 0.3s ease'
-              }}
-            >
-              <option value="">Select Template B</option>
-              {templateOptions.map(option => (
-                <option key={option.value} value={option.value}>{option.label}</option>
-              ))}
-            </select>
-            {validationErrors.templateB && (
-              <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-                {validationErrors.templateB}
-              </p>
-            )}
-          </div>
-        )}
+        <div style={{ opacity: currentStep >= 3 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
+          <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
+            Template B (Second Variant) <span style={{ color: '#dc2626' }}>*</span>
+          </label>
+          <select
+            value={flowData.templateB}
+            onChange={(e) => updateFlowData('templateB', e.target.value)}
+            style={{
+              width: '100%',
+              padding: '16px',
+              border: validationErrors.templateB ? '2px solid #dc2626' : '2px solid #e5e7eb',
+              borderRadius: '12px',
+              fontSize: '16px',
+              background: 'white',
+              transition: 'all 0.3s ease'
+            }}
+          >
+            <option value="">Select Template B</option>
+            {templateOptions.map(option => (
+              <option key={option.value} value={option.value}>{option.label}</option>
+            ))}
+          </select>
+          {validationErrors.templateB && (
+            <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
+              {validationErrors.templateB}
+            </p>
+          )}
+        </div>
 
         {/* Step 5: Traffic Split */}
-        {flowData.templateB && (
-          <div style={{ opacity: currentStep >= 4 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
-            <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-              Traffic Split (A %) <span style={{ color: '#dc2626' }}>*</span>
-            </label>
-            <input
-              type="number"
-              value={flowData.trafficSplit}
-              onChange={(e) => updateFlowData('trafficSplit', e.target.value)}
-              min="1"
-              max="99"
-              placeholder="50"
-              style={{
-                width: '100%',
-                padding: '16px',
-                border: validationErrors.trafficSplit ? '2px solid #dc2626' : '2px solid #e5e7eb',
-                borderRadius: '12px',
-                fontSize: '16px',
-                transition: 'all 0.3s ease'
-              }}
-            />
-            {validationErrors.trafficSplit && (
-              <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-                {validationErrors.trafficSplit}
-              </p>
-            )}
-            <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
-              Percentage of traffic to show Template A (1-99)
+        <div style={{ opacity: currentStep >= 4 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
+          <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
+            Traffic Split (A %) <span style={{ color: '#dc2626' }}>*</span>
+          </label>
+          <input
+            type="number"
+            value={flowData.trafficSplit}
+            onChange={(e) => updateFlowData('trafficSplit', e.target.value)}
+            min="1"
+            max="99"
+            placeholder="50"
+            style={{
+              width: '100%',
+              padding: '16px',
+              border: validationErrors.trafficSplit ? '2px solid #dc2626' : '2px solid #e5e7eb',
+              borderRadius: '12px',
+              fontSize: '16px',
+              transition: 'all 0.3s ease'
+            }}
+          />
+          {validationErrors.trafficSplit && (
+            <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
+              {validationErrors.trafficSplit}
             </p>
-          </div>
-        )}
+          )}
+          <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
+            Percentage of traffic to show Template A (1-99)
+          </p>
+        </div>
 
-        {/* Create Test Button */}
-        {flowData.trafficSplit && (
+        {/* Step 6: End Result Configuration */}
+        <div style={{ opacity: currentStep >= 5 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
+          <div style={{
+            padding: '24px',
+            background: '#f8fafc',
+            borderRadius: '16px',
+            border: '1px solid #e2e8f0'
+          }}>
+            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#000000', marginBottom: '16px' }}>
+              🎯 End Result Configuration
+            </h3>
+            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px' }}>
+              Choose how the test will determine a winner or when it should end.
+            </p>
+
+            {/* End Result Type Selection */}
+            <div style={{ marginBottom: '20px' }}>
+              <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
+                End Result Type
+              </label>
+              
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                {/* Manual Option */}
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '16px',
+                  background: flowData.endResultType === 'manual' ? '#f0fdf4' : 'white',
+                  border: flowData.endResultType === 'manual' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}>
+                  <input
+                    type="radio"
+                    name="endResultType"
+                    value="manual"
+                    checked={flowData.endResultType === 'manual'}
+                    onChange={(e) => updateFlowData('endResultType', e.target.value)}
+                    style={{ marginRight: '16px' }}
+                  />
+                  <div>
+                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                      Manual Control
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      You decide when to end the test and declare a winner
+                    </div>
+                  </div>
+                </label>
+
+                {/* Date Option */}
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '16px',
+                  background: flowData.endResultType === 'date' ? '#f0fdf4' : 'white',
+                  border: flowData.endResultType === 'date' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}>
+                  <input
+                    type="radio"
+                    name="endResultType"
+                    value="date"
+                    checked={flowData.endResultType === 'date'}
+                    onChange={(e) => updateFlowData('endResultType', e.target.value)}
+                    style={{ marginRight: '16px' }}
+                  />
+                  <div>
+                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                      End Date
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      Test ends on a specific date and winner is determined
+                    </div>
+                  </div>
+                </label>
+
+                {/* Impressions Option */}
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '16px',
+                  background: flowData.endResultType === 'impressions' ? '#f0fdf4' : 'white',
+                  border: flowData.endResultType === 'impressions' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}>
+                  <input
+                    type="radio"
+                    name="endResultType"
+                    value="impressions"
+                    checked={flowData.endResultType === 'impressions'}
+                    onChange={(e) => updateFlowData('endResultType', e.target.value)}
+                    style={{ marginRight: '16px' }}
+                  />
+                  <div>
+                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                      Impression Count
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      Test ends when one variant reaches target impressions
+                    </div>
+                  </div>
+                </label>
+
+                {/* Conversions Option */}
+                <label style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  padding: '16px',
+                  background: flowData.endResultType === 'conversions' ? '#f0fdf4' : 'white',
+                  border: flowData.endResultType === 'conversions' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                  borderRadius: '12px',
+                  cursor: 'pointer',
+                  transition: 'all 0.2s ease'
+                }}>
+                  <input
+                    type="radio"
+                    name="endResultType"
+                    value="conversions"
+                    checked={flowData.endResultType === 'conversions'}
+                    onChange={(e) => updateFlowData('endResultType', e.target.value)}
+                    style={{ marginRight: '16px' }}
+                  />
+                  <div>
+                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                      Conversion Count
+                    </div>
+                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                      Test ends when one variant reaches target conversions
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            {/* Conditional Fields Based on Selection */}
+            {flowData.endResultType === 'date' && (
+              <div>
+                <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
+                  End Date <span style={{ color: '#dc2626' }}>*</span>
+                </label>
+                <div style={{
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}>
+                  <input
+                    type="date"
+                    value={flowData.endDate.split('T')[0] || ''}
+                    onChange={(e) => {
+                      const date = e.target.value;
+                      const time = flowData.endDate.split('T')[1] || '23:59';
+                      updateFlowData('endDate', `${date}T${time}`);
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '16px 16px 16px 48px',
+                      border: validationErrors.endDate ? '2px solid #dc2626' : '2px solid #e5e7eb',
+                      borderRadius: '12px',
+                      fontSize: '16px',
+                      background: 'white',
+                      cursor: 'pointer'
+                    }}
+                  />
+                  <div style={{
+                    position: 'absolute',
+                    left: '16px',
+                    color: '#6b7280',
+                    pointerEvents: 'none'
+                  }}>
+                    📅
+                  </div>
+                </div>
+                
+                <div style={{ marginTop: '12px' }}>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>
+                    End Time
+                  </label>
+                  <div style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}>
+                    <input
+                      type="time"
+                      value={flowData.endDate.split('T')[1] || '23:59'}
+                      onChange={(e) => {
+                        const date = flowData.endDate.split('T')[0] || '';
+                        const time = e.target.value;
+                        updateFlowData('endDate', `${date}T${time}`);
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '12px 12px 12px 48px',
+                        border: '2px solid #e5e7eb',
+                        borderRadius: '12px',
+                        fontSize: '16px',
+                        background: 'white',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      left: '16px',
+                      color: '#6b7280',
+                      pointerEvents: 'none'
+                    }}>
+                      🕐
+                    </div>
+                  </div>
+                </div>
+                
+                {validationErrors.endDate && (
+                  <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
+                    {validationErrors.endDate}
+                  </p>
+                )}
+                <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '12px' }}>
+                  When the test should end and winner be determined
+                </p>
+              </div>
+            )}
+
+            {flowData.endResultType === 'impressions' && (
+              <div>
+                <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
+                  Impression Threshold <span style={{ color: '#dc2626' }}>*</span>
+                </label>
+                <input
+                  type="number"
+                  value={flowData.impressionThreshold}
+                  onChange={(e) => updateFlowData('impressionThreshold', e.target.value)}
+                  min="100"
+                  placeholder="1000"
+                  style={{
+                    width: '100%',
+                    padding: '16px',
+                    border: validationErrors.impressionThreshold ? '2px solid #dc2626' : '2px solid #e5e7eb',
+                    borderRadius: '12px',
+                    fontSize: '16px',
+                    transition: 'all 0.3s ease'
+                  }}
+                />
+                {validationErrors.impressionThreshold && (
+                  <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
+                    {validationErrors.impressionThreshold}
+                  </p>
+                )}
+                <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
+                  Number of impressions needed for one variant to win (minimum 100)
+                </p>
+              </div>
+            )}
+
+            {flowData.endResultType === 'conversions' && (
+              <div>
+                <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
+                  Conversion Threshold <span style={{ color: '#dc2626' }}>*</span>
+                </label>
+                <input
+                  type="number"
+                  value={flowData.conversionThreshold}
+                  onChange={(e) => updateFlowData('conversionThreshold', e.target.value)}
+                  min="10"
+                  placeholder="100"
+                  style={{
+                    width: '100%',
+                    padding: '16px',
+                    border: validationErrors.conversionThreshold ? '2px solid #dc2626' : '2px solid #e5e7eb',
+                    borderRadius: '12px',
+                    fontSize: '16px',
+                    transition: 'all 0.3s ease'
+                  }}
+                />
+                {validationErrors.conversionThreshold && (
+                  <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
+                    {validationErrors.conversionThreshold}
+                  </p>
+                )}
+                <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
+                  Number of conversions needed for one variant to win (minimum 10)
+                </p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation Buttons */}
+        <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
           <button
-            onClick={handleSubmit}
+            onClick={prevStep}
             style={{
               padding: '16px 32px',
-              background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-              color: 'white',
-              border: 'none',
+              background: 'white',
+              color: '#6b7280',
+              border: '2px solid #e5e7eb',
               borderRadius: '12px',
               fontSize: '16px',
               fontWeight: '600',
               cursor: 'pointer',
-              transition: 'all 0.3s ease',
-              marginTop: '16px'
+              transition: 'all 0.3s ease'
             }}
             onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-2px)';
-              e.target.style.boxShadow = '0 10px 20px rgba(50, 205, 50, 0.3)';
+              e.target.style.background = '#f8fafc';
+              e.target.style.borderColor = '#d1d5db';
             }}
             onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
-              e.target.style.boxShadow = 'none';
+              e.target.style.background = 'white';
+              e.target.style.borderColor = '#e5e7eb';
             }}
           >
-            🚀 Create A/B Test
+            ← Back
           </button>
-        )}
+
+          {/* Next/Submit Button */}
+          {currentStep < 5 ? (
+            <button
+              onClick={nextStep}
+              disabled={!flowData.testName.trim()}
+              style={{
+                padding: '16px 32px',
+                background: !flowData.testName.trim() ? '#9ca3af' : 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: !flowData.testName.trim() ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s ease',
+                flex: 1
+              }}
+              onMouseEnter={(e) => {
+                if (flowData.testName.trim()) {
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 10px 20px rgba(50, 205, 50, 0.3)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (flowData.testName.trim()) {
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = 'none';
+                }
+              }}
+            >
+              Next →
+            </button>
+          ) : (
+            <button
+              onClick={handleSubmit}
+              style={{
+                padding: '16px 32px',
+                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '12px',
+                fontSize: '16px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                flex: 1
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 10px 20px rgba(50, 205, 50, 0.3)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = 'none';
+              }}
+            >
+              🚀 Create A/B Test
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Error and Success Messages */}
