@@ -504,107 +504,105 @@ export default function ABTesting() {
   const actionData = useActionData();
   const { user } = useOutletContext();
   
-  // Flow state management
-  const [currentStep, setCurrentStep] = useState(0);
-  const [selectedAction, setSelectedAction] = useState(null);
-  const [flowData, setFlowData] = useState({
-    action: null,
-    testName: "",
-    selectedProductId: "",
-    templateA: "",
-    templateB: "",
-    trafficSplit: "50",
-    endResultType: "manual",
-    endDate: "",
-    impressionThreshold: "1000",
-    conversionThreshold: "100",
-    duplicateTemplateName: "",
-    selectedTemplate: productTemplates[0] || ""
-  });
-
-  // Form state
+  // Step management - NEW
+  const [currentStep, setCurrentStep] = useState(1);
+  const [completedSteps, setCompletedSteps] = useState([]);
+  
+  // Form state with proper defaults
+  const [templateA, setTemplateA] = useState("");
+  const [templateB, setTemplateB] = useState("");
+  const [trafficSplit, setTrafficSplit] = useState("50");
+  const [testName, setTestName] = useState("");
   const [error, setError] = useState(null);
+  const [selectedProductId, setSelectedProductId] = useState("");
   const [successMessage, setSuccessMessage] = useState(null);
   const [validationErrors, setValidationErrors] = useState({});
+
+  // End result options state
+  const [endResultType, setEndResultType] = useState("manual");
+  const [endDate, setEndDate] = useState("");
+  const [impressionThreshold, setImpressionThreshold] = useState("1000");
+  const [conversionThreshold, setConversionThreshold] = useState("100");
+
+  // Product validation state
   const [isCheckingProduct, setIsCheckingProduct] = useState(false);
   const [productValidationError, setProductValidationError] = useState(null);
-  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
-  const [associatedProduct, setAssociatedProduct] = useState(null);
-  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
+
+  // Template preview state
+  const [selectedTemplate, setSelectedTemplate] = useState(productTemplates[0] || "");
+  const [duplicateTemplateName, setDuplicateTemplateName] = useState("");
   const [previewError, setPreviewError] = useState(null);
+  const [associatedProduct, setAssociatedProduct] = useState(null);
+  const [isLoadingProduct, setIsLoadingProduct] = useState(false);
+  const [isCreatingTemplate, setIsCreatingTemplate] = useState(false);
+
+  // Automatically infer product handle from first product or use default (fallback)
+  const inferredProductHandle = products[0]?.handle || "example-product";
 
   const templateOptions = productTemplates.map(f => ({ label: f, value: f }));
   const productOptions = products.map(p => ({ label: p.title, value: p.id }));
 
-  // Flow steps configuration
-  const flowSteps = [
-    {
-      id: 'action-selection',
-      title: 'Choose Your Action',
-      description: 'What would you like to do?',
-      component: 'ActionSelection'
-    },
-    {
-      id: 'test-setup',
-      title: 'Create A/B Test',
-      description: 'Set up your experiment',
-      component: 'TestSetup',
-      condition: () => selectedAction === 'create-test'
-    },
-    {
-      id: 'template-duplication',
-      title: 'Duplicate Template',
-      description: 'Create a copy of your template',
-      component: 'TemplateDuplication',
-      condition: () => selectedAction === 'duplicate-template'
-    }
-  ];
-
-  // Helper functions
-  const updateFlowData = (key, value) => {
-    setFlowData(prev => ({ ...prev, [key]: value }));
-  };
-
+  // Step navigation functions - NEW
   const nextStep = () => {
-    setCurrentStep(prev => prev + 1);
+    if (currentStep < 2) {
+      setCurrentStep(currentStep + 1);
+      setCompletedSteps([...completedSteps, currentStep]);
+    }
   };
 
   const prevStep = () => {
-    setCurrentStep(prev => prev - 1);
+    if (currentStep > 1) {
+      setCurrentStep(currentStep - 1);
+      setCompletedSteps(completedSteps.filter(step => step !== currentStep - 1));
+    }
   };
 
-  const resetFlow = () => {
-    setCurrentStep(0);
-    setSelectedAction(null);
-    setFlowData({
-      action: null,
-      testName: "",
-      selectedProductId: "",
-      templateA: "",
-      templateB: "",
-      trafficSplit: "50",
-      endResultType: "manual",
-      endDate: "",
-      impressionThreshold: "1000",
-      conversionThreshold: "100",
-      duplicateTemplateName: "",
-      selectedTemplate: productTemplates[0] || ""
-    });
+  const goToStep = (step) => {
+    if (step <= currentStep || completedSteps.includes(step - 1)) {
+      setCurrentStep(step);
+    }
+  };
+
+  // Reset Template B if templates list changes and B is not in the list
+  useEffect(() => {
+    if (templateB && !productTemplates.includes(templateB)) {
+      setTemplateB("");
+    }
+  }, [productTemplates, templateB]);
+
+  // Function to reset form
+  const resetForm = () => {
+    setTestName("");
+    setTemplateA("");
+    setTemplateB("");
+    setTrafficSplit("50");
+    setSelectedProductId("");
+    setEndResultType("manual");
+    setEndDate("");
+    setImpressionThreshold("1000");
+    setConversionThreshold("100");
     setError(null);
     setSuccessMessage(null);
     setValidationErrors({});
     setProductValidationError(null);
+    // Reset step management
+    setCurrentStep(1);
+    setCompletedSteps([]);
+    setDuplicateTemplateName("");
+    setSelectedTemplate(productTemplates[0] || "");
+    setAssociatedProduct(null);
+    setPreviewError(null);
   };
 
   // Function to validate form
   const validateForm = () => {
     const errors = {};
 
-    if (!flowData.testName.trim()) {
+    if (!testName.trim()) {
       errors.testName = "Test name is required";
     }
 
-    if (!flowData.selectedProductId) {
+    if (!selectedProductId) {
       errors.product = "Please select a product";
     }
 
@@ -612,32 +610,32 @@ export default function ABTesting() {
       errors.product = productValidationError;
     }
 
-    if (!flowData.templateA) {
+    if (!templateA) {
       errors.templateA = "Please select Template A";
     }
 
-    if (!flowData.templateB) {
+    if (!templateB) {
       errors.templateB = "Please select Template B";
     }
 
-    if (flowData.templateA && flowData.templateB && flowData.templateA === flowData.templateB) {
+    if (templateA && templateB && templateA === templateB) {
       errors.templateB = "Template A and Template B must be different";
     }
 
-    if (!flowData.trafficSplit || flowData.trafficSplit < 1 || flowData.trafficSplit > 99) {
+    if (!trafficSplit || trafficSplit < 1 || trafficSplit > 99) {
       errors.trafficSplit = "Traffic split must be between 1 and 99";
     }
 
     // Validate end result options based on selected type
-    if (flowData.endResultType === "date" && !flowData.endDate) {
+    if (endResultType === "date" && !endDate) {
       errors.endDate = "Please select an end date";
     }
 
-    if (flowData.endResultType === "impressions" && (!flowData.impressionThreshold || flowData.impressionThreshold < 100)) {
+    if (endResultType === "impressions" && (!impressionThreshold || impressionThreshold < 100)) {
       errors.impressionThreshold = "Impression threshold must be at least 100";
     }
 
-    if (flowData.endResultType === "conversions" && (!flowData.conversionThreshold || flowData.conversionThreshold < 10)) {
+    if (endResultType === "conversions" && (!conversionThreshold || conversionThreshold < 10)) {
       errors.conversionThreshold = "Conversion threshold must be at least 10";
     }
 
@@ -647,13 +645,13 @@ export default function ABTesting() {
 
   // When template selection changes, fetch the associated product
   useEffect(() => {
-    if (flowData.selectedTemplate) {
+    if (selectedTemplate) {
       setIsLoadingProduct(true);
       setAssociatedProduct(null);
       
       const formData = new FormData();
       formData.append("actionType", "getProductForTemplate");
-      formData.append("template", flowData.selectedTemplate);
+      formData.append("template", selectedTemplate);
       
       fetch("/app/ab-tests", {
         method: "POST",
@@ -675,7 +673,7 @@ export default function ABTesting() {
         setIsLoadingProduct(false);
       });
     }
-  }, [flowData.selectedTemplate]);
+  }, [selectedTemplate]);
 
   const checkProductAvailability = async (productId) => {
     if (!productId) {
@@ -716,18 +714,20 @@ export default function ABTesting() {
     }
   };
 
+  // Remove the fetcher useEffect since we're going back to manual fetch
+
   // Check product availability when product selection changes
   useEffect(() => {
-    if (flowData.selectedProductId) {
-      checkProductAvailability(flowData.selectedProductId);
+    if (selectedProductId) {
+      checkProductAvailability(selectedProductId);
     } else {
       setProductValidationError(null);
     }
-  }, [flowData.selectedProductId]);
+  }, [selectedProductId]);
 
   // Handler for OK button (create duplicate template and open in theme editor)
   const handleOk = async () => {
-    if (!flowData.duplicateTemplateName.trim()) {
+    if (!duplicateTemplateName.trim()) {
       setPreviewError("Please enter a name for the duplicate template");
       return;
     }
@@ -739,8 +739,8 @@ export default function ABTesting() {
       // Create duplicate template
       const formData = new FormData();
       formData.append("actionType", "duplicateTemplate");
-      formData.append("template", flowData.selectedTemplate);
-      formData.append("newName", flowData.duplicateTemplateName.trim());
+      formData.append("template", selectedTemplate);
+      formData.append("newName", duplicateTemplateName.trim());
       formData.append("themeId", themeGid);
 
       const response = await fetch("/app/ab-tests", {
@@ -752,13 +752,19 @@ export default function ABTesting() {
 
       if (data.success) {
         // Open the duplicated template in theme editor
-        const productHandle = associatedProduct?.handle || "example-product"; // Fallback to example-product if no handle
-        const previewPath = `/products/${productHandle}?view=${flowData.duplicateTemplateName.trim()}`;
+        const productHandle = associatedProduct?.handle || inferredProductHandle;
+        const previewPath = `/products/${productHandle}?view=${duplicateTemplateName.trim()}`;
         
         const shopShort = shopDomain.replace('.myshopify.com', '');
         const themeIdNum = themeId.replace('gid://shopify/Theme/', '');
         const url = `https://admin.shopify.com/store/${shopShort}/themes/${themeIdNum}/editor?previewPath=${encodeURIComponent(previewPath)}`;
         window.open(url, "_blank");
+        
+        // Advance to step 2 and set the new template as Template A
+        setCompletedSteps([...completedSteps, 1]);
+        setCurrentStep(2);
+        const newTemplateName = `templates/product.${duplicateTemplateName.trim()}.liquid`;
+        setTemplateA(newTemplateName);
       } else {
         setPreviewError(data.error || "Failed to create duplicate template");
       }
@@ -783,28 +789,28 @@ export default function ABTesting() {
 
     console.log("🔍 Submitting A/B test form with data:", {
       shop: shopDomain,
-      testName: flowData.testName,
-      productId: flowData.selectedProductId,
-      templateA: flowData.templateA,
-      templateB: flowData.templateB,
-      trafficSplit: flowData.trafficSplit,
-      endResultType: flowData.endResultType,
-      endDate: flowData.endDate,
-      impressionThreshold: flowData.impressionThreshold,
-      conversionThreshold: flowData.conversionThreshold
+      testName,
+      productId: selectedProductId,
+      templateA,
+      templateB,
+      trafficSplit,
+      endResultType,
+      endDate,
+      impressionThreshold,
+      conversionThreshold
     });
 
     const formData = new FormData();
     formData.append("shop", shopDomain);
-    formData.append("testName", flowData.testName);
-    formData.append("productId", flowData.selectedProductId);
-    formData.append("templateA", flowData.templateA);
-    formData.append("templateB", flowData.templateB);
-    formData.append("trafficSplit", flowData.trafficSplit);
-    formData.append("endResultType", flowData.endResultType);
-    formData.append("endDate", flowData.endDate);
-    formData.append("impressionThreshold", flowData.impressionThreshold);
-    formData.append("conversionThreshold", flowData.conversionThreshold);
+    formData.append("testName", testName);
+    formData.append("productId", selectedProductId);
+    formData.append("templateA", templateA);
+    formData.append("templateB", templateB);
+    formData.append("trafficSplit", trafficSplit);
+    formData.append("endResultType", endResultType);
+    formData.append("endDate", endDate);
+    formData.append("impressionThreshold", impressionThreshold);
+    formData.append("conversionThreshold", conversionThreshold);
 
     try {
       console.log("🔍 Sending POST request to /app/ab-tests");
@@ -825,7 +831,7 @@ export default function ABTesting() {
           console.log("✅ A/B test created successfully (received HTML but status 200)");
           
           // Show success message but DON'T reset form
-          const successMessage = `✅ A/B test "${flowData.testName}" created successfully!`;
+          const successMessage = `✅ A/B test "${testName}" created successfully!`;
           setSuccessMessage(successMessage);
           setTimeout(() => setSuccessMessage(null), 5000);
           return;
@@ -860,859 +866,8 @@ export default function ABTesting() {
     }
   };
 
-  // Action Selection Component
-  const ActionSelection = () => (
-    <div style={{
-      background: 'white',
-      padding: '40px',
-      borderRadius: '20px',
-      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-      border: '1px solid rgba(50, 205, 50, 0.2)',
-      maxWidth: '600px',
-      margin: '0 auto'
-    }}>
-      <div style={{ textAlign: 'center', marginBottom: '40px' }}>
-        <h2 style={{ fontSize: '28px', fontWeight: '700', color: '#000000', marginBottom: '12px' }}>
-          🚀 A/B Testing Setup
-        </h2>
-        <p style={{ fontSize: '16px', color: '#6b7280' }}>
-          Choose how you'd like to get started with A/B testing
-        </p>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-        {/* Create A/B Test Option */}
-        <button
-          onClick={() => {
-            setSelectedAction('create-test');
-            updateFlowData('action', 'create-test');
-            nextStep();
-          }}
-          style={{
-            padding: '24px',
-            background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '16px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            textAlign: 'left',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '16px'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = 'translateY(-4px)';
-            e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.2), 0 10px 10px -5px rgba(0, 0, 0, 0.1)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = 'none';
-          }}
-        >
-          <div style={{ fontSize: '24px' }}>🧪</div>
-          <div>
-            <div style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>
-              Create New A/B Test
-            </div>
-            <div style={{ fontSize: '14px', opacity: 0.9 }}>
-              Set up an experiment to compare two different product page versions
-            </div>
-          </div>
-        </button>
-
-        {/* Duplicate Template Option */}
-        <button
-          onClick={() => {
-            setSelectedAction('duplicate-template');
-            updateFlowData('action', 'duplicate-template');
-            nextStep();
-          }}
-          style={{
-            padding: '24px',
-            background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
-            color: 'white',
-            border: 'none',
-            borderRadius: '16px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            textAlign: 'left',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '16px'
-          }}
-          onMouseEnter={(e) => {
-            e.target.style.transform = 'translateY(-4px)';
-            e.target.style.boxShadow = '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)';
-          }}
-          onMouseLeave={(e) => {
-            e.target.style.transform = 'translateY(0)';
-            e.target.style.boxShadow = 'none';
-          }}
-        >
-          <div style={{ fontSize: '24px' }}>📝</div>
-          <div>
-            <div style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>
-              Duplicate Product Template
-            </div>
-            <div style={{ fontSize: '14px', opacity: 0.9 }}>
-              Create a copy of your existing product template for customization
-            </div>
-          </div>
-        </button>
-      </div>
-    </div>
-  );
-
-  // Test Setup Component
-  const TestSetup = () => (
-    <div style={{
-      background: 'white',
-      padding: '40px',
-      borderRadius: '20px',
-      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-      border: '1px solid rgba(50, 205, 50, 0.2)',
-      maxWidth: '600px',
-      margin: '0 auto'
-    }}>
-      {/* Header with back button */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '32px' }}>
-        <button
-          onClick={prevStep}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '24px',
-            cursor: 'pointer',
-            marginRight: '16px',
-            color: '#6b7280'
-          }}
-        >
-          ←
-        </button>
-        <div>
-          <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#000000', marginBottom: '4px' }}>
-            Create A/B Test
-          </h2>
-          <p style={{ fontSize: '14px', color: '#6b7280' }}>
-            Step {currentStep + 1} of 6
-          </p>
-        </div>
-      </div>
-
-      {/* Step indicator */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '32px' }}>
-        {[1, 2, 3, 4, 5, 6].map((step) => (
-          <div
-            key={step}
-            style={{
-              width: '40px',
-              height: '4px',
-              background: step <= currentStep + 1 ? '#32cd32' : '#e5e7eb',
-              borderRadius: '2px',
-              transition: 'all 0.3s ease'
-            }}
-          />
-        ))}
-      </div>
-
-      {/* Form fields - show progressively */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* Step 1: Test Name */}
-        <div style={{ opacity: currentStep >= 0 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
-          <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-            Test Name <span style={{ color: '#dc2626' }}>*</span>
-          </label>
-          <input
-            type="text"
-            value={flowData.testName}
-            onChange={(e) => updateFlowData('testName', e.target.value)}
-            placeholder="Enter a unique name for this A/B test"
-            style={{
-              width: '100%',
-              padding: '16px',
-              border: validationErrors.testName ? '2px solid #dc2626' : '2px solid #e5e7eb',
-              borderRadius: '12px',
-              fontSize: '16px',
-              transition: 'all 0.3s ease'
-            }}
-          />
-          {validationErrors.testName && (
-            <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-              {validationErrors.testName}
-            </p>
-          )}
-        </div>
-
-        {/* Step 2: Product Selection */}
-        <div style={{ opacity: currentStep >= 1 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
-          <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-            Product <span style={{ color: '#dc2626' }}>*</span>
-          </label>
-          <select
-            value={flowData.selectedProductId}
-            onChange={(e) => updateFlowData('selectedProductId', e.target.value)}
-            style={{
-              width: '100%',
-              padding: '16px',
-              border: (validationErrors.product || productValidationError) ? '2px solid #dc2626' : '2px solid #e5e7eb',
-              borderRadius: '12px',
-              fontSize: '16px',
-              background: 'white',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <option value="">Select Product</option>
-            {productOptions.map(option => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-          {(validationErrors.product || productValidationError) && (
-            <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-              {validationErrors.product || productValidationError}
-            </p>
-          )}
-        </div>
-
-        {/* Step 3: Template A */}
-        <div style={{ opacity: currentStep >= 2 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
-          <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-            Template A (First Variant) <span style={{ color: '#dc2626' }}>*</span>
-          </label>
-          <select
-            value={flowData.templateA}
-            onChange={(e) => updateFlowData('templateA', e.target.value)}
-            style={{
-              width: '100%',
-              padding: '16px',
-              border: validationErrors.templateA ? '2px solid #dc2626' : '2px solid #e5e7eb',
-              borderRadius: '12px',
-              fontSize: '16px',
-              background: 'white',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <option value="">Select Template A</option>
-            {templateOptions.map(option => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-          {validationErrors.templateA && (
-            <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-              {validationErrors.templateA}
-            </p>
-          )}
-        </div>
-
-        {/* Step 4: Template B */}
-        <div style={{ opacity: currentStep >= 3 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
-          <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-            Template B (Second Variant) <span style={{ color: '#dc2626' }}>*</span>
-          </label>
-          <select
-            value={flowData.templateB}
-            onChange={(e) => updateFlowData('templateB', e.target.value)}
-            style={{
-              width: '100%',
-              padding: '16px',
-              border: validationErrors.templateB ? '2px solid #dc2626' : '2px solid #e5e7eb',
-              borderRadius: '12px',
-              fontSize: '16px',
-              background: 'white',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            <option value="">Select Template B</option>
-            {templateOptions.map(option => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-          {validationErrors.templateB && (
-            <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-              {validationErrors.templateB}
-            </p>
-          )}
-        </div>
-
-        {/* Step 5: Traffic Split */}
-        <div style={{ opacity: currentStep >= 4 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
-          <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-            Traffic Split (A %) <span style={{ color: '#dc2626' }}>*</span>
-          </label>
-          <input
-            type="number"
-            value={flowData.trafficSplit}
-            onChange={(e) => updateFlowData('trafficSplit', e.target.value)}
-            min="1"
-            max="99"
-            placeholder="50"
-            style={{
-              width: '100%',
-              padding: '16px',
-              border: validationErrors.trafficSplit ? '2px solid #dc2626' : '2px solid #e5e7eb',
-              borderRadius: '12px',
-              fontSize: '16px',
-              transition: 'all 0.3s ease'
-            }}
-          />
-          {validationErrors.trafficSplit && (
-            <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-              {validationErrors.trafficSplit}
-            </p>
-          )}
-          <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
-            Percentage of traffic to show Template A (1-99)
-          </p>
-        </div>
-
-        {/* Step 6: End Result Configuration */}
-        <div style={{ opacity: currentStep >= 5 ? 1 : 0.5, transition: 'opacity 0.3s ease' }}>
-          <div style={{
-            padding: '24px',
-            background: '#f8fafc',
-            borderRadius: '16px',
-            border: '1px solid #e2e8f0'
-          }}>
-            <h3 style={{ fontSize: '18px', fontWeight: '700', color: '#000000', marginBottom: '16px' }}>
-              🎯 End Result Configuration
-            </h3>
-            <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px' }}>
-              Choose how the test will determine a winner or when it should end.
-            </p>
-
-            {/* End Result Type Selection */}
-            <div style={{ marginBottom: '20px' }}>
-              <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-                End Result Type
-              </label>
-              
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                {/* Manual Option */}
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '16px',
-                  background: flowData.endResultType === 'manual' ? '#f0fdf4' : 'white',
-                  border: flowData.endResultType === 'manual' ? '2px solid #22c55e' : '1px solid #d1d5db',
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}>
-                  <input
-                    type="radio"
-                    name="endResultType"
-                    value="manual"
-                    checked={flowData.endResultType === 'manual'}
-                    onChange={(e) => updateFlowData('endResultType', e.target.value)}
-                    style={{ marginRight: '16px' }}
-                  />
-                  <div>
-                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
-                      Manual Control
-                    </div>
-                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                      You decide when to end the test and declare a winner
-                    </div>
-                  </div>
-                </label>
-
-                {/* Date Option */}
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '16px',
-                  background: flowData.endResultType === 'date' ? '#f0fdf4' : 'white',
-                  border: flowData.endResultType === 'date' ? '2px solid #22c55e' : '1px solid #d1d5db',
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}>
-                  <input
-                    type="radio"
-                    name="endResultType"
-                    value="date"
-                    checked={flowData.endResultType === 'date'}
-                    onChange={(e) => updateFlowData('endResultType', e.target.value)}
-                    style={{ marginRight: '16px' }}
-                  />
-                  <div>
-                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
-                      End Date
-                    </div>
-                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                      Test ends on a specific date and winner is determined
-                    </div>
-                  </div>
-                </label>
-
-                {/* Impressions Option */}
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '16px',
-                  background: flowData.endResultType === 'impressions' ? '#f0fdf4' : 'white',
-                  border: flowData.endResultType === 'impressions' ? '2px solid #22c55e' : '1px solid #d1d5db',
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}>
-                  <input
-                    type="radio"
-                    name="endResultType"
-                    value="impressions"
-                    checked={flowData.endResultType === 'impressions'}
-                    onChange={(e) => updateFlowData('endResultType', e.target.value)}
-                    style={{ marginRight: '16px' }}
-                  />
-                  <div>
-                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
-                      Impression Count
-                    </div>
-                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                      Test ends when one variant reaches target impressions
-                    </div>
-                  </div>
-                </label>
-
-                {/* Conversions Option */}
-                <label style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  padding: '16px',
-                  background: flowData.endResultType === 'conversions' ? '#f0fdf4' : 'white',
-                  border: flowData.endResultType === 'conversions' ? '2px solid #22c55e' : '1px solid #d1d5db',
-                  borderRadius: '12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease'
-                }}>
-                  <input
-                    type="radio"
-                    name="endResultType"
-                    value="conversions"
-                    checked={flowData.endResultType === 'conversions'}
-                    onChange={(e) => updateFlowData('endResultType', e.target.value)}
-                    style={{ marginRight: '16px' }}
-                  />
-                  <div>
-                    <div style={{ fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
-                      Conversion Count
-                    </div>
-                    <div style={{ fontSize: '14px', color: '#6b7280' }}>
-                      Test ends when one variant reaches target conversions
-                    </div>
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            {/* Conditional Fields Based on Selection */}
-            {flowData.endResultType === 'date' && (
-              <div>
-                <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-                  End Date <span style={{ color: '#dc2626' }}>*</span>
-                </label>
-                <div style={{
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  <input
-                    type="date"
-                    value={flowData.endDate.split('T')[0] || ''}
-                    onChange={(e) => {
-                      const date = e.target.value;
-                      const time = flowData.endDate.split('T')[1] || '23:59';
-                      updateFlowData('endDate', `${date}T${time}`);
-                    }}
-                    style={{
-                      width: '100%',
-                      padding: '16px 16px 16px 48px',
-                      border: validationErrors.endDate ? '2px solid #dc2626' : '2px solid #e5e7eb',
-                      borderRadius: '12px',
-                      fontSize: '16px',
-                      background: 'white',
-                      cursor: 'pointer'
-                    }}
-                  />
-                  <div style={{
-                    position: 'absolute',
-                    left: '16px',
-                    color: '#6b7280',
-                    pointerEvents: 'none'
-                  }}>
-                    📅
-                  </div>
-                </div>
-                
-                <div style={{ marginTop: '12px' }}>
-                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '600', color: '#6b7280', marginBottom: '8px' }}>
-                    End Time
-                  </label>
-                  <div style={{
-                    position: 'relative',
-                    display: 'flex',
-                    alignItems: 'center'
-                  }}>
-                    <input
-                      type="time"
-                      value={flowData.endDate.split('T')[1] || '23:59'}
-                      onChange={(e) => {
-                        const date = flowData.endDate.split('T')[0] || '';
-                        const time = e.target.value;
-                        updateFlowData('endDate', `${date}T${time}`);
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '12px 12px 12px 48px',
-                        border: '2px solid #e5e7eb',
-                        borderRadius: '12px',
-                        fontSize: '16px',
-                        background: 'white',
-                        cursor: 'pointer'
-                      }}
-                    />
-                    <div style={{
-                      position: 'absolute',
-                      left: '16px',
-                      color: '#6b7280',
-                      pointerEvents: 'none'
-                    }}>
-                      🕐
-                    </div>
-                  </div>
-                </div>
-                
-                {validationErrors.endDate && (
-                  <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-                    {validationErrors.endDate}
-                  </p>
-                )}
-                <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '12px' }}>
-                  When the test should end and winner be determined
-                </p>
-              </div>
-            )}
-
-            {flowData.endResultType === 'impressions' && (
-              <div>
-                <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-                  Impression Threshold <span style={{ color: '#dc2626' }}>*</span>
-                </label>
-                <input
-                  type="number"
-                  value={flowData.impressionThreshold}
-                  onChange={(e) => updateFlowData('impressionThreshold', e.target.value)}
-                  min="100"
-                  placeholder="1000"
-                  style={{
-                    width: '100%',
-                    padding: '16px',
-                    border: validationErrors.impressionThreshold ? '2px solid #dc2626' : '2px solid #e5e7eb',
-                    borderRadius: '12px',
-                    fontSize: '16px',
-                    transition: 'all 0.3s ease'
-                  }}
-                />
-                {validationErrors.impressionThreshold && (
-                  <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-                    {validationErrors.impressionThreshold}
-                  </p>
-                )}
-                <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
-                  Number of impressions needed for one variant to win (minimum 100)
-                </p>
-              </div>
-            )}
-
-            {flowData.endResultType === 'conversions' && (
-              <div>
-                <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-                  Conversion Threshold <span style={{ color: '#dc2626' }}>*</span>
-                </label>
-                <input
-                  type="number"
-                  value={flowData.conversionThreshold}
-                  onChange={(e) => updateFlowData('conversionThreshold', e.target.value)}
-                  min="10"
-                  placeholder="100"
-                  style={{
-                    width: '100%',
-                    padding: '16px',
-                    border: validationErrors.conversionThreshold ? '2px solid #dc2626' : '2px solid #e5e7eb',
-                    borderRadius: '12px',
-                    fontSize: '16px',
-                    transition: 'all 0.3s ease'
-                  }}
-                />
-                {validationErrors.conversionThreshold && (
-                  <p style={{ fontSize: '14px', color: '#dc2626', marginTop: '8px' }}>
-                    {validationErrors.conversionThreshold}
-                  </p>
-                )}
-                <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
-                  Number of conversions needed for one variant to win (minimum 10)
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Navigation Buttons */}
-        <div style={{ display: 'flex', gap: '16px', marginTop: '24px' }}>
-          <button
-            onClick={prevStep}
-            style={{
-              padding: '16px 32px',
-              background: 'white',
-              color: '#6b7280',
-              border: '2px solid #e5e7eb',
-              borderRadius: '12px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: 'pointer',
-              transition: 'all 0.3s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.background = '#f8fafc';
-              e.target.style.borderColor = '#d1d5db';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'white';
-              e.target.style.borderColor = '#e5e7eb';
-            }}
-          >
-            ← Back
-          </button>
-
-          {/* Next/Submit Button */}
-          {currentStep < 5 ? (
-            <button
-              onClick={nextStep}
-              disabled={!flowData.testName.trim()}
-              style={{
-                padding: '16px 32px',
-                background: !flowData.testName.trim() ? '#9ca3af' : 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: !flowData.testName.trim() ? 'not-allowed' : 'pointer',
-                transition: 'all 0.3s ease',
-                flex: 1
-              }}
-              onMouseEnter={(e) => {
-                if (flowData.testName.trim()) {
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 10px 20px rgba(50, 205, 50, 0.3)';
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (flowData.testName.trim()) {
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = 'none';
-                }
-              }}
-            >
-              Next →
-            </button>
-          ) : (
-            <button
-              onClick={handleSubmit}
-              style={{
-                padding: '16px 32px',
-                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-                color: 'white',
-                border: 'none',
-                borderRadius: '12px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                transition: 'all 0.3s ease',
-                flex: 1
-              }}
-              onMouseEnter={(e) => {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 10px 20px rgba(50, 205, 50, 0.3)';
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = 'none';
-              }}
-            >
-              🚀 Create A/B Test
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Error and Success Messages */}
-      {error && (
-        <div style={{
-          padding: '16px',
-          background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-          border: '1px solid #dc2626',
-          borderRadius: '12px',
-          color: 'white',
-          marginTop: '24px'
-        }}>
-          ❌ {error}
-        </div>
-      )}
-
-      {successMessage && (
-        <div style={{
-          padding: '16px',
-          background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-          border: '1px solid #32cd32',
-          borderRadius: '12px',
-          color: 'white',
-          marginTop: '24px'
-        }}>
-          {successMessage}
-        </div>
-      )}
-    </div>
-  );
-
-  // Template Duplication Component
-  const TemplateDuplication = () => (
-    <div style={{
-      background: 'white',
-      padding: '40px',
-      borderRadius: '20px',
-      boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
-      border: '1px solid rgba(50, 205, 50, 0.2)',
-      maxWidth: '600px',
-      margin: '0 auto'
-    }}>
-      {/* Header with back button */}
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '32px' }}>
-        <button
-          onClick={prevStep}
-          style={{
-            background: 'none',
-            border: 'none',
-            fontSize: '24px',
-            cursor: 'pointer',
-            marginRight: '16px',
-            color: '#6b7280'
-          }}
-        >
-          ←
-        </button>
-        <div>
-          <h2 style={{ fontSize: '24px', fontWeight: '700', color: '#000000', marginBottom: '4px' }}>
-            Duplicate Template
-          </h2>
-          <p style={{ fontSize: '14px', color: '#6b7280' }}>
-            Create a copy of your product template
-          </p>
-        </div>
-      </div>
-
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
-        {/* Template Selection */}
-        <div>
-          <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-            Base Product Template
-          </label>
-          <select
-            value={flowData.selectedTemplate}
-            onChange={(e) => updateFlowData('selectedTemplate', e.target.value)}
-            style={{
-              width: '100%',
-              padding: '16px',
-              border: '2px solid #e5e7eb',
-              borderRadius: '12px',
-              fontSize: '16px',
-              background: 'white',
-              transition: 'all 0.3s ease'
-            }}
-          >
-            {templateOptions.map(option => (
-              <option key={option.value} value={option.value}>{option.label}</option>
-            ))}
-          </select>
-        </div>
-
-        {/* Template Name */}
-        {flowData.selectedTemplate && (
-          <div>
-            <label style={{ display: 'block', fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '12px' }}>
-              Duplicate Template Name
-            </label>
-            <input
-              type="text"
-              value={flowData.duplicateTemplateName}
-              onChange={(e) => updateFlowData('duplicateTemplateName', e.target.value)}
-              placeholder="e.g., variant-a, hero-version, etc."
-              style={{
-                width: '100%',
-                padding: '16px',
-                border: '2px solid #e5e7eb',
-                borderRadius: '12px',
-                fontSize: '16px',
-                transition: 'all 0.3s ease'
-              }}
-            />
-            <p style={{ fontSize: '14px', color: '#6b7280', marginTop: '8px' }}>
-              Enter a unique name for your duplicate template (no spaces, use hyphens)
-            </p>
-          </div>
-        )}
-
-        {/* Create Template Button */}
-        {flowData.duplicateTemplateName && (
-          <button
-            onClick={handleOk}
-            disabled={isCreatingTemplate}
-            style={{
-              padding: '16px 32px',
-              background: isCreatingTemplate 
-                ? '#9ca3af' 
-                : 'linear-gradient(135deg, #000000 0%, #1a1a1a 100%)',
-              color: 'white',
-              border: 'none',
-              borderRadius: '12px',
-              fontSize: '16px',
-              fontWeight: '600',
-              cursor: isCreatingTemplate ? 'not-allowed' : 'pointer',
-              transition: 'all 0.3s ease',
-              marginTop: '16px'
-            }}
-            onMouseEnter={(e) => {
-              if (!isCreatingTemplate) {
-                e.target.style.transform = 'translateY(-2px)';
-                e.target.style.boxShadow = '0 10px 20px rgba(0, 0, 0, 0.3)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isCreatingTemplate) {
-                e.target.style.transform = 'translateY(0)';
-                e.target.style.boxShadow = 'none';
-              }
-            }}
-          >
-            {isCreatingTemplate ? "Creating Template..." : "📝 Create & Open in Theme Editor"}
-          </button>
-        )}
-      </div>
-    </div>
-  );
-
-  // Main render
   return (
-    <div style={{ 
-      padding: '20px', 
-      fontFamily: 'Inter, system-ui, sans-serif',
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)'
-    }}>
+    <div style={{ padding: '20px', fontFamily: 'Inter, system-ui, sans-serif' }}>
       {/* Header */}
       <div style={{
         background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #32cd32 100%)',
@@ -1720,17 +875,829 @@ export default function ABTesting() {
         padding: '32px',
         borderRadius: '16px',
         marginBottom: '32px',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
-        textAlign: 'center'
+        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)'
       }}>
-        <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>🧪 A/B Testing</h1>
-        <p style={{ fontSize: '18px', opacity: 0.9 }}>Create experiments to optimize your product pages</p>
+        <h1 style={{ fontSize: '32px', fontWeight: 'bold', marginBottom: '8px' }}>🧪 Create A/B Test</h1>
+        <p style={{ fontSize: '18px', opacity: 0.9 }}>Set up experiments to optimize your product pages</p>
       </div>
 
-      {/* Flow Content */}
-      {currentStep === 0 && <ActionSelection />}
-      {currentStep === 1 && selectedAction === 'create-test' && <TestSetup />}
-      {currentStep === 1 && selectedAction === 'duplicate-template' && <TemplateDuplication />}
+      {/* Step Progress Indicator */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        marginBottom: '32px'
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          background: 'white',
+          padding: '16px 24px',
+          borderRadius: '50px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          border: '1px solid rgba(50, 205, 50, 0.2)'
+        }}>
+          {/* Step 1 */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            cursor: 'pointer'
+          }} onClick={() => goToStep(1)}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              background: currentStep === 1 
+                ? 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)'
+                : completedSteps.includes(1)
+                ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
+                : '#e5e7eb',
+              color: currentStep === 1 || completedSteps.includes(1) ? 'white' : '#6b7280',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 'bold',
+              fontSize: '14px',
+              marginRight: '12px'
+            }}>
+              {completedSteps.includes(1) ? '✓' : '1'}
+            </div>
+            <div>
+              <div style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: currentStep === 1 ? '#000000' : completedSteps.includes(1) ? '#22c55e' : '#6b7280'
+              }}>
+                Duplicate Template
+              </div>
+            </div>
+          </div>
+
+          {/* Step Connector */}
+          <div style={{
+            width: '40px',
+            height: '2px',
+            background: completedSteps.includes(1) ? '#22c55e' : '#e5e7eb',
+            margin: '0 16px'
+          }} />
+
+          {/* Step 2 */}
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            cursor: currentStep >= 2 || completedSteps.includes(1) ? 'pointer' : 'default'
+          }} onClick={() => goToStep(2)}>
+            <div style={{
+              width: '36px',
+              height: '36px',
+              borderRadius: '50%',
+              background: currentStep === 2 
+                ? 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)'
+                : completedSteps.includes(2)
+                ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
+                : currentStep >= 2 || completedSteps.includes(1)
+                ? '#e5e7eb'
+                : '#f3f4f6',
+              color: currentStep === 2 || completedSteps.includes(2) ? 'white' : '#6b7280',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              fontWeight: 'bold',
+              fontSize: '14px',
+              marginRight: '12px'
+            }}>
+              {completedSteps.includes(2) ? '✓' : '2'}
+            </div>
+            <div>
+              <div style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: currentStep === 2 ? '#000000' : completedSteps.includes(2) ? '#22c55e' : currentStep >= 2 || completedSteps.includes(1) ? '#6b7280' : '#9ca3af'
+              }}>
+                Create A/B Test
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+        {/* Create Duplicate Template - Step 1 */}
+        <div style={{
+          background: 'white',
+          padding: '24px',
+          borderRadius: '16px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          border: '1px solid rgba(50, 205, 50, 0.2)',
+          display: currentStep === 1 ? 'block' : 'none'
+        }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', marginBottom: '24px' }}>
+            📝 Step 1: Create Duplicate Template
+          </h2>
+          
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {/* Base Product Template */}
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Base Product Template
+              </label>
+              <select
+                value={selectedTemplate}
+                onChange={(e) => setSelectedTemplate(e.target.value)}
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  background: 'white'
+                }}
+              >
+                {templateOptions.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+              <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                Select the template you want to duplicate
+              </p>
+            </div>
+
+            {/* Duplicate Template Name */}
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Duplicate Template Name
+              </label>
+              <input
+                type="text"
+                value={duplicateTemplateName}
+                onChange={(e) => setDuplicateTemplateName(e.target.value)}
+                placeholder="e.g., variant-a, hero-version, etc."
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '14px'
+                }}
+              />
+              <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                Enter a unique name for your duplicate template (no spaces, use hyphens)
+              </p>
+            </div>
+
+            {/* Status Messages */}
+            {isLoadingProduct && (
+              <div style={{
+                padding: '12px',
+                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                border: '1px solid #32cd32',
+                borderRadius: '8px',
+                color: 'white'
+              }}>
+                🔍 Finding associated product...
+              </div>
+            )}
+
+            {associatedProduct && (
+              <div style={{
+                padding: '12px',
+                background: associatedProduct.isFallback 
+                  ? 'linear-gradient(135deg, #9acd32 0%, #6b8e23 100%)'
+                  : 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                border: associatedProduct.isFallback ? '1px solid #9acd32' : '1px solid #32cd32',
+                borderRadius: '8px',
+                color: 'white'
+              }}>
+                {associatedProduct.isFallback 
+                  ? `⚠️ No specific product found for this template. Will use "${associatedProduct.title}" as fallback.`
+                  : `✅ Associated Product: ${associatedProduct.title} (${associatedProduct.handle})`
+                }
+              </div>
+            )}
+
+            {previewError && (
+              <div style={{
+                padding: '12px',
+                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                border: '1px solid #dc2626',
+                borderRadius: '8px',
+                color: 'white'
+              }}>
+                ❌ {previewError}
+              </div>
+            )}
+
+            <button
+              onClick={handleOk}
+              disabled={!selectedTemplate || !duplicateTemplateName.trim() || isCreatingTemplate}
+              style={{
+                padding: '12px 24px',
+                background: isCreatingTemplate || !selectedTemplate || !duplicateTemplateName.trim()
+                  ? '#9ca3af'
+                  : 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: isCreatingTemplate || !selectedTemplate || !duplicateTemplateName.trim() ? 'not-allowed' : 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              {isCreatingTemplate ? "Creating Template..." : "Create Template & Continue"}
+            </button>
+          </div>
+        </div>
+
+        {/* Create A/B Test - Step 2 */}
+        <div style={{
+          background: 'white',
+          padding: '24px',
+          borderRadius: '16px',
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          border: '1px solid rgba(50, 205, 50, 0.2)',
+          display: currentStep === 2 ? 'block' : 'none'
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <div>
+              <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', marginBottom: '8px' }}>
+                🧪 Step 2: Create A/B Test
+              </h2>
+              <p style={{ fontSize: '14px', color: '#374151' }}>
+                Configure your A/B test parameters and select the templates to compare.
+              </p>
+            </div>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                type="button"
+                onClick={prevStep}
+                style={{
+                  padding: '12px 20px',
+                  background: 'white',
+                  color: '#6b7280',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = '#f9fafb';
+                  e.target.style.borderColor = '#9ca3af';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'white';
+                  e.target.style.borderColor = '#d1d5db';
+                }}
+              >
+                ← Back
+              </button>
+              <button
+                type="button"
+                onClick={resetForm}
+                style={{
+                  padding: '12px 20px',
+                  background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '10px',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  boxShadow: '0 4px 12px rgba(50, 205, 50, 0.3)',
+                  minWidth: '140px',
+                  justifyContent: 'center'
+                }}
+                onMouseEnter={(e) => {
+                  e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
+                  e.target.style.transform = 'translateY(-2px)';
+                  e.target.style.boxShadow = '0 6px 20px rgba(50, 205, 50, 0.4)';
+                }}
+                onMouseLeave={(e) => {
+                  e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
+                  e.target.style.transform = 'translateY(0)';
+                  e.target.style.boxShadow = '0 4px 12px rgba(50, 205, 50, 0.3)';
+                }}
+              >
+                <span style={{ fontSize: '16px' }}>🚀</span> Create New Test
+              </button>
+            </div>
+          </div>
+
+          <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <input type="hidden" name="shop" value={shopDomain} />
+
+            {/* Test Name */}
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Test Name <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <input
+                type="text"
+                value={testName}
+                onChange={(e) => setTestName(e.target.value)}
+                name="testName"
+                placeholder="Enter a unique name for this A/B test"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: validationErrors.testName ? '1px solid #dc2626' : '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '14px'
+                }}
+              />
+              {validationErrors.testName && (
+                <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                  {validationErrors.testName}
+                </p>
+              )}
+              <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                Enter a unique name for this A/B test
+              </p>
+            </div>
+
+            {/* Product */}
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Product <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <div style={{ position: 'relative' }}>
+                <select
+                  value={selectedProductId}
+                  onChange={(e) => setSelectedProductId(e.target.value)}
+                  name="productId"
+                  style={{
+                    width: '100%',
+                    padding: '12px',
+                    paddingRight: isCheckingProduct ? '40px' : '12px',
+                    border: (validationErrors.product || productValidationError) ? '1px solid #dc2626' : '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    background: 'white'
+                  }}
+                >
+                  <option value="">Select Product</option>
+                  {productOptions.map(option => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
+                {isCheckingProduct && (
+                  <div style={{
+                    position: 'absolute',
+                    right: '12px',
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    color: '#32cd32'
+                  }}>
+                    🔄
+                  </div>
+                )}
+              </div>
+              {(validationErrors.product || productValidationError) && (
+                <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                  {validationErrors.product || productValidationError}
+                </p>
+              )}
+              <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                Select the product to run the A/B test on
+              </p>
+            </div>
+
+            {/* Template A */}
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Template A (First Variant) <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <select
+                value={templateA}
+                onChange={(e) => setTemplateA(e.target.value)}
+                name="templateA"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: validationErrors.templateA ? '1px solid #dc2626' : '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  background: 'white'
+                }}
+              >
+                <option value="">Select Template A</option>
+                {templateOptions.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+              {validationErrors.templateA && (
+                <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                  {validationErrors.templateA}
+                </p>
+              )}
+            </div>
+
+            {/* Template B */}
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Template B (Second Variant) <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <select
+                value={templateB}
+                onChange={(e) => setTemplateB(e.target.value)}
+                name="templateB"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: validationErrors.templateB ? '1px solid #dc2626' : '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '14px',
+                  background: 'white'
+                }}
+              >
+                <option value="">Select Template B</option>
+                {templateOptions.map(option => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
+              {validationErrors.templateB && (
+                <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                  {validationErrors.templateB}
+                </p>
+              )}
+            </div>
+
+            {/* Traffic Split */}
+            <div>
+              <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                Traffic Split (A %) <span style={{ color: '#dc2626' }}>*</span>
+              </label>
+              <input
+                type="number"
+                value={trafficSplit}
+                onChange={(e) => setTrafficSplit(e.target.value)}
+                name="trafficSplit"
+                min="1"
+                max="99"
+                placeholder="50"
+                style={{
+                  width: '100%',
+                  padding: '12px',
+                  border: validationErrors.trafficSplit ? '1px solid #dc2626' : '1px solid #d1d5db',
+                  borderRadius: '8px',
+                  fontSize: '14px'
+                }}
+              />
+              {validationErrors.trafficSplit && (
+                <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                  {validationErrors.trafficSplit}
+                </p>
+              )}
+              <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                Percentage of traffic to show Template A (1-99)
+              </p>
+            </div>
+
+            {/* End Result Options */}
+            <div style={{
+              padding: '20px',
+              background: '#f8fafc',
+              borderRadius: '12px',
+              border: '1px solid #e2e8f0'
+            }}>
+              <h3 style={{ fontSize: '16px', fontWeight: '600', color: '#000000', marginBottom: '16px' }}>
+                🎯 End Result Configuration
+              </h3>
+              <p style={{ fontSize: '14px', color: '#64748b', marginBottom: '20px' }}>
+                Choose how the test will determine a winner or when it should end.
+              </p>
+
+              {/* End Result Type Selection */}
+              <div style={{ marginBottom: '20px' }}>
+                <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '12px' }}>
+                  End Result Type
+                </label>
+                
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {/* Manual Option */}
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    background: endResultType === 'manual' ? '#f0fdf4' : 'white',
+                    border: endResultType === 'manual' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <input
+                      type="radio"
+                      name="endResultType"
+                      value="manual"
+                      checked={endResultType === 'manual'}
+                      onChange={(e) => setEndResultType(e.target.value)}
+                      style={{ marginRight: '12px' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                        Manual Control
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                        You decide when to end the test and declare a winner
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Date Option */}
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    background: endResultType === 'date' ? '#f0fdf4' : 'white',
+                    border: endResultType === 'date' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <input
+                      type="radio"
+                      name="endResultType"
+                      value="date"
+                      checked={endResultType === 'date'}
+                      onChange={(e) => setEndResultType(e.target.value)}
+                      style={{ marginRight: '12px' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                        End Date
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                        Test ends on a specific date and winner is determined
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Impressions Option */}
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    background: endResultType === 'impressions' ? '#f0fdf4' : 'white',
+                    border: endResultType === 'impressions' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <input
+                      type="radio"
+                      name="endResultType"
+                      value="impressions"
+                      checked={endResultType === 'impressions'}
+                      onChange={(e) => setEndResultType(e.target.value)}
+                      style={{ marginRight: '12px' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                        Impression Count
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                        Test ends when one variant reaches target impressions
+                      </div>
+                    </div>
+                  </label>
+
+                  {/* Conversions Option */}
+                  <label style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '12px',
+                    background: endResultType === 'conversions' ? '#f0fdf4' : 'white',
+                    border: endResultType === 'conversions' ? '2px solid #22c55e' : '1px solid #d1d5db',
+                    borderRadius: '8px',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease'
+                  }}>
+                    <input
+                      type="radio"
+                      name="endResultType"
+                      value="conversions"
+                      checked={endResultType === 'conversions'}
+                      onChange={(e) => setEndResultType(e.target.value)}
+                      style={{ marginRight: '12px' }}
+                    />
+                    <div>
+                      <div style={{ fontSize: '14px', fontWeight: '600', color: '#000000', marginBottom: '4px' }}>
+                        Conversion Count
+                      </div>
+                      <div style={{ fontSize: '12px', color: '#6b7280' }}>
+                        Test ends when one variant reaches target conversions
+                      </div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Conditional Fields Based on Selection */}
+              {endResultType === 'date' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                    End Date <span style={{ color: '#dc2626' }}>*</span>
+                  </label>
+                  <div style={{
+                    position: 'relative',
+                    display: 'flex',
+                    alignItems: 'center'
+                  }}>
+                    <input
+                      type="date"
+                      value={endDate.split('T')[0] || ''}
+                      onChange={(e) => {
+                        const date = e.target.value;
+                        const time = endDate.split('T')[1] || '23:59';
+                        setEndDate(`${date}T${time}`);
+                      }}
+                      style={{
+                        width: '100%',
+                        padding: '12px 12px 12px 40px',
+                        border: validationErrors.endDate ? '1px solid #dc2626' : '1px solid #d1d5db',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        background: 'white',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <div style={{
+                      position: 'absolute',
+                      left: '12px',
+                      color: '#6b7280',
+                      pointerEvents: 'none'
+                    }}>
+                      📅
+                    </div>
+                  </div>
+                  
+                  <div style={{ marginTop: '8px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '500', color: '#6b7280', marginBottom: '4px' }}>
+                      End Time
+                    </label>
+                    <div style={{
+                      position: 'relative',
+                      display: 'flex',
+                      alignItems: 'center'
+                    }}>
+                      <input
+                        type="time"
+                        value={endDate.split('T')[1] || '23:59'}
+                        onChange={(e) => {
+                          const date = endDate.split('T')[0] || '';
+                          const time = e.target.value;
+                          setEndDate(`${date}T${time}`);
+                        }}
+                        style={{
+                          width: '100%',
+                          padding: '8px 12px 8px 40px',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          background: 'white',
+                          cursor: 'pointer'
+                        }}
+                      />
+                      <div style={{
+                        position: 'absolute',
+                        left: '12px',
+                        color: '#6b7280',
+                        pointerEvents: 'none'
+                      }}>
+                        🕐
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {validationErrors.endDate && (
+                    <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                      {validationErrors.endDate}
+                    </p>
+                  )}
+                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '8px' }}>
+                    When the test should end and winner be determined
+                  </p>
+                </div>
+              )}
+
+              {endResultType === 'impressions' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                    Impression Threshold <span style={{ color: '#dc2626' }}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={impressionThreshold}
+                    onChange={(e) => setImpressionThreshold(e.target.value)}
+                    name="impressionThreshold"
+                    min="100"
+                    placeholder="1000"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: validationErrors.impressionThreshold ? '1px solid #dc2626' : '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                  {validationErrors.impressionThreshold && (
+                    <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                      {validationErrors.impressionThreshold}
+                    </p>
+                  )}
+                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                    Number of impressions needed for one variant to win (minimum 100)
+                  </p>
+                </div>
+              )}
+
+              {endResultType === 'conversions' && (
+                <div>
+                  <label style={{ display: 'block', fontSize: '14px', fontWeight: '500', color: '#000000', marginBottom: '8px' }}>
+                    Conversion Threshold <span style={{ color: '#dc2626' }}>*</span>
+                  </label>
+                  <input
+                    type="number"
+                    value={conversionThreshold}
+                    onChange={(e) => setConversionThreshold(e.target.value)}
+                    name="conversionThreshold"
+                    min="10"
+                    placeholder="100"
+                    style={{
+                      width: '100%',
+                      padding: '12px',
+                      border: validationErrors.conversionThreshold ? '1px solid #dc2626' : '1px solid #d1d5db',
+                      borderRadius: '8px',
+                      fontSize: '14px'
+                    }}
+                  />
+                  {validationErrors.conversionThreshold && (
+                    <p style={{ fontSize: '12px', color: '#dc2626', marginTop: '4px' }}>
+                      {validationErrors.conversionThreshold}
+                    </p>
+                  )}
+                  <p style={{ fontSize: '12px', color: '#6b7280', marginTop: '4px' }}>
+                    Number of conversions needed for one variant to win (minimum 10)
+                  </p>
+                </div>
+              )}
+            </div>
+
+            {/* Error Messages */}
+            {error && (
+              <div style={{
+                padding: '12px',
+                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                border: '1px solid #dc2626',
+                borderRadius: '8px',
+                color: 'white'
+              }}>
+                ❌ {error}
+              </div>
+            )}
+
+            {successMessage && (
+              <div style={{
+                padding: '12px',
+                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                border: '1px solid #32cd32',
+                borderRadius: '8px',
+                color: 'white'
+              }}>
+                {successMessage}
+              </div>
+            )}
+
+            <button
+              type="submit"
+              style={{
+                padding: '12px 24px',
+                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '8px',
+                fontSize: '14px',
+                fontWeight: '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
+              }}
+            >
+              Create A/B Test
+            </button>
+          </form>
+        </div>
+      </div>
     </div>
   );
 } 
