@@ -309,6 +309,13 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
       descriptionColor: '#1d4ed8',
       arrowColor: '#3b82f6'
     },
+    lightBlue: { 
+      background: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)',
+      border: '1px solid #7dd3fc',
+      textColor: '#0369a1',
+      descriptionColor: '#0284c7',
+      arrowColor: '#0ea5e9'
+    },
     purple: { 
       background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
       border: '1px solid #d8b4fe',
@@ -443,7 +450,7 @@ export default function Dashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #000000 0%, #1a1a1a 50%, #32cd32 100%)',
+      background: 'linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)',
       padding: '24px',
       fontFamily: 'system-ui, -apple-system, sans-serif'
     }}>
@@ -453,8 +460,8 @@ export default function Dashboard() {
         padding: '32px',
         borderRadius: '20px',
         marginBottom: '32px',
-        boxShadow: '0 10px 40px rgba(0, 0, 0, 0.1), 0 4px 20px rgba(0, 0, 0, 0.05)',
-        border: '1px solid rgba(50, 205, 50, 0.2)',
+        boxShadow: '0 10px 40px rgba(59, 130, 246, 0.1), 0 4px 20px rgba(59, 130, 246, 0.05)',
+        border: '1px solid rgba(59, 130, 246, 0.2)',
         position: 'relative',
         overflow: 'hidden'
       }}>
@@ -465,7 +472,7 @@ export default function Dashboard() {
           right: '-20px',
           width: '120px',
           height: '120px',
-          background: 'linear-gradient(135deg, rgba(50, 205, 50, 0.1) 0%, rgba(34, 139, 34, 0.05) 100%)',
+          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)',
           borderRadius: '50%',
           transform: 'rotate(15deg)'
         }}></div>
@@ -475,7 +482,7 @@ export default function Dashboard() {
           left: '-30px',
           width: '80px',
           height: '80px',
-          background: 'linear-gradient(135deg, rgba(50, 205, 50, 0.08) 0%, rgba(34, 139, 34, 0.03) 100%)',
+          background: 'linear-gradient(135deg, rgba(59, 130, 246, 0.08) 0%, rgba(37, 99, 235, 0.03) 100%)',
           borderRadius: '50%',
           transform: 'rotate(-10deg)'
         }}></div>
@@ -486,13 +493,13 @@ export default function Dashboard() {
               <div style={{
                 width: '40px',
                 height: '40px',
-                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
                 borderRadius: '12px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 marginRight: '16px',
-                boxShadow: '0 4px 12px rgba(50, 205, 50, 0.3)'
+                boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
               }}>
                 <span style={{ fontSize: '20px' }}>🚀</span>
               </div>
@@ -501,18 +508,18 @@ export default function Dashboard() {
                   TryLabs Dashboard
                 </h1>
                 <p style={{ color: '#6b7280', margin: '0', fontSize: '16px', fontWeight: '500' }}>
-                  Welcome back, <span style={{ color: '#32cd32', fontWeight: '600' }}>{user?.firstName || 'User'}</span>! Here's your testing overview.
+                  Welcome back, <span style={{ color: '#3b82f6', fontWeight: '600' }}>{user?.firstName || 'User'}</span>! Here's your testing overview.
                 </p>
               </div>
             </div>
           </div>
 
           <div style={{
-            background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+            background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
             padding: '28px',
             borderRadius: '16px',
             border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 8px 32px rgba(50, 205, 50, 0.3)',
+            boxShadow: '0 8px 32px rgba(59, 130, 246, 0.3)',
             minWidth: '280px',
             position: 'relative',
             overflow: 'hidden'
@@ -601,17 +608,17 @@ export default function Dashboard() {
 
       {/* Gamified Hero Tile */}
       <div style={{
-        background: 'linear-gradient(135deg, #000000 0%, #32cd32 100%)',
+        background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)',
         color: 'white',
         padding: '32px',
         borderRadius: '16px',
         marginBottom: '32px',
-        boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.2)',
+        boxShadow: '0 20px 25px -5px rgba(59, 130, 246, 0.3), 0 10px 10px -5px rgba(59, 130, 246, 0.2)',
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'rgba(50, 205, 50, 0.2)', borderRadius: '50%', transform: 'translate(64px, -64px)' }}></div>
-        <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'rgba(50, 205, 50, 0.1)', borderRadius: '50%', transform: 'translate(-48px, 48px)' }}></div>
+        <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'rgba(255, 255, 255, 0.2)', borderRadius: '50%', transform: 'translate(64px, -64px)' }}></div>
+        <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'rgba(255, 255, 255, 0.1)', borderRadius: '50%', transform: 'translate(-48px, 48px)' }}></div>
         
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -619,7 +626,7 @@ export default function Dashboard() {
               <div style={{
                 width: '64px',
                 height: '64px',
-                background: 'rgba(50, 205, 50, 0.3)',
+                background: 'rgba(255, 255, 255, 0.3)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -634,13 +641,13 @@ export default function Dashboard() {
                 right: '-4px',
                 width: '24px',
                 height: '24px',
-                background: '#32cd32',
+                background: '#ffffff',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
               }}>
-                <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white' }}>1</span>
+                <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#3b82f6' }}>1</span>
               </div>
             </div>
             <div style={{ marginLeft: '24px' }}>
@@ -655,15 +662,15 @@ export default function Dashboard() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', textAlign: 'center' }}>
-            <div style={{ background: 'rgba(50, 205, 50, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>{stats.activeTests}</div>
               <p style={{ fontSize: '14px', opacity: 0.8 }}>Active tests</p>
             </div>
-            <div style={{ background: 'rgba(50, 205, 50, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>{stats.totalConversions}</div>
               <p style={{ fontSize: '14px', opacity: 0.8 }}>Conversions</p>
             </div>
-            <div style={{ background: 'rgba(50, 205, 50, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
+            <div style={{ background: 'rgba(255, 255, 255, 0.2)', borderRadius: '8px', padding: '16px', backdropFilter: 'blur(8px)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px' }}>${stats.totalRevenue.toFixed(0)}</div>
               <p style={{ fontSize: '14px', opacity: 0.8 }}>Revenue generated</p>
             </div>
@@ -678,7 +685,7 @@ export default function Dashboard() {
         borderRadius: '16px',
         marginBottom: '32px',
         boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        border: '1px solid rgba(50, 205, 50, 0.2)'
+        border: '1px solid rgba(59, 130, 246, 0.2)'
       }}>
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', display: 'flex', alignItems: 'center' }}>
@@ -692,7 +699,7 @@ export default function Dashboard() {
           <QuickActionCard
             title="Create New Test"
             description="Set up a new A/B test for your products"
-            color="green"
+            color="lightBlue"
             to="/app/ab-tests"
             icon="🧪"
           />
@@ -706,7 +713,7 @@ export default function Dashboard() {
           <QuickActionCard
             title="Manage Tests"
             description="View and edit existing A/B tests"
-            color="purple"
+            color="lightBlue"
             to="/app/manage-tests"
             icon="⚙️"
           />
@@ -801,19 +808,19 @@ export default function Dashboard() {
 
       {/* Recent Activity Tile */}
       <div style={{
-        background: 'rgba(255, 255, 255, 0.8)',
+        background: 'rgba(255, 255, 255, 0.95)',
         backdropFilter: 'blur(8px)',
         padding: '24px',
         borderRadius: '16px',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        border: '1px solid rgba(255, 255, 255, 0.2)'
+        boxShadow: '0 4px 6px -1px rgba(59, 130, 246, 0.1), 0 2px 4px -1px rgba(59, 130, 246, 0.06)',
+        border: '1px solid rgba(59, 130, 246, 0.2)'
       }}>
         <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#374151', display: 'flex', alignItems: 'center' }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1e40af', display: 'flex', alignItems: 'center' }}>
             <span style={{ marginRight: '8px' }}>📝</span>
             Recent Activity
           </h2>
-          <p style={{ color: '#6b7280', marginTop: '4px' }}>Your latest testing activities</p>
+          <p style={{ color: '#3b82f6', marginTop: '4px' }}>Your latest testing activities</p>
         </div>
         
         <div>
@@ -822,9 +829,9 @@ export default function Dashboard() {
               const activityIcon = getActivityIcon(activity.iconType);
               const colorStyles = {
                 blue: { background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' },
-                green: { background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)' },
-                orange: { background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)' },
-                purple: { background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' }
+                green: { background: 'linear-gradient(135deg, #0ea5e9 0%, #0284c7 100%)' },
+                orange: { background: 'linear-gradient(135deg, #06b6d4 0%, #0891b2 100%)' },
+                purple: { background: 'linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%)' }
               };
               
               return (
@@ -836,7 +843,7 @@ export default function Dashboard() {
                       left: '20px',
                       width: '2px',
                       height: 'calc(100% + 16px)',
-                      background: 'linear-gradient(to bottom, #e5e7eb 0%, transparent 100%)'
+                      background: 'linear-gradient(to bottom, #bfdbfe 0%, transparent 100%)'
                     }}></div>
                   )}
                   <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>

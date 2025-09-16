@@ -504,10 +504,6 @@ export default function ABTesting() {
   const actionData = useActionData();
   const { user } = useOutletContext();
   
-  // Step management - NEW
-  const [currentStep, setCurrentStep] = useState(2); // Changed default to step 2
-  const [completedSteps, setCompletedSteps] = useState([1]); // Mark step 1 as completed by default
-  
   // Form state with proper defaults
   const [templateA, setTemplateA] = useState("");
   const [templateB, setTemplateB] = useState("");
@@ -542,36 +538,6 @@ export default function ABTesting() {
   const templateOptions = productTemplates.map(f => ({ label: f, value: f }));
   const productOptions = products.map(p => ({ label: p.title, value: p.id }));
 
-  // Step navigation functions - NEW
-  const nextStep = () => {
-    if (currentStep < 2) {
-      setCurrentStep(currentStep + 1);
-      setCompletedSteps([...completedSteps, currentStep]);
-    }
-  };
-
-  const prevStep = () => {
-    if (currentStep > 1) {
-      setCurrentStep(currentStep - 1);
-      setCompletedSteps(completedSteps.filter(step => step !== currentStep - 1));
-    }
-  };
-
-  const goToStep = (step) => {
-    // Allow clicking on any step (1 or 2)
-    setCurrentStep(step);
-    // Mark previous steps as completed when going forward
-    if (step > currentStep) {
-      const newCompletedSteps = [...completedSteps];
-      for (let i = currentStep; i < step; i++) {
-        if (!newCompletedSteps.includes(i)) {
-          newCompletedSteps.push(i);
-        }
-      }
-      setCompletedSteps(newCompletedSteps);
-    }
-  };
-
   // Reset Template B if templates list changes and B is not in the list
   useEffect(() => {
     if (templateB && !productTemplates.includes(templateB)) {
@@ -579,7 +545,7 @@ export default function ABTesting() {
     }
   }, [productTemplates, templateB]);
 
-  // Function to reset form
+  // Function to reset form fields
   const resetForm = () => {
     setTestName("");
     setTemplateA("");
@@ -594,13 +560,6 @@ export default function ABTesting() {
     setSuccessMessage(null);
     setValidationErrors({});
     setProductValidationError(null);
-    // Reset step management
-    setCurrentStep(2); // Reset to step 2 as default
-    setCompletedSteps([1]); // Mark step 1 as completed by default
-    setDuplicateTemplateName("");
-    setSelectedTemplate(productTemplates[0] || "");
-    setAssociatedProduct(null);
-    setPreviewError(null);
   };
 
   // Function to validate form
@@ -768,12 +727,6 @@ export default function ABTesting() {
         const themeIdNum = themeId.replace('gid://shopify/Theme/', '');
         const url = `https://admin.shopify.com/store/${shopShort}/themes/${themeIdNum}/editor?previewPath=${encodeURIComponent(previewPath)}`;
         window.open(url, "_blank");
-        
-        // Advance to step 2 and set the new template as Template A
-        setCompletedSteps([...completedSteps, 1]);
-        setCurrentStep(2);
-        const newTemplateName = `templates/product.${duplicateTemplateName.trim()}.liquid`;
-        setTemplateA(newTemplateName);
       } else {
         setPreviewError(data.error || "Failed to create duplicate template");
       }
@@ -890,115 +843,17 @@ export default function ABTesting() {
         <p style={{ fontSize: '18px', opacity: 0.9 }}>Set up experiments to optimize your product pages</p>
       </div>
 
-      {/* Step Progress Indicator */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'center',
-        marginBottom: '32px'
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          background: 'white',
-          padding: '16px 24px',
-          borderRadius: '50px',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          border: '1px solid rgba(50, 205, 50, 0.2)'
-        }}>
-          {/* Step 1 */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            cursor: 'pointer'
-          }} onClick={() => goToStep(1)}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: currentStep === 1 
-                ? 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)'
-                : completedSteps.includes(1)
-                ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                : '#e5e7eb',
-              color: currentStep === 1 || completedSteps.includes(1) ? 'white' : '#6b7280',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-              fontSize: '14px',
-              marginRight: '12px'
-            }}>
-              {completedSteps.includes(1) ? '✓' : '1'}
-            </div>
-            <div>
-              <div style={{
-                fontSize: '14px',
-                fontWeight: '600',
-                color: currentStep === 1 ? '#000000' : completedSteps.includes(1) ? '#22c55e' : '#6b7280'
-              }}>
-                Duplicate Template
-              </div>
-            </div>
-          </div>
-
-          {/* Step Connector */}
-          <div style={{
-            width: '40px',
-            height: '2px',
-            background: completedSteps.includes(1) ? '#22c55e' : '#e5e7eb',
-            margin: '0 16px'
-          }} />
-
-          {/* Step 2 */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            cursor: 'pointer' // Always clickable
-          }} onClick={() => goToStep(2)}>
-            <div style={{
-              width: '36px',
-              height: '36px',
-              borderRadius: '50%',
-              background: currentStep === 2 
-                ? 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)'
-                : completedSteps.includes(2)
-                ? 'linear-gradient(135deg, #22c55e 0%, #16a34a 100%)'
-                : '#e5e7eb',
-              color: currentStep === 2 || completedSteps.includes(2) ? 'white' : '#6b7280',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontWeight: 'bold',
-              fontSize: '14px',
-              marginRight: '12px'
-            }}>
-              {completedSteps.includes(2) ? '✓' : '2'}
-            </div>
-            <div>
-              <div style={{
-                fontSize: '14px',
-                fontWeight: '600',
-                color: currentStep === 2 ? '#000000' : completedSteps.includes(2) ? '#22c55e' : '#6b7280'
-              }}>
-                Create A/B Test
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
-        {/* Create Duplicate Template - Step 1 */}
+        {/* Create Duplicate Template */}
         <div style={{
           background: 'white',
           padding: '24px',
           borderRadius: '16px',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          border: '1px solid rgba(50, 205, 50, 0.2)',
-          display: currentStep === 1 ? 'block' : 'none'
+          border: '1px solid rgba(50, 205, 50, 0.2)'
         }}>
           <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', marginBottom: '24px' }}>
-            📝 Step 1: Create Duplicate Template
+            📝 Create Duplicate Template
           </h2>
           
           <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
@@ -1110,89 +965,61 @@ export default function ABTesting() {
                 transition: 'all 0.2s ease'
               }}
             >
-              {isCreatingTemplate ? "Creating Template..." : "Create Template & Continue"}
+              {isCreatingTemplate ? "Creating Template..." : "Create & Open in Theme Editor"}
             </button>
           </div>
         </div>
 
-        {/* Create A/B Test - Step 2 */}
+        {/* Create A/B Test */}
         <div style={{
           background: 'white',
           padding: '24px',
           borderRadius: '16px',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          border: '1px solid rgba(50, 205, 50, 0.2)',
-          display: currentStep === 2 ? 'block' : 'none'
+          border: '1px solid rgba(50, 205, 50, 0.2)'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
             <div>
               <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', marginBottom: '8px' }}>
-                🧪 Step 2: Create A/B Test
+                🧪 Create A/B Test
               </h2>
               <p style={{ fontSize: '14px', color: '#374151' }}>
-                Configure your A/B test parameters and select the templates to compare.
+                Select two different templates to compare their performance. All fields marked with <span style={{ color: '#dc2626' }}>*</span> are required.
               </p>
             </div>
-            <div style={{ display: 'flex', gap: '12px' }}>
-              <button
-                type="button"
-                onClick={prevStep}
-                style={{
-                  padding: '12px 20px',
-                  background: 'white',
-                  color: '#6b7280',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '10px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = '#f9fafb';
-                  e.target.style.borderColor = '#9ca3af';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'white';
-                  e.target.style.borderColor = '#d1d5db';
-                }}
-              >
-                ← Back
-              </button>
-              <button
-                type="button"
-                onClick={resetForm}
-                style={{
-                  padding: '12px 20px',
-                  background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-                  color: 'white',
-                  border: 'none',
-                  borderRadius: '10px',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  boxShadow: '0 4px 12px rgba(50, 205, 50, 0.3)',
-                  minWidth: '140px',
-                  justifyContent: 'center'
-                }}
-                onMouseEnter={(e) => {
-                  e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
-                  e.target.style.transform = 'translateY(-2px)';
-                  e.target.style.boxShadow = '0 6px 20px rgba(50, 205, 50, 0.4)';
-                }}
-                onMouseLeave={(e) => {
-                  e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
-                  e.target.style.transform = 'translateY(0)';
-                  e.target.style.boxShadow = '0 4px 12px rgba(50, 205, 50, 0.3)';
-                }}
-              >
-                <span style={{ fontSize: '16px' }}>🚀</span> Create New Test
-              </button>
-            </div>
+            <button
+              type="button"
+              onClick={resetForm}
+              style={{
+                padding: '12px 20px',
+                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                color: 'white',
+                border: 'none',
+                borderRadius: '10px',
+                fontSize: '14px',
+                fontWeight: '600',
+                cursor: 'pointer',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                boxShadow: '0 4px 12px rgba(50, 205, 50, 0.3)',
+                minWidth: '140px',
+                justifyContent: 'center'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
+                e.target.style.transform = 'translateY(-2px)';
+                e.target.style.boxShadow = '0 6px 20px rgba(50, 205, 50, 0.4)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
+                e.target.style.transform = 'translateY(0)';
+                e.target.style.boxShadow = '0 4px 12px rgba(50, 205, 50, 0.3)';
+              }}
+            >
+              <span style={{ fontSize: '16px' }}>🚀</span> Create New Test
+            </button>
           </div>
 
           <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
