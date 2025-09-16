@@ -486,8 +486,8 @@ export default function Dashboard() {
           right: '-20px',
           width: '120px',
           height: '120px',
-          background: 'rgba(139, 92, 246, 0.08)',
-          borderRadius: '50%',
+          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(124, 58, 237, 0.03) 100%)',
+          borderRadius: '24px',
           transform: 'rotate(15deg)'
         }}></div>
         <div style={{
@@ -496,8 +496,8 @@ export default function Dashboard() {
           left: '-30px',
           width: '80px',
           height: '80px',
-          background: 'rgba(139, 92, 246, 0.05)',
-          borderRadius: '50%',
+          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.04) 0%, rgba(124, 58, 237, 0.02) 100%)',
+          borderRadius: '20px',
           transform: 'rotate(-10deg)'
         }}></div>
 
@@ -529,11 +529,11 @@ export default function Dashboard() {
           </div>
 
           <div style={{
-            background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+            background: 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)',
             padding: '28px',
             borderRadius: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 4px 6px -1px rgba(139, 92, 246, 0.2), 0 2px 4px -1px rgba(139, 92, 246, 0.1)',
+            border: '1px solid #d1d5db',
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
             minWidth: '280px',
             position: 'relative',
             overflow: 'hidden'
@@ -632,8 +632,8 @@ export default function Dashboard() {
         position: 'relative',
         overflow: 'hidden'
       }}>
-        <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'rgba(139, 92, 246, 0.08)', borderRadius: '50%', transform: 'translate(64px, -64px)' }}></div>
-        <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'rgba(139, 92, 246, 0.05)', borderRadius: '50%', transform: 'translate(-48px, 48px)' }}></div>
+        <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.06) 0%, rgba(124, 58, 237, 0.03) 100%)', borderRadius: '24px', transform: 'translate(64px, -64px)' }}></div>
+        <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.04) 0%, rgba(124, 58, 237, 0.02) 100%)', borderRadius: '20px', transform: 'translate(-48px, 48px)' }}></div>
         
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
@@ -641,8 +641,8 @@ export default function Dashboard() {
               <div style={{
                 width: '64px',
                 height: '64px',
-                background: 'rgba(139, 92, 246, 0.15)',
-                borderRadius: '50%',
+                background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%)',
+                borderRadius: '20px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -657,7 +657,7 @@ export default function Dashboard() {
                 width: '24px',
                 height: '24px',
                 background: '#8b5cf6',
-                borderRadius: '50%',
+                borderRadius: '8px',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center'
@@ -677,15 +677,15 @@ export default function Dashboard() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', textAlign: 'center' }}>
-            <div style={{ background: 'rgba(139, 92, 246, 0.1)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+            <div style={{ background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)', borderRadius: '16px', padding: '20px', border: '1px solid #e5e7eb' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937' }}>{stats.activeTests}</div>
               <p style={{ fontSize: '14px', color: '#6b7280' }}>Active tests</p>
             </div>
-            <div style={{ background: 'rgba(139, 92, 246, 0.1)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+            <div style={{ background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)', borderRadius: '16px', padding: '20px', border: '1px solid #e5e7eb' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937' }}>{stats.totalConversions}</div>
               <p style={{ fontSize: '14px', color: '#6b7280' }}>Conversions</p>
             </div>
-            <div style={{ background: 'rgba(139, 92, 246, 0.1)', borderRadius: '16px', padding: '20px', border: '1px solid rgba(139, 92, 246, 0.2)' }}>
+            <div style={{ background: 'linear-gradient(135deg, #f9fafb 0%, #f3f4f6 100%)', borderRadius: '16px', padding: '20px', border: '1px solid #e5e7eb' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937' }}>${stats.totalRevenue.toFixed(0)}</div>
               <p style={{ fontSize: '14px', color: '#6b7280' }}>Revenue generated</p>
             </div>
