@@ -310,10 +310,8 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
       arrowColor: '#3b82f6'
     },
     lightBlue: { 
-      background: 'rgba(147, 197, 253, 0.2)',
-      backdropFilter: 'blur(15px)',
-      WebkitBackdropFilter: 'blur(15px)',
-      border: '1px solid rgba(147, 197, 253, 0.3)',
+      background: 'linear-gradient(135deg, rgba(147, 197, 253, 0.12) 0%, rgba(251, 191, 36, 0.08) 50%, rgba(196, 181, 253, 0.06) 100%)',
+      border: '1px solid rgba(147, 197, 253, 0.2)',
       textColor: '#1e40af',
       descriptionColor: '#1d4ed8',
       arrowColor: '#3b82f6'
@@ -333,10 +331,8 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
       arrowColor: '#8b5cf6'
     },
     purple: { 
-      background: 'rgba(251, 146, 199, 0.2)',
-      backdropFilter: 'blur(15px)',
-      WebkitBackdropFilter: 'blur(15px)',
-      border: '1px solid rgba(251, 146, 199, 0.3)',
+      background: 'linear-gradient(135deg, rgba(251, 146, 199, 0.12) 0%, rgba(196, 181, 253, 0.08) 50%, rgba(251, 191, 36, 0.06) 100%)',
+      border: '1px solid rgba(251, 146, 199, 0.2)',
       textColor: '#5b21b6',
       descriptionColor: '#6d28d9',
       arrowColor: '#8b5cf6'
@@ -355,16 +351,13 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
   const CardContent = () => (
     <div 
       className="rounded-2xl shadow-sm cursor-pointer transition-all duration-300 relative overflow-hidden"
-        style={{ 
-          background: styles.background,
-          backdropFilter: styles.backdropFilter || 'blur(15px)',
-          WebkitBackdropFilter: styles.WebkitBackdropFilter || 'blur(15px)',
-          border: styles.border,
-          transform: 'translateY(0)',
-          minHeight: '120px',
-          padding: '24px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-        }}
+      style={{ 
+        background: styles.background,
+        border: styles.border,
+        transform: 'translateY(0)',
+        minHeight: '120px',
+        padding: '24px',
+      }}
       onMouseEnter={(e) => {
         // Only apply hover effects to the outer container
         const container = e.currentTarget;
@@ -478,18 +471,16 @@ export default function Dashboard() {
       overflow: 'hidden'
     }}>
       {/* TryLabs Dashboard */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.25)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: '32px',
-          borderRadius: '24px',
-          marginBottom: '32px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
+      <div style={{
+        background: 'linear-gradient(135deg, #ffffff 0%, #fafbff 100%)',
+        padding: '32px',
+        borderRadius: '24px',
+        marginBottom: '32px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e2e8f0',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
         {/* Background decorative elements */}
         <div style={{
           position: 'absolute',
@@ -632,19 +623,17 @@ export default function Dashboard() {
       </div>
 
       {/* Gamified Hero Tile */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          color: '#1f2937',
-          padding: '32px',
-          borderRadius: '24px',
-          marginBottom: '32px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          position: 'relative',
-          overflow: 'hidden'
-        }}>
+      <div style={{
+        background: 'linear-gradient(135deg, #ffffff 0%, #fafbff 100%)',
+        color: '#1f2937',
+        padding: '32px',
+        borderRadius: '24px',
+        marginBottom: '32px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e2e8f0',
+        position: 'relative',
+        overflow: 'hidden'
+      }}>
         <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.1) 0%, rgba(167, 139, 250, 0.05) 100%)', borderRadius: '24px', transform: 'translate(64px, -64px)' }}></div>
         <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.08) 0%, rgba(167, 139, 250, 0.03) 100%)', borderRadius: '20px', transform: 'translate(-48px, 48px)' }}></div>
         
@@ -690,15 +679,15 @@ export default function Dashboard() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', textAlign: 'center' }}>
-            <div style={{ background: 'rgba(251, 146, 199, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(251, 146, 199, 0.3)', boxShadow: '0 8px 32px rgba(251, 146, 199, 0.15)' }}>
+            <div style={{ background: 'linear-gradient(135deg, rgba(251, 146, 199, 0.12) 0%, rgba(251, 191, 36, 0.08) 50%, rgba(196, 181, 253, 0.06) 100%)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(251, 146, 199, 0.2)', boxShadow: '0 4px 20px rgba(251, 146, 199, 0.1)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937' }}>{stats.activeTests}</div>
               <p style={{ fontSize: '14px', color: '#6b7280' }}>Active tests</p>
             </div>
-            <div style={{ background: 'rgba(196, 181, 253, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(196, 181, 253, 0.3)', boxShadow: '0 8px 32px rgba(196, 181, 253, 0.15)' }}>
+            <div style={{ background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.12) 0%, rgba(251, 191, 36, 0.08) 50%, rgba(251, 146, 199, 0.06) 100%)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(196, 181, 253, 0.2)', boxShadow: '0 4px 20px rgba(196, 181, 253, 0.1)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937' }}>{stats.totalConversions}</div>
               <p style={{ fontSize: '14px', color: '#6b7280' }}>Conversions</p>
             </div>
-            <div style={{ background: 'rgba(251, 191, 36, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(251, 191, 36, 0.3)', boxShadow: '0 8px 32px rgba(251, 191, 36, 0.15)' }}>
+            <div style={{ background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(251, 146, 199, 0.08) 50%, rgba(196, 181, 253, 0.06) 100%)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(251, 191, 36, 0.2)', boxShadow: '0 4px 20px rgba(251, 191, 36, 0.1)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937' }}>${stats.totalRevenue.toFixed(0)}</div>
               <p style={{ fontSize: '14px', color: '#6b7280' }}>Revenue generated</p>
             </div>
@@ -707,16 +696,14 @@ export default function Dashboard() {
       </div>
 
       {/* Quick Actions Tile */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.25)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: '28px',
-          borderRadius: '24px',
-          marginBottom: '32px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.3)'
-        }}>
+      <div style={{
+        background: 'linear-gradient(135deg, #ffffff 0%, #fafbff 100%)',
+        padding: '28px',
+        borderRadius: '24px',
+        marginBottom: '32px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e2e8f0'
+      }}>
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', display: 'flex', alignItems: 'center' }}>
             <span style={{ marginRight: '8px' }}>⚡</span>
@@ -837,15 +824,13 @@ export default function Dashboard() {
       */}
 
       {/* Recent Activity Tile */}
-        <div style={{
-          background: 'rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: '28px',
-          borderRadius: '24px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.3)'
-        }}>
+      <div style={{
+        background: 'linear-gradient(135deg, #ffffff 0%, #fafbff 100%)',
+        padding: '28px',
+        borderRadius: '24px',
+        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+        border: '1px solid #e2e8f0'
+      }}>
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', display: 'flex', alignItems: 'center' }}>
             <span style={{ marginRight: '8px' }}>📝</span>
