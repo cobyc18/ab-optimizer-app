@@ -508,7 +508,7 @@ export default function Dashboard() {
                   TryLabs Dashboard
                 </h1>
                 <p style={{ color: '#6b7280', margin: '0', fontSize: '16px', fontWeight: '500' }}>
-                  Welcome back, <span style={{ color: '#3b82f6', fontWeight: '600' }}>{user?.firstName || 'User'}</span>! Here's your testing overview.
+                  Welcome back!!, <span style={{ color: '#3b82f6', fontWeight: '600' }}>{user?.firstName || 'User'}</span>! Here's your testing overview.
                 </p>
               </div>
             </div>
