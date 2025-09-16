@@ -89,11 +89,11 @@ export default function App() {
             padding: '12px 16px',
             margin: '4px 8px',
             borderRadius: '12px',
-            color: isActiveItem ? '#1f2937' : '#ffffff',
+            color: isActiveItem ? '#1f2937' : '#6b7280',
             background: isActiveItem 
-              ? '#ffffff' 
+              ? 'linear-gradient(135deg, rgba(196, 181, 253, 0.15) 0%, rgba(167, 139, 250, 0.08) 100%)' 
               : 'transparent',
-            border: isActiveItem ? '1px solid rgba(255, 255, 255, 0.2)' : '1px solid transparent',
+            border: isActiveItem ? '1px solid rgba(196, 181, 253, 0.3)' : '1px solid transparent',
             cursor: 'pointer',
             transition: 'all 0.2s ease',
             position: 'relative',
@@ -101,16 +101,16 @@ export default function App() {
           }}
           onMouseEnter={(e) => {
             if (!isActiveItem) {
-              e.currentTarget.style.background = '#ffffff';
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(196, 181, 253, 0.1) 0%, rgba(167, 139, 250, 0.05) 100%)';
               e.currentTarget.style.color = '#1f2937';
               e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(0, 0, 0, 0.1)';
+              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(139, 92, 246, 0.1)';
             }
           }}
           onMouseLeave={(e) => {
             if (!isActiveItem) {
               e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#ffffff';
+              e.currentTarget.style.color = '#6b7280';
               e.currentTarget.style.transform = 'translateY(0)';
               e.currentTarget.style.boxShadow = 'none';
             }
@@ -131,7 +131,7 @@ export default function App() {
               {item.badge && (
                 <span style={{
                   fontSize: '10px',
-                  background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                  background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
                   color: 'white',
                   padding: '2px 8px',
                   borderRadius: '10px',
@@ -150,7 +150,7 @@ export default function App() {
               top: '0',
               bottom: '0',
               width: '4px',
-              background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+              background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
               borderRadius: '0 2px 2px 0'
             }} />
           )}
@@ -160,14 +160,14 @@ export default function App() {
   };
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: '#f9fafb' }}>
+    <div style={{ display: 'flex', height: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)' }}>
       {/* Beautiful Sidebar */}
       <div style={{
-        background: 'linear-gradient(180deg, #000000 0%, #1a1a1a 100%)',
-        boxShadow: '4px 0 20px rgba(0, 0, 0, 0.3)',
+        background: 'linear-gradient(180deg, #ffffff 0%, #fafbff 100%)',
+        boxShadow: '4px 0 20px rgba(139, 92, 246, 0.15)',
         display: 'flex',
         flexDirection: 'column',
-        borderRight: '1px solid #32cd32',
+        borderRight: '1px solid rgba(196, 181, 253, 0.3)',
         transition: 'all 0.3s ease',
         width: isSidebarCollapsed ? '80px' : '280px',
         position: 'relative',
@@ -176,21 +176,21 @@ export default function App() {
         {/* Sidebar Header */}
         <div style={{
           padding: '24px 20px',
-          borderBottom: '1px solid #32cd32',
-          background: 'linear-gradient(135deg, #000000 0%, #32cd32 100%)',
+          borderBottom: '1px solid rgba(196, 181, 253, 0.3)',
+          background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
           color: 'white'
         }}>
           <div style={{ display: 'flex', alignItems: 'center' }}>
             <div style={{
               width: '40px',
               height: '40px',
-              background: 'rgba(50, 205, 50, 0.3)',
+              background: 'rgba(255, 255, 255, 0.3)',
               borderRadius: '12px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(50, 205, 50, 0.5)'
+              border: '1px solid rgba(255, 255, 255, 0.5)'
             }}>
               <span style={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }}>TL</span>
             </div>
@@ -210,7 +210,7 @@ export default function App() {
               <div style={{
                 fontSize: '20px',
                 fontWeight: '600',
-                color: '#ffffff',
+                color: '#1f2937',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
                 marginBottom: '8px',
@@ -239,8 +239,8 @@ export default function App() {
           width: '24px',
           height: '24px',
           borderRadius: '50%',
-          background: 'rgba(0, 0, 0, 0.8)',
-          border: '1px solid #32cd32',
+          background: 'rgba(196, 181, 253, 0.8)',
+          border: '1px solid rgba(196, 181, 253, 0.3)',
           color: '#ffffff',
           display: 'flex',
           alignItems: 'center',
@@ -253,11 +253,11 @@ export default function App() {
           boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.background = '#32cd32';
+          e.currentTarget.style.background = '#c4b5fd';
           e.currentTarget.style.transform = 'translateX(-50%) scale(1.1)';
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'rgba(0, 0, 0, 0.8)';
+          e.currentTarget.style.background = 'rgba(196, 181, 253, 0.8)';
           e.currentTarget.style.transform = 'translateX(-50%) scale(1)';
         }}
       >
@@ -268,8 +268,8 @@ export default function App() {
       <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         {/* Beautiful Top Bar */}
         <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #f8fafc 100%)',
-          borderBottom: '1px solid #e5e7eb',
+          background: 'linear-gradient(135deg, #ffffff 0%, #fafbff 100%)',
+          borderBottom: '1px solid rgba(196, 181, 253, 0.2)',
           padding: '16px 24px',
           boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
         }}>
@@ -279,7 +279,7 @@ export default function App() {
                 <div style={{
                   width: '8px',
                   height: '8px',
-                  background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                  background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
                   borderRadius: '50%',
                   animation: 'pulse 2s infinite'
                 }}></div>
@@ -292,7 +292,7 @@ export default function App() {
               <div style={{
                 width: '40px',
                 height: '40px',
-                background: 'linear-gradient(135deg, #000000 0%, #32cd32 100%)',
+                background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
