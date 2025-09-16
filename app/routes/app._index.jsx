@@ -464,9 +464,11 @@ export default function Dashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)',
+      background: 'linear-gradient(135deg, rgba(251, 146, 199, 0.08) 0%, rgba(251, 191, 36, 0.06) 25%, rgba(196, 181, 253, 0.08) 50%, rgba(147, 197, 253, 0.06) 75%, rgba(251, 146, 199, 0.04) 100%)',
       padding: '24px',
-      fontFamily: 'system-ui, -apple-system, sans-serif'
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      position: 'relative',
+      overflow: 'hidden'
     }}>
       {/* TryLabs Dashboard */}
       <div style={{
