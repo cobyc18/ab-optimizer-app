@@ -310,8 +310,8 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
       arrowColor: '#3b82f6'
     },
     lightBlue: { 
-      background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.15) 0%, rgba(167, 139, 250, 0.08) 100%)',
-      border: '1px solid rgba(196, 181, 253, 0.3)',
+      background: 'linear-gradient(135deg, rgba(147, 197, 253, 0.12) 0%, rgba(251, 191, 36, 0.08) 50%, rgba(196, 181, 253, 0.06) 100%)',
+      border: '1px solid rgba(147, 197, 253, 0.2)',
       textColor: '#1e40af',
       descriptionColor: '#1d4ed8',
       arrowColor: '#3b82f6'
@@ -331,8 +331,8 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
       arrowColor: '#8b5cf6'
     },
     purple: { 
-      background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.15) 0%, rgba(167, 139, 250, 0.08) 100%)',
-      border: '1px solid rgba(196, 181, 253, 0.3)',
+      background: 'linear-gradient(135deg, rgba(251, 146, 199, 0.12) 0%, rgba(196, 181, 253, 0.08) 50%, rgba(251, 191, 36, 0.06) 100%)',
+      border: '1px solid rgba(251, 146, 199, 0.2)',
       textColor: '#5b21b6',
       descriptionColor: '#6d28d9',
       arrowColor: '#8b5cf6'
@@ -677,15 +677,15 @@ export default function Dashboard() {
           </div>
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', textAlign: 'center' }}>
-            <div style={{ background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.15) 0%, rgba(167, 139, 250, 0.08) 100%)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(196, 181, 253, 0.3)' }}>
+            <div style={{ background: 'linear-gradient(135deg, rgba(251, 146, 199, 0.12) 0%, rgba(251, 191, 36, 0.08) 50%, rgba(196, 181, 253, 0.06) 100%)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(251, 146, 199, 0.2)', boxShadow: '0 4px 20px rgba(251, 146, 199, 0.1)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937' }}>{stats.activeTests}</div>
               <p style={{ fontSize: '14px', color: '#6b7280' }}>Active tests</p>
             </div>
-            <div style={{ background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.15) 0%, rgba(167, 139, 250, 0.08) 100%)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(196, 181, 253, 0.3)' }}>
+            <div style={{ background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.12) 0%, rgba(251, 191, 36, 0.08) 50%, rgba(251, 146, 199, 0.06) 100%)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(196, 181, 253, 0.2)', boxShadow: '0 4px 20px rgba(196, 181, 253, 0.1)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937' }}>{stats.totalConversions}</div>
               <p style={{ fontSize: '14px', color: '#6b7280' }}>Conversions</p>
             </div>
-            <div style={{ background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.15) 0%, rgba(167, 139, 250, 0.08) 100%)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(196, 181, 253, 0.3)' }}>
+            <div style={{ background: 'linear-gradient(135deg, rgba(251, 191, 36, 0.12) 0%, rgba(251, 146, 199, 0.08) 50%, rgba(196, 181, 253, 0.06) 100%)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(251, 191, 36, 0.2)', boxShadow: '0 4px 20px rgba(251, 191, 36, 0.1)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937' }}>${stats.totalRevenue.toFixed(0)}</div>
               <p style={{ fontSize: '14px', color: '#6b7280' }}>Revenue generated</p>
             </div>
