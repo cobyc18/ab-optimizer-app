@@ -310,8 +310,8 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
       arrowColor: '#3b82f6'
     },
     lightBlue: { 
-      background: 'linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%)',
-      border: '1px solid #bfdbfe',
+      background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.15) 0%, rgba(167, 139, 250, 0.08) 100%)',
+      border: '1px solid rgba(196, 181, 253, 0.3)',
       textColor: '#1e40af',
       descriptionColor: '#1d4ed8',
       arrowColor: '#3b82f6'
@@ -331,8 +331,8 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
       arrowColor: '#8b5cf6'
     },
     purple: { 
-      background: 'linear-gradient(135deg, #faf5ff 0%, #f3e8ff 100%)',
-      border: '1px solid #d8b4fe',
+      background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.15) 0%, rgba(167, 139, 250, 0.08) 100%)',
+      border: '1px solid rgba(196, 181, 253, 0.3)',
       textColor: '#5b21b6',
       descriptionColor: '#6d28d9',
       arrowColor: '#8b5cf6'
