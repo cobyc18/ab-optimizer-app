@@ -957,6 +957,7 @@ export default function Dashboard() {
             })}
           </ul>
         </div>
+        </div>
         
         {/* Stats Summary Tile - Small Tile */}
         <div style={{
