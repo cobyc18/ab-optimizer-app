@@ -536,65 +536,65 @@ export default function Dashboard() {
           position: 'relative',
           overflow: 'hidden'
         }}>
-        {/* Background decorative elements */}
-        <div style={{
-          position: 'absolute',
-          top: '-20px',
-          right: '-20px',
-          width: '120px',
-          height: '120px',
-          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%)',
-          borderRadius: '24px',
-          transform: 'rotate(15deg)'
-        }}></div>
-        <div style={{
-          position: 'absolute',
-          bottom: '-30px',
-          left: '-30px',
-          width: '80px',
-          height: '80px',
-          background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 58, 237, 0.03) 100%)',
-          borderRadius: '20px',
-          transform: 'rotate(-10deg)'
-        }}></div>
+          {/* Background decorative elements */}
+          <div style={{
+            position: 'absolute',
+            top: '-20px',
+            right: '-20px',
+            width: '120px',
+            height: '120px',
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%)',
+            borderRadius: '24px',
+            transform: 'rotate(15deg)'
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            bottom: '-30px',
+            left: '-30px',
+            width: '80px',
+            height: '80px',
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 58, 237, 0.03) 100%)',
+            borderRadius: '20px',
+            transform: 'rotate(-10deg)'
+          }}></div>
 
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-          <div style={{ flex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: '#3B82F6',
-                borderRadius: '12px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                marginRight: '16px',
-                boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)'
-              }}>
-                <span style={{ fontSize: '20px' }}>🚀</span>
-              </div>
-              <div>
-                <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#1a1a1a', margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>
-                  TryLabs Dashboard
-                </h1>
-                <p style={{ color: '#6b7280', margin: '0', fontSize: '16px', fontWeight: '500' }}>
-                  Welcome back, <span style={{ color: '#8b5cf6', fontWeight: '600' }}>{user?.firstName || 'User'}</span>! Here's your testing overview.
-                </p>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div style={{ flex: 1 }}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+                <div style={{
+                  width: '40px',
+                  height: '40px',
+                  background: '#3B82F6',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '16px',
+                  boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)'
+                }}>
+                  <span style={{ fontSize: '20px' }}>🚀</span>
+                </div>
+                <div>
+                  <h1 style={{ fontSize: '32px', fontWeight: '800', color: '#1a1a1a', margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>
+                    TryLabs Dashboard
+                  </h1>
+                  <p style={{ color: '#6b7280', margin: '0', fontSize: '16px', fontWeight: '500' }}>
+                    Welcome back, <span style={{ color: '#8b5cf6', fontWeight: '600' }}>{user?.firstName || 'User'}</span>! Here's your testing overview.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div style={{
-            background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
-            padding: '28px',
-            borderRadius: '20px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 4px 6px -1px rgba(196, 181, 253, 0.2), 0 2px 4px -1px rgba(196, 181, 253, 0.1)',
-            minWidth: '280px',
-            position: 'relative',
-            overflow: 'hidden'
-          }}>
+            <div style={{
+              background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
+              padding: '28px',
+              borderRadius: '20px',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+              boxShadow: '0 4px 6px -1px rgba(196, 181, 253, 0.2), 0 2px 4px -1px rgba(196, 181, 253, 0.1)',
+              minWidth: '280px',
+              position: 'relative',
+              overflow: 'hidden'
+            }}>
             {/* Progress card background decoration */}
             <div style={{
               position: 'absolute',
@@ -675,7 +675,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
 
         {/* Gamified Hero Tile - Medium Tile */}
         <div style={{
@@ -692,51 +692,51 @@ export default function Dashboard() {
           position: 'relative',
           overflow: 'hidden'
         }}>
-        <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.1) 0%, rgba(167, 139, 250, 0.05) 100%)', borderRadius: '24px', transform: 'translate(64px, -64px)' }}></div>
-        <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.08) 0%, rgba(167, 139, 250, 0.03) 100%)', borderRadius: '20px', transform: 'translate(-48px, 48px)' }}></div>
-        
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{ position: 'relative' }}>
-              <div style={{
-                width: '64px',
-                height: '64px',
-                background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.2) 0%, rgba(167, 139, 250, 0.1) 100%)',
-                borderRadius: '20px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                animation: 'pulse 2s infinite'
-              }}>
-                <span style={{ fontSize: '24px' }}>🏆</span>
+          <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.1) 0%, rgba(167, 139, 250, 0.05) 100%)', borderRadius: '24px', transform: 'translate(64px, -64px)' }}></div>
+          <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.08) 0%, rgba(167, 139, 250, 0.03) 100%)', borderRadius: '20px', transform: 'translate(-48px, 48px)' }}></div>
+          
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', position: 'relative' }}>
+            <div style={{ display: 'flex', alignItems: 'center' }}>
+              <div style={{ position: 'relative' }}>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.2) 0%, rgba(167, 139, 250, 0.1) 100%)',
+                  borderRadius: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  animation: 'pulse 2s infinite'
+                }}>
+                  <span style={{ fontSize: '24px' }}>🏆</span>
+                </div>
+                <div style={{
+                  position: 'absolute',
+                  top: '-4px',
+                  right: '-4px',
+                  width: '24px',
+                  height: '24px',
+                  background: '#c4b5fd',
+                  borderRadius: '8px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}>
+                  <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white' }}>1</span>
+                </div>
               </div>
-              <div style={{
-                position: 'absolute',
-                top: '-4px',
-                right: '-4px',
-                width: '24px',
-                height: '24px',
-                background: '#c4b5fd',
-                borderRadius: '8px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <span style={{ fontSize: '12px', fontWeight: 'bold', color: 'white' }}>1</span>
+              <div style={{ marginLeft: '24px' }}>
+                <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px' }}>🏅 Data Scientist</h2>
+                <p style={{ opacity: 0.9 }}>
+                  {stats.totalTests > 0 
+                    ? `You've run ${stats.totalTests} test${stats.totalTests > 1 ? 's' : ''} with ${stats.totalImpressions} total impressions!`
+                    : "Ready to start your first A/B test and optimize your store!"
+                  }
+                </p>
               </div>
             </div>
-            <div style={{ marginLeft: '24px' }}>
-              <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '4px' }}>🏅 Data Scientist</h2>
-              <p style={{ opacity: 0.9 }}>
-                {stats.totalTests > 0 
-                  ? `You've run ${stats.totalTests} test${stats.totalTests > 1 ? 's' : ''} with ${stats.totalImpressions} total impressions!`
-                  : "Ready to start your first A/B test and optimize your store!"
-                }
-              </p>
-            </div>
-          </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', textAlign: 'center' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '24px', textAlign: 'center' }}>
             <div style={{ background: 'rgba(251, 146, 199, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '20px', padding: '20px', border: '1px solid rgba(251, 146, 199, 0.3)', boxShadow: '0 8px 32px rgba(251, 146, 199, 0.15)' }}>
               <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '8px', color: '#1f2937' }}>{stats.activeTests}</div>
               <p style={{ fontSize: '14px', color: '#6b7280' }}>Active tests</p>
@@ -751,7 +751,7 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-      </div>
+        </div>
 
         {/* Quick Actions Tile - Wide Tile */}
         <div style={{
@@ -765,38 +765,38 @@ export default function Dashboard() {
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.3)'
         }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '8px' }}>⚡</span>
-            Quick Actions
-          </h2>
-          <p style={{ color: '#374151', marginTop: '4px' }}>Get started with common tasks</p>
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', display: 'flex', alignItems: 'center' }}>
+              <span style={{ marginRight: '8px' }}>⚡</span>
+              Quick Actions
+            </h2>
+            <p style={{ color: '#374151', marginTop: '4px' }}>Get started with common tasks</p>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+            <QuickActionCard
+              title="Create New Test"
+              description="Set up a new A/B test for your products"
+              color="purple"
+              to="/app/ab-tests"
+              icon="🧪"
+            />
+            <QuickActionCard
+              title="View Analytics"
+              description="Check detailed performance metrics"
+              color="lightBlue"
+              to="/app/analytics"
+              icon="📊"
+            />
+            <QuickActionCard
+              title="Manage Tests"
+              description="View and edit existing A/B tests"
+              color="purple"
+              to="/app/manage-tests"
+              icon="⚙️"
+            />
+          </div>
         </div>
-        
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
-          <QuickActionCard
-            title="Create New Test"
-            description="Set up a new A/B test for your products"
-            color="purple"
-            to="/app/ab-tests"
-            icon="🧪"
-          />
-          <QuickActionCard
-            title="View Analytics"
-            description="Check detailed performance metrics"
-            color="lightBlue"
-            to="/app/analytics"
-            icon="📊"
-          />
-          <QuickActionCard
-            title="Manage Tests"
-            description="View and edit existing A/B tests"
-            color="purple"
-            to="/app/manage-tests"
-            icon="⚙️"
-          />
-        </div>
-      </div>
 
       {/* Webhook Status Tile - Hidden from end users */}
       {/* 
@@ -896,16 +896,16 @@ export default function Dashboard() {
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.3)'
         }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '8px' }}>📝</span>
-            Recent Activity
-          </h2>
-          <p style={{ color: '#6b7280', marginTop: '4px' }}>Your latest testing activities</p>
-        </div>
-        
-        <div>
-          <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
+          <div style={{ marginBottom: '24px' }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', display: 'flex', alignItems: 'center' }}>
+              <span style={{ marginRight: '8px' }}>📝</span>
+              Recent Activity
+            </h2>
+            <p style={{ color: '#6b7280', marginTop: '4px' }}>Your latest testing activities</p>
+          </div>
+          
+          <div>
+            <ul style={{ margin: 0, padding: 0, listStyle: 'none' }}>
             {stats.recentActivity.map((activity, activityIdx) => {
               const activityIcon = getActivityIcon(activity.iconType);
               const colorStyles = {
@@ -955,8 +955,8 @@ export default function Dashboard() {
                 </li>
               );
             })}
-          </ul>
-        </div>
+            </ul>
+          </div>
         </div>
         
         {/* Stats Summary Tile - Small Tile */}
