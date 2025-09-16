@@ -512,20 +512,30 @@ export default function Dashboard() {
         filter: 'blur(60px)',
         zIndex: 0
       }}></div>
-      {/* TryLabs Dashboard */}
+      {/* Dashboard Grid Layout */}
       <div style={{
-        background: 'rgba(255, 255, 255, 0.25)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        padding: '32px',
-        borderRadius: '24px',
-        marginBottom: '32px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-        position: 'relative',
-        overflow: 'hidden',
+        display: 'grid',
+        gridTemplateColumns: 'repeat(12, 1fr)',
+        gridTemplateRows: 'repeat(8, 1fr)',
+        gap: '24px',
+        height: 'calc(100vh - 48px)',
         zIndex: 1
       }}>
+        
+        {/* TryLabs Dashboard - Large Tile */}
+        <div style={{
+          gridColumn: '1 / 8',
+          gridRow: '1 / 4',
+          background: 'rgba(255, 255, 255, 0.25)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          padding: '32px',
+          borderRadius: '24px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
         {/* Background decorative elements */}
         <div style={{
           position: 'absolute',
@@ -667,21 +677,21 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Gamified Hero Tile */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.2)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        color: '#1f2937',
-        padding: '32px',
-        borderRadius: '24px',
-        marginBottom: '32px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-        position: 'relative',
-        overflow: 'hidden',
-        zIndex: 1
-      }}>
+        {/* Gamified Hero Tile - Medium Tile */}
+        <div style={{
+          gridColumn: '8 / 13',
+          gridRow: '1 / 5',
+          background: 'rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          color: '#1f2937',
+          padding: '32px',
+          borderRadius: '24px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          position: 'relative',
+          overflow: 'hidden'
+        }}>
         <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.1) 0%, rgba(167, 139, 250, 0.05) 100%)', borderRadius: '24px', transform: 'translate(64px, -64px)' }}></div>
         <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.08) 0%, rgba(167, 139, 250, 0.03) 100%)', borderRadius: '20px', transform: 'translate(-48px, 48px)' }}></div>
         
@@ -743,18 +753,18 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Quick Actions Tile */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.25)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        padding: '28px',
-        borderRadius: '24px',
-        marginBottom: '32px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-        zIndex: 1
-      }}>
+        {/* Quick Actions Tile - Wide Tile */}
+        <div style={{
+          gridColumn: '1 / 13',
+          gridRow: '4 / 6',
+          background: 'rgba(255, 255, 255, 0.25)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          padding: '28px',
+          borderRadius: '24px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.3)'
+        }}>
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', display: 'flex', alignItems: 'center' }}>
             <span style={{ marginRight: '8px' }}>⚡</span>
@@ -874,17 +884,18 @@ export default function Dashboard() {
       </div>
       */}
 
-      {/* Recent Activity Tile */}
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.2)',
-        backdropFilter: 'blur(20px)',
-        WebkitBackdropFilter: 'blur(20px)',
-        padding: '28px',
-        borderRadius: '24px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-        border: '1px solid rgba(255, 255, 255, 0.3)',
-        zIndex: 1
-      }}>
+        {/* Recent Activity Tile - Large Tile */}
+        <div style={{
+          gridColumn: '1 / 9',
+          gridRow: '6 / 9',
+          background: 'rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          padding: '28px',
+          borderRadius: '24px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.3)'
+        }}>
         <div style={{ marginBottom: '24px' }}>
           <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', display: 'flex', alignItems: 'center' }}>
             <span style={{ marginRight: '8px' }}>📝</span>
@@ -946,6 +957,41 @@ export default function Dashboard() {
             })}
           </ul>
         </div>
+        
+        {/* Stats Summary Tile - Small Tile */}
+        <div style={{
+          gridColumn: '9 / 13',
+          gridRow: '6 / 9',
+          background: 'rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          padding: '28px',
+          borderRadius: '24px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center'
+        }}>
+          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#1f2937', marginBottom: '24px' }}>📊 Quick Stats</h2>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', width: '100%' }}>
+            <div style={{ background: 'rgba(251, 146, 199, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(251, 146, 199, 0.3)', boxShadow: '0 8px 32px rgba(251, 146, 199, 0.15)' }}>
+              <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.activeTests}</div>
+              <p style={{ fontSize: '12px', color: '#6b7280' }}>Active tests</p>
+            </div>
+            <div style={{ background: 'rgba(196, 181, 253, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(196, 181, 253, 0.3)', boxShadow: '0 8px 32px rgba(196, 181, 253, 0.15)' }}>
+              <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.totalConversions}</div>
+              <p style={{ fontSize: '12px', color: '#6b7280' }}>Conversions</p>
+            </div>
+            <div style={{ background: 'rgba(251, 191, 36, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '16px', padding: '16px', border: '1px solid rgba(251, 191, 36, 0.3)', boxShadow: '0 8px 32px rgba(251, 191, 36, 0.15)' }}>
+              <div style={{ fontSize: '20px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>${stats.totalRevenue.toFixed(0)}</div>
+              <p style={{ fontSize: '12px', color: '#6b7280' }}>Revenue</p>
+            </div>
+          </div>
+        </div>
+        
       </div>
     </div>
   );
