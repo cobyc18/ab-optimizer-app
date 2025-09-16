@@ -595,86 +595,85 @@ export default function Dashboard() {
               position: 'relative',
               overflow: 'hidden'
             }}>
-            {/* Progress card background decoration */}
-            <div style={{
-              position: 'absolute',
-              top: '-10px',
-              right: '-10px',
-              width: '60px',
-              height: '60px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '50%'
-            }}></div>
-            
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  background: '#ffffff',
-                  borderRadius: '50%',
-                  marginRight: '10px',
-                  boxShadow: '0 0 8px rgba(255, 255, 255, 0.5)'
-                }}></div>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Your Progress
-                </span>
-              </div>
-              
-              <div style={{ 
-                fontSize: '24px', 
-                fontWeight: '700', 
-                color: '#ffffff', 
-                marginBottom: '20px',
-                textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-              }}>
-                🏆 Data Scientist
-              </div>
-              
-              <div style={{ marginBottom: '12px' }}>
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  fontSize: '13px', 
-                  color: '#ffffff', 
-                  marginBottom: '8px',
-                  fontWeight: '500'
-                }}>
-                  <span>Level Progress</span>
-                  <span>{stats.totalTests} / {Math.max(stats.totalTests + 5, 10)} Tests</span>
-                </div>
-                <div style={{ 
-                  height: '10px', 
-                  background: 'rgba(255, 255, 255, 0.2)', 
-                  borderRadius: '6px', 
-                  overflow: 'hidden',
-                  boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)'
-                }}>
-                  <div style={{ 
-                    width: `${Math.min((stats.totalTests / Math.max(stats.totalTests + 5, 10)) * 100, 100)}%`, 
-                    height: '100%', 
-                    background: 'linear-gradient(90deg, #ffffff 0%, #f0f0f0 100%)', 
-                    borderRadius: '6px',
-                    boxShadow: '0 2px 4px rgba(255, 255, 255, 0.3)',
-                    transition: 'width 0.8s ease-in-out'
-                  }}></div>
-                </div>
-              </div>
-              
+              {/* Progress card background decoration */}
               <div style={{
-                fontSize: '12px',
-                color: 'rgba(255, 255, 255, 0.8)',
-                textAlign: 'center',
-                fontStyle: 'italic'
-              }}>
-                {stats.totalTests > 0 
-                  ? `${Math.max(stats.totalTests + 5, 10) - stats.totalTests} more tests to level up!`
-                  : "Start your first test to begin your journey!"
-                }
+                position: 'absolute',
+                top: '-10px',
+                right: '-10px',
+                width: '60px',
+                height: '60px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                borderRadius: '50%'
+              }}></div>
+              
+              <div style={{ position: 'relative', zIndex: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+                  <div style={{
+                    width: '12px',
+                    height: '12px',
+                    background: '#ffffff',
+                    borderRadius: '50%',
+                    marginRight: '10px',
+                    boxShadow: '0 0 8px rgba(255, 255, 255, 0.5)'
+                  }}></div>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                    Your Progress
+                  </span>
+                </div>
+              
+                <div style={{ 
+                  fontSize: '24px', 
+                  fontWeight: '700', 
+                  color: '#ffffff', 
+                  marginBottom: '20px',
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+                }}>
+                  🏆 Data Scientist
+                </div>
+              
+                <div style={{ marginBottom: '12px' }}>
+                  <div style={{ 
+                    display: 'flex', 
+                    justifyContent: 'space-between', 
+                    fontSize: '13px', 
+                    color: '#ffffff', 
+                    marginBottom: '8px',
+                    fontWeight: '500'
+                  }}>
+                    <span>Level Progress</span>
+                    <span>{stats.totalTests} / {Math.max(stats.totalTests + 5, 10)} Tests</span>
+                  </div>
+                  <div style={{ 
+                    height: '10px', 
+                    background: 'rgba(255, 255, 255, 0.2)', 
+                    borderRadius: '6px', 
+                    overflow: 'hidden',
+                    boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    <div style={{ 
+                      width: `${Math.min((stats.totalTests / Math.max(stats.totalTests + 5, 10)) * 100, 100)}%`, 
+                      height: '100%', 
+                      background: 'linear-gradient(90deg, #ffffff 0%, #f0f0f0 100%)', 
+                      borderRadius: '6px',
+                      boxShadow: '0 2px 4px rgba(255, 255, 255, 0.3)',
+                      transition: 'width 0.8s ease-in-out'
+                    }}></div>
+                  </div>
+                </div>
+              
+                <div style={{
+                  fontSize: '12px',
+                  color: 'rgba(255, 255, 255, 0.8)',
+                  textAlign: 'center',
+                  fontStyle: 'italic'
+                }}>
+                  {stats.totalTests > 0 
+                    ? `${Math.max(stats.totalTests + 5, 10) - stats.totalTests} more tests to level up!`
+                    : "Start your first test to begin your journey!"
+                  }
+                </div>
               </div>
             </div>
-          </div>
-        </div>
         </div>
 
         {/* Gamified Hero Tile - Medium Tile */}
@@ -994,6 +993,7 @@ export default function Dashboard() {
         </div>
         
       </div>
+      </div>
     </div>
   );
-} 
+}
