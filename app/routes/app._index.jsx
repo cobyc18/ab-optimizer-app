@@ -516,27 +516,28 @@ export default function Dashboard() {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
-        gridTemplateRows: 'repeat(8, 1fr)',
-        gap: '24px',
+        gridTemplateRows: 'repeat(10, 1fr)',
+        gap: '20px',
         height: 'calc(100vh - 48px)',
         zIndex: 1
       }}>
         
-        {/* TryLabs Dashboard - Large Tile */}
+        {/* Welcome Header Tile */}
         <div style={{
-          gridColumn: '1 / 8',
-          gridRow: '1 / 4',
+          gridColumn: '1 / 13',
+          gridRow: '1 / 2',
           background: 'rgba(255, 255, 255, 0.25)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          padding: '24px',
-          borderRadius: '24px',
+          padding: '20px 24px',
+          borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.3)',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
-          flexDirection: 'column'
+          alignItems: 'center',
+          justifyContent: 'space-between'
         }}>
           {/* Background decorative elements */}
           <div style={{
@@ -561,7 +562,7 @@ export default function Dashboard() {
           }}></div>
 
           {/* Header Section */}
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>
             <div style={{
               width: '40px',
               height: '40px',
@@ -576,7 +577,7 @@ export default function Dashboard() {
               <span style={{ fontSize: '20px' }}>🚀</span>
             </div>
             <div>
-              <h1 style={{ fontSize: '28px', fontWeight: '800', color: '#1a1a1a', margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>
+              <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1a1a1a', margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>
                 TryLabs Dashboard
               </h1>
               <p style={{ color: '#6b7280', margin: '0', fontSize: '14px', fontWeight: '500' }}>
@@ -585,178 +586,209 @@ export default function Dashboard() {
             </div>
           </div>
 
-          {/* Progress Card */}
-          <div style={{
-            background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
-            padding: '20px',
-            borderRadius: '16px',
-            border: '1px solid rgba(255, 255, 255, 0.2)',
-            boxShadow: '0 4px 6px -1px rgba(196, 181, 253, 0.2), 0 2px 4px -1px rgba(196, 181, 253, 0.1)',
-            position: 'relative',
-            overflow: 'hidden',
-            flex: 1
-          }}>
-            {/* Progress card background decoration */}
-            <div style={{
-              position: 'absolute',
-              top: '-10px',
-              right: '-10px',
-              width: '60px',
-              height: '60px',
-              background: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '50%'
-            }}></div>
-            
-            <div style={{ position: 'relative', zIndex: 1 }}>
-              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
-                <div style={{
-                  width: '12px',
-                  height: '12px',
-                  background: '#ffffff',
-                  borderRadius: '50%',
-                  marginRight: '10px',
-                  boxShadow: '0 0 8px rgba(255, 255, 255, 0.5)'
-                }}></div>
-                <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
-                  Your Progress
-                </span>
-              </div>
-              
-              <div style={{ 
-                fontSize: '20px', 
-                fontWeight: '700', 
-                color: '#ffffff', 
-                marginBottom: '16px',
-                textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-              }}>
-                🏆 Data Scientist
-              </div>
-              
-              <div style={{ marginBottom: '12px' }}>
-                <div style={{ 
-                  display: 'flex', 
-                  justifyContent: 'space-between', 
-                  fontSize: '12px', 
-                  color: '#ffffff', 
-                  marginBottom: '6px',
-                  fontWeight: '500'
-                }}>
-                  <span>Level Progress</span>
-                  <span>{stats.totalTests} / {Math.max(stats.totalTests + 5, 10)} Tests</span>
-                </div>
-                <div style={{ 
-                  height: '8px', 
-                  background: 'rgba(255, 255, 255, 0.2)', 
-                  borderRadius: '4px', 
-                  overflow: 'hidden',
-                  boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)'
-                }}>
-                  <div style={{ 
-                    width: `${Math.min((stats.totalTests / Math.max(stats.totalTests + 5, 10)) * 100, 100)}%`, 
-                    height: '100%', 
-                    background: 'linear-gradient(90deg, #ffffff 0%, #f0f0f0 100%)', 
-                    borderRadius: '4px',
-                    boxShadow: '0 2px 4px rgba(255, 255, 255, 0.3)',
-                    transition: 'width 0.8s ease-in-out'
-                  }}></div>
-                </div>
-              </div>
-              
-              <div style={{
-                fontSize: '11px',
-                color: 'rgba(255, 255, 255, 0.8)',
-                textAlign: 'center',
-                fontStyle: 'italic'
-              }}>
-                {stats.totalTests > 0 
-                  ? `${Math.max(stats.totalTests + 5, 10) - stats.totalTests} more tests to level up!`
-                  : "Start your first test to begin your journey!"
-                }
-              </div>
+          {/* Quick Stats in Header */}
+          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>{stats.totalTests}</div>
+              <div style={{ fontSize: '10px', color: '#6b7280' }}>Total Tests</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>{stats.activeTests}</div>
+              <div style={{ fontSize: '10px', color: '#6b7280' }}>Active</div>
+            </div>
+            <div style={{ textAlign: 'center' }}>
+              <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>${stats.totalRevenue.toFixed(0)}</div>
+              <div style={{ fontSize: '10px', color: '#6b7280' }}>Revenue</div>
             </div>
           </div>
         </div>
 
-        {/* Gamified Hero Tile - Medium Tile */}
+        {/* Progress Card Tile */}
         <div style={{
-          gridColumn: '8 / 13',
-          gridRow: '1 / 5',
+          gridColumn: '1 / 5',
+          gridRow: '2 / 4',
+          background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
+          padding: '24px',
+          borderRadius: '20px',
+          border: '1px solid rgba(255, 255, 255, 0.2)',
+          boxShadow: '0 4px 6px -1px rgba(196, 181, 253, 0.2), 0 2px 4px -1px rgba(196, 181, 253, 0.1)',
+          position: 'relative',
+          overflow: 'hidden',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center'
+        }}>
+          {/* Progress card background decoration */}
+          <div style={{
+            position: 'absolute',
+            top: '-10px',
+            right: '-10px',
+            width: '60px',
+            height: '60px',
+            background: 'rgba(255, 255, 255, 0.1)',
+            borderRadius: '50%'
+          }}></div>
+          
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <div style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}>
+              <div style={{
+                width: '12px',
+                height: '12px',
+                background: '#ffffff',
+                borderRadius: '50%',
+                marginRight: '10px',
+                boxShadow: '0 0 8px rgba(255, 255, 255, 0.5)'
+              }}></div>
+              <span style={{ fontSize: '14px', fontWeight: '600', color: '#ffffff', textTransform: 'uppercase', letterSpacing: '0.5px' }}>
+                Your Progress
+              </span>
+            </div>
+            
+            <div style={{ 
+              fontSize: '20px', 
+              fontWeight: '700', 
+              color: '#ffffff', 
+              marginBottom: '16px',
+              textShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+            }}>
+              🏆 Data Scientist
+            </div>
+            
+            <div style={{ marginBottom: '12px' }}>
+              <div style={{ 
+                display: 'flex', 
+                justifyContent: 'space-between', 
+                fontSize: '12px', 
+                color: '#ffffff', 
+                marginBottom: '6px',
+                fontWeight: '500'
+              }}>
+                <span>Level Progress</span>
+                <span>{stats.totalTests} / {Math.max(stats.totalTests + 5, 10)} Tests</span>
+              </div>
+              <div style={{ 
+                height: '8px', 
+                background: 'rgba(255, 255, 255, 0.2)', 
+                borderRadius: '4px', 
+                overflow: 'hidden',
+                boxShadow: 'inset 0 2px 4px rgba(0, 0, 0, 0.1)'
+              }}>
+                <div style={{ 
+                  width: `${Math.min((stats.totalTests / Math.max(stats.totalTests + 5, 10)) * 100, 100)}%`, 
+                  height: '100%', 
+                  background: 'linear-gradient(90deg, #ffffff 0%, #f0f0f0 100%)', 
+                  borderRadius: '4px',
+                  boxShadow: '0 2px 4px rgba(255, 255, 255, 0.3)',
+                  transition: 'width 0.8s ease-in-out'
+                }}></div>
+              </div>
+            </div>
+            
+            <div style={{
+              fontSize: '11px',
+              color: 'rgba(255, 255, 255, 0.8)',
+              textAlign: 'center',
+              fontStyle: 'italic'
+            }}>
+              {stats.totalTests > 0 
+                ? `${Math.max(stats.totalTests + 5, 10) - stats.totalTests} more tests to level up!`
+                : "Start your first test to begin your journey!"
+              }
+            </div>
+          </div>
+        </div>
+
+        {/* Achievement Tile */}
+        <div style={{
+          gridColumn: '5 / 9',
+          gridRow: '2 / 4',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           color: '#1f2937',
           padding: '24px',
-          borderRadius: '24px',
+          borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.3)',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
-          flexDirection: 'column'
+          flexDirection: 'column',
+          justifyContent: 'center'
         }}>
           <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.1) 0%, rgba(167, 139, 250, 0.05) 100%)', borderRadius: '24px', transform: 'translate(64px, -64px)' }}></div>
           <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.08) 0%, rgba(167, 139, 250, 0.03) 100%)', borderRadius: '20px', transform: 'translate(-48px, 48px)' }}></div>
           
           {/* Achievement Section */}
-          <div style={{ display: 'flex', alignItems: 'center', marginBottom: '20px', position: 'relative', zIndex: 1 }}>
-            <div style={{ display: 'flex', alignItems: 'center' }}>
-              <div style={{ position: 'relative' }}>
-                <div style={{
-                  width: '48px',
-                  height: '48px',
-                  background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.2) 0%, rgba(167, 139, 250, 0.1) 100%)',
-                  borderRadius: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  animation: 'pulse 2s infinite'
-                }}>
-                  <span style={{ fontSize: '20px' }}>🏆</span>
-                </div>
-                <div style={{
-                  position: 'absolute',
-                  top: '-4px',
-                  right: '-4px',
-                  width: '20px',
-                  height: '20px',
-                  background: '#c4b5fd',
-                  borderRadius: '6px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center'
-                }}>
-                  <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'white' }}>1</span>
-                </div>
+          <div style={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+            <div style={{ position: 'relative' }}>
+              <div style={{
+                width: '48px',
+                height: '48px',
+                background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.2) 0%, rgba(167, 139, 250, 0.1) 100%)',
+                borderRadius: '16px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                animation: 'pulse 2s infinite'
+              }}>
+                <span style={{ fontSize: '20px' }}>🏆</span>
               </div>
-              <div style={{ marginLeft: '16px' }}>
-                <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>🏅 Data Scientist</h2>
-                <p style={{ opacity: 0.9, fontSize: '12px' }}>
-                  {stats.totalTests > 0 
-                    ? `You've run ${stats.totalTests} test${stats.totalTests > 1 ? 's' : ''}!`
-                    : "Ready to start your first A/B test!"
-                  }
-                </p>
+              <div style={{
+                position: 'absolute',
+                top: '-4px',
+                right: '-4px',
+                width: '20px',
+                height: '20px',
+                background: '#c4b5fd',
+                borderRadius: '6px',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}>
+                <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'white' }}>1</span>
               </div>
             </div>
-
-            {/* Stats Grid */}
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '12px', textAlign: 'center', flex: 1 }}>
-              <div style={{ background: 'rgba(251, 146, 199, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(251, 146, 199, 0.3)', boxShadow: '0 4px 16px rgba(251, 146, 199, 0.15)' }}>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.activeTests}</div>
-                <p style={{ fontSize: '10px', color: '#6b7280' }}>Active tests</p>
-              </div>
-              <div style={{ background: 'rgba(196, 181, 253, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(196, 181, 253, 0.3)', boxShadow: '0 4px 16px rgba(196, 181, 253, 0.15)' }}>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.totalConversions}</div>
-                <p style={{ fontSize: '10px', color: '#6b7280' }}>Conversions</p>
-              </div>
-              <div style={{ background: 'rgba(251, 191, 36, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(251, 191, 36, 0.3)', boxShadow: '0 4px 16px rgba(251, 191, 36, 0.15)' }}>
-                <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>${stats.totalRevenue.toFixed(0)}</div>
-                <p style={{ fontSize: '10px', color: '#6b7280' }}>Revenue</p>
-              </div>
+            <div style={{ marginLeft: '16px' }}>
+              <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>🏅 Data Scientist</h2>
+              <p style={{ opacity: 0.9, fontSize: '12px' }}>
+                {stats.totalTests > 0 
+                  ? `You've run ${stats.totalTests} test${stats.totalTests > 1 ? 's' : ''}!`
+                  : "Ready to start your first A/B test!"
+                }
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Quick Actions Tile - Wide Tile */}
+        {/* Conversion Rate Tile */}
+        <div style={{
+          gridColumn: '9 / 13',
+          gridRow: '2 / 4',
+          background: 'rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          padding: '24px',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '32px', marginBottom: '8px' }}>📈</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
+            {stats.conversionRate}%
+          </div>
+          <div style={{ fontSize: '12px', color: '#6b7280' }}>Conversion Rate</div>
+          <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '4px' }}>
+            {stats.totalImpressions} impressions
+          </div>
+        </div>
+
+        {/* Quick Actions Tile */}
         <div style={{
           gridColumn: '1 / 13',
           gridRow: '4 / 6',
@@ -764,7 +796,7 @@ export default function Dashboard() {
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           padding: '24px',
-          borderRadius: '24px',
+          borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.3)',
           display: 'flex',
@@ -803,101 +835,101 @@ export default function Dashboard() {
           </div>
         </div>
 
-      {/* Webhook Status Tile - Hidden from end users */}
-      {/* 
-      <div style={{
-        background: 'rgba(255, 255, 255, 0.95)',
-        backdropFilter: 'blur(8px)',
-        padding: '24px',
-        borderRadius: '16px',
-        boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-        border: '1px solid rgba(50, 205, 50, 0.3)',
-        marginBottom: '24px'
-      }}>
-        <div style={{ marginBottom: '24px' }}>
-          <h2 style={{ fontSize: '20px', fontWeight: '600', color: '#000000', display: 'flex', alignItems: 'center' }}>
-            <span style={{ marginRight: '8px' }}>🔗</span>
-            A/B Testing Webhook Setup
-          </h2>
-          <p style={{ color: '#374151', marginTop: '4px' }}>
-            Register webhooks to track purchase events for A/B testing. This will allow the app to automatically detect when customers complete purchases.
-          </p>
-        </div>
-        
-        <div style={{ marginBottom: '20px' }}>
-          {webhookStatus.error ? (
-            <div style={{
-              padding: '12px',
-              background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-              border: '1px solid #dc2626',
-              borderRadius: '8px',
-              color: 'white'
-            }}>
-              ❌ Error checking webhook status: {webhookStatus.error}
-            </div>
-          ) : webhookStatus.registered ? (
-            <div style={{
-              padding: '12px',
-              background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-              border: '1px solid #32cd32',
-              borderRadius: '8px',
-              color: 'white'
-            }}>
-              ✅ All required webhooks are registered and active
-            </div>
-          ) : (
-            <div style={{
-              padding: '12px',
-              background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-              border: '1px solid #f59e0b',
-              borderRadius: '8px',
-              color: 'white'
-            }}>
-              ⚠️ Missing webhooks: {webhookStatus.missing.join(', ')}
-            </div>
-          )}
-        </div>
-        
-        {!webhookStatus.registered && (
-          <button
-            onClick={() => {
-              const formData = new FormData();
-              formData.append('actionType', 'registerWebhooks');
-              submit(formData, { method: 'post' });
-            }}
-            style={{
-              background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-              color: 'white',
-              border: 'none',
-              padding: '12px 24px',
-              borderRadius: '8px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: 'pointer',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.background = 'linear-gradient(135deg, #228b22 0%, #006400 100%)';
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)';
-            }}
-          >
-            Register Webhooks
-        </button>
-        )}
-      </div>
-      */}
-
-        {/* Recent Activity Tile - Large Tile */}
+        {/* Webhook Status Tile */}
         <div style={{
-          gridColumn: '1 / 9',
-          gridRow: '6 / 9',
+          gridColumn: '1 / 7',
+          gridRow: '6 / 8',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           padding: '24px',
-          borderRadius: '24px',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          display: 'flex',
+          flexDirection: 'column'
+        }}>
+          <div style={{ marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937', display: 'flex', alignItems: 'center' }}>
+              <span style={{ marginRight: '8px' }}>🔗</span>
+              Webhook Status
+            </h2>
+            <p style={{ color: '#6b7280', marginTop: '4px', fontSize: '14px' }}>
+              Track purchase events for A/B testing
+            </p>
+          </div>
+          
+          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            {webhookStatus.error ? (
+              <div style={{
+                padding: '12px',
+                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                border: '1px solid #dc2626',
+                borderRadius: '8px',
+                color: 'white',
+                fontSize: '12px'
+              }}>
+                ❌ Error: {webhookStatus.error}
+              </div>
+            ) : webhookStatus.registered ? (
+              <div style={{
+                padding: '12px',
+                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                border: '1px solid #32cd32',
+                borderRadius: '8px',
+                color: 'white',
+                fontSize: '12px'
+              }}>
+                ✅ All webhooks registered
+              </div>
+            ) : (
+              <div style={{
+                padding: '12px',
+                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
+                border: '1px solid #f59e0b',
+                borderRadius: '8px',
+                color: 'white',
+                fontSize: '12px'
+              }}>
+                ⚠️ Missing: {webhookStatus.missing.join(', ')}
+              </div>
+            )}
+            
+            {!webhookStatus.registered && (
+              <fetcher.Form method="post" style={{ marginTop: '12px' }}>
+                <input type="hidden" name="action" value="register_webhooks" />
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  style={{
+                    background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
+                    color: 'white',
+                    border: 'none',
+                    padding: '8px 16px',
+                    borderRadius: '8px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    cursor: 'pointer',
+                    transition: 'all 0.2s ease',
+                    width: '100%'
+                  }}
+                >
+                  {isLoading ? 'Registering...' : 'Register Webhooks'}
+                </button>
+              </fetcher.Form>
+            )}
+          </div>
+        </div>
+
+        {/* Recent Activity Tile */}
+        <div style={{
+          gridColumn: '7 / 13',
+          gridRow: '6 / 8',
+          background: 'rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          padding: '24px',
+          borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.3)',
           display: 'flex',
@@ -923,38 +955,38 @@ export default function Dashboard() {
               };
               
               return (
-                <li key={activity.id} style={{ marginBottom: '32px', position: 'relative' }}>
+                <li key={activity.id} style={{ marginBottom: '16px', position: 'relative' }}>
                   {activityIdx !== stats.recentActivity.length - 1 && (
                     <div style={{
                       position: 'absolute',
-                      top: '16px',
-                      left: '20px',
+                      top: '12px',
+                      left: '16px',
                       width: '2px',
-                      height: 'calc(100% + 16px)',
+                      height: 'calc(100% + 8px)',
                       background: 'linear-gradient(to bottom, #e9d5ff 0%, transparent 100%)'
                     }}></div>
                   )}
-                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '16px' }}>
+                  <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
                     <div style={{
-                      width: '40px',
-                      height: '40px',
+                      width: '32px',
+                      height: '32px',
                       borderRadius: '50%',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-                      border: '4px solid white',
+                      border: '3px solid white',
                       ...colorStyles[activity.color]
                     }}>
-                      <span style={{ color: 'white', fontSize: '14px' }}>{activityIcon}</span>
+                      <span style={{ color: 'white', fontSize: '12px' }}>{activityIcon}</span>
                     </div>
-                    <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '6px' }}>
+                    <div style={{ flex: 1, display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', paddingTop: '4px' }}>
                       <div>
-                        <p style={{ fontSize: '14px', fontWeight: '600', color: '#374151', margin: 0 }}>
+                        <p style={{ fontSize: '12px', fontWeight: '600', color: '#374151', margin: 0 }}>
                           {activity.message}
                         </p>
                       </div>
-                      <div style={{ fontSize: '12px', color: '#6b7280', whiteSpace: 'nowrap', marginLeft: '16px' }}>
+                      <div style={{ fontSize: '10px', color: '#6b7280', whiteSpace: 'nowrap', marginLeft: '12px' }}>
                         {activity.time}
                       </div>
                     </div>
@@ -965,43 +997,50 @@ export default function Dashboard() {
             </ul>
           </div>
         </div>
-        
-        {/* Stats Summary Tile - Small Tile */}
+
+        {/* Detailed Stats Tile */}
         <div style={{
-          gridColumn: '9 / 13',
-          gridRow: '6 / 9',
+          gridColumn: '1 / 13',
+          gridRow: '8 / 10',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
           padding: '24px',
-          borderRadius: '24px',
+          borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.3)',
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          textAlign: 'center'
+          flexDirection: 'column'
         }}>
-          <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937', marginBottom: '16px' }}>📊 Quick Stats</h2>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', width: '100%' }}>
-            <div style={{ background: 'rgba(251, 146, 199, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(251, 146, 199, 0.3)', boxShadow: '0 4px 16px rgba(251, 146, 199, 0.15)' }}>
-              <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.activeTests}</div>
-              <p style={{ fontSize: '10px', color: '#6b7280' }}>Active tests</p>
+          <div style={{ marginBottom: '16px' }}>
+            <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937', display: 'flex', alignItems: 'center' }}>
+              <span style={{ marginRight: '8px' }}>📊</span>
+              Detailed Statistics
+            </h2>
+            <p style={{ color: '#6b7280', marginTop: '4px', fontSize: '14px' }}>Comprehensive performance metrics</p>
+          </div>
+          
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', flex: 1 }}>
+            <div style={{ background: 'rgba(251, 146, 199, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(251, 146, 199, 0.3)', boxShadow: '0 4px 16px rgba(251, 146, 199, 0.15)', textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.totalTests}</div>
+              <p style={{ fontSize: '12px', color: '#6b7280' }}>Total Tests</p>
             </div>
-            <div style={{ background: 'rgba(196, 181, 253, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(196, 181, 253, 0.3)', boxShadow: '0 4px 16px rgba(196, 181, 253, 0.15)' }}>
-              <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.totalConversions}</div>
-              <p style={{ fontSize: '10px', color: '#6b7280' }}>Conversions</p>
+            <div style={{ background: 'rgba(196, 181, 253, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(196, 181, 253, 0.3)', boxShadow: '0 4px 16px rgba(196, 181, 253, 0.15)', textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.activeTests}</div>
+              <p style={{ fontSize: '12px', color: '#6b7280' }}>Active Tests</p>
             </div>
-            <div style={{ background: 'rgba(251, 191, 36, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '12px', border: '1px solid rgba(251, 191, 36, 0.3)', boxShadow: '0 4px 16px rgba(251, 191, 36, 0.15)' }}>
-              <div style={{ fontSize: '18px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>${stats.totalRevenue.toFixed(0)}</div>
-              <p style={{ fontSize: '10px', color: '#6b7280' }}>Revenue</p>
+            <div style={{ background: 'rgba(251, 191, 36, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(251, 191, 36, 0.3)', boxShadow: '0 4px 16px rgba(251, 191, 36, 0.15)', textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.totalConversions}</div>
+              <p style={{ fontSize: '12px', color: '#6b7280' }}>Conversions</p>
+            </div>
+            <div style={{ background: 'rgba(34, 197, 94, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(34, 197, 94, 0.3)', boxShadow: '0 4px 16px rgba(34, 197, 94, 0.15)', textAlign: 'center' }}>
+              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>${stats.totalRevenue.toFixed(0)}</div>
+              <p style={{ fontSize: '12px', color: '#6b7280' }}>Total Revenue</p>
             </div>
           </div>
         </div>
         
       </div>
-    </div>
     </div>
   );
 }
