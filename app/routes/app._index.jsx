@@ -516,7 +516,7 @@ export default function Dashboard() {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
-        gridTemplateRows: 'repeat(8, 1fr)',
+        gridTemplateRows: 'repeat(10, 1fr)',
         gap: '20px',
         height: 'calc(100vh - 48px)',
         zIndex: 1
@@ -894,7 +894,7 @@ export default function Dashboard() {
         {/* Recent Activity Tile */}
         <div style={{
           gridColumn: '1 / 13',
-          gridRow: '7 / 9',
+          gridRow: '8 / 10',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
