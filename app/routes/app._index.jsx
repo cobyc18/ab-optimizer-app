@@ -527,10 +527,10 @@ export default function Dashboard() {
         <div style={{
           width: '100%',
           minHeight: 'clamp(120px, 15vh, 200px)',
-          background: '#97CDFF',
+          background: '#FFFFFF',
           padding: 'clamp(16px, 3vw, 32px)',
           borderRadius: '24px',
-          boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
           border: '1px solid #E6E6E6',
           position: 'relative',
           overflow: 'hidden',
@@ -638,11 +638,11 @@ export default function Dashboard() {
           <div style={{
             flex: '1 1 clamp(280px, 30vw, 400px)',
             minHeight: 'clamp(140px, 18vh, 200px)',
-            background: '#ef9362',
+            background: '#97CDFF',
             padding: 'clamp(16px, 2vw, 24px)',
             borderRadius: '20px',
             border: '1px solid #E6E6E6',
-            boxShadow: '0 4px 6px -1px rgba(239, 147, 98, 0.2), 0 2px 4px -1px rgba(239, 147, 98, 0.1)',
+            boxShadow: '0 4px 6px -1px rgba(151, 205, 255, 0.2), 0 2px 4px -1px rgba(151, 205, 255, 0.1)',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
@@ -736,10 +736,10 @@ export default function Dashboard() {
           <div style={{
             flex: '1 1 clamp(120px, 15vw, 180px)',
             minHeight: 'clamp(100px, 12vh, 140px)',
-            background: '#97CDFF',
+            background: '#FFFFFF',
             padding: 'clamp(12px, 2vw, 24px)',
             borderRadius: '20px',
-            boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
             border: '1px solid #E6E6E6',
             display: 'flex',
             flexDirection: 'column',
@@ -748,20 +748,20 @@ export default function Dashboard() {
             textAlign: 'center'
           }}>
             <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>🧪</div>
-            <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#FFFFFF', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
+            <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#151515', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
               {stats.totalTests}
             </div>
-            <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#FFFFFF' }}>Total Tests</div>
+            <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#151515' }}>Total Tests</div>
           </div>
 
           {/* Active Tests Tile */}
           <div style={{
             flex: '1 1 clamp(120px, 15vw, 180px)',
             minHeight: 'clamp(100px, 12vh, 140px)',
-            background: '#ef9362',
+            background: '#97CDFF',
             padding: 'clamp(12px, 2vw, 24px)',
             borderRadius: '20px',
-            boxShadow: '0 8px 32px rgba(239, 147, 98, 0.1), 0 4px 16px rgba(239, 147, 98, 0.05)',
+            boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
             border: '1px solid #E6E6E6',
             display: 'flex',
             flexDirection: 'column',
@@ -780,10 +780,10 @@ export default function Dashboard() {
           <div style={{
             flex: '1 1 clamp(120px, 15vw, 180px)',
             minHeight: 'clamp(100px, 12vh, 140px)',
-            background: '#97CDFF',
+            background: '#FFFFFF',
             padding: 'clamp(12px, 2vw, 24px)',
             borderRadius: '20px',
-            boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
             border: '1px solid #E6E6E6',
             display: 'flex',
             flexDirection: 'column',
@@ -792,20 +792,20 @@ export default function Dashboard() {
             textAlign: 'center'
           }}>
             <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>💰</div>
-            <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#FFFFFF', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
+            <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#151515', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
               ${stats.totalRevenue.toFixed(0)}
-              </div>
-            <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#FFFFFF' }}>Revenue</div>
+            </div>
+            <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#151515' }}>Revenue</div>
           </div>
 
           {/* Conversion Rate Tile */}
           <div style={{
             flex: '1 1 clamp(120px, 15vw, 180px)',
             minHeight: 'clamp(100px, 12vh, 140px)',
-            background: '#ef9362',
+            background: '#FFFFFF',
             padding: 'clamp(12px, 2vw, 24px)',
             borderRadius: '20px',
-            boxShadow: '0 8px 32px rgba(239, 147, 98, 0.1), 0 4px 16px rgba(239, 147, 98, 0.05)',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
             border: '1px solid #E6E6E6',
             display: 'flex',
             flexDirection: 'column',
@@ -832,10 +832,10 @@ export default function Dashboard() {
           {/* Create New Test Tile */}
           <Link to="/app/ab-tests" style={{ textDecoration: 'none', flex: '1 1 clamp(200px, 25vw, 300px)' }}>
             <div style={{
-              background: '#97CDFF',
+              background: '#FFFFFF',
               padding: 'clamp(12px, 2vw, 24px)',
               borderRadius: '20px',
-              boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
               border: '1px solid #E6E6E6',
               display: 'flex',
               flexDirection: 'column',
@@ -886,10 +886,10 @@ export default function Dashboard() {
           {/* Manage Tests Tile */}
           <Link to="/app/manage-tests" style={{ textDecoration: 'none', flex: '1 1 clamp(200px, 25vw, 300px)' }}>
             <div style={{
-              background: '#97CDFF',
+              background: '#FFFFFF',
               padding: 'clamp(12px, 2vw, 24px)',
               borderRadius: '20px',
-              boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
               border: '1px solid #E6E6E6',
               display: 'flex',
               flexDirection: 'column',
@@ -916,10 +916,10 @@ export default function Dashboard() {
         <div style={{
           width: '100%',
           minHeight: 'clamp(200px, 25vh, 300px)',
-          background: '#ef9362',
+          background: '#FFFFFF',
           padding: 'clamp(16px, 2vw, 24px)',
           borderRadius: '20px',
-          boxShadow: '0 8px 32px rgba(239, 147, 98, 0.1), 0 4px 16px rgba(239, 147, 98, 0.05)',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
           border: '1px solid #E6E6E6',
           display: 'flex',
           flexDirection: 'column'
