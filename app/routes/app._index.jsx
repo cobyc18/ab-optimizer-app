@@ -516,97 +516,105 @@ export default function Dashboard() {
       <div style={{
         display: 'grid',
         gridTemplateColumns: 'repeat(12, 1fr)',
-        gridTemplateRows: 'repeat(10, 1fr)',
+        gridTemplateRows: 'repeat(8, 1fr)',
         gap: '20px',
         height: 'calc(100vh - 48px)',
         zIndex: 1
       }}>
         
-        {/* Welcome Header Tile */}
+        {/* TryLabs Dashboard Tile */}
         <div style={{
           gridColumn: '1 / 13',
-          gridRow: '1 / 2',
+          gridRow: '1 / 3',
           background: 'rgba(255, 255, 255, 0.25)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          padding: '20px 24px',
-          borderRadius: '20px',
+          padding: '32px',
+          borderRadius: '24px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.3)',
           position: 'relative',
           overflow: 'hidden',
           display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between'
+          flexDirection: 'column',
+          justifyContent: 'center'
         }}>
           {/* Background decorative elements */}
           <div style={{
             position: 'absolute',
-            top: '-20px',
-            right: '-20px',
-            width: '120px',
-            height: '120px',
-            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.1) 0%, rgba(124, 58, 237, 0.05) 100%)',
-            borderRadius: '24px',
+            top: '-40px',
+            right: '-40px',
+            width: '160px',
+            height: '160px',
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.15) 0%, rgba(124, 58, 237, 0.08) 100%)',
+            borderRadius: '32px',
             transform: 'rotate(15deg)'
           }}></div>
           <div style={{
             position: 'absolute',
-            bottom: '-30px',
-            left: '-30px',
-            width: '80px',
-            height: '80px',
-            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.08) 0%, rgba(124, 58, 237, 0.03) 100%)',
-            borderRadius: '20px',
+            bottom: '-50px',
+            left: '-50px',
+            width: '120px',
+            height: '120px',
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.12) 0%, rgba(124, 58, 237, 0.05) 100%)',
+            borderRadius: '28px',
             transform: 'rotate(-10deg)'
+          }}></div>
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '200px',
+            height: '200px',
+            background: 'linear-gradient(135deg, rgba(139, 92, 246, 0.05) 0%, rgba(124, 58, 237, 0.02) 100%)',
+            borderRadius: '50%',
+            filter: 'blur(40px)'
           }}></div>
 
           {/* Header Section */}
-          <div style={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>
+          <div style={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1, marginBottom: '20px' }}>
             <div style={{
-              width: '40px',
-              height: '40px',
-              background: '#3B82F6',
-              borderRadius: '12px',
+              width: '60px',
+              height: '60px',
+              background: 'linear-gradient(135deg, #3B82F6 0%, #1D4ED8 100%)',
+              borderRadius: '16px',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              marginRight: '16px',
-              boxShadow: '0 2px 4px rgba(59, 130, 246, 0.2)'
+              marginRight: '24px',
+              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
             }}>
-              <span style={{ fontSize: '20px' }}>🚀</span>
+              <span style={{ fontSize: '28px' }}>🚀</span>
             </div>
             <div>
-              <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1a1a1a', margin: '0 0 4px 0', letterSpacing: '-0.5px' }}>
+              <h1 style={{ fontSize: '36px', fontWeight: '800', color: '#1a1a1a', margin: '0 0 8px 0', letterSpacing: '-0.8px' }}>
                 TryLabs Dashboard
               </h1>
-              <p style={{ color: '#6b7280', margin: '0', fontSize: '14px', fontWeight: '500' }}>
+              <p style={{ color: '#6b7280', margin: '0', fontSize: '18px', fontWeight: '500' }}>
                 Welcome back, <span style={{ color: '#8b5cf6', fontWeight: '600' }}>{user?.firstName || 'User'}</span>!
               </p>
             </div>
           </div>
 
-          {/* Quick Stats in Header */}
-          <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>{stats.totalTests}</div>
-              <div style={{ fontSize: '10px', color: '#6b7280' }}>Total Tests</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>{stats.activeTests}</div>
-              <div style={{ fontSize: '10px', color: '#6b7280' }}>Active</div>
-            </div>
-            <div style={{ textAlign: 'center' }}>
-              <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937' }}>${stats.totalRevenue.toFixed(0)}</div>
-              <div style={{ fontSize: '10px', color: '#6b7280' }}>Revenue</div>
-            </div>
+          {/* Subtitle */}
+          <div style={{ position: 'relative', zIndex: 1 }}>
+            <p style={{ 
+              color: '#4B5563', 
+              margin: '0', 
+              fontSize: '16px', 
+              fontWeight: '400',
+              lineHeight: '1.5'
+            }}>
+              Your comprehensive A/B testing platform for optimizing conversions and driving growth.
+            </p>
           </div>
         </div>
 
         {/* Progress Card Tile */}
         <div style={{
           gridColumn: '1 / 5',
-          gridRow: '2 / 4',
+          gridRow: '3 / 5',
           background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
           padding: '24px',
           borderRadius: '20px',
@@ -702,7 +710,7 @@ export default function Dashboard() {
         {/* Total Tests Tile */}
         <div style={{
           gridColumn: '5 / 7',
-          gridRow: '2 / 4',
+          gridRow: '3 / 5',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
@@ -726,7 +734,7 @@ export default function Dashboard() {
         {/* Active Tests Tile */}
         <div style={{
           gridColumn: '7 / 9',
-          gridRow: '2 / 4',
+          gridRow: '3 / 5',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
@@ -750,7 +758,7 @@ export default function Dashboard() {
         {/* Revenue Tile */}
         <div style={{
           gridColumn: '9 / 11',
-          gridRow: '2 / 4',
+          gridRow: '3 / 5',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
@@ -774,7 +782,7 @@ export default function Dashboard() {
         {/* Conversion Rate Tile */}
         <div style={{
           gridColumn: '11 / 13',
-          gridRow: '2 / 4',
+          gridRow: '3 / 5',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
@@ -796,7 +804,7 @@ export default function Dashboard() {
         </div>
 
         {/* Create New Test Tile */}
-        <Link to="/app/ab-tests" style={{ textDecoration: 'none', gridColumn: '1 / 5', gridRow: '4 / 6' }}>
+        <Link to="/app/ab-tests" style={{ textDecoration: 'none', gridColumn: '1 / 5', gridRow: '5 / 7' }}>
           <div style={{
             background: 'rgba(255, 255, 255, 0.2)',
             backdropFilter: 'blur(20px)',
@@ -825,7 +833,7 @@ export default function Dashboard() {
         </Link>
 
         {/* View Analytics Tile */}
-        <Link to="/app/analytics" style={{ textDecoration: 'none', gridColumn: '5 / 9', gridRow: '4 / 6' }}>
+        <Link to="/app/analytics" style={{ textDecoration: 'none', gridColumn: '5 / 9', gridRow: '5 / 7' }}>
           <div style={{
             background: 'rgba(255, 255, 255, 0.2)',
             backdropFilter: 'blur(20px)',
@@ -854,7 +862,7 @@ export default function Dashboard() {
         </Link>
 
         {/* Manage Tests Tile */}
-        <Link to="/app/manage-tests" style={{ textDecoration: 'none', gridColumn: '9 / 13', gridRow: '4 / 6' }}>
+        <Link to="/app/manage-tests" style={{ textDecoration: 'none', gridColumn: '9 / 13', gridRow: '5 / 7' }}>
           <div style={{
             background: 'rgba(255, 255, 255, 0.2)',
             backdropFilter: 'blur(20px)',
@@ -886,7 +894,7 @@ export default function Dashboard() {
         {/* Recent Activity Tile */}
         <div style={{
           gridColumn: '1 / 13',
-          gridRow: '6 / 8',
+          gridRow: '7 / 9',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
@@ -960,47 +968,6 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Detailed Stats Tile */}
-        <div style={{
-          gridColumn: '1 / 13',
-          gridRow: '8 / 10',
-          background: 'rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: '24px',
-          borderRadius: '20px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          <div style={{ marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937', display: 'flex', alignItems: 'center' }}>
-              <span style={{ marginRight: '8px' }}>📊</span>
-              Detailed Statistics
-            </h2>
-            <p style={{ color: '#6b7280', marginTop: '4px', fontSize: '14px' }}>Comprehensive performance metrics</p>
-          </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '16px', flex: 1 }}>
-            <div style={{ background: 'rgba(251, 146, 199, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(251, 146, 199, 0.3)', boxShadow: '0 4px 16px rgba(251, 146, 199, 0.15)', textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.totalTests}</div>
-              <p style={{ fontSize: '12px', color: '#6b7280' }}>Total Tests</p>
-            </div>
-            <div style={{ background: 'rgba(196, 181, 253, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(196, 181, 253, 0.3)', boxShadow: '0 4px 16px rgba(196, 181, 253, 0.15)', textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.activeTests}</div>
-              <p style={{ fontSize: '12px', color: '#6b7280' }}>Active Tests</p>
-            </div>
-            <div style={{ background: 'rgba(251, 191, 36, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(251, 191, 36, 0.3)', boxShadow: '0 4px 16px rgba(251, 191, 36, 0.15)', textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>{stats.totalConversions}</div>
-              <p style={{ fontSize: '12px', color: '#6b7280' }}>Conversions</p>
-            </div>
-            <div style={{ background: 'rgba(34, 197, 94, 0.15)', backdropFilter: 'blur(15px)', WebkitBackdropFilter: 'blur(15px)', borderRadius: '12px', padding: '16px', border: '1px solid rgba(34, 197, 94, 0.3)', boxShadow: '0 4px 16px rgba(34, 197, 94, 0.15)', textAlign: 'center' }}>
-              <div style={{ fontSize: '24px', fontWeight: 'bold', marginBottom: '4px', color: '#1f2937' }}>${stats.totalRevenue.toFixed(0)}</div>
-              <p style={{ fontSize: '12px', color: '#6b7280' }}>Total Revenue</p>
-            </div>
-          </div>
-        </div>
         
       </div>
     </div>
