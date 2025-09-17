@@ -512,20 +512,21 @@ export default function Dashboard() {
         filter: 'blur(60px)',
         zIndex: 0
       }}></div>
-      {/* Dashboard Grid Layout */}
+      {/* Dashboard Responsive Layout */}
       <div style={{
-        display: 'grid',
-        gridTemplateColumns: 'repeat(12, 1fr)',
-        gridTemplateRows: 'repeat(10, 1fr)',
-        gap: '20px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'clamp(16px, 2vw, 24px)',
+        padding: 'clamp(16px, 2vw, 24px)',
         height: 'calc(100vh - 48px)',
-        zIndex: 1
+        zIndex: 1,
+        overflow: 'auto'
       }}>
         
         {/* TryLabs Dashboard Tile */}
         <div style={{
-          gridColumn: '1 / 13',
-          gridRow: '1 / 3',
+          width: '100%',
+          minHeight: 'clamp(120px, 15vh, 200px)',
           background: 'rgba(255, 255, 255, 0.25)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
@@ -624,21 +625,29 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Progress Card Tile */}
+        {/* Stats Row */}
         <div style={{
-          gridColumn: '1 / 5',
-          gridRow: '3 / 5',
-          background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
-          padding: 'clamp(16px, 2vw, 24px)',
-          borderRadius: '20px',
-          border: '1px solid rgba(255, 255, 255, 0.2)',
-          boxShadow: '0 4px 6px -1px rgba(196, 181, 253, 0.2), 0 2px 4px -1px rgba(196, 181, 253, 0.1)',
-          position: 'relative',
-          overflow: 'hidden',
           display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center'
+          flexDirection: 'row',
+          gap: 'clamp(12px, 2vw, 20px)',
+          flexWrap: 'wrap',
+          width: '100%'
         }}>
+          {/* Progress Card Tile */}
+          <div style={{
+            flex: '1 1 clamp(280px, 30vw, 400px)',
+            minHeight: 'clamp(140px, 18vh, 200px)',
+            background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
+            padding: 'clamp(16px, 2vw, 24px)',
+            borderRadius: '20px',
+            border: '1px solid rgba(255, 255, 255, 0.2)',
+            boxShadow: '0 4px 6px -1px rgba(196, 181, 253, 0.2), 0 2px 4px -1px rgba(196, 181, 253, 0.1)',
+            position: 'relative',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center'
+          }}>
           {/* Progress card background decoration */}
           <div style={{
             position: 'absolute',
@@ -720,105 +729,10 @@ export default function Dashboard() {
         </div>
 
 
-        {/* Total Tests Tile */}
-        <div style={{
-          gridColumn: '5 / 7',
-          gridRow: '3 / 5',
-          background: 'rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: 'clamp(12px, 2vw, 24px)',
-          borderRadius: '20px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>🧪</div>
-          <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#1f2937', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
-            {stats.totalTests}
-          </div>
-          <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>Total Tests</div>
-        </div>
-
-        {/* Active Tests Tile */}
-        <div style={{
-          gridColumn: '7 / 9',
-          gridRow: '3 / 5',
-          background: 'rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: 'clamp(12px, 2vw, 24px)',
-          borderRadius: '20px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>⚡</div>
-          <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#1f2937', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
-            {stats.activeTests}
-          </div>
-          <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>Active Tests</div>
-        </div>
-
-        {/* Revenue Tile */}
-        <div style={{
-          gridColumn: '9 / 11',
-          gridRow: '3 / 5',
-          background: 'rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: 'clamp(12px, 2vw, 24px)',
-          borderRadius: '20px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>💰</div>
-          <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#1f2937', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
-            ${stats.totalRevenue.toFixed(0)}
-          </div>
-          <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>Revenue</div>
-        </div>
-
-        {/* Conversion Rate Tile */}
-        <div style={{
-          gridColumn: '11 / 13',
-          gridRow: '3 / 5',
-          background: 'rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: 'clamp(12px, 2vw, 24px)',
-          borderRadius: '20px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          alignItems: 'center',
-          textAlign: 'center'
-        }}>
-          <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>📈</div>
-          <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#1f2937', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
-            {stats.conversionRate}%
-          </div>
-          <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>Conversion Rate</div>
-        </div>
-
-        {/* Create New Test Tile */}
-        <Link to="/app/ab-tests" style={{ textDecoration: 'none', gridColumn: '1 / 5', gridRow: '5 / 7' }}>
+          {/* Total Tests Tile */}
           <div style={{
+            flex: '1 1 clamp(120px, 15vw, 180px)',
+            minHeight: 'clamp(100px, 12vh, 140px)',
             background: 'rgba(255, 255, 255, 0.2)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
@@ -830,24 +744,19 @@ export default function Dashboard() {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            textAlign: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            height: '100%'
+            textAlign: 'center'
           }}>
-            <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(6px, 1vw, 12px)' }}>🧪</div>
-            <div style={{ fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: '600', color: '#1f2937', marginBottom: 'clamp(4px, 1vw, 8px)' }}>
-              Create New Test
+            <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>🧪</div>
+            <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#1f2937', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
+              {stats.totalTests}
             </div>
-            <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>
-              Set up a new A/B test
-            </div>
+            <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>Total Tests</div>
           </div>
-        </Link>
 
-        {/* View Analytics Tile */}
-        <Link to="/app/analytics" style={{ textDecoration: 'none', gridColumn: '5 / 9', gridRow: '5 / 7' }}>
+          {/* Active Tests Tile */}
           <div style={{
+            flex: '1 1 clamp(120px, 15vw, 180px)',
+            minHeight: 'clamp(100px, 12vh, 140px)',
             background: 'rgba(255, 255, 255, 0.2)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
@@ -859,24 +768,19 @@ export default function Dashboard() {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            textAlign: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            height: '100%'
+            textAlign: 'center'
           }}>
-            <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(6px, 1vw, 12px)' }}>📊</div>
-            <div style={{ fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: '600', color: '#1f2937', marginBottom: 'clamp(4px, 1vw, 8px)' }}>
-              View Analytics
+            <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>⚡</div>
+            <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#1f2937', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
+              {stats.activeTests}
             </div>
-            <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>
-              Check performance metrics
-            </div>
+            <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>Active Tests</div>
           </div>
-        </Link>
 
-        {/* Manage Tests Tile */}
-        <Link to="/app/manage-tests" style={{ textDecoration: 'none', gridColumn: '9 / 13', gridRow: '5 / 7' }}>
+          {/* Revenue Tile */}
           <div style={{
+            flex: '1 1 clamp(120px, 15vw, 180px)',
+            minHeight: 'clamp(100px, 12vh, 140px)',
             background: 'rgba(255, 255, 255, 0.2)',
             backdropFilter: 'blur(20px)',
             WebkitBackdropFilter: 'blur(20px)',
@@ -888,26 +792,141 @@ export default function Dashboard() {
             flexDirection: 'column',
             justifyContent: 'center',
             alignItems: 'center',
-            textAlign: 'center',
-            cursor: 'pointer',
-            transition: 'all 0.3s ease',
-            height: '100%'
+            textAlign: 'center'
           }}>
-            <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(6px, 1vw, 12px)' }}>⚙️</div>
-            <div style={{ fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: '600', color: '#1f2937', marginBottom: 'clamp(4px, 1vw, 8px)' }}>
-              Manage Tests
+            <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>💰</div>
+            <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#1f2937', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
+              ${stats.totalRevenue.toFixed(0)}
             </div>
-            <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>
-              View and edit tests
-            </div>
+            <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>Revenue</div>
           </div>
-        </Link>
+
+          {/* Conversion Rate Tile */}
+          <div style={{
+            flex: '1 1 clamp(120px, 15vw, 180px)',
+            minHeight: 'clamp(100px, 12vh, 140px)',
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            padding: 'clamp(12px, 2vw, 24px)',
+            borderRadius: '20px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center'
+          }}>
+            <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>📈</div>
+            <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#1f2937', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
+              {stats.conversionRate}%
+            </div>
+            <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>Conversion Rate</div>
+          </div>
+        </div>
+
+        {/* Actions Row */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'row',
+          gap: 'clamp(12px, 2vw, 20px)',
+          flexWrap: 'wrap',
+          width: '100%'
+        }}>
+          {/* Create New Test Tile */}
+          <Link to="/app/ab-tests" style={{ textDecoration: 'none', flex: '1 1 clamp(200px, 25vw, 300px)' }}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              padding: 'clamp(12px, 2vw, 24px)',
+              borderRadius: '20px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              minHeight: 'clamp(120px, 15vh, 160px)'
+            }}>
+              <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(6px, 1vw, 12px)' }}>🧪</div>
+              <div style={{ fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: '600', color: '#1f2937', marginBottom: 'clamp(4px, 1vw, 8px)' }}>
+                Create New Test
+              </div>
+              <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>
+                Set up a new A/B test
+              </div>
+            </div>
+          </Link>
+
+          {/* View Analytics Tile */}
+          <Link to="/app/analytics" style={{ textDecoration: 'none', flex: '1 1 clamp(200px, 25vw, 300px)' }}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              padding: 'clamp(12px, 2vw, 24px)',
+              borderRadius: '20px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              minHeight: 'clamp(120px, 15vh, 160px)'
+            }}>
+              <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(6px, 1vw, 12px)' }}>📊</div>
+              <div style={{ fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: '600', color: '#1f2937', marginBottom: 'clamp(4px, 1vw, 8px)' }}>
+                View Analytics
+              </div>
+              <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>
+                Check performance metrics
+              </div>
+            </div>
+          </Link>
+
+          {/* Manage Tests Tile */}
+          <Link to="/app/manage-tests" style={{ textDecoration: 'none', flex: '1 1 clamp(200px, 25vw, 300px)' }}>
+            <div style={{
+              background: 'rgba(255, 255, 255, 0.2)',
+              backdropFilter: 'blur(20px)',
+              WebkitBackdropFilter: 'blur(20px)',
+              padding: 'clamp(12px, 2vw, 24px)',
+              borderRadius: '20px',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+              border: '1px solid rgba(255, 255, 255, 0.3)',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              textAlign: 'center',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              minHeight: 'clamp(120px, 15vh, 160px)'
+            }}>
+              <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(6px, 1vw, 12px)' }}>⚙️</div>
+              <div style={{ fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: '600', color: '#1f2937', marginBottom: 'clamp(4px, 1vw, 8px)' }}>
+                Manage Tests
+              </div>
+              <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#6b7280' }}>
+                View and edit tests
+              </div>
+            </div>
+          </Link>
+        </div>
 
 
         {/* Recent Activity Tile */}
         <div style={{
-          gridColumn: '1 / 13',
-          gridRow: '8 / 10',
+          width: '100%',
+          minHeight: 'clamp(200px, 25vh, 300px)',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
