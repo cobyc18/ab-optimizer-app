@@ -471,7 +471,7 @@ export default function Dashboard() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#97CDFF',
+      background: '#E6E6E6',
       padding: '24px',
       fontFamily: 'system-ui, -apple-system, sans-serif',
       position: 'relative',
@@ -531,13 +531,13 @@ export default function Dashboard() {
           padding: 'clamp(16px, 3vw, 32px)',
           borderRadius: '24px',
           boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
-          border: '1px solid #97CDFF',
-        position: 'relative',
+          border: '1px solid #E6E6E6',
+          position: 'relative',
           overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'center'
-      }}>
+        }}>
         {/* Background decorative elements */}
         <div style={{
           position: 'absolute',
@@ -607,7 +607,7 @@ export default function Dashboard() {
                 fontWeight: '500',
                 lineHeight: '1.3'
               }}>
-                Welcome back, <span style={{ color: '#97CDFF', fontWeight: '600' }}>{user?.firstName || 'User'}</span>!
+                Welcome back, <span style={{ color: '#0038FF', fontWeight: '600' }}>{user?.firstName || 'User'}</span>!
                 </p>
               </div>
             </div>
@@ -638,11 +638,11 @@ export default function Dashboard() {
           <div style={{
             flex: '1 1 clamp(280px, 30vw, 400px)',
             minHeight: 'clamp(140px, 18vh, 200px)',
-            background: '#97CDFF',
+            background: '#ef9362',
             padding: 'clamp(16px, 2vw, 24px)',
             borderRadius: '20px',
-            border: '1px solid #97CDFF',
-            boxShadow: '0 4px 6px -1px rgba(151, 205, 255, 0.2), 0 2px 4px -1px rgba(151, 205, 255, 0.1)',
+            border: '1px solid #E6E6E6',
+            boxShadow: '0 4px 6px -1px rgba(239, 147, 98, 0.2), 0 2px 4px -1px rgba(239, 147, 98, 0.1)',
             position: 'relative',
             overflow: 'hidden',
             display: 'flex',
@@ -733,14 +733,14 @@ export default function Dashboard() {
 
 
           {/* Total Tests Tile */}
-      <div style={{
+          <div style={{
             flex: '1 1 clamp(120px, 15vw, 180px)',
             minHeight: 'clamp(100px, 12vh, 140px)',
             background: '#97CDFF',
             padding: 'clamp(12px, 2vw, 24px)',
             borderRadius: '20px',
             boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
-            border: '1px solid #97CDFF',
+            border: '1px solid #E6E6E6',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -755,20 +755,20 @@ export default function Dashboard() {
           </div>
 
           {/* Active Tests Tile */}
-              <div style={{
+          <div style={{
             flex: '1 1 clamp(120px, 15vw, 180px)',
             minHeight: 'clamp(100px, 12vh, 140px)',
             background: '#ef9362',
             padding: 'clamp(12px, 2vw, 24px)',
             borderRadius: '20px',
             boxShadow: '0 8px 32px rgba(239, 147, 98, 0.1), 0 4px 16px rgba(239, 147, 98, 0.05)',
-            border: '1px solid #ef9362',
-                display: 'flex',
+            border: '1px solid #E6E6E6',
+            display: 'flex',
             flexDirection: 'column',
-                justifyContent: 'center',
+            justifyContent: 'center',
             alignItems: 'center',
             textAlign: 'center'
-              }}>
+          }}>
             <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>⚡</div>
             <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#151515', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
               {stats.activeTests}
@@ -777,20 +777,20 @@ export default function Dashboard() {
           </div>
 
           {/* Revenue Tile */}
-              <div style={{
+          <div style={{
             flex: '1 1 clamp(120px, 15vw, 180px)',
             minHeight: 'clamp(100px, 12vh, 140px)',
             background: '#97CDFF',
             padding: 'clamp(12px, 2vw, 24px)',
             borderRadius: '20px',
             boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
-            border: '1px solid #97CDFF',
-                display: 'flex',
+            border: '1px solid #E6E6E6',
+            display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
-                alignItems: 'center',
+            alignItems: 'center',
             textAlign: 'center'
-              }}>
+          }}>
             <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(4px, 1vw, 8px)' }}>💰</div>
             <div style={{ fontSize: 'clamp(16px, 2.5vw, 24px)', fontWeight: 'bold', color: '#FFFFFF', marginBottom: 'clamp(2px, 0.5vw, 4px)' }}>
               ${stats.totalRevenue.toFixed(0)}
@@ -802,11 +802,11 @@ export default function Dashboard() {
           <div style={{
             flex: '1 1 clamp(120px, 15vw, 180px)',
             minHeight: 'clamp(100px, 12vh, 140px)',
-            background: '#97CDFF',
+            background: '#ef9362',
             padding: 'clamp(12px, 2vw, 24px)',
             borderRadius: '20px',
-            boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
-            border: '1px solid #97CDFF',
+            boxShadow: '0 8px 32px rgba(239, 147, 98, 0.1), 0 4px 16px rgba(239, 147, 98, 0.05)',
+            border: '1px solid #E6E6E6',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'center',
@@ -836,7 +836,7 @@ export default function Dashboard() {
               padding: 'clamp(12px, 2vw, 24px)',
               borderRadius: '20px',
               boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
-              border: '1px solid #97CDFF',
+              border: '1px solid #E6E6E6',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
@@ -858,12 +858,12 @@ export default function Dashboard() {
 
           {/* View Analytics Tile */}
           <Link to="/app/analytics" style={{ textDecoration: 'none', flex: '1 1 clamp(200px, 25vw, 300px)' }}>
-      <div style={{
-              background: '#0038FF',
+            <div style={{
+              background: '#ef9362',
               padding: 'clamp(12px, 2vw, 24px)',
               borderRadius: '20px',
-              boxShadow: '0 8px 32px rgba(0, 56, 255, 0.1), 0 4px 16px rgba(0, 56, 255, 0.05)',
-              border: '1px solid #0038FF',
+              boxShadow: '0 8px 32px rgba(239, 147, 98, 0.1), 0 4px 16px rgba(239, 147, 98, 0.05)',
+              border: '1px solid #E6E6E6',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
@@ -874,10 +874,10 @@ export default function Dashboard() {
               minHeight: 'clamp(120px, 15vh, 160px)'
             }}>
               <div style={{ fontSize: 'clamp(20px, 3vw, 32px)', marginBottom: 'clamp(6px, 1vw, 12px)' }}>📊</div>
-              <div style={{ fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: '600', color: '#FFFFFF', marginBottom: 'clamp(4px, 1vw, 8px)' }}>
+              <div style={{ fontSize: 'clamp(14px, 2vw, 18px)', fontWeight: '600', color: '#151515', marginBottom: 'clamp(4px, 1vw, 8px)' }}>
                 View Analytics
-        </div>
-              <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#FFFFFF' }}>
+              </div>
+              <div style={{ fontSize: 'clamp(10px, 1.2vw, 12px)', color: '#151515' }}>
                 Check performance metrics
               </div>
             </div>
@@ -890,7 +890,7 @@ export default function Dashboard() {
               padding: 'clamp(12px, 2vw, 24px)',
               borderRadius: '20px',
               boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
-              border: '1px solid #97CDFF',
+              border: '1px solid #E6E6E6',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
@@ -912,15 +912,15 @@ export default function Dashboard() {
         </div>
         
 
-      {/* Recent Activity Tile */}
-      <div style={{
+        {/* Recent Activity Tile */}
+        <div style={{
           width: '100%',
           minHeight: 'clamp(200px, 25vh, 300px)',
-          background: '#97CDFF',
+          background: '#ef9362',
           padding: 'clamp(16px, 2vw, 24px)',
           borderRadius: '20px',
-          boxShadow: '0 8px 32px rgba(151, 205, 255, 0.1), 0 4px 16px rgba(151, 205, 255, 0.05)',
-          border: '1px solid #97CDFF',
+          boxShadow: '0 8px 32px rgba(239, 147, 98, 0.1), 0 4px 16px rgba(239, 147, 98, 0.05)',
+          border: '1px solid #E6E6E6',
           display: 'flex',
           flexDirection: 'column'
         }}>
@@ -940,7 +940,7 @@ export default function Dashboard() {
                 blue: { background: '#97CDFF' },
                 green: { background: '#ef9362' },
                 orange: { background: '#0038FF' },
-                purple: { background: '#97CDFF' }
+                purple: { background: '#ef9362' }
               };
               
               return (
