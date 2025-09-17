@@ -698,72 +698,82 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Achievement Tile */}
+
+        {/* Total Tests Tile */}
         <div style={{
-          gridColumn: '5 / 9',
+          gridColumn: '5 / 7',
           gridRow: '2 / 4',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
           WebkitBackdropFilter: 'blur(20px)',
-          color: '#1f2937',
           padding: '24px',
           borderRadius: '20px',
           boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
           border: '1px solid rgba(255, 255, 255, 0.3)',
-          position: 'relative',
-          overflow: 'hidden',
           display: 'flex',
           flexDirection: 'column',
-          justifyContent: 'center'
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center'
         }}>
-          <div style={{ position: 'absolute', top: '0', right: '0', width: '128px', height: '128px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.1) 0%, rgba(167, 139, 250, 0.05) 100%)', borderRadius: '24px', transform: 'translate(64px, -64px)' }}></div>
-          <div style={{ position: 'absolute', bottom: '0', left: '0', width: '96px', height: '96px', background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.08) 0%, rgba(167, 139, 250, 0.03) 100%)', borderRadius: '20px', transform: 'translate(-48px, 48px)' }}></div>
-          
-          {/* Achievement Section */}
-          <div style={{ display: 'flex', alignItems: 'center', position: 'relative', zIndex: 1 }}>
-            <div style={{ position: 'relative' }}>
-              <div style={{
-                width: '48px',
-                height: '48px',
-                background: 'linear-gradient(135deg, rgba(196, 181, 253, 0.2) 0%, rgba(167, 139, 250, 0.1) 100%)',
-                borderRadius: '16px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                animation: 'pulse 2s infinite'
-              }}>
-                <span style={{ fontSize: '20px' }}>🏆</span>
-              </div>
-              <div style={{
-                position: 'absolute',
-                top: '-4px',
-                right: '-4px',
-                width: '20px',
-                height: '20px',
-                background: '#c4b5fd',
-                borderRadius: '6px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center'
-              }}>
-                <span style={{ fontSize: '10px', fontWeight: 'bold', color: 'white' }}>1</span>
-              </div>
-            </div>
-            <div style={{ marginLeft: '16px' }}>
-              <h2 style={{ fontSize: '18px', fontWeight: '600', marginBottom: '4px' }}>🏅 Data Scientist</h2>
-              <p style={{ opacity: 0.9, fontSize: '12px' }}>
-                {stats.totalTests > 0 
-                  ? `You've run ${stats.totalTests} test${stats.totalTests > 1 ? 's' : ''}!`
-                  : "Ready to start your first A/B test!"
-                }
-              </p>
-            </div>
+          <div style={{ fontSize: '32px', marginBottom: '8px' }}>🧪</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
+            {stats.totalTests}
           </div>
+          <div style={{ fontSize: '12px', color: '#6b7280' }}>Total Tests</div>
+        </div>
+
+        {/* Active Tests Tile */}
+        <div style={{
+          gridColumn: '7 / 9',
+          gridRow: '2 / 4',
+          background: 'rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          padding: '24px',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '32px', marginBottom: '8px' }}>⚡</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
+            {stats.activeTests}
+          </div>
+          <div style={{ fontSize: '12px', color: '#6b7280' }}>Active Tests</div>
+        </div>
+
+        {/* Revenue Tile */}
+        <div style={{
+          gridColumn: '9 / 11',
+          gridRow: '2 / 4',
+          background: 'rgba(255, 255, 255, 0.2)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          padding: '24px',
+          borderRadius: '20px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+          border: '1px solid rgba(255, 255, 255, 0.3)',
+          display: 'flex',
+          flexDirection: 'column',
+          justifyContent: 'center',
+          alignItems: 'center',
+          textAlign: 'center'
+        }}>
+          <div style={{ fontSize: '32px', marginBottom: '8px' }}>💰</div>
+          <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1f2937', marginBottom: '4px' }}>
+            ${stats.totalRevenue.toFixed(0)}
+          </div>
+          <div style={{ fontSize: '12px', color: '#6b7280' }}>Revenue</div>
         </div>
 
         {/* Conversion Rate Tile */}
         <div style={{
-          gridColumn: '9 / 13',
+          gridColumn: '11 / 13',
           gridRow: '2 / 4',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
@@ -783,147 +793,99 @@ export default function Dashboard() {
             {stats.conversionRate}%
           </div>
           <div style={{ fontSize: '12px', color: '#6b7280' }}>Conversion Rate</div>
-          <div style={{ fontSize: '10px', color: '#9ca3af', marginTop: '4px' }}>
-            {stats.totalImpressions} impressions
-          </div>
         </div>
 
-        {/* Quick Actions Tile */}
-        <div style={{
-          gridColumn: '1 / 13',
-          gridRow: '4 / 6',
-          background: 'rgba(255, 255, 255, 0.25)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: '24px',
-          borderRadius: '20px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          <div style={{ marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#000000', display: 'flex', alignItems: 'center' }}>
-              <span style={{ marginRight: '8px' }}>⚡</span>
-              Quick Actions
-            </h2>
-            <p style={{ color: '#374151', marginTop: '4px', fontSize: '14px' }}>Get started with common tasks</p>
+        {/* Create New Test Tile */}
+        <Link to="/app/ab-tests" style={{ textDecoration: 'none', gridColumn: '1 / 5', gridRow: '4 / 6' }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            padding: '24px',
+            borderRadius: '20px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            height: '100%'
+          }}>
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>🧪</div>
+            <div style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937', marginBottom: '8px' }}>
+              Create New Test
+            </div>
+            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+              Set up a new A/B test
+            </div>
           </div>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', flex: 1 }}>
-            <QuickActionCard
-              title="Create New Test"
-              description="Set up a new A/B test"
-              color="purple"
-              to="/app/ab-tests"
-              icon="🧪"
-            />
-            <QuickActionCard
-              title="View Analytics"
-              description="Check performance metrics"
-              color="lightBlue"
-              to="/app/analytics"
-              icon="📊"
-            />
-            <QuickActionCard
-              title="Manage Tests"
-              description="View and edit tests"
-              color="purple"
-              to="/app/manage-tests"
-              icon="⚙️"
-            />
-          </div>
-        </div>
+        </Link>
 
-        {/* Webhook Status Tile */}
-        <div style={{
-          gridColumn: '1 / 7',
-          gridRow: '6 / 8',
-          background: 'rgba(255, 255, 255, 0.2)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          padding: '24px',
-          borderRadius: '20px',
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
-          border: '1px solid rgba(255, 255, 255, 0.3)',
-          display: 'flex',
-          flexDirection: 'column'
-        }}>
-          <div style={{ marginBottom: '16px' }}>
-            <h2 style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937', display: 'flex', alignItems: 'center' }}>
-              <span style={{ marginRight: '8px' }}>🔗</span>
-              Webhook Status
-            </h2>
-            <p style={{ color: '#6b7280', marginTop: '4px', fontSize: '14px' }}>
-              Track purchase events for A/B testing
-            </p>
+        {/* View Analytics Tile */}
+        <Link to="/app/analytics" style={{ textDecoration: 'none', gridColumn: '5 / 9', gridRow: '4 / 6' }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            padding: '24px',
+            borderRadius: '20px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            height: '100%'
+          }}>
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>📊</div>
+            <div style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937', marginBottom: '8px' }}>
+              View Analytics
+            </div>
+            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+              Check performance metrics
+            </div>
           </div>
-          
-          <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-            {webhookStatus.error ? (
-              <div style={{
-                padding: '12px',
-                background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-                border: '1px solid #dc2626',
-                borderRadius: '8px',
-                color: 'white',
-                fontSize: '12px'
-              }}>
-                ❌ Error: {webhookStatus.error}
-              </div>
-            ) : webhookStatus.registered ? (
-              <div style={{
-                padding: '12px',
-                background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-                border: '1px solid #32cd32',
-                borderRadius: '8px',
-                color: 'white',
-                fontSize: '12px'
-              }}>
-                ✅ All webhooks registered
-              </div>
-            ) : (
-              <div style={{
-                padding: '12px',
-                background: 'linear-gradient(135deg, #f59e0b 0%, #d97706 100%)',
-                border: '1px solid #f59e0b',
-                borderRadius: '8px',
-                color: 'white',
-                fontSize: '12px'
-              }}>
-                ⚠️ Missing: {webhookStatus.missing.join(', ')}
-              </div>
-            )}
-            
-            {!webhookStatus.registered && (
-              <fetcher.Form method="post" style={{ marginTop: '12px' }}>
-                <input type="hidden" name="action" value="register_webhooks" />
-                <button
-                  type="submit"
-                  disabled={isLoading}
-                  style={{
-                    background: 'linear-gradient(135deg, #32cd32 0%, #228b22 100%)',
-                    color: 'white',
-                    border: 'none',
-                    padding: '8px 16px',
-                    borderRadius: '8px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    width: '100%'
-                  }}
-                >
-                  {isLoading ? 'Registering...' : 'Register Webhooks'}
-                </button>
-              </fetcher.Form>
-            )}
+        </Link>
+
+        {/* Manage Tests Tile */}
+        <Link to="/app/manage-tests" style={{ textDecoration: 'none', gridColumn: '9 / 13', gridRow: '4 / 6' }}>
+          <div style={{
+            background: 'rgba(255, 255, 255, 0.2)',
+            backdropFilter: 'blur(20px)',
+            WebkitBackdropFilter: 'blur(20px)',
+            padding: '24px',
+            borderRadius: '20px',
+            boxShadow: '0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px rgba(0, 0, 0, 0.05)',
+            border: '1px solid rgba(255, 255, 255, 0.3)',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'center',
+            alignItems: 'center',
+            textAlign: 'center',
+            cursor: 'pointer',
+            transition: 'all 0.3s ease',
+            height: '100%'
+          }}>
+            <div style={{ fontSize: '32px', marginBottom: '12px' }}>⚙️</div>
+            <div style={{ fontSize: '18px', fontWeight: '600', color: '#1f2937', marginBottom: '8px' }}>
+              Manage Tests
+            </div>
+            <div style={{ fontSize: '12px', color: '#6b7280' }}>
+              View and edit tests
+            </div>
           </div>
-        </div>
+        </Link>
+
 
         {/* Recent Activity Tile */}
         <div style={{
-          gridColumn: '7 / 13',
+          gridColumn: '1 / 13',
           gridRow: '6 / 8',
           background: 'rgba(255, 255, 255, 0.2)',
           backdropFilter: 'blur(20px)',
