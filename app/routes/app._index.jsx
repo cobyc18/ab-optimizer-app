@@ -370,7 +370,7 @@ export default function TryLabDashboard() {
           {/* Active Experiments Card */}
           <div style={{
             flex: 1,
-            background: '#DBEAFE',
+            background: '#97CDFF',
             padding: '24px',
             borderRadius: '12px',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
@@ -435,7 +435,7 @@ export default function TryLabDashboard() {
           {/* Winning Variants Found Card */}
           <div style={{
             flex: 1,
-            background: '#DBEAFE',
+            background: '#97CDFF',
             padding: '24px',
             borderRadius: '12px',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
@@ -500,7 +500,7 @@ export default function TryLabDashboard() {
           {/* Revenue Impact Card */}
           <div style={{
             flex: 1,
-            background: '#DBEAFE',
+            background: '#97CDFF',
             padding: '24px',
             borderRadius: '12px',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
