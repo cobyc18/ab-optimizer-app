@@ -566,7 +566,7 @@ export default function TryLabDashboard() {
 
         {/* Main Content Grid */}
         <div style={{
-          padding: '0 40px 40px 40px',
+          padding: '0 40px 40px 35px',
           display: 'flex',
           gap: '24px',
           alignItems: 'flex-start'
@@ -979,83 +979,182 @@ export default function TryLabDashboard() {
               {/* Legend Scientist Card */}
               <div style={{
                 flex: 1,
-                background: '#22C55E',
+                background: '#0038FF',
                 padding: '24px',
                 borderRadius: '12px',
                 color: '#FFFFFF',
                 position: 'relative',
                 overflow: 'hidden'
               }}>
+                {/* Large Badge + Title */}
                 <div style={{
-                  position: 'absolute',
-                  top: '16px',
-                  left: '16px',
-                  width: '32px',
-                  height: '32px',
-                  background: '#FFFFFF',
-                  borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '16px'
-                }}>
-                  🏆
-                </div>
-                
-                <div style={{
-                  marginTop: '40px',
+                  gap: '12px',
                   marginBottom: '16px'
                 }}>
-                  <h3 style={{
-                    fontSize: '20px',
-                    fontWeight: '700',
-                    margin: '0 0 8px 0'
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    background: '#FFFFFF',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px'
                   }}>
-                    Legend Scientist
-                  </h3>
-                  <p style={{
-                    fontSize: '14px',
-                    margin: '0',
-                    opacity: 0.9
-                  }}>
-                    You've run a test for 60 days straight!
-                  </p>
+                    🏆
+                  </div>
+                  <div>
+                    <h3 style={{
+                      fontSize: '18px',
+                      fontWeight: '700',
+                      margin: '0 0 4px 0'
+                    }}>
+                      Legend Scientist
+                    </h3>
+                    <p style={{
+                      fontSize: '12px',
+                      margin: '0',
+                      opacity: 0.9
+                    }}>
+                      Current level/title
+                    </p>
+                  </div>
                 </div>
-                
+
+                {/* Progress Bar */}
+                <div style={{
+                  marginBottom: '16px'
+                }}>
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '8px'
+                  }}>
+                    <span style={{
+                      fontSize: '12px',
+                      opacity: 0.9
+                    }}>
+                      150 pts to go
+                    </span>
+                  </div>
+                  <div style={{
+                    width: '100%',
+                    height: '6px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '3px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      width: '60%',
+                      height: '100%',
+                      background: '#FFFFFF',
+                      borderRadius: '3px'
+                    }}></div>
+                  </div>
+                </div>
+
+                {/* Mini Badges */}
                 <div style={{
                   display: 'flex',
-                  justifyContent: 'space-between',
-                  marginTop: '20px'
+                  flexWrap: 'wrap',
+                  gap: '6px',
+                  marginBottom: '16px'
                 }}>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{
-                      fontSize: '18px',
-                      fontWeight: '700'
-                    }}>23</div>
-                    <div style={{
-                      fontSize: '10px',
-                      opacity: 0.8
-                    }}>Tests this week</div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    🎉 First Winner Found
                   </div>
-                  <div style={{ textAlign: 'center' }}>
-                    <div style={{
-                      fontSize: '18px',
-                      fontWeight: '700'
-                    }}>156</div>
-                    <div style={{
-                      fontSize: '10px',
-                      opacity: 0.8
-                    }}>Total variants</div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    🚀 5 Experiments Launched
                   </div>
-                  <div style={{ textAlign: 'center' }}>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    👥 1000 Visitors Tested
+                  </div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    🔥 Streak: 4 Weeks Testing
+                  </div>
+                </div>
+
+                {/* Two mini containers */}
+                <div style={{
+                  display: 'flex',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    flex: 1,
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    textAlign: 'center'
+                  }}>
                     <div style={{
-                      fontSize: '18px',
-                      fontWeight: '700'
-                    }}>2,840</div>
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      marginBottom: '4px'
+                    }}>
+                      23
+                    </div>
                     <div style={{
                       fontSize: '10px',
                       opacity: 0.8
-                    }}>Points earned</div>
+                    }}>
+                      Tests Run (lifetime)
+                    </div>
+                  </div>
+                  <div style={{
+                    flex: 1,
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      marginBottom: '4px'
+                    }}>
+                      8
+                    </div>
+                    <div style={{
+                      fontSize: '10px',
+                      opacity: 0.8
+                    }}>
+                      Winners Pushed (lifetime)
+                    </div>
                   </div>
                 </div>
               </div>
@@ -1063,36 +1162,184 @@ export default function TryLabDashboard() {
               {/* Next Goal Card */}
               <div style={{
                 flex: 1,
-                background: '#16A34A',
+                background: '#0038FF',
                 padding: '24px',
                 borderRadius: '12px',
                 color: '#FFFFFF',
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'center',
-                textAlign: 'center'
+                position: 'relative',
+                overflow: 'hidden'
               }}>
+                {/* Large Badge + Title */}
                 <div style={{
-                  fontSize: '24px',
-                  marginBottom: '12px'
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginBottom: '16px'
                 }}>
-                  🎯
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    background: '#FFFFFF',
+                    borderRadius: '50%',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '20px'
+                  }}>
+                    🎯
+                  </div>
+                  <div>
+                    <h3 style={{
+                      fontSize: '18px',
+                      fontWeight: '700',
+                      margin: '0 0 4px 0'
+                    }}>
+                      Next Goal
+                    </h3>
+                    <p style={{
+                      fontSize: '12px',
+                      margin: '0',
+                      opacity: 0.9
+                    }}>
+                      Current level/title
+                    </p>
+                  </div>
                 </div>
-                <h3 style={{
-                  fontSize: '16px',
-                  fontWeight: '700',
-                  margin: '0 0 8px 0'
+
+                {/* Progress Bar */}
+                <div style={{
+                  marginBottom: '16px'
                 }}>
-                  Next Goal
-                </h3>
-                <p style={{
-                  fontSize: '14px',
-                  margin: '0',
-                  opacity: 0.9
+                  <div style={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'center',
+                    marginBottom: '8px'
+                  }}>
+                    <span style={{
+                      fontSize: '12px',
+                      opacity: 0.9
+                    }}>
+                      75 pts to go
+                    </span>
+                  </div>
+                  <div style={{
+                    width: '100%',
+                    height: '6px',
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    borderRadius: '3px',
+                    overflow: 'hidden'
+                  }}>
+                    <div style={{
+                      width: '40%',
+                      height: '100%',
+                      background: '#FFFFFF',
+                      borderRadius: '3px'
+                    }}></div>
+                  </div>
+                </div>
+
+                {/* Mini Badges */}
+                <div style={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
+                  gap: '6px',
+                  marginBottom: '16px'
                 }}>
-                  Run 5 more tests
-                </p>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    🎉 First Winner Found
+                  </div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    🚀 3 Experiments Launched
+                  </div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    👥 500 Visitors Tested
+                  </div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    🔥 Streak: 2 Weeks Testing
+                  </div>
+                </div>
+
+                {/* Two mini containers */}
+                <div style={{
+                  display: 'flex',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    flex: 1,
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      marginBottom: '4px'
+                    }}>
+                      12
+                    </div>
+                    <div style={{
+                      fontSize: '10px',
+                      opacity: 0.8
+                    }}>
+                      Tests Run (lifetime)
+                    </div>
+                  </div>
+                  <div style={{
+                    flex: 1,
+                    background: 'rgba(255, 255, 255, 0.1)',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{
+                      fontSize: '16px',
+                      fontWeight: '700',
+                      marginBottom: '4px'
+                    }}>
+                      3
+                    </div>
+                    <div style={{
+                      fontSize: '10px',
+                      opacity: 0.8
+                    }}>
+                      Winners Pushed (lifetime)
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
