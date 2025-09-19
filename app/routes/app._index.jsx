@@ -360,7 +360,7 @@ export default function TryLabDashboard() {
           </button>
         </div>
 
-        {/* Key Metrics Cards */}
+        {/* Top Row: Three Blue Cards + What's New */}
         <div style={{
           padding: '0 40px 32px 40px',
           display: 'flex',
@@ -536,6 +536,48 @@ export default function TryLabDashboard() {
               }}></div>
             </div>
           </div>
+
+          {/* What's New Section - Part of Background */}
+          <div style={{
+            flex: 1,
+            padding: '24px'
+          }}>
+            <h2 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#1F2937',
+              margin: '0 0 20px 0'
+            }}>
+              Whats New
+            </h2>
+            
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}>
+              {[1, 2, 3, 4, 5].map((item) => (
+                <div key={item} style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    background: '#F97316',
+                    borderRadius: '50%'
+                  }}></div>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#1F2937'
+                  }}>
+                    List of New features added recently
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Main Content Grid */}
@@ -548,12 +590,9 @@ export default function TryLabDashboard() {
           <div style={{
             flex: 2
           }}>
-            {/* Experiment Overview Graph */}
+            {/* Experiment Overview Graph - Part of Background */}
             <div style={{
-              background: '#FFFFFF',
               padding: '24px',
-              borderRadius: '12px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
               marginBottom: '24px'
             }}>
               <div style={{
@@ -722,12 +761,9 @@ export default function TryLabDashboard() {
               </div>
             </div>
 
-            {/* Recent Activity */}
+            {/* Recent Activity - Part of Background */}
             <div style={{
-              background: '#FFFFFF',
               padding: '24px',
-              borderRadius: '12px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
               marginBottom: '24px'
             }}>
               <h2 style={{
@@ -933,57 +969,9 @@ export default function TryLabDashboard() {
           <div style={{
             flex: 1
           }}>
-            {/* What's New */}
+            {/* New Test Ideas - Part of Background */}
             <div style={{
-              background: '#FFFFFF',
               padding: '24px',
-              borderRadius: '12px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-              marginBottom: '24px'
-            }}>
-              <h2 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1F2937',
-                margin: '0 0 20px 0'
-              }}>
-                Whats New
-              </h2>
-              
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px'
-              }}>
-                {[1, 2, 3, 4, 5].map((item) => (
-                  <div key={item} style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px'
-                  }}>
-                    <div style={{
-                      width: '8px',
-                      height: '8px',
-                      background: '#F97316',
-                      borderRadius: '50%'
-                    }}></div>
-                    <span style={{
-                      fontSize: '14px',
-                      color: '#1F2937'
-                    }}>
-                      List of New features added recently
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* New Test Ideas */}
-            <div style={{
-              background: '#FFFFFF',
-              padding: '24px',
-              borderRadius: '12px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
               marginBottom: '24px'
             }}>
               <h2 style={{
@@ -1041,12 +1029,9 @@ export default function TryLabDashboard() {
               </div>
             </div>
 
-            {/* Upcoming Features */}
+            {/* Upcoming Features - Part of Background */}
             <div style={{
-              background: '#FFFFFF',
-              padding: '24px',
-              borderRadius: '12px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              padding: '24px'
             }}>
               <h2 style={{
                 fontSize: '18px',
