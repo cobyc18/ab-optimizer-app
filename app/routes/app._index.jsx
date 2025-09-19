@@ -1212,7 +1212,8 @@ export default function TryLabDashboard() {
           {/* Right Column - Aligned with What's New */}
           <div style={{
             flex: 1,
-            paddingTop: '0'
+            paddingTop: '0',
+            paddingLeft: '24px'
           }}>
             {/* New Test Ideas - Part of Background */}
             <div style={{
