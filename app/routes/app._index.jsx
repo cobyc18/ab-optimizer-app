@@ -565,7 +565,7 @@ export default function TryLabDashboard() {
           {/* What's New Section - Part of Background */}
           <div style={{
             flex: 1,
-            padding: '24px 24px 0 0'
+            padding: '0 24px 0 0'
           }}>
             <h2 style={{
               fontSize: '18px',
@@ -582,26 +582,96 @@ export default function TryLabDashboard() {
               flexDirection: 'column',
               gap: '12px'
             }}>
-              {[1, 2, 3, 4, 5].map((item) => (
-                <div key={item} style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  background: '#F97316',
+                  borderRadius: '50%'
+                }}></div>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#1F2937'
                 }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    background: '#F97316',
-                    borderRadius: '50%'
-                  }}></div>
-                  <span style={{
-                    fontSize: '14px',
-                    color: '#1F2937'
-                  }}>
-                    List of New features added recently
-                  </span>
-                </div>
-              ))}
+                  You can now see which version is winning faster — no more guessing
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  background: '#F97316',
+                  borderRadius: '50%'
+                }}></div>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#1F2937'
+                }}>
+                  Cleaner graphs to understand your results at a glance
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  background: '#F97316',
+                  borderRadius: '50%'
+                }}></div>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#1F2937'
+                }}>
+                  Easier setup flow — launch a new test in just 2 clicks
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  background: '#F97316',
+                  borderRadius: '50%'
+                }}></div>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#1F2937'
+                }}>
+                  Shopify sync improved — your products and pages show up instantly
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  background: '#F97316',
+                  borderRadius: '50%'
+                }}></div>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#1F2937'
+                }}>
+                  Added tooltips & guides so you always know what each number means
+                </span>
+              </div>
             </div>
           </div>
         </div>
@@ -610,7 +680,8 @@ export default function TryLabDashboard() {
         <div style={{
           padding: '0 40px 40px 40px',
           display: 'flex',
-          gap: '24px'
+          gap: '24px',
+          alignItems: 'flex-start'
         }}>
           {/* Left Column */}
           <div style={{
@@ -930,7 +1001,7 @@ export default function TryLabDashboard() {
                     fontSize: '14px',
                     color: '#1F2937'
                   }}>
-                    Variant B beat Variant A by 9% yesterday
+                    Variant B beat Variant A by 11% in CTR (Product Page Banner Test)
                   </span>
                 </div>
                 
@@ -949,7 +1020,7 @@ export default function TryLabDashboard() {
                     fontSize: '14px',
                     color: '#1F2937'
                   }}>
-                    Experiment 'Cart Upsell' reached 95% confidence
+                    Experiment "Cart Upsell Offer" reached 97% statistical significance
                   </span>
                 </div>
                 
@@ -968,7 +1039,45 @@ export default function TryLabDashboard() {
                     fontSize: '14px',
                     color: '#1F2937'
                   }}>
-                    New experiment added to queue
+                    New experiment started: "Homepage Hero Image" (running 3 variants)
+                  </span>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    background: '#F97316',
+                    borderRadius: '50%'
+                  }}></div>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#1F2937'
+                  }}>
+                    Test "Buy Now Button Color" completed — Winner: Variant A (+6% conversions)
+                  </span>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    background: '#F97316',
+                    borderRadius: '50%'
+                  }}></div>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#1F2937'
+                  }}>
+                    User milestone unlocked: 🎉 10 successful experiments this month
                   </span>
                 </div>
               </div>
@@ -1124,44 +1233,190 @@ export default function TryLabDashboard() {
                 flexDirection: 'column',
                 gap: '16px'
               }}>
-                {[1, 2, 3, 4, 5].map((item) => (
-                  <div key={item} style={{
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    background: '#10B981',
+                    borderRadius: '4px',
                     display: 'flex',
-                    alignItems: 'flex-start',
-                    gap: '12px'
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    color: '#FFFFFF',
+                    flexShrink: 0
                   }}>
+                    🚚
+                  </div>
+                  <div>
                     <div style={{
-                      width: '20px',
-                      height: '20px',
-                      background: '#10B981',
-                      borderRadius: '4px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      color: '#FFFFFF',
-                      flexShrink: 0
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '4px'
                     }}>
-                      🚚
+                      Try a free shipping badge under product prices
                     </div>
-                    <div>
-                      <div style={{
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        marginBottom: '4px'
-                      }}>
-                        Shipping Badge Widget Times indicated in Shipping Badge
-                      </div>
-                      <div style={{
-                        fontSize: '12px',
-                        color: '#6B7280'
-                      }}>
-                        Adding our Shipping Badge bellow A2C can increase CVR by +5%
-                      </div>
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#6B7280'
+                    }}>
+                      Often boosts conversion by 8–12%
                     </div>
                   </div>
-                ))}
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    background: '#10B981',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    color: '#FFFFFF',
+                    flexShrink: 0
+                  }}>
+                    ⏰
+                  </div>
+                  <div>
+                    <div style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '4px'
+                    }}>
+                      Test a countdown timer on cart page
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#6B7280'
+                    }}>
+                      Can increase checkout completion by 5–7%
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    background: '#10B981',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    color: '#FFFFFF',
+                    flexShrink: 0
+                  }}>
+                    🖼️
+                  </div>
+                  <div>
+                    <div style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '4px'
+                    }}>
+                      Swap product images with lifestyle shots vs. plain backgrounds
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#6B7280'
+                    }}>
+                      Great for A/B testing CTR
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    background: '#10B981',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    color: '#FFFFFF',
+                    flexShrink: 0
+                  }}>
+                    🛡️
+                  </div>
+                  <div>
+                    <div style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '4px'
+                    }}>
+                      Add a trust badge near the "Buy Now" button
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#6B7280'
+                    }}>
+                      Improves buyer confidence
+                    </div>
+                  </div>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'flex-start',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '20px',
+                    height: '20px',
+                    background: '#10B981',
+                    borderRadius: '4px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '12px',
+                    color: '#FFFFFF',
+                    flexShrink: 0
+                  }}>
+                    📝
+                  </div>
+                  <div>
+                    <div style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '4px'
+                    }}>
+                      Experiment with short vs. long product descriptions
+                    </div>
+                    <div style={{
+                      fontSize: '12px',
+                      color: '#6B7280'
+                    }}>
+                      Test which drives more add-to-cart
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
 
@@ -1180,28 +1435,103 @@ export default function TryLabDashboard() {
               
               <div style={{
                 display: 'flex',
-                alignItems: 'center',
+                flexDirection: 'column',
                 gap: '12px'
               }}>
                 <div style={{
-                  width: '20px',
-                  height: '20px',
-                  background: '#3B82F6',
-                  borderRadius: '4px',
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '12px',
-                  color: '#FFFFFF'
+                  gap: '12px'
                 }}>
-                  🚀
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    background: '#3B82F6',
+                    borderRadius: '50%'
+                  }}></div>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#1F2937'
+                  }}>
+                    Multi-variant testing (beyond A/B) → run A/B/C/D tests simultaneously
+                  </span>
                 </div>
-                <span style={{
-                  fontSize: '14px',
-                  color: '#1F2937'
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
                 }}>
-                  List of New features added recently
-                </span>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    background: '#3B82F6',
+                    borderRadius: '50%'
+                  }}></div>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#1F2937'
+                  }}>
+                    AI-powered test suggestions tailored to your store data
+                  </span>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    background: '#3B82F6',
+                    borderRadius: '50%'
+                  }}></div>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#1F2937'
+                  }}>
+                    Auto-rollout winners → automatically publish winning variant to your store
+                  </span>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    background: '#3B82F6',
+                    borderRadius: '50%'
+                  }}></div>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#1F2937'
+                  }}>
+                    Deeper analytics: segment results by device, country, or traffic source
+                  </span>
+                </div>
+                
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '12px'
+                }}>
+                  <div style={{
+                    width: '8px',
+                    height: '8px',
+                    background: '#3B82F6',
+                    borderRadius: '50%'
+                  }}></div>
+                  <span style={{
+                    fontSize: '14px',
+                    color: '#1F2937'
+                  }}>
+                    One-click report export to PDF & Google Slides for sharing results
+                  </span>
+                </div>
               </div>
             </div>
           </div>
