@@ -364,7 +364,8 @@ export default function TryLabDashboard() {
         <div style={{
           padding: '0 40px 32px 40px',
           display: 'flex',
-          gap: '20px'
+          gap: '20px',
+          alignItems: 'flex-start'
         }}>
           {/* Active Experiments Card */}
           <div style={{
@@ -372,54 +373,62 @@ export default function TryLabDashboard() {
             background: '#DBEAFE',
             padding: '24px',
             borderRadius: '12px',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            minHeight: '140px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
           }}>
-            <div style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#1F2937',
-              marginBottom: '8px'
-            }}>
-              3
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#1F2937',
-              marginBottom: '16px'
-            }}>
-              Active Experiments
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <span style={{
-                fontSize: '14px',
-                color: '#059669',
-                fontWeight: '600'
-              }}>
-                + 30%
-              </span>
-              <span style={{
-                fontSize: '12px',
-                color: '#1F2937'
-              }}>
-                This month
-              </span>
-            </div>
-            <div style={{
-              marginTop: '8px',
-              display: 'flex',
-              justifyContent: 'flex-end'
-            }}>
+            <div>
               <div style={{
-                width: '24px',
-                height: '16px',
-                background: '#3B82F6',
-                borderRadius: '2px',
-                opacity: 0.3
-              }}></div>
+                fontSize: '32px',
+                fontWeight: '700',
+                color: '#1F2937',
+                marginBottom: '8px'
+              }}>
+                3
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#1F2937',
+                marginBottom: '16px'
+              }}>
+                Active Experiments
+              </div>
+            </div>
+            <div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '8px'
+              }}>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#059669',
+                  fontWeight: '600'
+                }}>
+                  + 30%
+                </span>
+                <span style={{
+                  fontSize: '12px',
+                  color: '#1F2937'
+                }}>
+                  This month
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end'
+              }}>
+                <div style={{
+                  width: '24px',
+                  height: '16px',
+                  background: '#3B82F6',
+                  borderRadius: '2px',
+                  opacity: 0.3
+                }}></div>
+              </div>
             </div>
           </div>
 
@@ -429,54 +438,62 @@ export default function TryLabDashboard() {
             background: '#DBEAFE',
             padding: '24px',
             borderRadius: '12px',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            minHeight: '140px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
           }}>
-            <div style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#1F2937',
-              marginBottom: '8px'
-            }}>
-              34
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#1F2937',
-              marginBottom: '16px'
-            }}>
-              Winning Variants Found
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <span style={{
-                fontSize: '14px',
-                color: '#059669',
-                fontWeight: '600'
-              }}>
-                + 15%
-              </span>
-              <span style={{
-                fontSize: '12px',
-                color: '#1F2937'
-              }}>
-                This month
-              </span>
-            </div>
-            <div style={{
-              marginTop: '8px',
-              display: 'flex',
-              justifyContent: 'flex-end'
-            }}>
+            <div>
               <div style={{
-                width: '24px',
-                height: '16px',
-                background: '#3B82F6',
-                borderRadius: '2px',
-                opacity: 0.3
-              }}></div>
+                fontSize: '32px',
+                fontWeight: '700',
+                color: '#1F2937',
+                marginBottom: '8px'
+              }}>
+                34
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#1F2937',
+                marginBottom: '16px'
+              }}>
+                Winning Variants Found
+              </div>
+            </div>
+            <div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '8px'
+              }}>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#059669',
+                  fontWeight: '600'
+                }}>
+                  + 15%
+                </span>
+                <span style={{
+                  fontSize: '12px',
+                  color: '#1F2937'
+                }}>
+                  This month
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end'
+              }}>
+                <div style={{
+                  width: '24px',
+                  height: '16px',
+                  background: '#3B82F6',
+                  borderRadius: '2px',
+                  opacity: 0.3
+                }}></div>
+              </div>
             </div>
           </div>
 
@@ -486,54 +503,62 @@ export default function TryLabDashboard() {
             background: '#DBEAFE',
             padding: '24px',
             borderRadius: '12px',
-            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
+            minHeight: '140px',
+            display: 'flex',
+            flexDirection: 'column',
+            justifyContent: 'space-between'
           }}>
-            <div style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#1F2937',
-              marginBottom: '8px'
-            }}>
-              +12%
-            </div>
-            <div style={{
-              fontSize: '14px',
-              color: '#1F2937',
-              marginBottom: '16px'
-            }}>
-              Revenue Impact
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'space-between'
-            }}>
-              <span style={{
-                fontSize: '14px',
-                color: '#059669',
-                fontWeight: '600'
-              }}>
-                + 23%
-              </span>
-              <span style={{
-                fontSize: '12px',
-                color: '#1F2937'
-              }}>
-                This month
-              </span>
-            </div>
-            <div style={{
-              marginTop: '8px',
-              display: 'flex',
-              justifyContent: 'flex-end'
-            }}>
+            <div>
               <div style={{
-                width: '24px',
-                height: '16px',
-                background: '#3B82F6',
-                borderRadius: '2px',
-                opacity: 0.3
-              }}></div>
+                fontSize: '32px',
+                fontWeight: '700',
+                color: '#1F2937',
+                marginBottom: '8px'
+              }}>
+                +12%
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#1F2937',
+                marginBottom: '16px'
+              }}>
+                Revenue Impact
+              </div>
+            </div>
+            <div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '8px'
+              }}>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#059669',
+                  fontWeight: '600'
+                }}>
+                  + 23%
+                </span>
+                <span style={{
+                  fontSize: '12px',
+                  color: '#1F2937'
+                }}>
+                  This month
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end'
+              }}>
+                <div style={{
+                  width: '24px',
+                  height: '16px',
+                  background: '#3B82F6',
+                  borderRadius: '2px',
+                  opacity: 0.3
+                }}></div>
+              </div>
             </div>
           </div>
 
@@ -601,14 +626,77 @@ export default function TryLabDashboard() {
                 alignItems: 'center',
                 marginBottom: '24px'
               }}>
-                <h2 style={{
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  color: '#1F2937',
-                  margin: '0'
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }}>
-                  Experiment Overview
-                </h2>
+                  <h2 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    margin: '0'
+                  }}>
+                    Experiment Overview
+                  </h2>
+                  <div style={{
+                    position: 'relative',
+                    display: 'inline-block'
+                  }}>
+                    <div style={{
+                      width: '16px',
+                      height: '16px',
+                      background: '#6B7280',
+                      borderRadius: '50%',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      fontSize: '10px',
+                      color: '#FFFFFF',
+                      fontWeight: 'bold'
+                    }}
+                    onMouseEnter={(e) => {
+                      const tooltip = e.currentTarget.nextElementSibling;
+                      if (tooltip) tooltip.style.display = 'block';
+                    }}
+                    onMouseLeave={(e) => {
+                      const tooltip = e.currentTarget.nextElementSibling;
+                      if (tooltip) tooltip.style.display = 'none';
+                    }}>
+                      i
+                    </div>
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '100%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      background: '#1F2937',
+                      color: '#FFFFFF',
+                      padding: '8px 12px',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      whiteSpace: 'nowrap',
+                      zIndex: 1000,
+                      display: 'none',
+                      marginBottom: '5px',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    }}>
+                      Conversion rate over time for all experiments. Hover over data points to see detailed metrics.
+                      <div style={{
+                        position: 'absolute',
+                        top: '100%',
+                        left: '50%',
+                        transform: 'translateX(-50%)',
+                        width: '0',
+                        height: '0',
+                        borderLeft: '5px solid transparent',
+                        borderRight: '5px solid transparent',
+                        borderTop: '5px solid #1F2937'
+                      }}></div>
+                    </div>
+                  </div>
+                </div>
                 <div style={{
                   display: 'flex',
                   background: '#F3F4F6',
@@ -636,11 +724,9 @@ export default function TryLabDashboard() {
                 </div>
               </div>
               
-              {/* Graph Area */}
+              {/* Graph Area - No Background */}
               <div style={{
                 height: '200px',
-                background: '#F9FAFB',
-                borderRadius: '8px',
                 padding: '16px',
                 position: 'relative'
               }}>
@@ -656,6 +742,7 @@ export default function TryLabDashboard() {
                   fontSize: '12px',
                   color: '#6B7280'
                 }}>
+                  <span>5%</span>
                   <span>4%</span>
                   <span>3%</span>
                   <span>2%</span>
@@ -671,25 +758,55 @@ export default function TryLabDashboard() {
                   top: '16px',
                   bottom: '16px'
                 }}>
-                  {/* Variant A line (blue dotted) */}
+                  {/* Variant A line (blue solid with dots) */}
                   <svg width="100%" height="100%" style={{ position: 'absolute' }}>
                     <polyline
                       points="0,80 50,60 100,70 150,50 200,40 250,30 300,20 350,25 400,15 450,10"
                       fill="none"
                       stroke="#3B82F6"
                       strokeWidth="2"
-                      strokeDasharray="5,5"
                     />
+                    <circle cx="0" cy="80" r="3" fill="#3B82F6" />
+                    <circle cx="50" cy="60" r="3" fill="#3B82F6" />
+                    <circle cx="100" cy="70" r="3" fill="#3B82F6" />
+                    <circle cx="150" cy="50" r="3" fill="#3B82F6" />
+                    <circle cx="200" cy="40" r="3" fill="#3B82F6" />
+                    <circle cx="250" cy="30" r="3" fill="#3B82F6" />
+                    <circle cx="300" cy="20" r="3" fill="#3B82F6" />
+                    <circle cx="350" cy="25" r="3" fill="#3B82F6" />
+                    <circle cx="400" cy="15" r="3" fill="#3B82F6" />
+                    <circle cx="450" cy="10" r="3" fill="#3B82F6" />
                   </svg>
                   
-                  {/* Variant B line (yellow dotted) */}
+                  {/* Variant B line (orange solid with dots) */}
                   <svg width="100%" height="100%" style={{ position: 'absolute' }}>
                     <polyline
                       points="0,90 50,75 100,85 150,65 200,55 250,45 300,35 350,40 400,30 450,25"
                       fill="none"
                       stroke="#F59E0B"
                       strokeWidth="2"
+                    />
+                    <circle cx="0" cy="90" r="3" fill="#F59E0B" />
+                    <circle cx="50" cy="75" r="3" fill="#F59E0B" />
+                    <circle cx="100" cy="85" r="3" fill="#F59E0B" />
+                    <circle cx="150" cy="65" r="3" fill="#F59E0B" />
+                    <circle cx="200" cy="55" r="3" fill="#F59E0B" />
+                    <circle cx="250" cy="45" r="3" fill="#F59E0B" />
+                    <circle cx="300" cy="35" r="3" fill="#F59E0B" />
+                    <circle cx="350" cy="40" r="3" fill="#F59E0B" />
+                    <circle cx="400" cy="30" r="3" fill="#F59E0B" />
+                    <circle cx="450" cy="25" r="3" fill="#F59E0B" />
+                  </svg>
+                  
+                  {/* Control line (grey dotted) */}
+                  <svg width="100%" height="100%" style={{ position: 'absolute' }}>
+                    <polyline
+                      points="0,100 50,95 100,100 150,90 200,85 250,80 300,75 350,80 400,70 450,65"
+                      fill="none"
+                      stroke="#6B7280"
+                      strokeWidth="2"
                       strokeDasharray="5,5"
+                      opacity="0.4"
                     />
                   </svg>
                 </div>
@@ -757,6 +874,23 @@ export default function TryLabDashboard() {
                     fontSize: '12px',
                     color: '#1F2937'
                   }}>Variant B</span>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{
+                    width: '12px',
+                    height: '12px',
+                    background: '#6B7280',
+                    borderRadius: '50%',
+                    opacity: '0.4'
+                  }}></div>
+                  <span style={{
+                    fontSize: '12px',
+                    color: '#1F2937'
+                  }}>Control</span>
                 </div>
               </div>
             </div>
