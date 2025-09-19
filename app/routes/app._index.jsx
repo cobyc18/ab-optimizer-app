@@ -566,7 +566,7 @@ export default function TryLabDashboard() {
 
         {/* Main Content Grid */}
         <div style={{
-          padding: '0 40px 40px 35px',
+          padding: '0 40px 40px 30px',
           display: 'flex',
           gap: '24px',
           alignItems: 'flex-start'
@@ -981,37 +981,37 @@ export default function TryLabDashboard() {
               overflow: 'hidden',
               display: 'flex',
               alignItems: 'center',
-              gap: '32px'
+              gap: '20px'
             }}>
               {/* Left Section - Large Badge + Title */}
               <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '16px',
+                gap: '12px',
                 flexShrink: 0
               }}>
                 <div style={{
-                  width: '60px',
-                  height: '60px',
+                  width: '45px',
+                  height: '45px',
                   background: '#FFFFFF',
                   borderRadius: '50%',
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  fontSize: '28px'
+                  fontSize: '20px'
                 }}>
                   🏆
                 </div>
                 <div>
                   <h3 style={{
-                    fontSize: '24px',
+                    fontSize: '18px',
                     fontWeight: '700',
-                    margin: '0 0 4px 0'
+                    margin: '0 0 2px 0'
                   }}>
                     Legend Scientist
                   </h3>
                   <p style={{
-                    fontSize: '14px',
+                    fontSize: '12px',
                     margin: '0',
                     opacity: 0.9
                   }}>
@@ -1055,61 +1055,61 @@ export default function TryLabDashboard() {
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '8px',
+                gap: '6px',
                 flexShrink: 0
               }}>
                 <div style={{
                   display: 'flex',
-                  gap: '8px',
+                  gap: '6px',
                   flexWrap: 'wrap'
                 }}>
                   <div style={{
                     background: 'rgba(255, 255, 255, 0.2)',
-                    padding: '6px 12px',
-                    borderRadius: '16px',
-                    fontSize: '12px',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '4px'
                   }}>
                     🎉 First Winner Found
                   </div>
                   <div style={{
                     background: 'rgba(255, 255, 255, 0.2)',
-                    padding: '6px 12px',
-                    borderRadius: '16px',
-                    fontSize: '12px',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '4px'
                   }}>
                     🚀 5 Experiments Launched
                   </div>
                 </div>
                 <div style={{
                   display: 'flex',
-                  gap: '8px',
+                  gap: '6px',
                   flexWrap: 'wrap'
                 }}>
                   <div style={{
                     background: 'rgba(255, 255, 255, 0.2)',
-                    padding: '6px 12px',
-                    borderRadius: '16px',
-                    fontSize: '12px',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '4px'
                   }}>
                     👥 1000 Visitors Tested
                   </div>
                   <div style={{
                     background: 'rgba(255, 255, 255, 0.2)',
-                    padding: '6px 12px',
-                    borderRadius: '16px',
-                    fontSize: '12px',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '6px'
+                    gap: '4px'
                   }}>
                     🔥 Streak: 4 Weeks Testing
                   </div>
@@ -1119,25 +1119,25 @@ export default function TryLabDashboard() {
               {/* Far Right Section - Two mini containers */}
               <div style={{
                 display: 'flex',
-                gap: '16px',
+                gap: '12px',
                 flexShrink: 0
               }}>
                 <div style={{
                   background: 'rgba(255, 255, 255, 0.1)',
-                  padding: '16px',
-                  borderRadius: '8px',
+                  padding: '12px',
+                  borderRadius: '6px',
                   textAlign: 'center',
-                  minWidth: '80px'
+                  minWidth: '70px'
                 }}>
                   <div style={{
-                    fontSize: '20px',
+                    fontSize: '16px',
                     fontWeight: '700',
-                    marginBottom: '4px'
+                    marginBottom: '2px'
                   }}>
                     23
                   </div>
                   <div style={{
-                    fontSize: '11px',
+                    fontSize: '9px',
                     opacity: 0.8
                   }}>
                     Tests Run (lifetime)
@@ -1145,20 +1145,20 @@ export default function TryLabDashboard() {
                 </div>
                 <div style={{
                   background: 'rgba(255, 255, 255, 0.1)',
-                  padding: '16px',
-                  borderRadius: '8px',
+                  padding: '12px',
+                  borderRadius: '6px',
                   textAlign: 'center',
-                  minWidth: '80px'
+                  minWidth: '70px'
                 }}>
                   <div style={{
-                    fontSize: '20px',
+                    fontSize: '16px',
                     fontWeight: '700',
-                    marginBottom: '4px'
+                    marginBottom: '2px'
                   }}>
                     8
                   </div>
                   <div style={{
-                    fontSize: '11px',
+                    fontSize: '9px',
                     opacity: 0.8
                   }}>
                     Winners Pushed (lifetime)
