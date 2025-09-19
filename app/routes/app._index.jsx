@@ -565,13 +565,14 @@ export default function TryLabDashboard() {
           {/* What's New Section - Part of Background */}
           <div style={{
             flex: 1,
-            padding: '24px'
+            padding: '24px 24px 0 0'
           }}>
             <h2 style={{
               fontSize: '18px',
               fontWeight: '600',
               color: '#1F2937',
-              margin: '0 0 20px 0'
+              margin: '0 0 20px 0',
+              paddingTop: '0'
             }}>
               Whats New
             </h2>
@@ -1099,13 +1100,14 @@ export default function TryLabDashboard() {
             </div>
           </div>
 
-          {/* Right Column */}
+          {/* Right Column - Aligned with What's New */}
           <div style={{
-            flex: 1
+            flex: 1,
+            paddingTop: '0'
           }}>
             {/* New Test Ideas - Part of Background */}
             <div style={{
-              padding: '24px',
+              padding: '0 0 24px 0',
               marginBottom: '24px'
             }}>
               <h2 style={{
@@ -1165,7 +1167,7 @@ export default function TryLabDashboard() {
 
             {/* Upcoming Features - Part of Background */}
             <div style={{
-              padding: '24px'
+              padding: '0'
             }}>
               <h2 style={{
                 fontSize: '18px',
