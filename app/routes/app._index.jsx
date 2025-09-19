@@ -566,7 +566,7 @@ export default function TryLabDashboard() {
 
         {/* Main Content Grid */}
         <div style={{
-          padding: '0 40px 40px 40px',
+          padding: '0 40px 40px 0',
           display: 'flex',
           gap: '24px',
           alignItems: 'flex-start'
@@ -1101,7 +1101,7 @@ export default function TryLabDashboard() {
           <div style={{
             flex: 1,
             paddingTop: '0',
-            paddingLeft: '24px'
+            paddingLeft: '64px'
           }}>
             {/* What's New Section - Part of Background */}
             <div style={{
