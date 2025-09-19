@@ -311,19 +311,20 @@ export default function TryLabDashboard() {
         </div>
       </div>
 
-      {/* Main Content Area */}
+      {/* Main Content Area - Full Width */}
       <div style={{
         marginLeft: '280px',
-        flex: 1,
-        padding: '24px',
-        background: '#F5F5F5'
+        width: 'calc(100vw - 280px)',
+        minHeight: '100vh',
+        background: '#F5F5F5',
+        padding: '0'
       }}>
         {/* Header Section */}
         <div style={{
+          padding: '32px 40px 24px 40px',
           display: 'flex',
           justifyContent: 'space-between',
-          alignItems: 'flex-start',
-          marginBottom: '32px'
+          alignItems: 'flex-start'
         }}>
           <div>
             <h1 style={{
@@ -361,9 +362,9 @@ export default function TryLabDashboard() {
 
         {/* Key Metrics Cards */}
         <div style={{
+          padding: '0 40px 32px 40px',
           display: 'flex',
-          gap: '20px',
-          marginBottom: '32px'
+          gap: '20px'
         }}>
           {/* Active Experiments Card */}
           <div style={{
@@ -539,6 +540,7 @@ export default function TryLabDashboard() {
 
         {/* Main Content Grid */}
         <div style={{
+          padding: '0 40px 40px 40px',
           display: 'flex',
           gap: '24px'
         }}>
