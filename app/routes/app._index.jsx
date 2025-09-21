@@ -1221,7 +1221,7 @@ export default function TryLabDashboard() {
                     fontSize: '14px',
                     color: '#1F2937'
                   }}>
-                    You can now see which version is winning faster — no more guessing
+                    You can now see which version is winning faster — no more guessing!
                   </span>
                 </div>
                 <div style={{
