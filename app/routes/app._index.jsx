@@ -369,12 +369,12 @@ export default function TryLabDashboard() {
         }}>
           {/* Active Experiments Card */}
           <div style={{
-            flex: 1,
+            flex: 0.8,
             background: '#97CDFF',
-            padding: '24px',
+            padding: '20px',
             borderRadius: '12px',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-            minHeight: '140px',
+            minHeight: '120px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between'
@@ -434,12 +434,12 @@ export default function TryLabDashboard() {
 
           {/* Winning Variants Found Card */}
           <div style={{
-            flex: 1,
+            flex: 0.8,
             background: '#97CDFF',
-            padding: '24px',
+            padding: '20px',
             borderRadius: '12px',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-            minHeight: '140px',
+            minHeight: '120px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between'
@@ -499,12 +499,12 @@ export default function TryLabDashboard() {
 
           {/* Revenue Impact Card */}
           <div style={{
-            flex: 1,
+            flex: 0.8,
             background: '#97CDFF',
-            padding: '24px',
+            padding: '20px',
             borderRadius: '12px',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-            minHeight: '140px',
+            minHeight: '120px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between'
@@ -562,11 +562,122 @@ export default function TryLabDashboard() {
             </div>
           </div>
 
+          {/* What's New Section - Part of Background */}
+          <div style={{
+            flex: 1.2,
+            padding: '0 0 0 0'
+          }}>
+            <h2 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#1F2937',
+              margin: '0 0 20px 0'
+            }}>
+              Whats New
+            </h2>
+            
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '12px'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  background: '#F97316',
+                  borderRadius: '50%'
+                }}></div>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#1F2937'
+                }}>
+                  You can now see which version is winning faster — no more guessing!
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  background: '#F97316',
+                  borderRadius: '50%'
+                }}></div>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#1F2937'
+                }}>
+                  Cleaner graphs to understand your results at a glance
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  background: '#F97316',
+                  borderRadius: '50%'
+                }}></div>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#1F2937'
+                }}>
+                  Easier setup flow — launch a new test in just 2 clicks
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  background: '#F97316',
+                  borderRadius: '50%'
+                }}></div>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#1F2937'
+                }}>
+                  Shopify sync improved — your products and pages show up instantly
+                </span>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <div style={{
+                  width: '8px',
+                  height: '8px',
+                  background: '#F97316',
+                  borderRadius: '50%'
+                }}></div>
+                <span style={{
+                  fontSize: '14px',
+                  color: '#1F2937'
+                }}>
+                  Added tooltips & guides so you always know what each number means
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Main Content Grid */}
         <div style={{
-          padding: '0 40px 40px 30px',
+          padding: '0 40px 40px 25px',
           display: 'flex',
           gap: '24px',
           alignItems: 'flex-start'
@@ -979,7 +1090,7 @@ export default function TryLabDashboard() {
               color: '#FFFFFF',
               position: 'relative',
               overflow: 'hidden',
-              minHeight: '140px'
+              minHeight: '180px'
             }}>
               {/* Top Row - Badge + Title + Mini Containers */}
               <div style={{
@@ -1024,6 +1135,9 @@ export default function TryLabDashboard() {
                     </p>
                   </div>
                 </div>
+
+                {/* Spacer to push mini containers to the right */}
+                <div style={{ flex: 1 }}></div>
 
                 {/* Right Section - Mini Containers */}
                 <div style={{
@@ -1076,105 +1190,96 @@ export default function TryLabDashboard() {
                 </div>
               </div>
 
-              {/* Bottom Row - Progress Bar + Mini Badges */}
+              {/* Middle Row - Progress Bar */}
+              <div style={{
+                marginBottom: '16px'
+              }}>
+                <div style={{
+                  marginBottom: '8px'
+                }}>
+                  <span style={{
+                    fontSize: '14px',
+                    opacity: 0.9
+                  }}>
+                    150 pts to go
+                  </span>
+                </div>
+                <div style={{
+                  width: '100%',
+                  height: '8px',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  borderRadius: '4px',
+                  overflow: 'hidden'
+                }}>
+                  <div style={{
+                    width: '60%',
+                    height: '100%',
+                    background: '#FFFFFF',
+                    borderRadius: '4px'
+                  }}></div>
+                </div>
+              </div>
+
+              {/* Bottom Row - Mini Badges */}
               <div style={{
                 display: 'flex',
-                alignItems: 'center',
-                gap: '20px'
+                flexDirection: 'column',
+                gap: '6px'
               }}>
-                {/* Progress Bar Section */}
-                <div style={{
-                  flex: 1,
-                  minWidth: '200px'
-                }}>
-                  <div style={{
-                    marginBottom: '8px'
-                  }}>
-                    <span style={{
-                      fontSize: '14px',
-                      opacity: 0.9
-                    }}>
-                      150 pts to go
-                    </span>
-                  </div>
-                  <div style={{
-                    width: '100%',
-                    height: '8px',
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    borderRadius: '4px',
-                    overflow: 'hidden'
-                  }}>
-                    <div style={{
-                      width: '60%',
-                      height: '100%',
-                      background: '#FFFFFF',
-                      borderRadius: '4px'
-                    }}></div>
-                  </div>
-                </div>
-
-                {/* Mini Badges Section */}
                 <div style={{
                   display: 'flex',
-                  flexDirection: 'column',
                   gap: '6px',
-                  flexShrink: 0
+                  flexWrap: 'wrap'
                 }}>
                   <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
                     display: 'flex',
-                    gap: '6px',
-                    flexWrap: 'wrap'
+                    alignItems: 'center',
+                    gap: '4px'
                   }}>
-                    <div style={{
-                      background: 'rgba(255, 255, 255, 0.2)',
-                      padding: '4px 8px',
-                      borderRadius: '12px',
-                      fontSize: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}>
-                      🎉 First Winner Found
-                    </div>
-                    <div style={{
-                      background: 'rgba(255, 255, 255, 0.2)',
-                      padding: '4px 8px',
-                      borderRadius: '12px',
-                      fontSize: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}>
-                      🚀 5 Experiments Launched
-                    </div>
+                    🎉 First Winner Found
                   </div>
                   <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
                     display: 'flex',
-                    gap: '6px',
-                    flexWrap: 'wrap'
+                    alignItems: 'center',
+                    gap: '4px'
                   }}>
-                    <div style={{
-                      background: 'rgba(255, 255, 255, 0.2)',
-                      padding: '4px 8px',
-                      borderRadius: '12px',
-                      fontSize: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}>
-                      👥 1000 Visitors Tested
-                    </div>
-                    <div style={{
-                      background: 'rgba(255, 255, 255, 0.2)',
-                      padding: '4px 8px',
-                      borderRadius: '12px',
-                      fontSize: '10px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px'
-                    }}>
-                      🔥 Streak: 4 Weeks Testing
-                    </div>
+                    🚀 5 Experiments Launched
+                  </div>
+                </div>
+                <div style={{
+                  display: 'flex',
+                  gap: '6px',
+                  flexWrap: 'wrap'
+                }}>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    👥 1000 Visitors Tested
+                  </div>
+                  <div style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    padding: '4px 8px',
+                    borderRadius: '12px',
+                    fontSize: '10px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}>
+                    🔥 Streak: 4 Weeks Testing
                   </div>
                 </div>
               </div>
@@ -1185,120 +1290,8 @@ export default function TryLabDashboard() {
           <div style={{
             flex: 1,
             paddingTop: '0',
-            paddingLeft: '24px'
+            paddingLeft: '0'
           }}>
-            {/* What's New Section - Part of Background */}
-            <div style={{
-              padding: '0 0 24px 0',
-              marginBottom: '24px'
-            }}>
-              <h2 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1F2937',
-                margin: '0 0 20px 0'
-              }}>
-                Whats New
-              </h2>
-              
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '12px'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    background: '#F97316',
-                    borderRadius: '50%'
-                  }}></div>
-                  <span style={{
-                    fontSize: '14px',
-                    color: '#1F2937'
-                  }}>
-                    You can now see which version is winning faster — no more guessing!
-                  </span>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    background: '#F97316',
-                    borderRadius: '50%'
-                  }}></div>
-                  <span style={{
-                    fontSize: '14px',
-                    color: '#1F2937'
-                  }}>
-                    Cleaner graphs to understand your results at a glance
-                  </span>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    background: '#F97316',
-                    borderRadius: '50%'
-                  }}></div>
-                  <span style={{
-                    fontSize: '14px',
-                    color: '#1F2937'
-                  }}>
-                    Easier setup flow — launch a new test in just 2 clicks
-                  </span>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    background: '#F97316',
-                    borderRadius: '50%'
-                  }}></div>
-                  <span style={{
-                    fontSize: '14px',
-                    color: '#1F2937'
-                  }}>
-                    Shopify sync improved — your products and pages show up instantly
-                  </span>
-                </div>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px'
-                }}>
-                  <div style={{
-                    width: '8px',
-                    height: '8px',
-                    background: '#F97316',
-                    borderRadius: '50%'
-                  }}></div>
-                  <span style={{
-                    fontSize: '14px',
-                    color: '#1F2937'
-                  }}>
-                    Added tooltips & guides so you always know what each number means
-                  </span>
-                </div>
-              </div>
-            </div>
-
             {/* New Test Ideas - Part of Background */}
             <div style={{
               padding: '0 0 24px 0',
