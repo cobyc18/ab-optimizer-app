@@ -1,0 +1,390 @@
+{% comment %}
+{
+  "name": "Product Carousel",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "carousel_title",
+      "label": "Carousel Title",
+      "default": "You may also like"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "Products to display",
+      "limit": 10
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show navigation arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show pagination dots",
+      "default": true
+    }
+  ]
+}
+{% endcomment %}
+
+<div class="product-carousel-widget" data-carousel-id="carousel-{{ block.id }}">
+  <div class="carousel-header">
+    <h3 class="carousel-title">{{ block.settings.carousel_title }}</h3>
+    {% if block.settings.show_navigation %}
+      <div class="carousel-navigation">
+        <button class="nav-arrow nav-prev" data-direction="prev">‹</button>
+        <button class="nav-arrow nav-next" data-direction="next">›</button>
+      </div>
+    {% endif %}
+  </div>
+  
+  <div class="carousel-container">
+    <div class="carousel-track" data-carousel-track>
+      {% for product in block.settings.products limit: 10 %}
+        <div class="carousel-slide">
+          <div class="product-card">
+            {% if product.featured_image %}
+              <img src="{{ product.featured_image | img_url: '200x200' }}" 
+                   alt="{{ product.title }}" 
+                   class="product-image"
+                   loading="lazy">
+            {% endif %}
+            
+            <div class="product-info">
+              <h4 class="product-title">{{ product.title }}</h4>
+              
+              <div class="product-pricing">
+                {% if product.compare_at_price > product.price %}
+                  <span class="price-original">{{ product.compare_at_price | money }}</span>
+                  <span class="price-sale">{{ product.price | money }}</span>
+                {% else %}
+                  <span class="price-regular">{{ product.price | money }}</span>
+                {% endif %}
+              </div>
+              
+              {% if product.variants.size > 1 %}
+                <div class="product-options">
+                  {% for variant in product.variants limit: 2 %}
+                    <button class="variant-option" data-variant-id="{{ variant.id }}">
+                      {{ variant.title }}
+                    </button>
+                  {% endfor %}
+                </div>
+              {% endif %}
+              
+              <button class="add-to-cart-btn" 
+                      data-product-id="{{ product.id }}"
+                      data-variant-id="{{ product.selected_or_first_available_variant.id }}">
+                Add
+              </button>
+            </div>
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+  
+  {% if block.settings.show_pagination %}
+    <div class="carousel-pagination" data-carousel-pagination>
+      {% for product in block.settings.products limit: 10 %}
+        <button class="pagination-dot" data-slide="{{ forloop.index0 }}"></button>
+      {% endfor %}
+    </div>
+  {% endif %}
+</div>
+
+<style>
+.product-carousel-widget {
+  margin: 20px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+.carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.carousel-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.carousel-navigation {
+  display: flex;
+  gap: 8px;
+}
+
+.nav-arrow {
+  width: 32px;
+  height: 32px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.nav-arrow:hover {
+  background: #f5f5f5;
+  border-color: #999;
+}
+
+.carousel-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.carousel-track {
+  display: flex;
+  transition: transform 0.3s ease;
+}
+
+.carousel-slide {
+  flex: 0 0 280px;
+  margin-right: 16px;
+}
+
+.product-card {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 16px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-image {
+  width: 100%;
+  height: 120px;
+  object-fit: cover;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0 0 8px 0;
+  color: #333;
+  text-align: center;
+}
+
+.product-pricing {
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+.price-original {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.price-sale, .price-regular {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.product-options {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+  justify-content: center;
+}
+
+.variant-option {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.variant-option:hover, .variant-option.selected {
+  border-color: #007bff;
+  background: #f0f8ff;
+}
+
+.add-to-cart-btn {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 4px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  margin-top: auto;
+  transition: background 0.2s ease;
+}
+
+.add-to-cart-btn:hover {
+  background: #0056b3;
+}
+
+.carousel-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.pagination-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: none;
+  background: #ddd;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.pagination-dot.active {
+  background: #007bff;
+}
+
+@media (max-width: 768px) {
+  .carousel-slide {
+    flex: 0 0 240px;
+  }
+  
+  .carousel-title {
+    font-size: 16px;
+  }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const carousel = document.querySelector('[data-carousel-id="carousel-{{ block.id }}"]');
+  if (!carousel) return;
+  
+  const track = carousel.querySelector('[data-carousel-track]');
+  const slides = carousel.querySelectorAll('.carousel-slide');
+  const prevBtn = carousel.querySelector('.nav-prev');
+  const nextBtn = carousel.querySelector('.nav-next');
+  const dots = carousel.querySelectorAll('.pagination-dot');
+  
+  let currentSlide = 0;
+  const slidesToShow = window.innerWidth < 768 ? 1 : 2;
+  const maxSlide = Math.max(0, slides.length - slidesToShow);
+  
+  function updateCarousel() {
+    const translateX = -currentSlide * (280 + 16);
+    track.style.transform = `translateX(${translateX}px)`;
+    
+    dots.forEach((dot, index) => {
+      dot.classList.toggle('active', index === currentSlide);
+    });
+  }
+  
+  function nextSlide() {
+    currentSlide = Math.min(currentSlide + 1, maxSlide);
+    updateCarousel();
+  }
+  
+  function prevSlide() {
+    currentSlide = Math.max(currentSlide - 1, 0);
+    updateCarousel();
+  }
+  
+  if (nextBtn) nextBtn.addEventListener('click', nextSlide);
+  if (prevBtn) prevBtn.addEventListener('click', prevSlide);
+  
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      currentSlide = index;
+      updateCarousel();
+    });
+  });
+  
+  // Add to cart functionality
+  carousel.addEventListener('click', function(e) {
+    if (e.target.classList.contains('add-to-cart-btn')) {
+      const productId = e.target.dataset.productId;
+      const variantId = e.target.dataset.variantId;
+      
+      fetch('/cart/add.js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          id: variantId,
+          quantity: 1
+        })
+      })
+      .then(response => response.json())
+      .then(data => {
+        if (data.status === 422) {
+          alert('Product could not be added to cart');
+        } else {
+          // Trigger cart update event
+          document.dispatchEvent(new CustomEvent('cart:updated'));
+        }
+      })
+      .catch(error => {
+        console.error('Error adding to cart:', error);
+      });
+    }
+  });
+  
+  updateCarousel();
+});
+</script>
+
+{% schema %}
+{
+  "name": "Product Carousel",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "carousel_title",
+      "label": "Carousel Title",
+      "default": "You may also like"
+    },
+    {
+      "type": "product_list",
+      "id": "products",
+      "label": "Products to display",
+      "limit": 10
+    },
+    {
+      "type": "checkbox",
+      "id": "show_navigation",
+      "label": "Show navigation arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_pagination",
+      "label": "Show pagination dots",
+      "default": true
+    }
+  ]
+}
+{% endschema %}
