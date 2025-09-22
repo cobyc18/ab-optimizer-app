@@ -78,11 +78,20 @@
                 </div>
               {% endif %}
               
-              <button class="add-to-cart-btn{% if forloop.index > 3 %} plus{% endif %}" 
-                      data-product-id="{{ product.id }}"
-                      data-variant-id="{{ product.selected_or_first_available_variant.id }}">
-                {% if forloop.index > 3 %}+ {% endif %}Add
-              </button>
+              {% assign available_variant = product.selected_or_first_available_variant %}
+              {% if available_variant %}
+                <button class="add-to-cart-btn{% if forloop.index > 3 %} plus{% endif %}" 
+                        data-product-id="{{ product.id }}"
+                        data-variant-id="{{ available_variant.id }}"
+                        data-variant-title="{{ available_variant.title }}"
+                        data-product-title="{{ product.title }}">
+                  {% if forloop.index > 3 %}+ {% endif %}Add
+                </button>
+              {% else %}
+                <button class="add-to-cart-btn disabled" disabled>
+                  Sold Out
+                </button>
+              {% endif %}
             </div>
           </div>
         </div>
@@ -292,6 +301,19 @@
   background: #2563eb;
 }
 
+.add-to-cart-btn:disabled,
+.add-to-cart-btn.disabled {
+  background: #9ca3af !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.add-to-cart-btn:disabled:hover,
+.add-to-cart-btn.disabled:hover {
+  transform: none;
+  background: #9ca3af !important;
+}
+
 .carousel-pagination {
   display: flex;
   justify-content: center;
@@ -375,32 +397,78 @@ document.addEventListener('DOMContentLoaded', function() {
   
   // Add to cart functionality
   carousel.addEventListener('click', function(e) {
-    if (e.target.classList.contains('add-to-cart-btn')) {
+    if (e.target.classList.contains('add-to-cart-btn') && !e.target.disabled) {
       const button = e.target;
       const variantId = button.dataset.variantId;
+      const variantTitle = button.dataset.variantTitle;
+      const productTitle = button.dataset.productTitle;
+      
+      // Validate variant ID
+      if (!variantId || variantId === 'undefined') {
+        console.error('Invalid variant ID:', variantId);
+        alert('This product variant is not available.');
+        return;
+      }
       
       // Disable button during request
       button.disabled = true;
+      const originalText = button.textContent;
       button.textContent = 'Adding...';
       
-      // Use Shopify's cart form submission approach
-      const formData = new FormData();
-      formData.append('id', variantId);
-      formData.append('quantity', '1');
+      console.log('Adding to cart:', {
+        variantId: variantId,
+        variantTitle: variantTitle,
+        productTitle: productTitle
+      });
       
-      fetch('/cart/add.js', {
-        method: 'POST',
-        body: formData
-      })
-      .then(response => {
+      // Try multiple approaches to add to cart
+      const tryAddToCart = async () => {
+        // Method 1: FormData approach
+        const formData = new FormData();
+        formData.append('id', variantId);
+        formData.append('quantity', '1');
+        
+        let response = await fetch('/cart/add.js', {
+          method: 'POST',
+          body: formData
+        });
+        
         if (!response.ok) {
-          throw new Error('Network response was not ok');
+          console.log('FormData method failed, trying JSON method...');
+          
+          // Method 2: JSON approach
+          response = await fetch('/cart/add.js', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'X-Requested-With': 'XMLHttpRequest'
+            },
+            body: JSON.stringify({
+              id: variantId,
+              quantity: 1
+            })
+          });
+        }
+        
+        return response;
+      };
+      
+      tryAddToCart()
+      .then(response => {
+        console.log('Cart response status:', response.status);
+        
+        if (!response.ok) {
+          return response.text().then(text => {
+            console.error('Cart error response:', text);
+            throw new Error(`HTTP ${response.status}: ${text}`);
+          });
         }
         return response.json();
       })
       .then(data => {
+        console.log('Cart add success:', data);
+        
         // Success - show feedback
-        const originalText = button.textContent.includes('+') ? '+ Add' : 'Add';
         button.textContent = 'Added!';
         button.style.background = '#10b981';
         
@@ -421,19 +489,27 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(res => res.json())
             .then(cart => {
               cartCount.textContent = cart.item_count;
-            });
+            })
+            .catch(err => console.log('Could not update cart count:', err));
         }
       })
       .catch(error => {
         console.error('Error adding to cart:', error);
         
         // Reset button on error
-        const originalText = button.textContent.includes('+') ? '+ Add' : 'Add';
         button.textContent = originalText;
         button.disabled = false;
         
-        // Show user-friendly error
-        alert('Sorry, this product could not be added to your cart. Please try again.');
+        // Show user-friendly error based on error type
+        let errorMessage = 'Sorry, this product could not be added to your cart.';
+        
+        if (error.message.includes('422')) {
+          errorMessage = 'This product variant is not available or is sold out.';
+        } else if (error.message.includes('Network')) {
+          errorMessage = 'Network error. Please check your connection and try again.';
+        }
+        
+        alert(errorMessage);
       });
     }
   });
