@@ -55,9 +55,27 @@
             {% endif %}
             
             <div class="product-info">
+              <!-- Product Header: Title Only -->
               <div class="product-header">
                 <h4 class="product-title">{{ product.title }}</h4>
-                <div class="product-pricing">
+              </div>
+              
+              <!-- Product Content: Variants -->
+              <div class="product-content">
+                {% if product.variants.size > 1 %}
+                  <div class="product-options">
+                    {% for variant in product.variants limit: 2 %}
+                      <button class="variant-option" data-variant-id="{{ variant.id }}">
+                        {{ variant.title }}
+                      </button>
+                    {% endfor %}
+                  </div>
+                {% endif %}
+              </div>
+              
+              <!-- Product Footer: Price and Add Button -->
+              <div class="product-footer">
+                <div class="product-price">
                   {% if product.compare_at_price > product.price %}
                     <span class="price-original">{{ product.compare_at_price | money }}</span>
                     <span class="price-sale">{{ product.price | money }}</span>
@@ -67,32 +85,22 @@
                     <span class="price-regular">{{ product.price | money }}</span>
                   {% endif %}
                 </div>
+                
+                {% assign available_variant = product.selected_or_first_available_variant %}
+                {% if available_variant %}
+                  <button class="add-to-cart-btn{% if forloop.index > 3 %} plus{% endif %}" 
+                          data-product-id="{{ product.id }}"
+                          data-variant-id="{{ available_variant.id }}"
+                          data-variant-title="{{ available_variant.title }}"
+                          data-product-title="{{ product.title }}">
+                    {% if forloop.index > 3 %}+ {% endif %}Add
+                  </button>
+                {% else %}
+                  <button class="add-to-cart-btn disabled" disabled>
+                    Sold Out
+                  </button>
+                {% endif %}
               </div>
-              
-              {% if product.variants.size > 1 %}
-                <div class="product-options">
-                  {% for variant in product.variants limit: 2 %}
-                    <button class="variant-option" data-variant-id="{{ variant.id }}">
-                      {{ variant.title }}
-                    </button>
-                  {% endfor %}
-                </div>
-              {% endif %}
-              
-              {% assign available_variant = product.selected_or_first_available_variant %}
-              {% if available_variant %}
-                <button class="add-to-cart-btn{% if forloop.index > 3 %} plus{% endif %}" 
-                        data-product-id="{{ product.id }}"
-                        data-variant-id="{{ available_variant.id }}"
-                        data-variant-title="{{ available_variant.title }}"
-                        data-product-title="{{ product.title }}">
-                  {% if forloop.index > 3 %}+ {% endif %}Add
-                </button>
-              {% else %}
-                <button class="add-to-cart-btn disabled" disabled>
-                  Sold Out
-                </button>
-              {% endif %}
             </div>
           </div>
         </div>
@@ -115,16 +123,21 @@
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
   background: #f5f5f5;
   border-radius: 8px;
-  padding: 20px;
-  width: 100%;
+  padding: 40px 20px;
+  width: 100vw;
   max-width: none;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
 }
 
 .carousel-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .carousel-title {
@@ -201,12 +214,12 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  position: relative;
 }
 
+/* Product Header Section */
 .product-header {
-  position: relative;
   margin-bottom: 12px;
+  padding: 8px 0;
 }
 
 .product-title {
@@ -215,14 +228,6 @@
   margin: 0;
   color: #333;
   text-align: center;
-  padding-right: 60px;
-}
-
-.product-pricing {
-  position: absolute;
-  top: 0;
-  right: 0;
-  text-align: right;
 }
 
 .price-original {
@@ -251,10 +256,18 @@
   letter-spacing: 0.025em;
 }
 
+/* Product Content Section */
+.product-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+}
+
 .product-options {
   display: flex;
   gap: 4px;
-  margin-bottom: 12px;
   justify-content: center;
 }
 
@@ -275,6 +288,19 @@
   color: #007bff;
 }
 
+/* Product Footer Section */
+.product-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  margin-top: auto;
+}
+
+.product-price {
+  text-align: left;
+}
+
 .add-to-cart-btn {
   background: #1e3a8a;
   color: white;
@@ -284,9 +310,6 @@
   font-size: 15px;
   font-weight: 600;
   cursor: pointer;
-  position: absolute;
-  bottom: 0;
-  right: 0;
   transition: background 0.2s ease;
   min-width: 70px;
 }
@@ -320,23 +343,29 @@
 .carousel-pagination {
   display: flex;
   justify-content: center;
-  gap: 8px;
-  margin-top: 16px;
+  gap: 12px;
+  margin-top: 20px;
+  align-items: center;
 }
 
 .pagination-dot {
-  width: 6px;
-  height: 6px;
-  border-radius: 50%;
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
   border: none;
   background: #ddd;
   cursor: pointer;
-  transition: background 0.2s ease;
+  transition: all 0.3s ease;
   flex-shrink: 0;
 }
 
 .pagination-dot.active {
-  background: #007bff;
+  background: #1e3a8a;
+  transform: scaleX(1.2);
+}
+
+.pagination-dot:hover {
+  background: #9ca3af;
 }
 
 @media (max-width: 768px) {

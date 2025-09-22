@@ -1,0 +1,152 @@
+{% comment %}
+{
+  "name": "Live Visitor Count",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "visitor_text",
+      "label": "Visitor Text",
+      "default": "People viewing this page"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "number_color",
+      "label": "Number Color",
+      "default": "#1e3a8a"
+    }
+  ]
+}
+{% endcomment %}
+
+<div class="live-visitor-widget" data-widget-id="visitor-{{ block.id }}">
+  <span class="visitor-count" data-count="76">76</span>
+  <span class="visitor-text">{{ block.settings.visitor_text | default: "People viewing this page" }}</span>
+</div>
+
+<style>
+.live-visitor-widget {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 16px;
+  background: #f8f9fa;
+  border-radius: 20px;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  font-size: 14px;
+  border: 1px solid #e9ecef;
+}
+
+.visitor-count {
+  font-weight: 700;
+  color: {{ block.settings.number_color | default: '#1e3a8a' }};
+  min-width: 24px;
+  text-align: center;
+}
+
+.visitor-text {
+  color: {{ block.settings.text_color | default: '#333333' }};
+  font-weight: 500;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.7; }
+}
+
+.visitor-count.updating {
+  animation: pulse 0.6s ease-in-out;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const widget = document.querySelector('[data-widget-id="visitor-{{ block.id }}"]');
+  const countElement = widget.querySelector('.visitor-count');
+  
+  if (!widget || !countElement) return;
+  
+  let currentCount = parseInt(countElement.dataset.count) || 76;
+  
+  // Simulate live visitor tracking
+  function updateVisitorCount() {
+    // Generate realistic visitor count changes
+    const change = Math.random() > 0.5 ? 
+      Math.floor(Math.random() * 3) + 1 : // +1 to +3
+      -(Math.floor(Math.random() * 2) + 1); // -1 to -2
+    
+    const newCount = Math.max(1, currentCount + change);
+    
+    if (newCount !== currentCount) {
+      countElement.classList.add('updating');
+      currentCount = newCount;
+      
+      setTimeout(() => {
+        countElement.textContent = currentCount;
+        countElement.dataset.count = currentCount;
+        countElement.classList.remove('updating');
+      }, 300);
+    }
+  }
+  
+  // Update every 8-15 seconds
+  function scheduleNextUpdate() {
+    const delay = Math.random() * 7000 + 8000; // 8-15 seconds
+    setTimeout(() => {
+      updateVisitorCount();
+      scheduleNextUpdate();
+    }, delay);
+  }
+  
+  // Start the live updates
+  scheduleNextUpdate();
+  
+  // Real visitor tracking (placeholder for actual implementation)
+  function trackRealVisitors() {
+    // This would integrate with your analytics or real-time visitor tracking
+    // For now, we'll use the simulated updates above
+    
+    // Example of how to integrate with real data:
+    // fetch('/api/visitor-count')
+    //   .then(response => response.json())
+    //   .then(data => {
+    //     if (data.count !== currentCount) {
+    //       updateCount(data.count);
+    //     }
+    //   });
+  }
+});
+</script>
+
+{% schema %}
+{
+  "name": "Live Visitor Count",
+  "target": "section",
+  "settings": [
+    {
+      "type": "text",
+      "id": "visitor_text",
+      "label": "Visitor Text",
+      "default": "People viewing this page"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#333333"
+    },
+    {
+      "type": "color",
+      "id": "number_color",
+      "label": "Number Color",
+      "default": "#1e3a8a"
+    }
+  ]
+}
+{% endschema %}

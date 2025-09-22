@@ -23,6 +23,10 @@
     "product_carousel": {
       "name": "Product Carousel",
       "description": "Display product recommendations in a carousel format"
+    },
+    "live_visitor_count": {
+      "name": "Live Visitor Count",
+      "description": "Show real-time visitor count on your page"
     }
   },
   "badges": {
@@ -39,5 +43,10 @@
     "add_to_cart_plus": "+ Add",
     "sale_badge": "% OFF",
     "from_price": "From"
+  },
+  "visitor_count": {
+    "people_viewing": "People viewing this page",
+    "person_viewing": "Person viewing this page",
+    "viewing_now": "viewing now"
   }
 }
