@@ -369,12 +369,12 @@ export default function TryLabDashboard() {
         }}>
           {/* Active Experiments Card */}
           <div style={{
-            flex: 0.8,
+            flex: 0.6,
             background: '#97CDFF',
-            padding: '20px',
+            padding: '18px',
             borderRadius: '12px',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-            minHeight: '120px',
+            minHeight: '110px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between'
@@ -434,12 +434,12 @@ export default function TryLabDashboard() {
 
           {/* Winning Variants Found Card */}
           <div style={{
-            flex: 0.8,
+            flex: 0.6,
             background: '#97CDFF',
-            padding: '20px',
+            padding: '18px',
             borderRadius: '12px',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-            minHeight: '120px',
+            minHeight: '110px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between'
@@ -499,12 +499,12 @@ export default function TryLabDashboard() {
 
           {/* Revenue Impact Card */}
           <div style={{
-            flex: 0.8,
+            flex: 0.6,
             background: '#97CDFF',
-            padding: '20px',
+            padding: '18px',
             borderRadius: '12px',
             boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)',
-            minHeight: '120px',
+            minHeight: '110px',
             display: 'flex',
             flexDirection: 'column',
             justifyContent: 'space-between'
@@ -564,7 +564,7 @@ export default function TryLabDashboard() {
 
           {/* What's New Section - Part of Background */}
           <div style={{
-            flex: 1.2,
+            flex: 1.8,
             padding: '0 0 0 0'
           }}>
             <h2 style={{
@@ -829,44 +829,44 @@ export default function TryLabDashboard() {
                   top: '16px',
                   bottom: '16px'
                 }}>
-                  {/* Variant A line (blue solid with dots) */}
+                  {/* Variant A line (yellow/gold - sine wave pattern) */}
                   <svg width="100%" height="100%" style={{ position: 'absolute' }}>
                     <polyline
-                      points="0,80 50,60 100,70 150,50 200,40 250,30 300,20 350,25 400,15 450,10"
-                      fill="none"
-                      stroke="#3B82F6"
-                      strokeWidth="2"
-                    />
-                    <circle cx="0" cy="80" r="3" fill="#3B82F6" />
-                    <circle cx="50" cy="60" r="3" fill="#3B82F6" />
-                    <circle cx="100" cy="70" r="3" fill="#3B82F6" />
-                    <circle cx="150" cy="50" r="3" fill="#3B82F6" />
-                    <circle cx="200" cy="40" r="3" fill="#3B82F6" />
-                    <circle cx="250" cy="30" r="3" fill="#3B82F6" />
-                    <circle cx="300" cy="20" r="3" fill="#3B82F6" />
-                    <circle cx="350" cy="25" r="3" fill="#3B82F6" />
-                    <circle cx="400" cy="15" r="3" fill="#3B82F6" />
-                    <circle cx="450" cy="10" r="3" fill="#3B82F6" />
-                  </svg>
-                  
-                  {/* Variant B line (orange solid with dots) */}
-                  <svg width="100%" height="100%" style={{ position: 'absolute' }}>
-                    <polyline
-                      points="0,90 50,75 100,85 150,65 200,55 250,45 300,35 350,40 400,30 450,25"
+                      points="0,120 50,100 100,80 150,100 200,120 250,100 300,80 350,100 400,120 450,100"
                       fill="none"
                       stroke="#F59E0B"
                       strokeWidth="2"
                     />
-                    <circle cx="0" cy="90" r="3" fill="#F59E0B" />
-                    <circle cx="50" cy="75" r="3" fill="#F59E0B" />
-                    <circle cx="100" cy="85" r="3" fill="#F59E0B" />
-                    <circle cx="150" cy="65" r="3" fill="#F59E0B" />
-                    <circle cx="200" cy="55" r="3" fill="#F59E0B" />
-                    <circle cx="250" cy="45" r="3" fill="#F59E0B" />
-                    <circle cx="300" cy="35" r="3" fill="#F59E0B" />
-                    <circle cx="350" cy="40" r="3" fill="#F59E0B" />
-                    <circle cx="400" cy="30" r="3" fill="#F59E0B" />
-                    <circle cx="450" cy="25" r="3" fill="#F59E0B" />
+                    <circle cx="0" cy="120" r="3" fill="#F59E0B" />
+                    <circle cx="50" cy="100" r="3" fill="#F59E0B" />
+                    <circle cx="100" cy="80" r="3" fill="#F59E0B" />
+                    <circle cx="150" cy="100" r="3" fill="#F59E0B" />
+                    <circle cx="200" cy="120" r="3" fill="#F59E0B" />
+                    <circle cx="250" cy="100" r="3" fill="#F59E0B" />
+                    <circle cx="300" cy="80" r="3" fill="#F59E0B" />
+                    <circle cx="350" cy="100" r="3" fill="#F59E0B" />
+                    <circle cx="400" cy="120" r="3" fill="#F59E0B" />
+                    <circle cx="450" cy="100" r="3" fill="#F59E0B" />
+                  </svg>
+                  
+                  {/* Variant B line (blue - sine wave pattern) */}
+                  <svg width="100%" height="100%" style={{ position: 'absolute' }}>
+                    <polyline
+                      points="0,140 50,120 100,100 150,120 200,140 250,120 300,100 350,120 400,140 450,120"
+                      fill="none"
+                      stroke="#3B82F6"
+                      strokeWidth="2"
+                    />
+                    <circle cx="0" cy="140" r="3" fill="#3B82F6" />
+                    <circle cx="50" cy="120" r="3" fill="#3B82F6" />
+                    <circle cx="100" cy="100" r="3" fill="#3B82F6" />
+                    <circle cx="150" cy="120" r="3" fill="#3B82F6" />
+                    <circle cx="200" cy="140" r="3" fill="#3B82F6" />
+                    <circle cx="250" cy="120" r="3" fill="#3B82F6" />
+                    <circle cx="300" cy="100" r="3" fill="#3B82F6" />
+                    <circle cx="350" cy="120" r="3" fill="#3B82F6" />
+                    <circle cx="400" cy="140" r="3" fill="#3B82F6" />
+                    <circle cx="450" cy="120" r="3" fill="#3B82F6" />
                   </svg>
                   
                   {/* Control line (grey dotted) */}
@@ -1223,64 +1223,52 @@ export default function TryLabDashboard() {
               {/* Bottom Row - Mini Badges */}
               <div style={{
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '6px'
+                gap: '6px',
+                flexWrap: 'wrap'
               }}>
                 <div style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  padding: '4px 8px',
+                  borderRadius: '12px',
+                  fontSize: '10px',
                   display: 'flex',
-                  gap: '6px',
-                  flexWrap: 'wrap'
+                  alignItems: 'center',
+                  gap: '4px'
                 }}>
-                  <div style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    padding: '4px 8px',
-                    borderRadius: '12px',
-                    fontSize: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    🎉 First Winner Found
-                  </div>
-                  <div style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    padding: '4px 8px',
-                    borderRadius: '12px',
-                    fontSize: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    🚀 5 Experiments Launched
-                  </div>
+                  🎉 First Winner Found
                 </div>
                 <div style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  padding: '4px 8px',
+                  borderRadius: '12px',
+                  fontSize: '10px',
                   display: 'flex',
-                  gap: '6px',
-                  flexWrap: 'wrap'
+                  alignItems: 'center',
+                  gap: '4px'
                 }}>
-                  <div style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    padding: '4px 8px',
-                    borderRadius: '12px',
-                    fontSize: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    👥 1000 Visitors Tested
-                  </div>
-                  <div style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    padding: '4px 8px',
-                    borderRadius: '12px',
-                    fontSize: '10px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}>
-                    🔥 Streak: 4 Weeks Testing
-                  </div>
+                  🚀 5 Experiments Launched
+                </div>
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  padding: '4px 8px',
+                  borderRadius: '12px',
+                  fontSize: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  👥 1000 Visitors Tested
+                </div>
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  padding: '4px 8px',
+                  borderRadius: '12px',
+                  fontSize: '10px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                  🔥 Streak: 4 Weeks Testing
                 </div>
               </div>
             </div>
