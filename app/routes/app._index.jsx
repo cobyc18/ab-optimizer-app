@@ -129,14 +129,175 @@ export default function TryLabDashboard() {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [isAdvanced, setIsAdvanced] = useState(false);
+  const [activeTab, setActiveTab] = useState('queued'); // 'queued' or 'discover'
+  const [selectedIdea, setSelectedIdea] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [placementGuideOpen, setPlacementGuideOpen] = useState(false);
+  const [autopilotMode, setAutopilotMode] = useState('balanced');
+  const [autoPushWinner, setAutoPushWinner] = useState(true);
+  const [cardIndex, setCardIndex] = useState(0);
+  const [cardOffset, setCardOffset] = useState(0);
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [swipeAnimation, setSwipeAnimation] = useState('');
   const [experimentData, setExperimentData] = useState({
     idea: null,
     product: null,
     variant: null,
     placement: null,
     name: '',
-    description: ''
+    description: '',
+    testName: '',
+    hypothesis: '',
+    trafficSplit: 50,
+    goalMetric: 'add_to_cart',
+    startDate: new Date(),
+    endConditions: {},
+    queuedIdeas: [
+      {
+        id: 1,
+        utility: 'Free Shipping Badge',
+        rationale: 'Increases conversion by 8-12%',
+        style: 'Minimal',
+        status: 'queued'
+      },
+      {
+        id: 2,
+        utility: 'Trust Badge',
+        rationale: 'Builds buyer confidence',
+        style: 'Conservative',
+        status: 'queued'
+      }
+    ],
+    discoverIdeas: [
+      {
+        id: 3,
+        utility: 'Countdown Timer',
+        rationale: 'Creates urgency, boosts checkout by 5-7%',
+        style: 'Energetic',
+        preview: '⏰ Limited time offer!'
+      },
+      {
+        id: 4,
+        utility: 'Product Badge',
+        rationale: 'Highlights key benefits',
+        style: 'Emphasis',
+        preview: '🏆 Best Seller'
+      },
+      {
+        id: 5,
+        utility: 'Social Proof',
+        rationale: 'Shows recent purchases',
+        style: 'Minimal',
+        preview: '👥 12 bought in last hour'
+      }
+    ]
   });
+
+  // Swipe gesture handlers
+  const handleSwipe = (direction) => {
+    if (direction === 'left') {
+      // Swipe left - reject idea
+      if (cardIndex < experimentData.discoverIdeas.length - 1) {
+        setSwipeAnimation('card-swipe-left');
+        setTimeout(() => {
+          setCardIndex(cardIndex + 1);
+          setSwipeAnimation('');
+        }, 300);
+      }
+    } else if (direction === 'right') {
+      // Swipe right - accept idea
+      setSwipeAnimation('card-swipe-right');
+      setSelectedIdea(experimentData.discoverIdeas[cardIndex]);
+      setTimeout(() => {
+        setCurrentStep(2);
+        setSwipeAnimation('');
+      }, 300);
+    } else if (direction === 'up') {
+      // Swipe up - maybe/save for later
+      if (cardIndex < experimentData.discoverIdeas.length - 1) {
+        setSwipeAnimation('card-swipe-up');
+        setTimeout(() => {
+          setCardIndex(cardIndex + 1);
+          setSwipeAnimation('');
+        }, 300);
+      }
+    }
+    setCardOffset(0);
+  };
+
+  const handleMouseDown = (e) => {
+    setIsDragging(true);
+    setDragStart({ x: e.clientX, y: e.clientY });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+    setCardOffset(deltaX);
+  };
+
+  const handleMouseUp = (e) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    const deltaX = e.clientX - dragStart.x;
+    const deltaY = e.clientY - dragStart.y;
+    
+    // Determine swipe direction
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 100) {
+        handleSwipe('right');
+      } else if (deltaX < -100) {
+        handleSwipe('left');
+      } else {
+        setCardOffset(0);
+      }
+    } else if (deltaY < -100) {
+      handleSwipe('up');
+    } else {
+      setCardOffset(0);
+    }
+  };
+
+  const handleTouchStart = (e) => {
+    const touch = e.touches[0];
+    setIsDragging(true);
+    setDragStart({ x: touch.clientX, y: touch.clientY });
+  };
+
+  const handleTouchMove = (e) => {
+    if (!isDragging) return;
+    const touch = e.touches[0];
+    const deltaX = touch.clientX - dragStart.x;
+    const deltaY = touch.clientY - dragStart.y;
+    setCardOffset(deltaX);
+  };
+
+  const handleTouchEnd = (e) => {
+    if (!isDragging) return;
+    setIsDragging(false);
+    
+    const touch = e.changedTouches[0];
+    const deltaX = touch.clientX - dragStart.x;
+    const deltaY = touch.clientY - dragStart.y;
+    
+    // Determine swipe direction
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 100) {
+        handleSwipe('right');
+      } else if (deltaX < -100) {
+        handleSwipe('left');
+      } else {
+        setCardOffset(0);
+      }
+    } else if (deltaY < -100) {
+      handleSwipe('up');
+    } else {
+      setCardOffset(0);
+    }
+  };
 
   return (
     <div style={{
@@ -145,6 +306,68 @@ export default function TryLabDashboard() {
       fontFamily: 'system-ui, -apple-system, sans-serif',
       display: 'flex'
     }}>
+      <style>{`
+        @keyframes slideInFromRight {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
+        
+        @keyframes slideOutToLeft {
+          from {
+            transform: translateX(0);
+            opacity: 1;
+          }
+          to {
+            transform: translateX(-100%);
+            opacity: 0;
+          }
+        }
+        
+        @keyframes cardSwipeRight {
+          from {
+            transform: translateX(0) rotate(0deg);
+          }
+          to {
+            transform: translateX(100vw) rotate(30deg);
+          }
+        }
+        
+        @keyframes cardSwipeLeft {
+          from {
+            transform: translateX(0) rotate(0deg);
+          }
+          to {
+            transform: translateX(-100vw) rotate(-30deg);
+          }
+        }
+        
+        @keyframes cardSwipeUp {
+          from {
+            transform: translateY(0) rotate(0deg);
+          }
+          to {
+            transform: translateY(-100vh) rotate(0deg);
+          }
+        }
+        
+        .card-swipe-right {
+          animation: cardSwipeRight 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .card-swipe-left {
+          animation: cardSwipeLeft 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+        
+        .card-swipe-up {
+          animation: cardSwipeUp 0.3s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+      `}</style>
       {/* Left Sidebar */}
       <div style={{
         width: '280px',
@@ -1677,248 +1900,520 @@ export default function TryLabDashboard() {
             <div style={{
               flex: 1,
               overflow: 'auto',
-              padding: '32px'
+              padding: '32px',
+              position: 'relative'
             }}>
               {currentStep === 1 && (
-                <div>
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
                   <h3 style={{
                     fontSize: '18px',
                     fontWeight: '600',
                     color: '#1F2937',
                     marginBottom: '8px'
                   }}>
-                    Pick an idea to test
+                    What do you want to try?
                   </h3>
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#6B7280',
+                  
+                  {/* Tabs */}
+                  <div style={{
+                    display: 'flex',
+                    borderBottom: '1px solid #E5E5E5',
                     marginBottom: '24px'
                   }}>
-                    Choose what you'd like to experiment with. We'll guide you through the rest.
-                  </p>
-                  
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '16px'
-                  }}>
-                    <div 
-                      onClick={() => setExperimentData({...experimentData, idea: 'free-shipping'})}
+                    <button
+                      onClick={() => setActiveTab('queued')}
                       style={{
-                        padding: '20px',
-                        border: experimentData.idea === 'free-shipping' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        background: experimentData.idea === 'free-shipping' ? '#F0F9FF' : '#FFFFFF'
-                      }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        marginBottom: '12px'
-                      }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          background: '#10B981',
-                          borderRadius: '6px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '16px'
-                        }}>
-                          🚚
-                        </div>
-                        <h4 style={{
-                          fontSize: '16px',
-                          fontWeight: '600',
-                          color: '#1F2937',
-                          margin: 0
-                        }}>
-                          Free Shipping Badge
-                        </h4>
-                      </div>
-                      <p style={{
+                        padding: '12px 24px',
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: activeTab === 'queued' ? '2px solid #3B82F6' : '2px solid transparent',
+                        color: activeTab === 'queued' ? '#3B82F6' : '#6B7280',
                         fontSize: '14px',
-                        color: '#6B7280',
-                        margin: 0
+                        fontWeight: '600',
+                        cursor: 'pointer'
                       }}>
-                        Test adding a "Free shipping" badge under product prices. Often boosts conversion by 8-12%.
-                      </p>
-                    </div>
-
-                    <div 
-                      onClick={() => setExperimentData({...experimentData, idea: 'countdown-timer'})}
+                      Queued ({experimentData.queuedIdeas.length})
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('discover')}
                       style={{
-                        padding: '20px',
-                        border: experimentData.idea === 'countdown-timer' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        background: experimentData.idea === 'countdown-timer' ? '#F0F9FF' : '#FFFFFF'
-                      }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        marginBottom: '12px'
-                      }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          background: '#10B981',
-                          borderRadius: '6px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '16px'
-                        }}>
-                          ⏰
-                        </div>
-                        <h4 style={{
-                          fontSize: '16px',
-                          fontWeight: '600',
-                          color: '#1F2937',
-                          margin: 0
-                        }}>
-                          Countdown Timer
-                        </h4>
-                      </div>
-                      <p style={{
+                        padding: '12px 24px',
+                        background: 'none',
+                        border: 'none',
+                        borderBottom: activeTab === 'discover' ? '2px solid #3B82F6' : '2px solid transparent',
+                        color: activeTab === 'discover' ? '#3B82F6' : '#6B7280',
                         fontSize: '14px',
-                        color: '#6B7280',
-                        margin: 0
+                        fontWeight: '600',
+                        cursor: 'pointer'
                       }}>
-                        Test a countdown timer on cart page. Can increase checkout completion by 5-7%.
-                      </p>
-                    </div>
-
-                    <div 
-                      onClick={() => setExperimentData({...experimentData, idea: 'trust-badge'})}
-                      style={{
-                        padding: '20px',
-                        border: experimentData.idea === 'trust-badge' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        background: experimentData.idea === 'trust-badge' ? '#F0F9FF' : '#FFFFFF'
-                      }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        marginBottom: '12px'
-                      }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          background: '#10B981',
-                          borderRadius: '6px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '16px'
-                        }}>
-                          🛡️
-                        </div>
-                        <h4 style={{
-                          fontSize: '16px',
-                          fontWeight: '600',
-                          color: '#1F2937',
-                          margin: 0
-                        }}>
-                          Trust Badge
-                        </h4>
-                      </div>
-                      <p style={{
-                        fontSize: '14px',
-                        color: '#6B7280',
-                        margin: 0
-                      }}>
-                        Add a trust badge near the "Buy Now" button to improve buyer confidence.
-                      </p>
-                    </div>
-
-                    <div 
-                      onClick={() => setExperimentData({...experimentData, idea: 'product-images'})}
-                      style={{
-                        padding: '20px',
-                        border: experimentData.idea === 'product-images' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        background: experimentData.idea === 'product-images' ? '#F0F9FF' : '#FFFFFF'
-                      }}>
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px',
-                        marginBottom: '12px'
-                      }}>
-                        <div style={{
-                          width: '32px',
-                          height: '32px',
-                          background: '#10B981',
-                          borderRadius: '6px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '16px'
-                        }}>
-                          🖼️
-                        </div>
-                        <h4 style={{
-                          fontSize: '16px',
-                          fontWeight: '600',
-                          color: '#1F2937',
-                          margin: 0
-                        }}>
-                          Product Images
-                        </h4>
-                      </div>
-                      <p style={{
-                        fontSize: '14px',
-                        color: '#6B7280',
-                        margin: 0
-                      }}>
-                        Test lifestyle shots vs. plain backgrounds for better click-through rates.
-                      </p>
-                    </div>
+                      Discover
+                    </button>
                   </div>
+
+                  {/* Queued Tab */}
+                  {activeTab === 'queued' && (
+                    <div>
+                      {experimentData.queuedIdeas.length > 0 ? (
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                          {experimentData.queuedIdeas.map((idea) => (
+                            <div 
+                              key={idea.id}
+                              onClick={() => setSelectedIdea(idea)}
+                              style={{
+                                padding: '16px',
+                                border: selectedIdea?.id === idea.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                                borderRadius: '8px',
+                                cursor: 'pointer',
+                                background: selectedIdea?.id === idea.id ? '#F0F9FF' : '#FFFFFF',
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                alignItems: 'center'
+                              }}>
+                              <div>
+                                <h4 style={{
+                                  fontSize: '16px',
+                                  fontWeight: '600',
+                                  color: '#1F2937',
+                                  margin: '0 0 4px 0'
+                                }}>
+                                  {idea.utility}
+                                </h4>
+                                <p style={{
+                                  fontSize: '14px',
+                                  color: '#6B7280',
+                                  margin: '0 0 8px 0'
+                                }}>
+                                  {idea.rationale}
+                                </p>
+                                <span style={{
+                                  fontSize: '12px',
+                                  color: '#3B82F6',
+                                  background: '#F0F9FF',
+                                  padding: '2px 8px',
+                                  borderRadius: '12px'
+                                }}>
+                                  {idea.style}
+                                </span>
+                              </div>
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <button style={{
+                                  padding: '6px 12px',
+                                  background: '#3B82F6',
+                                  color: '#FFFFFF',
+                                  border: 'none',
+                                  borderRadius: '4px',
+                                  fontSize: '12px',
+                                  cursor: 'pointer'
+                                }}>
+                                  Use
+                                </button>
+                                <button style={{
+                                  padding: '6px 12px',
+                                  background: 'none',
+                                  color: '#6B7280',
+                                  border: '1px solid #D1D5DB',
+                                  borderRadius: '4px',
+                                  fontSize: '12px',
+                                  cursor: 'pointer'
+                                }}>
+                                  Preview
+                                </button>
+                                <button style={{
+                                  padding: '6px 8px',
+                                  background: 'none',
+                                  color: '#6B7280',
+                                  border: 'none',
+                                  fontSize: '16px',
+                                  cursor: 'pointer'
+                                }}>
+                                  ⋯
+                                </button>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <div style={{
+                          textAlign: 'center',
+                          padding: '40px 20px',
+                          color: '#6B7280'
+                        }}>
+                          <p style={{ marginBottom: '16px' }}>No queued ideas yet</p>
+                          <p style={{ fontSize: '14px', marginBottom: '24px' }}>Swipe to pick an idea. You can always adjust later.</p>
+                          <button 
+                            onClick={() => setActiveTab('discover')}
+                            style={{
+                              padding: '8px 16px',
+                              background: '#3B82F6',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              cursor: 'pointer'
+                            }}>
+                            Go to Discover
+                          </button>
+                        </div>
+                      )}
+                      
+                      <div style={{ marginTop: '24px', textAlign: 'center' }}>
+                        <button style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#3B82F6',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          textDecoration: 'underline'
+                        }}>
+                          Create manually
+                        </button>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Discover Tab */}
+                  {activeTab === 'discover' && (
+                    <div>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        marginBottom: '24px',
+                        textAlign: 'center'
+                      }}>
+                        Swipe to pick an idea. You can always adjust later.
+                      </p>
+                      
+                      {/* Tinder-style card stack */}
+                      <div style={{
+                        position: 'relative',
+                        height: '350px',
+                        display: 'flex',
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                        userSelect: 'none'
+                      }}>
+                        {experimentData.discoverIdeas.slice(cardIndex, cardIndex + 3).map((idea, stackIndex) => {
+                          const actualIndex = cardIndex + stackIndex;
+                          const isTopCard = stackIndex === 0;
+                          const rotation = isTopCard ? (cardOffset / 20) : 0;
+                          const scale = isTopCard ? 1 : (1 - stackIndex * 0.05);
+                          const opacity = isTopCard ? 1 : (1 - stackIndex * 0.2);
+                          
+                          return (
+                            <div 
+                              key={idea.id}
+                              className={isTopCard && swipeAnimation ? swipeAnimation : ''}
+                              onMouseDown={isTopCard ? handleMouseDown : undefined}
+                              onMouseMove={isTopCard ? handleMouseMove : undefined}
+                              onMouseUp={isTopCard ? handleMouseUp : undefined}
+                              onTouchStart={isTopCard ? handleTouchStart : undefined}
+                              onTouchMove={isTopCard ? handleTouchMove : undefined}
+                              onTouchEnd={isTopCard ? handleTouchEnd : undefined}
+                              style={{
+                                position: 'absolute',
+                                width: '300px',
+                                height: '220px',
+                                background: '#FFFFFF',
+                                border: '1px solid #E5E5E5',
+                                borderRadius: '16px',
+                                padding: '24px',
+                                boxShadow: isTopCard 
+                                  ? `0 ${8 + Math.abs(cardOffset) / 10}px ${20 + Math.abs(cardOffset) / 5}px rgba(0, 0, 0, 0.15)` 
+                                  : '0 4px 12px rgba(0, 0, 0, 0.1)',
+                                transform: isTopCard 
+                                  ? `translateX(${cardOffset}px) translateY(${stackIndex * 4}px) rotate(${rotation}deg) scale(${scale})`
+                                  : `translateY(${stackIndex * 4}px) translateX(${stackIndex * 2}px) scale(${scale})`,
+                                zIndex: 3 - stackIndex,
+                                cursor: isTopCard ? 'grab' : 'default',
+                                transition: isTopCard && !isDragging ? 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+                                opacity: opacity,
+                                transformOrigin: 'center center'
+                              }}>
+                              
+                              {/* Swipe indicators */}
+                              {isTopCard && (
+                                <>
+                                  <div style={{
+                                    position: 'absolute',
+                                    top: '20px',
+                                    left: '20px',
+                                    background: cardOffset > 50 ? '#10B981' : 'rgba(16, 185, 129, 0.3)',
+                                    color: '#FFFFFF',
+                                    padding: '8px 16px',
+                                    borderRadius: '20px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    transform: `translateX(${Math.max(0, cardOffset - 100)}px)`,
+                                    opacity: cardOffset > 30 ? 1 : 0,
+                                    transition: 'all 0.2s ease'
+                                  }}>
+                                    ✓ LIKE
+                                  </div>
+                                  <div style={{
+                                    position: 'absolute',
+                                    top: '20px',
+                                    right: '20px',
+                                    background: cardOffset < -50 ? '#EF4444' : 'rgba(239, 68, 68, 0.3)',
+                                    color: '#FFFFFF',
+                                    padding: '8px 16px',
+                                    borderRadius: '20px',
+                                    fontSize: '14px',
+                                    fontWeight: '600',
+                                    transform: `translateX(${Math.min(0, cardOffset + 100)}px)`,
+                                    opacity: cardOffset < -30 ? 1 : 0,
+                                    transition: 'all 0.2s ease'
+                                  }}>
+                                    ✕ PASS
+                                  </div>
+                                </>
+                              )}
+                              
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                marginBottom: '16px'
+                              }}>
+                                <div style={{
+                                  width: '48px',
+                                  height: '48px',
+                                  background: '#10B981',
+                                  borderRadius: '12px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '24px'
+                                }}>
+                                  {idea.utility === 'Countdown Timer' ? '⏰' :
+                                   idea.utility === 'Product Badge' ? '🏆' : '👥'}
+                                </div>
+                                <div>
+                                  <h4 style={{
+                                    fontSize: '18px',
+                                    fontWeight: '700',
+                                    color: '#1F2937',
+                                    margin: '0 0 4px 0'
+                                  }}>
+                                    {idea.utility}
+                                  </h4>
+                                  <span style={{
+                                    fontSize: '12px',
+                                    color: '#3B82F6',
+                                    background: '#F0F9FF',
+                                    padding: '4px 12px',
+                                    borderRadius: '16px',
+                                    fontWeight: '600'
+                                  }}>
+                                    {idea.style}
+                                  </span>
+                                </div>
+                              </div>
+                              
+                              <p style={{
+                                fontSize: '15px',
+                                color: '#6B7280',
+                                margin: '0 0 20px 0',
+                                lineHeight: '1.4'
+                              }}>
+                                {idea.rationale}
+                              </p>
+                              
+                              <div style={{
+                                background: '#F9FAFB',
+                                padding: '16px',
+                                borderRadius: '8px',
+                                fontSize: '16px',
+                                color: '#1F2937',
+                                textAlign: 'center',
+                                fontWeight: '500',
+                                border: '1px solid #E5E5E5'
+                              }}>
+                                {idea.preview}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                      
+                      {/* Action buttons */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '20px',
+                        marginTop: '32px'
+                      }}>
+                        <button 
+                          onClick={() => handleSwipe('left')}
+                          style={{
+                            width: '56px',
+                            height: '56px',
+                            background: '#EF4444',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            borderRadius: '50%',
+                            fontSize: '24px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 4px 12px rgba(239, 68, 68, 0.3)',
+                            transition: 'all 0.2s ease',
+                            transform: 'scale(1)'
+                          }}
+                          onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+                          onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                          ✕
+                        </button>
+                        <button 
+                          onClick={() => handleSwipe('up')}
+                          style={{
+                            width: '56px',
+                            height: '56px',
+                            background: '#F59E0B',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            borderRadius: '50%',
+                            fontSize: '24px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 4px 12px rgba(245, 158, 11, 0.3)',
+                            transition: 'all 0.2s ease',
+                            transform: 'scale(1)'
+                          }}
+                          onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+                          onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                          ?
+                        </button>
+                        <button 
+                          onClick={() => handleSwipe('right')}
+                          style={{
+                            width: '56px',
+                            height: '56px',
+                            background: '#10B981',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            borderRadius: '50%',
+                            fontSize: '24px',
+                            cursor: 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            boxShadow: '0 4px 12px rgba(16, 185, 129, 0.3)',
+                            transition: 'all 0.2s ease',
+                            transform: 'scale(1)'
+                          }}
+                          onMouseDown={(e) => e.currentTarget.style.transform = 'scale(0.95)'}
+                          onMouseUp={(e) => e.currentTarget.style.transform = 'scale(1)'}
+                          onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}>
+                          ✓
+                        </button>
+                      </div>
+                      
+                      {/* Progress indicator */}
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'center',
+                        gap: '8px',
+                        marginTop: '20px'
+                      }}>
+                        {experimentData.discoverIdeas.map((_, index) => (
+                          <div 
+                            key={index}
+                            style={{
+                              width: '8px',
+                              height: '8px',
+                              borderRadius: '50%',
+                              background: index <= cardIndex ? '#3B82F6' : '#E5E5E5',
+                              transition: 'all 0.3s ease'
+                            }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
               {currentStep === 2 && (
-                <div>
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
                   <h3 style={{
                     fontSize: '18px',
                     fontWeight: '600',
                     color: '#1F2937',
                     marginBottom: '8px'
                   }}>
-                    Choose a product to test
+                    Which product are we testing?
                   </h3>
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#6B7280',
+                  
+                  {/* Product Search */}
+                  <div style={{
                     marginBottom: '24px'
                   }}>
-                    Select which product you'd like to run this experiment on.
-                  </p>
+                    <input
+                      type="text"
+                      placeholder="Search products..."
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        background: '#FFFFFF'
+                      }}
+                    />
+                  </div>
                   
+                  {/* Product Grid */}
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-                    gap: '16px'
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                    gap: '16px',
+                    marginBottom: '24px'
                   }}>
-                    {['Best Seller T-Shirt', 'Premium Coffee Mug', 'Wireless Headphones', 'Organic Soap Set'].map((product, index) => (
+                    {[
+                      { name: 'Best Seller T-Shirt', price: '$29.99', isBestseller: true, image: '👕' },
+                      { name: 'Premium Coffee Mug', price: '$19.99', isBestseller: false, image: '☕' },
+                      { name: 'Wireless Headphones', price: '$149.99', isBestseller: false, image: '🎧' },
+                      { name: 'Organic Soap Set', price: '$24.99', isBestseller: false, image: '🧼' }
+                    ].map((product, index) => (
                       <div 
                         key={index}
-                        onClick={() => setExperimentData({...experimentData, product: product})}
+                        onClick={() => setSelectedProduct(product)}
                         style={{
                           padding: '16px',
-                          border: experimentData.product === product ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                          border: selectedProduct?.name === product.name ? '2px solid #3B82F6' : '1px solid #E5E5E5',
                           borderRadius: '8px',
                           cursor: 'pointer',
-                          background: experimentData.product === product ? '#F0F9FF' : '#FFFFFF'
+                          background: selectedProduct?.name === product.name ? '#F0F9FF' : '#FFFFFF',
+                          position: 'relative'
                         }}>
+                        {product.isBestseller && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '8px',
+                            right: '8px',
+                            background: '#10B981',
+                            color: '#FFFFFF',
+                            padding: '2px 6px',
+                            borderRadius: '4px',
+                            fontSize: '10px',
+                            fontWeight: '600'
+                          }}>
+                            BESTSELLER
+                          </div>
+                        )}
                         <div style={{
                           width: '100%',
                           height: '120px',
@@ -1928,9 +2423,9 @@ export default function TryLabDashboard() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '24px'
+                          fontSize: '32px'
                         }}>
-                          📦
+                          {product.image}
                         </div>
                         <h4 style={{
                           fontSize: '14px',
@@ -1938,190 +2433,897 @@ export default function TryLabDashboard() {
                           color: '#1F2937',
                           margin: '0 0 4px 0'
                         }}>
-                          {product}
+                          {product.name}
                         </h4>
                         <p style={{
                           fontSize: '12px',
                           color: '#6B7280',
                           margin: 0
                         }}>
-                          $29.99
+                          {product.price}
                         </p>
                       </div>
                     ))}
                   </div>
+                  
+                  {/* Concurrency Notice */}
+                  <div style={{
+                    background: '#FEF3C7',
+                    border: '1px solid #F59E0B',
+                    borderRadius: '6px',
+                    padding: '12px',
+                    fontSize: '14px',
+                    color: '#92400E',
+                    marginBottom: '24px'
+                  }}>
+                    ⚠️ We recommend one test per page at a time for clean results.
+                  </div>
+                  
+                  {/* Variant Cards Preview */}
+                  {selectedProduct && (
+                    <div style={{
+                      display: 'flex',
+                      gap: '16px',
+                      marginTop: '24px'
+                    }}>
+                      {/* Variant Card A (Control) */}
+                      <div style={{
+                        flex: 1,
+                        padding: '16px',
+                        border: '2px solid #10B981',
+                        borderRadius: '8px',
+                        background: '#F0FDF4'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          marginBottom: '12px'
+                        }}>
+                          <div style={{
+                            width: '24px',
+                            height: '24px',
+                            background: '#10B981',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#FFFFFF',
+                            fontSize: '12px',
+                            fontWeight: '600'
+                          }}>
+                            A
+                          </div>
+                          <h4 style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#1F2937',
+                            margin: 0
+                          }}>
+                            Control (current page)
+                          </h4>
+                        </div>
+                        <div style={{
+                          width: '100%',
+                          height: '80px',
+                          background: '#F3F4F6',
+                          borderRadius: '4px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '24px'
+                        }}>
+                          {selectedProduct.image}
+                        </div>
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '8px 0 0 0',
+                          textAlign: 'center'
+                        }}>
+                          {selectedProduct.name}
+                        </p>
+                      </div>
+                      
+                      {/* Variant Card B (Empty) */}
+                      <div style={{
+                        flex: 1,
+                        padding: '16px',
+                        border: '2px dashed #D1D5DB',
+                        borderRadius: '8px',
+                        background: '#FAFAFA',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '140px'
+                      }}>
+                        <div style={{
+                          width: '40px',
+                          height: '40px',
+                          background: '#F3F4F6',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          marginBottom: '12px'
+                        }}>
+                          +
+                        </div>
+                        <p style={{
+                          fontSize: '14px',
+                          color: '#6B7280',
+                          margin: 0,
+                          textAlign: 'center'
+                        }}>
+                          Create duplicate variant with added {selectedIdea?.utility || 'widget'}
+                        </p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               )}
 
               {currentStep === 3 && (
-                <div>
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
                   <h3 style={{
                     fontSize: '18px',
                     fontWeight: '600',
                     color: '#1F2937',
                     marginBottom: '8px'
                   }}>
-                    Choose your variant
+                    Variant & Placement
                   </h3>
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#6B7280',
+                  
+                  {/* Two variant cards side by side */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '16px',
                     marginBottom: '24px'
                   }}>
-                    Pick what you want to test against the original.
-                  </p>
-                  
-                  <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '16px'
-                  }}>
-                    <div 
-                      onClick={() => setExperimentData({...experimentData, variant: 'original'})}
-                      style={{
-                        padding: '20px',
-                        border: experimentData.variant === 'original' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        background: experimentData.variant === 'original' ? '#F0F9FF' : '#FFFFFF'
+                    {/* Card A (Control) - Locked */}
+                    <div style={{
+                      flex: 1,
+                      padding: '20px',
+                      border: '2px solid #10B981',
+                      borderRadius: '8px',
+                      background: '#F0FDF4',
+                      opacity: 0.8
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        marginBottom: '16px'
                       }}>
-                      <h4 style={{
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        margin: '0 0 8px 0'
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          background: '#10B981',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#FFFFFF',
+                          fontSize: '12px',
+                          fontWeight: '600'
+                        }}>
+                          A
+                        </div>
+                        <h4 style={{
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          Control
+                        </h4>
+                        <span style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          background: '#F3F4F6',
+                          padding: '2px 6px',
+                          borderRadius: '4px'
+                        }}>
+                          Locked
+                        </span>
+                      </div>
+                      <div style={{
+                        width: '100%',
+                        height: '120px',
+                        background: '#F3F4F6',
+                        borderRadius: '6px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '32px',
+                        marginBottom: '12px'
                       }}>
-                        Original (Control)
-                      </h4>
+                        {selectedProduct?.image || '📦'}
+                      </div>
                       <p style={{
                         fontSize: '14px',
                         color: '#6B7280',
-                        margin: 0
+                        margin: 0,
+                        textAlign: 'center'
                       }}>
-                        Keep the current version as your baseline for comparison.
+                        Current page (baseline)
                       </p>
                     </div>
-
-                    <div 
-                      onClick={() => setExperimentData({...experimentData, variant: 'new'})}
-                      style={{
-                        padding: '20px',
-                        border: experimentData.variant === 'new' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                        borderRadius: '8px',
-                        cursor: 'pointer',
-                        background: experimentData.variant === 'new' ? '#F0F9FF' : '#FFFFFF'
+                    
+                    {/* Card B (Empty) - Interactive */}
+                    <div style={{
+                      flex: 1,
+                      padding: '20px',
+                      border: '2px dashed #3B82F6',
+                      borderRadius: '8px',
+                      background: '#F0F9FF',
+                      cursor: 'pointer',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      minHeight: '200px'
+                    }}
+                    onClick={() => setPlacementGuideOpen(true)}>
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        background: '#3B82F6',
+                        borderRadius: '50%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        color: '#FFFFFF',
+                        fontSize: '20px',
+                        marginBottom: '16px'
                       }}>
+                        +
+                      </div>
                       <h4 style={{
                         fontSize: '16px',
                         fontWeight: '600',
                         color: '#1F2937',
-                        margin: '0 0 8px 0'
+                        margin: '0 0 8px 0',
+                        textAlign: 'center'
                       }}>
-                        New Variant
+                        Create duplicate variant with added {selectedIdea?.utility || 'widget'}
                       </h4>
                       <p style={{
                         fontSize: '14px',
                         color: '#6B7280',
-                        margin: 0
+                        margin: 0,
+                        textAlign: 'center'
                       }}>
-                        Test your new idea against the original to see which performs better.
+                        Click to configure placement
                       </p>
                     </div>
                   </div>
-
-                  <div style={{ marginTop: '24px' }}>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      marginBottom: '8px'
+                  
+                  {/* Placement Guide Modal */}
+                  {placementGuideOpen && (
+                    <div style={{
+                      position: 'fixed',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'rgba(0, 0, 0, 0.5)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 2000
                     }}>
-                      Where should this appear?
-                    </label>
-                    <select 
-                      value={experimentData.placement || ''}
-                      onChange={(e) => setExperimentData({...experimentData, placement: e.target.value})}
-                      style={{
-                        width: '100%',
-                        padding: '12px',
-                        border: '1px solid #D1D5DB',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        background: '#FFFFFF'
+                      <div style={{
+                        background: '#FFFFFF',
+                        borderRadius: '12px',
+                        width: '90%',
+                        maxWidth: '1000px',
+                        maxHeight: '90vh',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column'
                       }}>
-                      <option value="">Select placement...</option>
-                      <option value="product-page">Product page</option>
-                      <option value="cart-page">Cart page</option>
-                      <option value="checkout-page">Checkout page</option>
-                      <option value="homepage">Homepage</option>
-                    </select>
+                        {/* Placement Guide Header */}
+                        <div style={{
+                          padding: '24px 32px',
+                          borderBottom: '1px solid #E5E5E5',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}>
+                          <h3 style={{
+                            fontSize: '18px',
+                            fontWeight: '600',
+                            color: '#1F2937',
+                            margin: 0
+                          }}>
+                            We'll place {selectedIdea?.utility || 'widget'} where it performs best. Want to choose?
+                          </h3>
+                          <button 
+                            onClick={() => setPlacementGuideOpen(false)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              fontSize: '24px',
+                              cursor: 'pointer',
+                              color: '#6B7280'
+                            }}>
+                            ×
+                          </button>
+                        </div>
+                        
+                        {/* Placement Guide Content */}
+                        <div style={{
+                          flex: 1,
+                          padding: '32px',
+                          display: 'flex',
+                          gap: '24px'
+                        }}>
+                          {/* Left: Options */}
+                          <div style={{ flex: 1 }}>
+                            <h4 style={{
+                              fontSize: '16px',
+                              fontWeight: '600',
+                              color: '#1F2937',
+                              margin: '0 0 16px 0'
+                            }}>
+                              Placement Options
+                            </h4>
+                            
+                            <div style={{
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '12px',
+                              marginBottom: '24px'
+                            }}>
+                              <label style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '12px',
+                                border: '1px solid #D1D5DB',
+                                borderRadius: '6px',
+                                cursor: 'pointer'
+                              }}>
+                                <input type="radio" name="placement" value="recommended" defaultChecked />
+                                <div>
+                                  <div style={{ fontSize: '14px', fontWeight: '500', color: '#1F2937' }}>
+                                    Recommended placement
+                                  </div>
+                                  <div style={{ fontSize: '12px', color: '#6B7280' }}>
+                                    Below Add to Cart button
+                                  </div>
+                                </div>
+                              </label>
+                              
+                              <label style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '12px',
+                                padding: '12px',
+                                border: '1px solid #D1D5DB',
+                                borderRadius: '6px',
+                                cursor: 'pointer'
+                              }}>
+                                <input type="radio" name="placement" value="manual" />
+                                <div>
+                                  <div style={{ fontSize: '14px', fontWeight: '500', color: '#1F2937' }}>
+                                    Choose manually
+                                  </div>
+                                  <div style={{ fontSize: '12px', color: '#6B7280' }}>
+                                    Select exact position on page
+                                  </div>
+                                </div>
+                              </label>
+                            </div>
+                            
+                            {/* Mini Edit Fields */}
+                            <div style={{
+                              background: '#F9FAFB',
+                              padding: '16px',
+                              borderRadius: '8px',
+                              marginBottom: '16px'
+                            }}>
+                              <h5 style={{
+                                fontSize: '14px',
+                                fontWeight: '600',
+                                color: '#1F2937',
+                                margin: '0 0 12px 0'
+                              }}>
+                                Customize (Optional)
+                              </h5>
+                              <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                                <div>
+                                  <label style={{
+                                    display: 'block',
+                                    fontSize: '12px',
+                                    fontWeight: '500',
+                                    color: '#1F2937',
+                                    marginBottom: '4px'
+                                  }}>
+                                    Short copy (≤60 chars)
+                                  </label>
+                                  <input 
+                                    type="text"
+                                    placeholder="Free shipping on orders over $50"
+                                    style={{
+                                      width: '100%',
+                                      padding: '8px 12px',
+                                      border: '1px solid #D1D5DB',
+                                      borderRadius: '4px',
+                                      fontSize: '14px'
+                                    }}
+                                  />
+                                </div>
+                                <div>
+                                  <label style={{
+                                    display: 'block',
+                                    fontSize: '12px',
+                                    fontWeight: '500',
+                                    color: '#1F2937',
+                                    marginBottom: '4px'
+                                  }}>
+                                    Color
+                                  </label>
+                                  <div style={{ display: 'flex', gap: '8px' }}>
+                                    {['#3B82F6', '#10B981', '#F59E0B', '#EF4444'].map(color => (
+                                      <div 
+                                        key={color}
+                                        style={{
+                                          width: '24px',
+                                          height: '24px',
+                                          background: color,
+                                          borderRadius: '4px',
+                                          cursor: 'pointer',
+                                          border: '2px solid transparent'
+                                        }}
+                                      />
+                                    ))}
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            
+                            <button style={{
+                              width: '100%',
+                              padding: '12px',
+                              background: '#3B82F6',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              cursor: 'pointer'
+                            }}>
+                              Save placement
+                            </button>
+                          </div>
+                          
+                          {/* Right: Live Preview */}
+                          <div style={{ flex: 1 }}>
+                            <h4 style={{
+                              fontSize: '16px',
+                              fontWeight: '600',
+                              color: '#1F2937',
+                              margin: '0 0 16px 0'
+                            }}>
+                              Live Preview
+                            </h4>
+                            <div style={{
+                              border: '1px solid #E5E5E5',
+                              borderRadius: '8px',
+                              overflow: 'hidden',
+                              background: '#FFFFFF'
+                            }}>
+                              <div style={{
+                                height: '300px',
+                                background: '#F9FAFB',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                position: 'relative'
+                              }}>
+                                {/* Mock product page with hotspots */}
+                                <div style={{
+                                  width: '80%',
+                                  background: '#FFFFFF',
+                                  borderRadius: '6px',
+                                  padding: '16px',
+                                  boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                  <div style={{ height: '60px', background: '#F3F4F6', borderRadius: '4px', marginBottom: '12px' }}></div>
+                                  <div style={{ height: '20px', background: '#E5E5E5', borderRadius: '2px', marginBottom: '8px' }}></div>
+                                  <div style={{ height: '16px', background: '#E5E5E5', borderRadius: '2px', marginBottom: '16px', width: '60%' }}></div>
+                                  <div style={{ height: '32px', background: '#3B82F6', borderRadius: '4px', marginBottom: '8px' }}></div>
+                                  
+                                  {/* Hotspot chips */}
+                                  <div style={{
+                                    position: 'absolute',
+                                    top: '20px',
+                                    right: '20px',
+                                    background: '#FEF3C7',
+                                    border: '1px solid #F59E0B',
+                                    borderRadius: '4px',
+                                    padding: '4px 8px',
+                                    fontSize: '10px',
+                                    color: '#92400E',
+                                    fontWeight: '600'
+                                  }}>
+                                    Above price
+                                  </div>
+                                  <div style={{
+                                    position: 'absolute',
+                                    bottom: '20px',
+                                    right: '20px',
+                                    background: '#DCFCE7',
+                                    border: '1px solid #10B981',
+                                    borderRadius: '4px',
+                                    padding: '4px 8px',
+                                    fontSize: '10px',
+                                    color: '#166534',
+                                    fontWeight: '600'
+                                  }}>
+                                    Near ATC
+                                  </div>
+                                </div>
+                              </div>
+                            </div>
+                            <div style={{
+                              marginTop: '12px',
+                              textAlign: 'center'
+                            }}>
+                              <button style={{
+                                background: 'none',
+                                border: 'none',
+                                color: '#3B82F6',
+                                fontSize: '12px',
+                                cursor: 'pointer',
+                                textDecoration: 'underline'
+                              }}>
+                                Open in Theme Editor...
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
+                  {/* Optional: Preview full page button */}
+                  <div style={{
+                    textAlign: 'center',
+                    marginTop: '16px'
+                  }}>
+                    <button style={{
+                      background: 'none',
+                      border: '1px solid #D1D5DB',
+                      color: '#6B7280',
+                      padding: '8px 16px',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      cursor: 'pointer'
+                    }}>
+                      Preview full page
+                    </button>
                   </div>
                 </div>
               )}
 
               {currentStep === 4 && (
-                <div>
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
                   <h3 style={{
                     fontSize: '18px',
                     fontWeight: '600',
                     color: '#1F2937',
                     marginBottom: '8px'
                   }}>
-                    Review & Launch
+                    Review & launch
                   </h3>
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#6B7280',
-                    marginBottom: '24px'
-                  }}>
-                    Review your experiment settings and launch when ready.
-                  </p>
                   
+                  {/* Summary Card */}
                   <div style={{
-                    background: '#F9FAFB',
-                    padding: '20px',
+                    background: '#FFFFFF',
+                    border: '1px solid #E5E5E5',
                     borderRadius: '8px',
+                    padding: '24px',
                     marginBottom: '24px'
                   }}>
-                    <h4 style={{
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      margin: '0 0 16px 0'
-                    }}>
-                      Experiment Summary
-                    </h4>
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '14px', color: '#6B7280' }}>Test idea:</span>
-                        <span style={{ fontSize: '14px', color: '#1F2937', fontWeight: '500' }}>
-                          {experimentData.idea === 'free-shipping' ? 'Free Shipping Badge' :
-                           experimentData.idea === 'countdown-timer' ? 'Countdown Timer' :
-                           experimentData.idea === 'trust-badge' ? 'Trust Badge' :
-                           experimentData.idea === 'product-images' ? 'Product Images' : 'Not selected'}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '14px', color: '#6B7280' }}>Product:</span>
-                        <span style={{ fontSize: '14px', color: '#1F2937', fontWeight: '500' }}>
-                          {experimentData.product || 'Not selected'}
-                        </span>
-                      </div>
-                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                        <span style={{ fontSize: '14px', color: '#6B7280' }}>Placement:</span>
-                        <span style={{ fontSize: '14px', color: '#1F2937', fontWeight: '500' }}>
-                          {experimentData.placement || 'Not selected'}
-                        </span>
+                    {/* Test Name */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        marginBottom: '8px'
+                      }}>
+                        Test name
+                      </label>
+                      <input 
+                        type="text"
+                        value={`${selectedIdea?.utility || 'Widget'} on ${selectedProduct?.name || 'Product'}`}
+                        onChange={(e) => setExperimentData({...experimentData, testName: e.target.value})}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #D1D5DB',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          background: '#FFFFFF'
+                        }}
+                      />
+                    </div>
+                    
+                    {/* Hypothesis */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        marginBottom: '8px'
+                      }}>
+                        Hypothesis
+                      </label>
+                      <input 
+                        type="text"
+                        value={`Adding a ${selectedIdea?.utility || 'widget'} near ${experimentData.placement || 'placement'} will increase Add to Cart.`}
+                        onChange={(e) => setExperimentData({...experimentData, hypothesis: e.target.value})}
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #D1D5DB',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          background: '#FFFFFF'
+                        }}
+                      />
+                    </div>
+                    
+                    {/* Variants */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        marginBottom: '8px'
+                      }}>
+                        Variants
+                      </label>
+                      <div style={{ display: 'flex', gap: '12px' }}>
+                        <div style={{
+                          flex: 1,
+                          padding: '12px',
+                          border: '1px solid #E5E5E5',
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          <div style={{
+                            width: '20px',
+                            height: '20px',
+                            background: '#10B981',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#FFFFFF',
+                            fontSize: '10px',
+                            fontWeight: '600'
+                          }}>
+                            A
+                          </div>
+                          <span style={{ fontSize: '14px', color: '#1F2937' }}>Control</span>
+                        </div>
+                        <div style={{
+                          flex: 1,
+                          padding: '12px',
+                          border: '1px solid #E5E5E5',
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          <div style={{
+                            width: '20px',
+                            height: '20px',
+                            background: '#3B82F6',
+                            borderRadius: '50%',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            color: '#FFFFFF',
+                            fontSize: '10px',
+                            fontWeight: '600'
+                          }}>
+                            B
+                          </div>
+                          <span style={{ fontSize: '14px', color: '#1F2937' }}>
+                            {selectedIdea?.utility || 'Widget'} (Style S-01)
+                          </span>
+                        </div>
                       </div>
                     </div>
+                    
+                    {/* Traffic Split */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        marginBottom: '8px'
+                      }}>
+                        Traffic split
+                      </label>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        padding: '12px',
+                        background: '#F9FAFB',
+                        borderRadius: '6px'
+                      }}>
+                        <span style={{ fontSize: '14px', color: '#1F2937' }}>50 / 50</span>
+                        {!isAdvanced && (
+                          <span style={{
+                            fontSize: '12px',
+                            color: '#6B7280',
+                            background: '#F3F4F6',
+                            padding: '2px 6px',
+                            borderRadius: '4px'
+                          }}>
+                            Locked in Simple
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    
+                    {/* Goal Metric */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        marginBottom: '8px'
+                      }}>
+                        Goal metric
+                      </label>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        padding: '12px',
+                        background: '#F9FAFB',
+                        borderRadius: '6px'
+                      }}>
+                        <span style={{ fontSize: '14px', color: '#1F2937' }}>Add to Cart</span>
+                        <span style={{
+                          fontSize: '12px',
+                          color: '#6B7280'
+                        }}>
+                          (recommended for PDP changes)
+                        </span>
+                      </div>
+                      <p style={{
+                        fontSize: '12px',
+                        color: '#6B7280',
+                        margin: '4px 0 0 0'
+                      }}>
+                        You can change this later.
+                      </p>
+                    </div>
+                    
+                    {/* Autopilot Mode */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        marginBottom: '8px'
+                      }}>
+                        Autopilot Mode
+                      </label>
+                      <div style={{ display: 'flex', gap: '8px', marginBottom: '8px' }}>
+                        {['Faster', 'Balanced', 'Extra careful'].map((mode) => (
+                          <button
+                            key={mode}
+                            onClick={() => setAutopilotMode(mode.toLowerCase())}
+                            style={{
+                              padding: '8px 16px',
+                              background: autopilotMode === mode.toLowerCase() ? '#3B82F6' : '#F3F4F6',
+                              color: autopilotMode === mode.toLowerCase() ? '#FFFFFF' : '#6B7280',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: '500',
+                              cursor: 'pointer'
+                            }}>
+                            {mode}
+                          </button>
+                        ))}
+                      </div>
+                      <p style={{
+                        fontSize: '12px',
+                        color: '#6B7280',
+                        margin: 0
+                      }}>
+                        Most stores see a clear result in ~2 weeks with <strong>Balanced</strong>.
+                      </p>
+                    </div>
+                    
+                    {/* Auto-push winner */}
+                    <div style={{ marginBottom: '16px' }}>
+                      <label style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        cursor: 'pointer'
+                      }}>
+                        <input 
+                          type="checkbox"
+                          checked={autoPushWinner}
+                          onChange={(e) => setAutoPushWinner(e.target.checked)}
+                        />
+                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#1F2937' }}>
+                          Auto-push winner
+                        </span>
+                        <span style={{
+                          fontSize: '12px',
+                          color: '#10B981',
+                          background: '#DCFCE7',
+                          padding: '2px 6px',
+                          borderRadius: '4px'
+                        }}>
+                          Recommended
+                        </span>
+                      </label>
+                      <p style={{
+                        fontSize: '12px',
+                        color: '#6B7280',
+                        margin: '4px 0 0 0'
+                      }}>
+                        We'll swap the winner live when it's clear.
+                      </p>
+                    </div>
+                    
+                    {/* Advanced link */}
+                    <div style={{ textAlign: 'center' }}>
+                      <button 
+                        onClick={() => setIsAdvanced(!isAdvanced)}
+                        style={{
+                          background: 'none',
+                          border: 'none',
+                          color: '#3B82F6',
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          textDecoration: 'underline'
+                        }}>
+                        {isAdvanced ? 'Hide' : 'Adjust configurations manually'}
+                      </button>
+                    </div>
                   </div>
-
+                  
+                  {/* Advanced Section */}
                   {isAdvanced && (
                     <div style={{
                       background: '#F0F9FF',
-                      padding: '20px',
+                      border: '1px solid #3B82F6',
                       borderRadius: '8px',
+                      padding: '20px',
                       marginBottom: '24px'
                     }}>
                       <h4 style={{
@@ -2132,7 +3334,9 @@ export default function TryLabDashboard() {
                       }}>
                         Advanced Settings
                       </h4>
+                      
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {/* Traffic Split */}
                         <div>
                           <label style={{
                             display: 'block',
@@ -2141,20 +3345,31 @@ export default function TryLabDashboard() {
                             color: '#1F2937',
                             marginBottom: '8px'
                           }}>
-                            Traffic Split
+                            Traffic split
                           </label>
-                          <select style={{
-                            width: '100%',
-                            padding: '8px 12px',
-                            border: '1px solid #D1D5DB',
-                            borderRadius: '6px',
-                            fontSize: '14px'
-                          }}>
-                            <option value="50-50">50% / 50% (Recommended)</option>
-                            <option value="80-20">80% / 20%</option>
-                            <option value="90-10">90% / 10%</option>
-                          </select>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                            <input 
+                              type="range"
+                              min="10"
+                              max="90"
+                              value={experimentData.trafficSplit}
+                              onChange={(e) => setExperimentData({...experimentData, trafficSplit: parseInt(e.target.value)})}
+                              style={{ flex: 1 }}
+                            />
+                            <div style={{
+                              display: 'flex',
+                              gap: '8px',
+                              fontSize: '14px',
+                              color: '#1F2937'
+                            }}>
+                              <span>{experimentData.trafficSplit}%</span>
+                              <span>/</span>
+                              <span>{100 - experimentData.trafficSplit}%</span>
+                            </div>
+                          </div>
                         </div>
+                        
+                        {/* Schedule */}
                         <div>
                           <label style={{
                             display: 'block',
@@ -2163,23 +3378,101 @@ export default function TryLabDashboard() {
                             color: '#1F2937',
                             marginBottom: '8px'
                           }}>
-                            End Rules
+                            Schedule
                           </label>
-                          <select style={{
-                            width: '100%',
-                            padding: '8px 12px',
-                            border: '1px solid #D1D5DB',
-                            borderRadius: '6px',
-                            fontSize: '14px'
+                          <input 
+                            type="datetime-local"
+                            defaultValue={new Date().toISOString().slice(0, 16)}
+                            style={{
+                              width: '100%',
+                              padding: '8px 12px',
+                              border: '1px solid #D1D5DB',
+                              borderRadius: '6px',
+                              fontSize: '14px'
+                            }}
+                          />
+                        </div>
+                        
+                        {/* End Conditions */}
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            color: '#1F2937',
+                            marginBottom: '8px'
                           }}>
-                            <option value="manual">End manually</option>
-                            <option value="significance">End when statistically significant</option>
-                            <option value="duration">End after 30 days</option>
-                          </select>
+                            End conditions
+                          </label>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <input type="radio" name="endCondition" value="date" />
+                              <span style={{ fontSize: '14px', color: '#1F2937' }}>End on date</span>
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <input type="radio" name="endCondition" value="impressions" />
+                              <span style={{ fontSize: '14px', color: '#1F2937' }}>End at impressions per variant</span>
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <input type="radio" name="endCondition" value="conversions" />
+                              <span style={{ fontSize: '14px', color: '#1F2937' }}>End at conversions (based on goal)</span>
+                            </label>
+                            <label style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                              <input type="radio" name="endCondition" value="minimum" />
+                              <span style={{ fontSize: '14px', color: '#1F2937' }}>Require minimum days (e.g., 7)</span>
+                            </label>
+                          </div>
+                        </div>
+                        
+                        {/* Autopilot off toggle */}
+                        <div>
+                          <label style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            cursor: 'pointer'
+                          }}>
+                            <input type="checkbox" />
+                            <span style={{ fontSize: '14px', fontWeight: '500', color: '#1F2937' }}>
+                              Autopilot off
+                            </span>
+                          </label>
+                          <p style={{
+                            fontSize: '12px',
+                            color: '#EF4444',
+                            margin: '4px 0 0 0'
+                          }}>
+                            Manual ends can increase false wins.
+                          </p>
                         </div>
                       </div>
                     </div>
                   )}
+                  
+                  {/* Validation Notices */}
+                  <div style={{
+                    background: '#FEF3C7',
+                    border: '1px solid #F59E0B',
+                    borderRadius: '6px',
+                    padding: '12px',
+                    fontSize: '14px',
+                    color: '#92400E',
+                    marginBottom: '24px'
+                  }}>
+                    ⚠️ Concurrency check: Same page already under test? — show inline warning and disable Launch.
+                  </div>
+                  
+                  <div style={{
+                    background: '#F0F9FF',
+                    border: '1px solid #3B82F6',
+                    borderRadius: '6px',
+                    padding: '12px',
+                    fontSize: '14px',
+                    color: '#1E40AF',
+                    marginBottom: '24px'
+                  }}>
+                    💡 Low traffic hint — suggest broader page or Balanced/Extra careful mode.
+                  </div>
                 </div>
               )}
             </div>
@@ -2246,7 +3539,7 @@ export default function TryLabDashboard() {
                 {currentStep < 4 ? (
                   <button 
                     onClick={() => setCurrentStep(currentStep + 1)}
-                    disabled={!experimentData.idea || (currentStep === 2 && !experimentData.product) || (currentStep === 3 && (!experimentData.variant || !experimentData.placement))}
+                    disabled={!selectedIdea || (currentStep === 2 && !selectedProduct) || (currentStep === 3 && !placementGuideOpen)}
                     style={{
                       padding: '8px 16px',
                       background: '#3B82F6',
@@ -2256,7 +3549,7 @@ export default function TryLabDashboard() {
                       fontWeight: '500',
                       color: '#FFFFFF',
                       cursor: 'pointer',
-                      opacity: (!experimentData.idea || (currentStep === 2 && !experimentData.product) || (currentStep === 3 && (!experimentData.variant || !experimentData.placement))) ? 0.5 : 1
+                      opacity: (!selectedIdea || (currentStep === 2 && !selectedProduct) || (currentStep === 3 && !placementGuideOpen)) ? 0.5 : 1
                     }}>
                     Next
                   </button>
@@ -2266,26 +3559,39 @@ export default function TryLabDashboard() {
                       // Launch experiment logic here
                       setShowCreateModal(false);
                       setCurrentStep(1);
+                      setSelectedIdea(null);
+                      setSelectedProduct(null);
+                      setPlacementGuideOpen(false);
+                      setAutopilotMode('balanced');
+                      setAutoPushWinner(true);
                       setExperimentData({
                         idea: null,
                         product: null,
                         variant: null,
                         placement: null,
                         name: '',
-                        description: ''
+                        description: '',
+                        testName: '',
+                        hypothesis: '',
+                        trafficSplit: 50,
+                        goalMetric: 'add_to_cart',
+                        startDate: new Date(),
+                        endConditions: {}
                       });
                     }}
                     style={{
-                      padding: '8px 16px',
+                      padding: '12px 24px',
                       background: '#10B981',
                       border: 'none',
                       borderRadius: '6px',
-                      fontSize: '14px',
-                      fontWeight: '500',
+                      fontSize: '16px',
+                      fontWeight: '600',
                       color: '#FFFFFF',
-                      cursor: 'pointer'
+                      cursor: 'pointer',
+                      width: '100%',
+                      maxWidth: '200px'
                     }}>
-                    Launch Experiment
+                    Launch Test
                   </button>
                 )}
               </div>
