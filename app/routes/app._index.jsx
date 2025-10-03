@@ -1,5 +1,6 @@
 import { json } from "@remix-run/node";
 import { useLoaderData, useOutletContext, Link } from "@remix-run/react";
+import { useState } from "react";
 import { authenticate } from "../shopify.server.js";
 import prisma from "../db.server.js";
 
@@ -123,6 +124,19 @@ const getTimeAgo = (date) => {
 export default function TryLabDashboard() {
   const { stats } = useLoaderData();
   const { user } = useOutletContext();
+  
+  // Experiment creation modal state
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [isAdvanced, setIsAdvanced] = useState(false);
+  const [experimentData, setExperimentData] = useState({
+    idea: null,
+    product: null,
+    variant: null,
+    placement: null,
+    name: '',
+    description: ''
+  });
 
   return (
     <div style={{
@@ -344,18 +358,20 @@ export default function TryLabDashboard() {
             </p>
           </div>
           
-          <button style={{
-            padding: '12px 24px',
-            background: '#3B82F6',
-            color: '#FFFFFF',
-            border: 'none',
-            borderRadius: '8px',
-            fontSize: '14px',
-            fontWeight: '600',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center'
-          }}>
+          <button 
+            onClick={() => setShowCreateModal(true)}
+            style={{
+              padding: '12px 24px',
+              background: '#3B82F6',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '8px',
+              fontSize: '14px',
+              fontWeight: '600',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center'
+            }}>
             + New Experiment
           </button>
         </div>
@@ -1603,6 +1619,680 @@ export default function TryLabDashboard() {
           </div>
         </div>
       </div>
+
+      {/* Experiment Creation Modal */}
+      {showCreateModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: '12px',
+            width: '90%',
+            maxWidth: '800px',
+            maxHeight: '90vh',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              padding: '24px 32px',
+              borderBottom: '1px solid #E5E5E5',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                fontSize: '20px',
+                fontWeight: '700',
+                color: '#1F2937',
+                margin: 0
+              }}>
+                Create New Experiment
+              </h2>
+              <button 
+                onClick={() => setShowCreateModal(false)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  fontSize: '24px',
+                  cursor: 'pointer',
+                  color: '#6B7280'
+                }}>
+                ×
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div style={{
+              flex: 1,
+              overflow: 'auto',
+              padding: '32px'
+            }}>
+              {currentStep === 1 && (
+                <div>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Pick an idea to test
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    Choose what you'd like to experiment with. We'll guide you through the rest.
+                  </p>
+                  
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gap: '16px'
+                  }}>
+                    <div 
+                      onClick={() => setExperimentData({...experimentData, idea: 'free-shipping'})}
+                      style={{
+                        padding: '20px',
+                        border: experimentData.idea === 'free-shipping' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        background: experimentData.idea === 'free-shipping' ? '#F0F9FF' : '#FFFFFF'
+                      }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: '12px'
+                      }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          background: '#10B981',
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '16px'
+                        }}>
+                          🚚
+                        </div>
+                        <h4 style={{
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          Free Shipping Badge
+                        </h4>
+                      </div>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        margin: 0
+                      }}>
+                        Test adding a "Free shipping" badge under product prices. Often boosts conversion by 8-12%.
+                      </p>
+                    </div>
+
+                    <div 
+                      onClick={() => setExperimentData({...experimentData, idea: 'countdown-timer'})}
+                      style={{
+                        padding: '20px',
+                        border: experimentData.idea === 'countdown-timer' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        background: experimentData.idea === 'countdown-timer' ? '#F0F9FF' : '#FFFFFF'
+                      }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: '12px'
+                      }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          background: '#10B981',
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '16px'
+                        }}>
+                          ⏰
+                        </div>
+                        <h4 style={{
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          Countdown Timer
+                        </h4>
+                      </div>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        margin: 0
+                      }}>
+                        Test a countdown timer on cart page. Can increase checkout completion by 5-7%.
+                      </p>
+                    </div>
+
+                    <div 
+                      onClick={() => setExperimentData({...experimentData, idea: 'trust-badge'})}
+                      style={{
+                        padding: '20px',
+                        border: experimentData.idea === 'trust-badge' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        background: experimentData.idea === 'trust-badge' ? '#F0F9FF' : '#FFFFFF'
+                      }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: '12px'
+                      }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          background: '#10B981',
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '16px'
+                        }}>
+                          🛡️
+                        </div>
+                        <h4 style={{
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          Trust Badge
+                        </h4>
+                      </div>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        margin: 0
+                      }}>
+                        Add a trust badge near the "Buy Now" button to improve buyer confidence.
+                      </p>
+                    </div>
+
+                    <div 
+                      onClick={() => setExperimentData({...experimentData, idea: 'product-images'})}
+                      style={{
+                        padding: '20px',
+                        border: experimentData.idea === 'product-images' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        background: experimentData.idea === 'product-images' ? '#F0F9FF' : '#FFFFFF'
+                      }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: '12px'
+                      }}>
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          background: '#10B981',
+                          borderRadius: '6px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '16px'
+                        }}>
+                          🖼️
+                        </div>
+                        <h4 style={{
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          Product Images
+                        </h4>
+                      </div>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        margin: 0
+                      }}>
+                        Test lifestyle shots vs. plain backgrounds for better click-through rates.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 2 && (
+                <div>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Choose a product to test
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    Select which product you'd like to run this experiment on.
+                  </p>
+                  
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                    gap: '16px'
+                  }}>
+                    {['Best Seller T-Shirt', 'Premium Coffee Mug', 'Wireless Headphones', 'Organic Soap Set'].map((product, index) => (
+                      <div 
+                        key={index}
+                        onClick={() => setExperimentData({...experimentData, product: product})}
+                        style={{
+                          padding: '16px',
+                          border: experimentData.product === product ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                          borderRadius: '8px',
+                          cursor: 'pointer',
+                          background: experimentData.product === product ? '#F0F9FF' : '#FFFFFF'
+                        }}>
+                        <div style={{
+                          width: '100%',
+                          height: '120px',
+                          background: '#F3F4F6',
+                          borderRadius: '6px',
+                          marginBottom: '12px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          fontSize: '24px'
+                        }}>
+                          📦
+                        </div>
+                        <h4 style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          margin: '0 0 4px 0'
+                        }}>
+                          {product}
+                        </h4>
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: 0
+                        }}>
+                          $29.99
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 3 && (
+                <div>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Choose your variant
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    Pick what you want to test against the original.
+                  </p>
+                  
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gap: '16px'
+                  }}>
+                    <div 
+                      onClick={() => setExperimentData({...experimentData, variant: 'original'})}
+                      style={{
+                        padding: '20px',
+                        border: experimentData.variant === 'original' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        background: experimentData.variant === 'original' ? '#F0F9FF' : '#FFFFFF'
+                      }}>
+                      <h4 style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        margin: '0 0 8px 0'
+                      }}>
+                        Original (Control)
+                      </h4>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        margin: 0
+                      }}>
+                        Keep the current version as your baseline for comparison.
+                      </p>
+                    </div>
+
+                    <div 
+                      onClick={() => setExperimentData({...experimentData, variant: 'new'})}
+                      style={{
+                        padding: '20px',
+                        border: experimentData.variant === 'new' ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                        borderRadius: '8px',
+                        cursor: 'pointer',
+                        background: experimentData.variant === 'new' ? '#F0F9FF' : '#FFFFFF'
+                      }}>
+                      <h4 style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        margin: '0 0 8px 0'
+                      }}>
+                        New Variant
+                      </h4>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        margin: 0
+                      }}>
+                        Test your new idea against the original to see which performs better.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div style={{ marginTop: '24px' }}>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '8px'
+                    }}>
+                      Where should this appear?
+                    </label>
+                    <select 
+                      value={experimentData.placement || ''}
+                      onChange={(e) => setExperimentData({...experimentData, placement: e.target.value})}
+                      style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        background: '#FFFFFF'
+                      }}>
+                      <option value="">Select placement...</option>
+                      <option value="product-page">Product page</option>
+                      <option value="cart-page">Cart page</option>
+                      <option value="checkout-page">Checkout page</option>
+                      <option value="homepage">Homepage</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 4 && (
+                <div>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Review & Launch
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    Review your experiment settings and launch when ready.
+                  </p>
+                  
+                  <div style={{
+                    background: '#F9FAFB',
+                    padding: '20px',
+                    borderRadius: '8px',
+                    marginBottom: '24px'
+                  }}>
+                    <h4 style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      margin: '0 0 16px 0'
+                    }}>
+                      Experiment Summary
+                    </h4>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B7280' }}>Test idea:</span>
+                        <span style={{ fontSize: '14px', color: '#1F2937', fontWeight: '500' }}>
+                          {experimentData.idea === 'free-shipping' ? 'Free Shipping Badge' :
+                           experimentData.idea === 'countdown-timer' ? 'Countdown Timer' :
+                           experimentData.idea === 'trust-badge' ? 'Trust Badge' :
+                           experimentData.idea === 'product-images' ? 'Product Images' : 'Not selected'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B7280' }}>Product:</span>
+                        <span style={{ fontSize: '14px', color: '#1F2937', fontWeight: '500' }}>
+                          {experimentData.product || 'Not selected'}
+                        </span>
+                      </div>
+                      <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                        <span style={{ fontSize: '14px', color: '#6B7280' }}>Placement:</span>
+                        <span style={{ fontSize: '14px', color: '#1F2937', fontWeight: '500' }}>
+                          {experimentData.placement || 'Not selected'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {isAdvanced && (
+                    <div style={{
+                      background: '#F0F9FF',
+                      padding: '20px',
+                      borderRadius: '8px',
+                      marginBottom: '24px'
+                    }}>
+                      <h4 style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        margin: '0 0 16px 0'
+                      }}>
+                        Advanced Settings
+                      </h4>
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            color: '#1F2937',
+                            marginBottom: '8px'
+                          }}>
+                            Traffic Split
+                          </label>
+                          <select style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            border: '1px solid #D1D5DB',
+                            borderRadius: '6px',
+                            fontSize: '14px'
+                          }}>
+                            <option value="50-50">50% / 50% (Recommended)</option>
+                            <option value="80-20">80% / 20%</option>
+                            <option value="90-10">90% / 10%</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            color: '#1F2937',
+                            marginBottom: '8px'
+                          }}>
+                            End Rules
+                          </label>
+                          <select style={{
+                            width: '100%',
+                            padding: '8px 12px',
+                            border: '1px solid #D1D5DB',
+                            borderRadius: '6px',
+                            fontSize: '14px'
+                          }}>
+                            <option value="manual">End manually</option>
+                            <option value="significance">End when statistically significant</option>
+                            <option value="duration">End after 30 days</option>
+                          </select>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Navigation Bar */}
+            <div style={{
+              padding: '20px 32px',
+              borderTop: '1px solid #E5E5E5',
+              background: '#FFFFFF',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              {/* Step Progress */}
+              <div style={{ display: 'flex', gap: '8px' }}>
+                {[1, 2, 3, 4].map((step) => (
+                  <div 
+                    key={step}
+                    style={{
+                      width: '8px',
+                      height: '8px',
+                      borderRadius: '50%',
+                      background: step <= currentStep ? '#3B82F6' : '#E5E5E5'
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Advanced Toggle */}
+              <button 
+                onClick={() => setIsAdvanced(!isAdvanced)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  color: '#6B7280',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}>
+                Advanced {isAdvanced ? '▲' : '▼'}
+              </button>
+
+              {/* Navigation Buttons */}
+              <div style={{ display: 'flex', gap: '12px' }}>
+                {currentStep > 1 && (
+                  <button 
+                    onClick={() => setCurrentStep(currentStep - 1)}
+                    style={{
+                      padding: '8px 16px',
+                      background: 'none',
+                      border: '1px solid #D1D5DB',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#6B7280',
+                      cursor: 'pointer'
+                    }}>
+                    Back
+                  </button>
+                )}
+                
+                {currentStep < 4 ? (
+                  <button 
+                    onClick={() => setCurrentStep(currentStep + 1)}
+                    disabled={!experimentData.idea || (currentStep === 2 && !experimentData.product) || (currentStep === 3 && (!experimentData.variant || !experimentData.placement))}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#3B82F6',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#FFFFFF',
+                      cursor: 'pointer',
+                      opacity: (!experimentData.idea || (currentStep === 2 && !experimentData.product) || (currentStep === 3 && (!experimentData.variant || !experimentData.placement))) ? 0.5 : 1
+                    }}>
+                    Next
+                  </button>
+                ) : (
+                  <button 
+                    onClick={() => {
+                      // Launch experiment logic here
+                      setShowCreateModal(false);
+                      setCurrentStep(1);
+                      setExperimentData({
+                        idea: null,
+                        product: null,
+                        variant: null,
+                        placement: null,
+                        name: '',
+                        description: ''
+                      });
+                    }}
+                    style={{
+                      padding: '8px 16px',
+                      background: '#10B981',
+                      border: 'none',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#FFFFFF',
+                      cursor: 'pointer'
+                    }}>
+                    Launch Experiment
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
