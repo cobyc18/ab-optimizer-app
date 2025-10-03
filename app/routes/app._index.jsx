@@ -7,6 +7,53 @@ import prisma from "../db.server.js";
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
   
+  // Fetch Shopify products
+  let products = [];
+  try {
+    const productsRes = await admin.graphql(`
+      query {
+        products(first: 20) {
+          nodes {
+            id
+            title
+            handle
+            priceRangeV2 {
+              minVariantPrice {
+                amount
+                currencyCode
+              }
+            }
+            featuredImage {
+              url
+              altText
+            }
+            images(first: 1) {
+              nodes {
+                url
+                altText
+              }
+            }
+            variants(first: 1) {
+              nodes {
+                compareAtPrice
+                price
+              }
+            }
+            totalInventory
+            createdAt
+            status
+            tags
+          }
+        }
+      }
+    `);
+    const productsJson = await productsRes.json();
+    products = productsJson.data.products.nodes;
+    console.log("✅ Products fetched:", products.length);
+  } catch (error) {
+    console.error("❌ Error fetching products:", error);
+  }
+  
   // Fetch real data from database
   let stats = {
     totalTests: 0,
@@ -105,7 +152,7 @@ export const loader = async ({ request }) => {
     // Keep default stats if database query fails
   }
 
-  return json({ stats });
+  return json({ stats, products });
 };
 
 // Helper function to format time ago
@@ -122,7 +169,7 @@ const getTimeAgo = (date) => {
 };
 
 export default function TryLabDashboard() {
-  const { stats } = useLoaderData();
+  const { stats, products } = useLoaderData();
   const { user } = useOutletContext();
   
   // Experiment creation modal state
@@ -2382,68 +2429,106 @@ export default function TryLabDashboard() {
                     gap: '16px',
                     marginBottom: '24px'
                   }}>
-                    {[
-                      { name: 'Best Seller T-Shirt', price: '$29.99', isBestseller: true, image: '👕' },
-                      { name: 'Premium Coffee Mug', price: '$19.99', isBestseller: false, image: '☕' },
-                      { name: 'Wireless Headphones', price: '$149.99', isBestseller: false, image: '🎧' },
-                      { name: 'Organic Soap Set', price: '$24.99', isBestseller: false, image: '🧼' }
-                    ].map((product, index) => (
-                      <div 
-                        key={index}
-                        onClick={() => setSelectedProduct(product)}
-                        style={{
-                          padding: '16px',
-                          border: selectedProduct?.name === product.name ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                          borderRadius: '8px',
-                          cursor: 'pointer',
-                          background: selectedProduct?.name === product.name ? '#F0F9FF' : '#FFFFFF',
-                          position: 'relative'
-                        }}>
-                        {product.isBestseller && (
-                          <div style={{
-                            position: 'absolute',
-                            top: '8px',
-                            right: '8px',
-                            background: '#10B981',
-                            color: '#FFFFFF',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            fontSize: '10px',
-                            fontWeight: '600'
+                    {products.map((product, index) => {
+                      const price = product.priceRangeV2?.minVariantPrice?.amount || '0';
+                      const currency = product.priceRangeV2?.minVariantPrice?.currencyCode || 'USD';
+                      const imageUrl = product.featuredImage?.url || product.images?.nodes?.[0]?.url;
+                      const isBestseller = product.tags?.includes('bestseller') || product.tags?.includes('featured');
+                      
+                      return (
+                        <div 
+                          key={product.id}
+                          onClick={() => setSelectedProduct(product)}
+                          style={{
+                            padding: '16px',
+                            border: selectedProduct?.id === product.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                            borderRadius: '8px',
+                            cursor: 'pointer',
+                            background: selectedProduct?.id === product.id ? '#F0F9FF' : '#FFFFFF',
+                            position: 'relative',
+                            transition: 'all 0.2s ease'
                           }}>
-                            BESTSELLER
+                          {isBestseller && (
+                            <div style={{
+                              position: 'absolute',
+                              top: '8px',
+                              right: '8px',
+                              background: '#10B981',
+                              color: '#FFFFFF',
+                              padding: '2px 6px',
+                              borderRadius: '4px',
+                              fontSize: '10px',
+                              fontWeight: '600',
+                              zIndex: 1
+                            }}>
+                              BESTSELLER
+                            </div>
+                          )}
+                          <div style={{
+                            width: '100%',
+                            height: '120px',
+                            background: '#F3F4F6',
+                            borderRadius: '6px',
+                            marginBottom: '12px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            overflow: 'hidden',
+                            position: 'relative'
+                          }}>
+                            {imageUrl ? (
+                              <img 
+                                src={imageUrl} 
+                                alt={product.featuredImage?.altText || product.title}
+                                style={{
+                                  width: '100%',
+                                  height: '100%',
+                                  objectFit: 'cover',
+                                  borderRadius: '6px'
+                                }}
+                              />
+                            ) : (
+                              <div style={{
+                                fontSize: '32px',
+                                color: '#9CA3AF'
+                              }}>
+                                📦
+                              </div>
+                            )}
                           </div>
-                        )}
-                        <div style={{
-                          width: '100%',
-                          height: '120px',
-                          background: '#F3F4F6',
-                          borderRadius: '6px',
-                          marginBottom: '12px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '32px'
-                        }}>
-                          {product.image}
+                          <h4 style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#1F2937',
+                            margin: '0 0 4px 0',
+                            lineHeight: '1.3',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden'
+                          }}>
+                            {product.title}
+                          </h4>
+                          <p style={{
+                            fontSize: '12px',
+                            color: '#6B7280',
+                            margin: 0
+                          }}>
+                            {currency} {parseFloat(price).toFixed(2)}
+                          </p>
+                          {product.totalInventory > 0 && (
+                            <p style={{
+                              fontSize: '10px',
+                              color: '#10B981',
+                              margin: '4px 0 0 0',
+                              fontWeight: '500'
+                            }}>
+                              {product.totalInventory} in stock
+                            </p>
+                          )}
                         </div>
-                        <h4 style={{
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#1F2937',
-                          margin: '0 0 4px 0'
-                        }}>
-                          {product.name}
-                        </h4>
-                        <p style={{
-                          fontSize: '12px',
-                          color: '#6B7280',
-                          margin: 0
-                        }}>
-                          {product.price}
-                        </p>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                   
                   {/* Concurrency Notice */}
@@ -2511,17 +2596,31 @@ export default function TryLabDashboard() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '24px'
+                          overflow: 'hidden'
                         }}>
-                          {selectedProduct.image}
+                          {selectedProduct.featuredImage?.url ? (
+                            <img 
+                              src={selectedProduct.featuredImage.url} 
+                              alt={selectedProduct.featuredImage.altText || selectedProduct.title}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                borderRadius: '4px'
+                              }}
+                            />
+                          ) : (
+                            <div style={{ fontSize: '24px', color: '#9CA3AF' }}>📦</div>
+                          )}
                         </div>
                         <p style={{
                           fontSize: '12px',
                           color: '#6B7280',
                           margin: '8px 0 0 0',
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          lineHeight: '1.2'
                         }}>
-                          {selectedProduct.name}
+                          {selectedProduct.title}
                         </p>
                       </div>
                       
@@ -2994,21 +3093,246 @@ export default function TryLabDashboard() {
                     </div>
                   )}
                   
+                  {/* Product Preview Modal */}
+                  {selectedProduct && (
+                    <div style={{
+                      position: 'fixed',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'rgba(0, 0, 0, 0.5)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 2000
+                    }}>
+                      <div style={{
+                        background: '#FFFFFF',
+                        borderRadius: '12px',
+                        width: '90%',
+                        maxWidth: '600px',
+                        maxHeight: '80vh',
+                        overflow: 'hidden',
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}>
+                        {/* Preview Header */}
+                        <div style={{
+                          padding: '20px 24px',
+                          borderBottom: '1px solid #E5E5E5',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}>
+                          <h3 style={{
+                            fontSize: '18px',
+                            fontWeight: '600',
+                            color: '#1F2937',
+                            margin: 0
+                          }}>
+                            Product Preview
+                          </h3>
+                          <button 
+                            onClick={() => setSelectedProduct(null)}
+                            style={{
+                              background: 'none',
+                              border: 'none',
+                              fontSize: '20px',
+                              cursor: 'pointer',
+                              color: '#6B7280'
+                            }}>
+                            ×
+                          </button>
+                        </div>
+                        
+                        {/* Preview Content */}
+                        <div style={{
+                          flex: 1,
+                          padding: '24px',
+                          overflow: 'auto'
+                        }}>
+                          <div style={{
+                            display: 'flex',
+                            gap: '20px',
+                            marginBottom: '20px'
+                          }}>
+                            {/* Product Image */}
+                            <div style={{
+                              flex: 1,
+                              minWidth: '200px'
+                            }}>
+                              <div style={{
+                                width: '100%',
+                                height: '200px',
+                                background: '#F3F4F6',
+                                borderRadius: '8px',
+                                overflow: 'hidden',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                              }}>
+                                {selectedProduct.featuredImage?.url ? (
+                                  <img 
+                                    src={selectedProduct.featuredImage.url} 
+                                    alt={selectedProduct.featuredImage.altText || selectedProduct.title}
+                                    style={{
+                                      width: '100%',
+                                      height: '100%',
+                                      objectFit: 'cover'
+                                    }}
+                                  />
+                                ) : (
+                                  <div style={{ fontSize: '48px', color: '#9CA3AF' }}>📦</div>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {/* Product Details */}
+                            <div style={{
+                              flex: 1,
+                              minWidth: '200px'
+                            }}>
+                              <h4 style={{
+                                fontSize: '20px',
+                                fontWeight: '700',
+                                color: '#1F2937',
+                                margin: '0 0 8px 0'
+                              }}>
+                                {selectedProduct.title}
+                              </h4>
+                              
+                              <div style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '8px',
+                                marginBottom: '12px'
+                              }}>
+                                <span style={{
+                                  fontSize: '18px',
+                                  fontWeight: '600',
+                                  color: '#1F2937'
+                                }}>
+                                  {selectedProduct.priceRangeV2?.minVariantPrice?.currencyCode || 'USD'} {parseFloat(selectedProduct.priceRangeV2?.minVariantPrice?.amount || '0').toFixed(2)}
+                                </span>
+                                {selectedProduct.variants?.nodes?.[0]?.compareAtPrice && (
+                                  <span style={{
+                                    fontSize: '14px',
+                                    color: '#6B7280',
+                                    textDecoration: 'line-through'
+                                  }}>
+                                    {selectedProduct.priceRangeV2?.minVariantPrice?.currencyCode || 'USD'} {parseFloat(selectedProduct.variants.nodes[0].compareAtPrice).toFixed(2)}
+                                  </span>
+                                )}
+                              </div>
+                              
+                              {selectedProduct.totalInventory > 0 && (
+                                <div style={{
+                                  background: '#DCFCE7',
+                                  color: '#166534',
+                                  padding: '6px 12px',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  fontWeight: '500',
+                                  display: 'inline-block',
+                                  marginBottom: '12px'
+                                }}>
+                                  {selectedProduct.totalInventory} in stock
+                                </div>
+                              )}
+                              
+                              {selectedProduct.tags && selectedProduct.tags.length > 0 && (
+                                <div style={{
+                                  display: 'flex',
+                                  flexWrap: 'wrap',
+                                  gap: '6px',
+                                  marginBottom: '12px'
+                                }}>
+                                  {selectedProduct.tags.slice(0, 3).map((tag, index) => (
+                                    <span 
+                                      key={index}
+                                      style={{
+                                        background: '#F0F9FF',
+                                        color: '#3B82F6',
+                                        padding: '2px 8px',
+                                        borderRadius: '12px',
+                                        fontSize: '10px',
+                                        fontWeight: '500'
+                                      }}>
+                                      {tag}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              
+                              <div style={{
+                                fontSize: '12px',
+                                color: '#6B7280',
+                                marginTop: '8px'
+                              }}>
+                                Created: {new Date(selectedProduct.createdAt).toLocaleDateString()}
+                              </div>
+                            </div>
+                          </div>
+                          
+                          {/* Action Buttons */}
+                          <div style={{
+                            display: 'flex',
+                            gap: '12px',
+                            justifyContent: 'flex-end'
+                          }}>
+                            <button 
+                              onClick={() => setSelectedProduct(null)}
+                              style={{
+                                padding: '8px 16px',
+                                background: 'none',
+                                border: '1px solid #D1D5DB',
+                                color: '#6B7280',
+                                borderRadius: '6px',
+                                fontSize: '14px',
+                                cursor: 'pointer'
+                              }}>
+                              Cancel
+                            </button>
+                            <button 
+                              onClick={() => {
+                                setSelectedProduct(null);
+                                setCurrentStep(3);
+                              }}
+                              style={{
+                                padding: '8px 16px',
+                                background: '#3B82F6',
+                                border: 'none',
+                                color: '#FFFFFF',
+                                borderRadius: '6px',
+                                fontSize: '14px',
+                                cursor: 'pointer'
+                              }}>
+                              Use This Product
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                  
                   {/* Optional: Preview full page button */}
                   <div style={{
                     textAlign: 'center',
                     marginTop: '16px'
                   }}>
-                    <button style={{
-                      background: 'none',
-                      border: '1px solid #D1D5DB',
-                      color: '#6B7280',
-                      padding: '8px 16px',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      cursor: 'pointer'
-                    }}>
-                      Preview full page
+                    <button 
+                      onClick={() => setSelectedProduct(selectedProduct)}
+                      style={{
+                        background: 'none',
+                        border: '1px solid #D1D5DB',
+                        color: '#6B7280',
+                        padding: '8px 16px',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        cursor: 'pointer'
+                      }}>
+                      Preview product details
                     </button>
                   </div>
                 </div>
@@ -3050,7 +3374,7 @@ export default function TryLabDashboard() {
                       </label>
                       <input 
                         type="text"
-                        value={`${selectedIdea?.utility || 'Widget'} on ${selectedProduct?.name || 'Product'}`}
+                        value={`${selectedIdea?.utility || 'Widget'} on ${selectedProduct?.title || 'Product'}`}
                         onChange={(e) => setExperimentData({...experimentData, testName: e.target.value})}
                         style={{
                           width: '100%',
@@ -3076,7 +3400,7 @@ export default function TryLabDashboard() {
                       </label>
                       <input 
                         type="text"
-                        value={`Adding a ${selectedIdea?.utility || 'widget'} near ${experimentData.placement || 'placement'} will increase Add to Cart.`}
+                        value={`Adding a ${selectedIdea?.utility || 'widget'} near ${experimentData.placement || 'placement'} will increase Add to Cart for ${selectedProduct?.title || 'this product'}.`}
                         onChange={(e) => setExperimentData({...experimentData, hypothesis: e.target.value})}
                         style={{
                           width: '100%',
