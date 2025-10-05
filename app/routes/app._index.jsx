@@ -18,8 +18,16 @@ export const loader = async ({ request }) => {
             id
             title
             handle
+            description
+            descriptionHtml
+            vendor
+            productType
             priceRangeV2 {
               minVariantPrice {
+                amount
+                currencyCode
+              }
+              maxVariantPrice {
                 amount
                 currencyCode
               }
@@ -27,23 +35,49 @@ export const loader = async ({ request }) => {
             featuredImage {
               url
               altText
+              width
+              height
             }
-            images(first: 1) {
+            images(first: 10) {
               nodes {
                 url
                 altText
+                width
+                height
               }
             }
-            variants(first: 1) {
+            variants(first: 20) {
               nodes {
-                compareAtPrice
+                id
+                title
                 price
+                compareAtPrice
+                availableForSale
+                selectedOptions {
+                  name
+                  value
+                }
+                image {
+                  url
+                  altText
+                }
+                inventoryQuantity
               }
             }
             totalInventory
             createdAt
+            updatedAt
             status
             tags
+            seo {
+              title
+              description
+            }
+            options {
+              id
+              name
+              values
+            }
           }
         }
       }
@@ -102,6 +136,8 @@ export default function Index() {
   const [draggedElement, setDraggedElement] = useState(null);
   const [themePreviewData, setThemePreviewData] = useState(null);
   const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [productPreviewOpen, setProductPreviewOpen] = useState(false);
+  const [previewProduct, setPreviewProduct] = useState(null);
 
   // A/B Test Ideas
   const abTestIdeas = [
@@ -292,6 +328,17 @@ export default function Index() {
 
   const updateWidgetPosition = (position) => {
     setWidgetPosition(position);
+  };
+
+  // Product Preview Functions
+  const openProductPreview = (product) => {
+    setPreviewProduct(product);
+    setProductPreviewOpen(true);
+  };
+
+  const closeProductPreview = () => {
+    setProductPreviewOpen(false);
+    setPreviewProduct(null);
   };
 
   return (
@@ -814,27 +861,56 @@ export default function Index() {
                       </div>
                     )}
 
-                    {/* Selection Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedProduct(product);
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '8px 16px',
-                        background: selectedProduct?.id === product.id ? '#3B82F6' : '#F3F4F6',
-                        color: selectedProduct?.id === product.id ? '#FFFFFF' : '#6B7280',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      {selectedProduct?.id === product.id ? '✓ Selected' : 'Select Product'}
-                    </button>
+                    {/* Action Buttons */}
+                    <div style={{
+                      display: 'flex',
+                      gap: '8px'
+                    }}>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openProductPreview(product);
+                        }}
+                        style={{
+                          flex: 1,
+                          padding: '8px 12px',
+                          background: '#F8FAFC',
+                          color: '#374151',
+                          border: '1px solid #D1D5DB',
+                          borderRadius: '6px',
+                          fontSize: '12px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          gap: '4px'
+                        }}
+                      >
+                        👁️ Preview
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setSelectedProduct(product);
+                        }}
+                        style={{
+                          flex: 2,
+                          padding: '8px 16px',
+                          background: selectedProduct?.id === product.id ? '#3B82F6' : '#F3F4F6',
+                          color: selectedProduct?.id === product.id ? '#FFFFFF' : '#6B7280',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        {selectedProduct?.id === product.id ? '✓ Selected' : 'Select Product'}
+                      </button>
+                    </div>
                   </div>
                     );
                   })}
@@ -1376,6 +1452,438 @@ export default function Index() {
           )}
         </div>
       </div>
+
+      {/* Product Preview Modal */}
+      {productPreviewOpen && previewProduct && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: '16px',
+            maxWidth: '900px',
+            width: '100%',
+            maxHeight: '90vh',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+              color: '#FFFFFF',
+              padding: '20px 24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <h2 style={{
+                fontSize: '20px',
+                fontWeight: '700',
+                margin: 0,
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px'
+              }}>
+                👁️ Product Preview
+              </h2>
+              <button
+                onClick={closeProductPreview}
+                style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  border: 'none',
+                  borderRadius: '50%',
+                  width: '32px',
+                  height: '32px',
+                  color: '#FFFFFF',
+                  fontSize: '18px',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
+                }}
+              >
+                ×
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div style={{
+              flex: 1,
+              overflow: 'auto',
+              padding: '24px'
+            }}>
+              {/* Product Images */}
+              <div style={{
+                marginBottom: '24px'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  gap: '12px',
+                  marginBottom: '16px',
+                  overflowX: 'auto',
+                  paddingBottom: '8px'
+                }}>
+                  {previewProduct.images?.nodes?.map((image, index) => (
+                    <img
+                      key={index}
+                      src={image.url}
+                      alt={image.altText || previewProduct.title}
+                      style={{
+                        width: '80px',
+                        height: '80px',
+                        objectFit: 'cover',
+                        borderRadius: '8px',
+                        border: '2px solid #E5E5E5',
+                        cursor: 'pointer'
+                      }}
+                    />
+                  ))}
+                </div>
+                
+                {/* Main Product Image */}
+                <div style={{
+                  width: '100%',
+                  height: '300px',
+                  background: '#F8FAFC',
+                  borderRadius: '12px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  overflow: 'hidden'
+                }}>
+                  {previewProduct.featuredImage?.url ? (
+                    <img
+                      src={previewProduct.featuredImage.url}
+                      alt={previewProduct.featuredImage.altText || previewProduct.title}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        objectFit: 'contain'
+                      }}
+                    />
+                  ) : (
+                    <div style={{
+                      fontSize: '48px',
+                      color: '#9CA3AF'
+                    }}>
+                      📦
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Product Details */}
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '24px',
+                marginBottom: '24px'
+              }}>
+                {/* Left Column - Basic Info */}
+                <div>
+                  <h3 style={{
+                    fontSize: '24px',
+                    fontWeight: '700',
+                    color: '#1F2937',
+                    marginBottom: '8px',
+                    lineHeight: '1.3'
+                  }}>
+                    {previewProduct.title}
+                  </h3>
+                  
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    marginBottom: '16px'
+                  }}>
+                    <div style={{
+                      fontSize: '20px',
+                      fontWeight: '700',
+                      color: '#059669'
+                    }}>
+                      {previewProduct.priceRangeV2?.minVariantPrice?.currencyCode} {parseFloat(previewProduct.priceRangeV2?.minVariantPrice?.amount || 0).toFixed(2)}
+                    </div>
+                    
+                    {previewProduct.priceRangeV2?.maxVariantPrice?.amount !== previewProduct.priceRangeV2?.minVariantPrice?.amount && (
+                      <span style={{
+                        color: '#6B7280',
+                        fontSize: '14px'
+                      }}>
+                        - {previewProduct.priceRangeV2?.maxVariantPrice?.currencyCode} {parseFloat(previewProduct.priceRangeV2?.maxVariantPrice?.amount || 0).toFixed(2)}
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Product Meta */}
+                  <div style={{
+                    background: '#F8FAFC',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    marginBottom: '16px'
+                  }}>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: '1fr 1fr',
+                      gap: '12px',
+                      fontSize: '14px'
+                    }}>
+                      <div>
+                        <span style={{ color: '#6B7280', fontWeight: '500' }}>Vendor:</span>
+                        <div style={{ color: '#1F2937', fontWeight: '600' }}>{previewProduct.vendor || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <span style={{ color: '#6B7280', fontWeight: '500' }}>Type:</span>
+                        <div style={{ color: '#1F2937', fontWeight: '600' }}>{previewProduct.productType || 'N/A'}</div>
+                      </div>
+                      <div>
+                        <span style={{ color: '#6B7280', fontWeight: '500' }}>Status:</span>
+                        <div style={{ 
+                          color: previewProduct.status === 'active' ? '#059669' : '#6B7280',
+                          fontWeight: '600',
+                          textTransform: 'capitalize'
+                        }}>
+                          {previewProduct.status}
+                        </div>
+                      </div>
+                      <div>
+                        <span style={{ color: '#6B7280', fontWeight: '500' }}>Inventory:</span>
+                        <div style={{ color: '#1F2937', fontWeight: '600' }}>{previewProduct.totalInventory || 0} units</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Product Tags */}
+                  {previewProduct.tags && previewProduct.tags.length > 0 && (
+                    <div style={{
+                      marginBottom: '16px'
+                    }}>
+                      <div style={{
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        fontWeight: '500',
+                        marginBottom: '8px'
+                      }}>
+                        Tags:
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        flexWrap: 'wrap',
+                        gap: '6px'
+                      }}>
+                        {previewProduct.tags.map((tag, index) => (
+                          <span
+                            key={index}
+                            style={{
+                              background: '#E0E7FF',
+                              color: '#3730A3',
+                              padding: '4px 8px',
+                              borderRadius: '6px',
+                              fontSize: '12px',
+                              fontWeight: '500'
+                            }}
+                          >
+                            {tag}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Right Column - Variants */}
+                <div>
+                  <h4 style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '16px'
+                  }}>
+                    Product Variants
+                  </h4>
+                  
+                  <div style={{
+                    maxHeight: '300px',
+                    overflowY: 'auto',
+                    border: '1px solid #E5E5E5',
+                    borderRadius: '8px'
+                  }}>
+                    {previewProduct.variants?.nodes?.map((variant, index) => (
+                      <div
+                        key={index}
+                        style={{
+                          padding: '12px 16px',
+                          borderBottom: index < previewProduct.variants.nodes.length - 1 ? '1px solid #F3F4F6' : 'none',
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center'
+                        }}
+                      >
+                        <div>
+                          <div style={{
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            color: '#1F2937',
+                            marginBottom: '4px'
+                          }}>
+                            {variant.title}
+                          </div>
+                          <div style={{
+                            fontSize: '12px',
+                            color: '#6B7280'
+                          }}>
+                            {variant.selectedOptions?.map(option => `${option.name}: ${option.value}`).join(', ') || 'Default'}
+                          </div>
+                        </div>
+                        <div style={{
+                          textAlign: 'right'
+                        }}>
+                          <div style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#059669'
+                          }}>
+                            {previewProduct.priceRangeV2?.minVariantPrice?.currencyCode} {parseFloat(variant.price || 0).toFixed(2)}
+                          </div>
+                          {variant.compareAtPrice && (
+                            <div style={{
+                              fontSize: '12px',
+                              color: '#9CA3AF',
+                              textDecoration: 'line-through'
+                            }}>
+                              {previewProduct.priceRangeV2?.minVariantPrice?.currencyCode} {parseFloat(variant.compareAtPrice).toFixed(2)}
+                            </div>
+                          )}
+                          <div style={{
+                            fontSize: '11px',
+                            color: variant.availableForSale ? '#059669' : '#DC2626',
+                            fontWeight: '500'
+                          }}>
+                            {variant.availableForSale ? `In Stock (${variant.inventoryQuantity || 0})` : 'Out of Stock'}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Product Description */}
+              {previewProduct.description && (
+                <div style={{
+                  marginBottom: '24px'
+                }}>
+                  <h4 style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '12px'
+                  }}>
+                    Description
+                  </h4>
+                  <div style={{
+                    background: '#F8FAFC',
+                    border: '1px solid #E5E5E5',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    fontSize: '14px',
+                    color: '#374151',
+                    lineHeight: '1.6'
+                  }}>
+                    {previewProduct.description}
+                  </div>
+                </div>
+              )}
+
+              {/* SEO Information */}
+              {previewProduct.seo && (
+                <div style={{
+                  background: '#F0FDF4',
+                  border: '1px solid #BBF7D0',
+                  borderRadius: '8px',
+                  padding: '16px'
+                }}>
+                  <h4 style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#166534',
+                    marginBottom: '8px'
+                  }}>
+                    📈 SEO Information
+                  </h4>
+                  <div style={{
+                    fontSize: '13px',
+                    color: '#166534'
+                  }}>
+                    <div style={{ marginBottom: '4px' }}>
+                      <strong>Title:</strong> {previewProduct.seo.title || previewProduct.title}
+                    </div>
+                    <div>
+                      <strong>Description:</strong> {previewProduct.seo.description || previewProduct.description?.substring(0, 160) + '...'}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              background: '#F8FAFC',
+              padding: '16px 24px',
+              borderTop: '1px solid #E5E5E5',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <button
+                onClick={closeProductPreview}
+                style={{
+                  padding: '8px 16px',
+                  background: '#F3F4F6',
+                  color: '#6B7280',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
+              >
+                Close Preview
+              </button>
+              <button
+                onClick={() => {
+                  setSelectedProduct(previewProduct);
+                  closeProductPreview();
+                }}
+                style={{
+                  padding: '8px 16px',
+                  background: '#3B82F6',
+                  color: '#FFFFFF',
+                  border: 'none',
+                  borderRadius: '6px',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  cursor: 'pointer'
+                }}
+              >
+                ✓ Select This Product
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style dangerouslySetInnerHTML={{
         __html: `
