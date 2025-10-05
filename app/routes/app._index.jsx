@@ -464,26 +464,17 @@ export default function TryLabDashboard() {
 
   // Theme Preview Functions
   const generateThemePreview = async (product, widget) => {
-    console.log('🎯 generateThemePreview called with:', { product, widget });
-    console.log('🎯 selectedProduct:', selectedProduct);
-    console.log('🎯 selectedIdea:', selectedIdea);
-    
     if (!product || !widget) {
       console.log('❌ Missing product or widget:', { product, widget });
       return;
     }
 
     try {
-      console.log('🚀 Starting theme preview generation...');
       setThemePreviewMode(true);
       
       // Generate widget code and get installation instructions
       const widgetCode = generateWidgetCode(widget, 'preview');
       const snippetName = `ab-test-${widget.toLowerCase().replace(/\s+/g, '-')}`;
-      
-      console.log('📦 Generated widget code:', widgetCode);
-      console.log('📦 Snippet name:', snippetName);
-      console.log('📦 Theme info:', themeInfo);
       
       const response = await fetch('/api/theme-widget', {
         method: 'POST',
@@ -499,7 +490,6 @@ export default function TryLabDashboard() {
       });
 
       const data = await response.json();
-      console.log('📡 API response:', data);
       
       if (data.success) {
         // Generate comprehensive preview data
@@ -3652,6 +3642,60 @@ export default function TryLabDashboard() {
                     Theme Preview & Positioning
                   </h3>
                   
+                  {!selectedProduct && (
+                    <div style={{
+                      background: '#FEF3C7',
+                      border: '1px solid #F59E0B',
+                      borderRadius: '8px',
+                      padding: '16px',
+                      marginBottom: '24px'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: '12px'
+                      }}>
+                        <div style={{
+                          fontSize: '20px'
+                        }}>
+                          ⚠️
+                        </div>
+                        <h4 style={{
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          color: '#92400E',
+                          margin: 0
+                        }}>
+                          Product Selection Required
+                        </h4>
+                      </div>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#92400E',
+                        marginBottom: '16px',
+                        lineHeight: '1.5'
+                      }}>
+                        You need to select a product before you can preview your widget. Please go back and select a product first.
+                      </p>
+                      <button
+                        onClick={() => setCurrentStep(2)}
+                        style={{
+                          padding: '8px 16px',
+                          background: '#F59E0B',
+                          color: '#FFFFFF',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        ← Back to Product Selection
+                      </button>
+                    </div>
+                  )}
+                  
                   <p style={{
                     fontSize: '14px',
                     color: '#6B7280',
@@ -4111,7 +4155,7 @@ export default function TryLabDashboard() {
                       </div>
                     )}
 
-                    {!themePreviewData && (
+                    {!themePreviewData && selectedProduct && (
                       <div style={{
                         display: 'flex',
                         flexDirection: 'column',
@@ -4154,13 +4198,7 @@ export default function TryLabDashboard() {
                         </div>
                         
                         <button
-                          onClick={() => {
-                            console.log('🖱️ Generate Preview button clicked!');
-                            console.log('🖱️ selectedProduct:', selectedProduct);
-                            console.log('🖱️ selectedIdea:', selectedIdea);
-                            alert('Button clicked! Check console for details.');
-                            generateThemePreview(selectedProduct, selectedIdea?.utility);
-                          }}
+                          onClick={() => generateThemePreview(selectedProduct, selectedIdea?.utility)}
                           disabled={themePreviewMode}
                           style={{
                             padding: '12px 24px',
@@ -4204,6 +4242,27 @@ export default function TryLabDashboard() {
                             }
                           `
                         }} />
+                      </div>
+                    )}
+
+                    {!themePreviewData && !selectedProduct && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '300px',
+                        color: '#6B7280',
+                        fontSize: '14px',
+                        background: '#F9FAFB',
+                        borderRadius: '8px',
+                        border: '2px dashed #E5E5E5',
+                        textAlign: 'center',
+                        padding: '32px'
+                      }}>
+                        <div>
+                          <div style={{ fontSize: '48px', marginBottom: '16px' }}>📦</div>
+                          <p>Please select a product to preview your widget</p>
+                        </div>
                       </div>
                     )}
                   </div>
