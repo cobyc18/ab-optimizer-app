@@ -464,20 +464,32 @@ export default function TryLabDashboard() {
 
   // Theme Preview Functions
   const generateThemePreview = async (product, widget) => {
-    if (!product || !widget) return;
+    console.log('🎯 generateThemePreview called with:', { product, widget });
+    console.log('🎯 selectedProduct:', selectedProduct);
+    console.log('🎯 selectedIdea:', selectedIdea);
+    
+    if (!product || !widget) {
+      console.log('❌ Missing product or widget:', { product, widget });
+      return;
+    }
 
     try {
+      console.log('🚀 Starting theme preview generation...');
       setThemePreviewMode(true);
       
       // Generate widget code and get installation instructions
       const widgetCode = generateWidgetCode(widget, 'preview');
       const snippetName = `ab-test-${widget.toLowerCase().replace(/\s+/g, '-')}`;
       
+      console.log('📦 Generated widget code:', widgetCode);
+      console.log('📦 Snippet name:', snippetName);
+      console.log('📦 Theme info:', themeInfo);
+      
       const response = await fetch('/api/theme-widget', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          themeId: themeInfo.themeId,
+          themeId: themeInfo?.themeId || 'default-theme',
           snippetName,
           snippetContent: widgetCode,
           widget,
@@ -487,6 +499,7 @@ export default function TryLabDashboard() {
       });
 
       const data = await response.json();
+      console.log('📡 API response:', data);
       
       if (data.success) {
         // Generate comprehensive preview data
@@ -4141,7 +4154,13 @@ export default function TryLabDashboard() {
                         </div>
                         
                         <button
-                          onClick={() => generateThemePreview(selectedProduct, selectedIdea?.utility)}
+                          onClick={() => {
+                            console.log('🖱️ Generate Preview button clicked!');
+                            console.log('🖱️ selectedProduct:', selectedProduct);
+                            console.log('🖱️ selectedIdea:', selectedIdea);
+                            alert('Button clicked! Check console for details.');
+                            generateThemePreview(selectedProduct, selectedIdea?.utility);
+                          }}
                           disabled={themePreviewMode}
                           style={{
                             padding: '12px 24px',
@@ -4717,7 +4736,7 @@ export default function TryLabDashboard() {
                 {currentStep < 6 ? (
                   <button 
                     onClick={() => setCurrentStep(currentStep + 1)}
-                    disabled={!selectedIdea || (currentStep === 2 && !selectedProduct) || (currentStep === 3 && !placementGuideOpen) || (currentStep === 5 && !themePreviewData)}
+                    disabled={!selectedIdea || (currentStep === 2 && !selectedProduct) || (currentStep === 3 && !placementGuideOpen) || (currentStep === 4 && !themePreviewData)}
                     style={{
                       padding: '8px 16px',
                       background: '#3B82F6',
@@ -4727,7 +4746,7 @@ export default function TryLabDashboard() {
                       fontWeight: '500',
                       color: '#FFFFFF',
                       cursor: 'pointer',
-                      opacity: (!selectedIdea || (currentStep === 2 && !selectedProduct) || (currentStep === 3 && !placementGuideOpen) || (currentStep === 5 && !themePreviewData)) ? 0.5 : 1
+                      opacity: (!selectedIdea || (currentStep === 2 && !selectedProduct) || (currentStep === 3 && !placementGuideOpen) || (currentStep === 4 && !themePreviewData)) ? 0.5 : 1
                     }}>
                     Next
                   </button>

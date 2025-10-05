@@ -2,12 +2,14 @@ import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server.js";
 
 export const action = async ({ request }) => {
+  console.log("🚀 API route called - theme-widget action");
+  
   const { admin } = await authenticate.admin(request);
   
   try {
     const { themeId, snippetName, snippetContent, widget, productId, position } = await request.json();
     
-    console.log("🔧 Creating widget preview data:", { widget, productId, position });
+    console.log("🔧 Creating widget preview data:", { themeId, snippetName, widget, productId, position });
     
     // Since we don't have write_themes permission, we'll create a preview system instead
     // This generates the widget code and provides installation instructions
