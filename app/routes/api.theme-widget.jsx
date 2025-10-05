@@ -2,7 +2,7 @@ import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server.js";
 
 export const action = async ({ request }) => {
-  const { admin } = await authenticate.admin(request);
+  const { admin, session } = await authenticate.admin(request);
   
   try {
     const { themeId, snippetName, snippetContent, widget, productId, position } = await request.json();
@@ -22,7 +22,12 @@ ${snippetContent}
 
 {% comment %} End A/B Test Widget {% endcomment %}`;
 
-    // Return preview data instead of trying to modify theme files
+    // Generate theme editor URLs for embedding and direct access
+    const shop = session.shop;
+    const themeEditorUrl = `https://${shop}/admin/themes/current/editor?template=product&previewPath=/products/${productId}`;
+    const themeEditorIframeUrl = `https://${shop}/admin/themes/current/editor?template=product&previewPath=/products/${productId}&embed=true&sidebar=closed`;
+    
+    // Return preview data with theme editor integration
     return json({ 
       success: true, 
       message: `Widget "${widget}" preview generated successfully!`,
@@ -32,6 +37,8 @@ ${snippetContent}
       widget,
       productId,
       position,
+      themeEditorUrl,
+      themeEditorIframeUrl,
       installationInstructions: `
 Installation Instructions:
 
