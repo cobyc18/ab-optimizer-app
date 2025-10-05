@@ -78,6 +78,7 @@ export const loader = async ({ request }) => {
               name
               values
             }
+            onlineStorePreviewUrl
           }
         }
       }
@@ -121,12 +122,13 @@ export const loader = async ({ request }) => {
   
   return json({
     products,
-    themeInfo
+    themeInfo,
+    shop: session.shop
   });
 };
 
 export default function Index() {
-  const { products, themeInfo } = useLoaderData();
+  const { products, themeInfo, shop } = useLoaderData();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedIdea, setSelectedIdea] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -1453,7 +1455,7 @@ export default function Index() {
         </div>
       </div>
 
-      {/* Product Preview Modal */}
+      {/* Product Preview Modal - Live Storefront Preview */}
       {productPreviewOpen && previewProduct && (
         <div style={{
           position: 'fixed',
@@ -1461,7 +1463,7 @@ export default function Index() {
           left: 0,
           right: 0,
           bottom: 0,
-          background: 'rgba(0, 0, 0, 0.8)',
+          background: 'rgba(0, 0, 0, 0.9)',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
@@ -1471,369 +1473,144 @@ export default function Index() {
           <div style={{
             background: '#FFFFFF',
             borderRadius: '16px',
-            maxWidth: '900px',
-            width: '100%',
-            maxHeight: '90vh',
+            width: '95vw',
+            height: '90vh',
+            maxWidth: '1400px',
             overflow: 'hidden',
             display: 'flex',
             flexDirection: 'column',
-            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.25)'
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
           }}>
             {/* Modal Header */}
             <div style={{
               background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
               color: '#FFFFFF',
-              padding: '20px 24px',
+              padding: '16px 24px',
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center'
+              alignItems: 'center',
+              flexShrink: 0
             }}>
-              <h2 style={{
-                fontSize: '20px',
-                fontWeight: '700',
-                margin: 0,
+              <div style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '8px'
+                gap: '12px'
               }}>
-                👁️ Product Preview
-              </h2>
-              <button
-                onClick={closeProductPreview}
-                style={{
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  border: 'none',
-                  borderRadius: '50%',
-                  width: '32px',
-                  height: '32px',
-                  color: '#FFFFFF',
+                <h2 style={{
                   fontSize: '18px',
-                  cursor: 'pointer',
+                  fontWeight: '700',
+                  margin: 0,
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'center'
-                }}
-              >
-                ×
-              </button>
-            </div>
-
-            {/* Modal Content */}
-            <div style={{
-              flex: 1,
-              overflow: 'auto',
-              padding: '24px'
-            }}>
-              {/* Product Images */}
-              <div style={{
-                marginBottom: '24px'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  gap: '12px',
-                  marginBottom: '16px',
-                  overflowX: 'auto',
-                  paddingBottom: '8px'
+                  gap: '8px'
                 }}>
-                  {previewProduct.images?.nodes?.map((image, index) => (
-                    <img
-                      key={index}
-                      src={image.url}
-                      alt={image.altText || previewProduct.title}
-                      style={{
-                        width: '80px',
-                        height: '80px',
-                        objectFit: 'cover',
-                        borderRadius: '8px',
-                        border: '2px solid #E5E5E5',
-                        cursor: 'pointer'
-                      }}
-                    />
-                  ))}
-                </div>
-                
-                {/* Main Product Image */}
+                  🛍️ Live Product Preview
+                </h2>
                 <div style={{
-                  width: '100%',
-                  height: '300px',
-                  background: '#F8FAFC',
-                  borderRadius: '12px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  overflow: 'hidden'
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '500'
                 }}>
-                  {previewProduct.featuredImage?.url ? (
-                    <img
-                      src={previewProduct.featuredImage.url}
-                      alt={previewProduct.featuredImage.altText || previewProduct.title}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain'
-                      }}
-                    />
-                  ) : (
-                    <div style={{
-                      fontSize: '48px',
-                      color: '#9CA3AF'
-                    }}>
-                      📦
-                    </div>
-                  )}
+                  {previewProduct.title}
                 </div>
               </div>
-
-              {/* Product Details */}
               <div style={{
-                display: 'grid',
-                gridTemplateColumns: '1fr 1fr',
-                gap: '24px',
-                marginBottom: '24px'
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
               }}>
-                {/* Left Column - Basic Info */}
-                <div>
-                  <h3 style={{
-                    fontSize: '24px',
-                    fontWeight: '700',
-                    color: '#1F2937',
-                    marginBottom: '8px',
-                    lineHeight: '1.3'
-                  }}>
-                    {previewProduct.title}
-                  </h3>
-                  
-                  <div style={{
+                <a
+                  href={previewProduct.onlineStorePreviewUrl || `https://${shop}/products/${previewProduct.handle}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    color: '#FFFFFF',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    textDecoration: 'none',
                     display: 'flex',
                     alignItems: 'center',
-                    gap: '12px',
-                    marginBottom: '16px'
-                  }}>
-                    <div style={{
-                      fontSize: '20px',
-                      fontWeight: '700',
-                      color: '#059669'
-                    }}>
-                      {previewProduct.priceRangeV2?.minVariantPrice?.currencyCode} {parseFloat(previewProduct.priceRangeV2?.minVariantPrice?.amount || 0).toFixed(2)}
-                    </div>
-                    
-                    {previewProduct.priceRangeV2?.maxVariantPrice?.amount !== previewProduct.priceRangeV2?.minVariantPrice?.amount && (
-                      <span style={{
-                        color: '#6B7280',
-                        fontSize: '14px'
-                      }}>
-                        - {previewProduct.priceRangeV2?.maxVariantPrice?.currencyCode} {parseFloat(previewProduct.priceRangeV2?.maxVariantPrice?.amount || 0).toFixed(2)}
-                      </span>
-                    )}
-                  </div>
-
-                  {/* Product Meta */}
-                  <div style={{
-                    background: '#F8FAFC',
-                    borderRadius: '8px',
-                    padding: '16px',
-                    marginBottom: '16px'
-                  }}>
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: '1fr 1fr',
-                      gap: '12px',
-                      fontSize: '14px'
-                    }}>
-                      <div>
-                        <span style={{ color: '#6B7280', fontWeight: '500' }}>Vendor:</span>
-                        <div style={{ color: '#1F2937', fontWeight: '600' }}>{previewProduct.vendor || 'N/A'}</div>
-                      </div>
-                      <div>
-                        <span style={{ color: '#6B7280', fontWeight: '500' }}>Type:</span>
-                        <div style={{ color: '#1F2937', fontWeight: '600' }}>{previewProduct.productType || 'N/A'}</div>
-                      </div>
-                      <div>
-                        <span style={{ color: '#6B7280', fontWeight: '500' }}>Status:</span>
-                        <div style={{ 
-                          color: previewProduct.status === 'active' ? '#059669' : '#6B7280',
-                          fontWeight: '600',
-                          textTransform: 'capitalize'
-                        }}>
-                          {previewProduct.status}
-                        </div>
-                      </div>
-                      <div>
-                        <span style={{ color: '#6B7280', fontWeight: '500' }}>Inventory:</span>
-                        <div style={{ color: '#1F2937', fontWeight: '600' }}>{previewProduct.totalInventory || 0} units</div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Product Tags */}
-                  {previewProduct.tags && previewProduct.tags.length > 0 && (
-                    <div style={{
-                      marginBottom: '16px'
-                    }}>
-                      <div style={{
-                        fontSize: '14px',
-                        color: '#6B7280',
-                        fontWeight: '500',
-                        marginBottom: '8px'
-                      }}>
-                        Tags:
-                      </div>
-                      <div style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '6px'
-                      }}>
-                        {previewProduct.tags.map((tag, index) => (
-                          <span
-                            key={index}
-                            style={{
-                              background: '#E0E7FF',
-                              color: '#3730A3',
-                              padding: '4px 8px',
-                              borderRadius: '6px',
-                              fontSize: '12px',
-                              fontWeight: '500'
-                            }}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                </div>
-
-                {/* Right Column - Variants */}
-                <div>
-                  <h4 style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    marginBottom: '16px'
-                  }}>
-                    Product Variants
-                  </h4>
-                  
-                  <div style={{
-                    maxHeight: '300px',
-                    overflowY: 'auto',
-                    border: '1px solid #E5E5E5',
-                    borderRadius: '8px'
-                  }}>
-                    {previewProduct.variants?.nodes?.map((variant, index) => (
-                      <div
-                        key={index}
-                        style={{
-                          padding: '12px 16px',
-                          borderBottom: index < previewProduct.variants.nodes.length - 1 ? '1px solid #F3F4F6' : 'none',
-                          display: 'flex',
-                          justifyContent: 'space-between',
-                          alignItems: 'center'
-                        }}
-                      >
-                        <div>
-                          <div style={{
-                            fontSize: '14px',
-                            fontWeight: '500',
-                            color: '#1F2937',
-                            marginBottom: '4px'
-                          }}>
-                            {variant.title}
-                          </div>
-                          <div style={{
-                            fontSize: '12px',
-                            color: '#6B7280'
-                          }}>
-                            {variant.selectedOptions?.map(option => `${option.name}: ${option.value}`).join(', ') || 'Default'}
-                          </div>
-                        </div>
-                        <div style={{
-                          textAlign: 'right'
-                        }}>
-                          <div style={{
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            color: '#059669'
-                          }}>
-                            {previewProduct.priceRangeV2?.minVariantPrice?.currencyCode} {parseFloat(variant.price || 0).toFixed(2)}
-                          </div>
-                          {variant.compareAtPrice && (
-                            <div style={{
-                              fontSize: '12px',
-                              color: '#9CA3AF',
-                              textDecoration: 'line-through'
-                            }}>
-                              {previewProduct.priceRangeV2?.minVariantPrice?.currencyCode} {parseFloat(variant.compareAtPrice).toFixed(2)}
-                            </div>
-                          )}
-                          <div style={{
-                            fontSize: '11px',
-                            color: variant.availableForSale ? '#059669' : '#DC2626',
-                            fontWeight: '500'
-                          }}>
-                            {variant.availableForSale ? `In Stock (${variant.inventoryQuantity || 0})` : 'Out of Stock'}
-                          </div>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                    gap: '4px'
+                  }}
+                >
+                  🔗 Open in New Tab
+                </a>
+                <button
+                  onClick={closeProductPreview}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    color: '#FFFFFF',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ×
+                </button>
               </div>
+            </div>
 
-              {/* Product Description */}
-              {previewProduct.description && (
+            {/* Live Preview Iframe */}
+            <div style={{
+              flex: 1,
+              position: 'relative',
+              background: '#F8FAFC'
+            }}>
+              {previewProduct.onlineStorePreviewUrl || previewProduct.handle ? (
+                <iframe
+                  src={previewProduct.onlineStorePreviewUrl || `https://${shop}/products/${previewProduct.handle}`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    borderRadius: '0 0 16px 16px'
+                  }}
+                  title={`Product Preview - ${previewProduct.title}`}
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                />
+              ) : (
                 <div style={{
-                  marginBottom: '24px'
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  color: '#6B7280'
                 }}>
-                  <h4 style={{
-                    fontSize: '16px',
+                  <div style={{
+                    fontSize: '48px',
+                    marginBottom: '16px'
+                  }}>
+                    🚫
+                  </div>
+                  <h3 style={{
+                    fontSize: '18px',
                     fontWeight: '600',
                     color: '#1F2937',
-                    marginBottom: '12px'
-                  }}>
-                    Description
-                  </h4>
-                  <div style={{
-                    background: '#F8FAFC',
-                    border: '1px solid #E5E5E5',
-                    borderRadius: '8px',
-                    padding: '16px',
-                    fontSize: '14px',
-                    color: '#374151',
-                    lineHeight: '1.6'
-                  }}>
-                    {previewProduct.description}
-                  </div>
-                </div>
-              )}
-
-              {/* SEO Information */}
-              {previewProduct.seo && (
-                <div style={{
-                  background: '#F0FDF4',
-                  border: '1px solid #BBF7D0',
-                  borderRadius: '8px',
-                  padding: '16px'
-                }}>
-                  <h4 style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#166534',
                     marginBottom: '8px'
                   }}>
-                    📈 SEO Information
-                  </h4>
-                  <div style={{
-                    fontSize: '13px',
-                    color: '#166534'
+                    Preview Not Available
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    textAlign: 'center',
+                    maxWidth: '400px',
+                    lineHeight: '1.5'
                   }}>
-                    <div style={{ marginBottom: '4px' }}>
-                      <strong>Title:</strong> {previewProduct.seo.title || previewProduct.title}
-                    </div>
-                    <div>
-                      <strong>Description:</strong> {previewProduct.seo.description || previewProduct.description?.substring(0, 160) + '...'}
-                    </div>
-                  </div>
+                    This product doesn't have a preview URL or handle available. 
+                    The product might not be published to the online store.
+                  </p>
                 </div>
               )}
             </div>
@@ -1845,41 +1622,53 @@ export default function Index() {
               borderTop: '1px solid #E5E5E5',
               display: 'flex',
               justifyContent: 'space-between',
-              alignItems: 'center'
+              alignItems: 'center',
+              flexShrink: 0
             }}>
-              <button
-                onClick={closeProductPreview}
-                style={{
-                  padding: '8px 16px',
-                  background: '#F3F4F6',
-                  color: '#6B7280',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer'
-                }}
-              >
-                Close Preview
-              </button>
-              <button
-                onClick={() => {
-                  setSelectedProduct(previewProduct);
-                  closeProductPreview();
-                }}
-                style={{
-                  padding: '8px 16px',
-                  background: '#3B82F6',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  fontWeight: '500',
-                  cursor: 'pointer'
-                }}
-              >
-                ✓ Select This Product
-              </button>
+              <div style={{
+                fontSize: '12px',
+                color: '#6B7280'
+              }}>
+                💡 This is exactly how customers see this product on your live store
+              </div>
+              <div style={{
+                display: 'flex',
+                gap: '12px'
+              }}>
+                <button
+                  onClick={closeProductPreview}
+                  style={{
+                    padding: '8px 16px',
+                    background: '#F3F4F6',
+                    color: '#6B7280',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Close Preview
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedProduct(previewProduct);
+                    closeProductPreview();
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    background: '#3B82F6',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ✓ Select This Product
+                </button>
+              </div>
             </div>
           </div>
         </div>
