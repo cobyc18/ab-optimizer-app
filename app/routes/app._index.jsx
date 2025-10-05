@@ -138,8 +138,6 @@ export default function Index() {
   const [draggedElement, setDraggedElement] = useState(null);
   const [themePreviewData, setThemePreviewData] = useState(null);
   const [productSearchTerm, setProductSearchTerm] = useState('');
-  const [productPreviewOpen, setProductPreviewOpen] = useState(false);
-  const [previewProduct, setPreviewProduct] = useState(null);
 
   // A/B Test Ideas
   const abTestIdeas = [
@@ -334,13 +332,13 @@ export default function Index() {
 
   // Product Preview Functions
   const openProductPreview = (product) => {
-    setPreviewProduct(product);
-    setProductPreviewOpen(true);
-  };
-
-  const closeProductPreview = () => {
-    setProductPreviewOpen(false);
-    setPreviewProduct(null);
+    const productUrl = product.onlineStorePreviewUrl || `https://${shop}/products/${product.handle}`;
+    if (window.openProductPreview) {
+      window.openProductPreview(productUrl, product.title);
+    } else {
+      // Fallback to opening in new tab
+      window.open(productUrl, '_blank');
+    }
   };
 
   return (
@@ -1455,224 +1453,29 @@ export default function Index() {
         </div>
       </div>
 
-      {/* Product Preview Modal - Live Storefront Preview */}
-      {productPreviewOpen && previewProduct && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.9)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: '16px',
-            width: '95vw',
-            height: '90vh',
-            maxWidth: '1400px',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
-          }}>
-            {/* Modal Header */}
-            <div style={{
-              background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-              color: '#FFFFFF',
-              padding: '16px 24px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexShrink: 0
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px'
-              }}>
-                <h2 style={{
-                  fontSize: '18px',
-                  fontWeight: '700',
-                  margin: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  🛍️ Live Product Preview
-                </h2>
-                <div style={{
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: '500'
-                }}>
-                  {previewProduct.title}
-                </div>
-              </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px'
-              }}>
-                <a
-                  href={previewProduct.onlineStorePreviewUrl || `https://${shop}/products/${previewProduct.handle}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    color: '#FFFFFF',
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    textDecoration: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  🔗 Open in New Tab
-                </a>
-                <button
-                  onClick={closeProductPreview}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '32px',
-                    height: '32px',
-                    color: '#FFFFFF',
-                    fontSize: '18px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-
-            {/* Live Preview Iframe */}
-            <div style={{
-              flex: 1,
-              position: 'relative',
-              background: '#F8FAFC'
-            }}>
-              {previewProduct.onlineStorePreviewUrl || previewProduct.handle ? (
-                <iframe
-                  src={previewProduct.onlineStorePreviewUrl || `https://${shop}/products/${previewProduct.handle}`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    border: 'none',
-                    borderRadius: '0 0 16px 16px'
-                  }}
-                  title={`Product Preview - ${previewProduct.title}`}
-                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-                />
-              ) : (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                  color: '#6B7280'
-                }}>
-                  <div style={{
-                    fontSize: '48px',
-                    marginBottom: '16px'
-                  }}>
-                    🚫
-                  </div>
-                  <h3 style={{
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}>
-                    Preview Not Available
-                  </h3>
-                  <p style={{
-                    fontSize: '14px',
-                    textAlign: 'center',
-                    maxWidth: '400px',
-                    lineHeight: '1.5'
-                  }}>
-                    This product doesn't have a preview URL or handle available. 
-                    The product might not be published to the online store.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div style={{
-              background: '#F8FAFC',
-              padding: '16px 24px',
-              borderTop: '1px solid #E5E5E5',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexShrink: 0
-            }}>
-              <div style={{
-                fontSize: '12px',
-                color: '#6B7280'
-              }}>
-                💡 This is exactly how customers see this product on your live store
-              </div>
-              <div style={{
-                display: 'flex',
-                gap: '12px'
-              }}>
-                <button
-                  onClick={closeProductPreview}
-                  style={{
-                    padding: '8px 16px',
-                    background: '#F3F4F6',
-                    color: '#6B7280',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Close Preview
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedProduct(previewProduct);
-                    closeProductPreview();
-                  }}
-                  style={{
-                    padding: '8px 16px',
-                    background: '#3B82F6',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  ✓ Select This Product
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {/* App Bridge Modal Script for Product Preview */}
+      <script dangerouslySetInnerHTML={{
+        __html: `
+          window.openProductPreview = async function(productUrl, productTitle) {
+            if (window.shopify && window.shopify.modal) {
+              try {
+                await window.shopify.modal.open({
+                  variant: 'max',
+                  src: productUrl,
+                  title: productTitle || 'Product Preview'
+                });
+              } catch (error) {
+                console.error('Failed to open product preview modal:', error);
+                // Fallback to opening in new tab
+                window.open(productUrl, '_blank');
+              }
+            } else {
+              console.warn('Shopify App Bridge not available, opening in new tab');
+              window.open(productUrl, '_blank');
+            }
+          };
+        `
+      }} />
 
       <style dangerouslySetInnerHTML={{
         __html: `
