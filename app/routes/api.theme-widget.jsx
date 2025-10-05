@@ -22,10 +22,9 @@ ${snippetContent}
 
 {% comment %} End A/B Test Widget {% endcomment %}`;
 
-    // Generate theme editor URLs for embedding and direct access
+    // Generate theme editor URL for App Bridge modal
     const shop = session.shop;
     const themeEditorUrl = `https://${shop}/admin/themes/current/editor?template=product&previewPath=/products/${productId}`;
-    const themeEditorIframeUrl = `https://${shop}/admin/themes/current/editor?template=product&previewPath=/products/${productId}&embed=true&sidebar=closed`;
     
     // Return preview data with theme editor integration
     return json({ 
@@ -38,7 +37,6 @@ ${snippetContent}
       productId,
       position,
       themeEditorUrl,
-      themeEditorIframeUrl,
       installationInstructions: `
 Installation Instructions:
 

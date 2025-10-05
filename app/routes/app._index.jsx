@@ -3,7 +3,7 @@ import { useLoaderData, useOutletContext, Link } from "@remix-run/react";
 import { useState } from "react";
 import { authenticate } from "../shopify.server.js";
 import prisma from "../db.server.js";
-import ThemeEditorEmbed from "../components/ThemeEditorEmbed.jsx";
+// Using App Bridge modal for theme editor instead of custom iframe component
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
@@ -1091,17 +1091,76 @@ export default function Index() {
                     </div>
                   </div>
 
-                  {/* Theme Editor Embed */}
+                  {/* Theme Editor using App Bridge Modal */}
                   {themePreviewData && (
-                    <ThemeEditorEmbed
-                      themeEditorUrl={themePreviewData.themeEditorUrl}
-                      product={selectedProduct}
-                      widget={selectedIdea.utility}
-                      onWidgetPositionChange={updateWidgetPosition}
-                      onThemeEditorReady={() => {
-                        console.log('Theme editor is ready!');
-                      }}
-                    />
+                    <div style={{
+                      background: '#F9FAFB',
+                      border: '2px dashed #D1D5DB',
+                      borderRadius: '8px',
+                      padding: '40px',
+                      textAlign: 'center'
+                    }}>
+                      <div style={{
+                        fontSize: '48px',
+                        marginBottom: '16px'
+                      }}>
+                        🎨
+                      </div>
+                      <h4 style={{
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        marginBottom: '8px'
+                      }}>
+                        Theme Editor Ready
+                      </h4>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        marginBottom: '24px',
+                        lineHeight: '1.5'
+                      }}>
+                        Click "Open Theme Editor" to launch the full Shopify theme editor in a modal where you can position your widget and see real-time changes.
+                      </p>
+                      
+                      <button
+                        onClick={() => {
+                          // Use App Bridge modal to open theme editor
+                          if (window.shopify && window.shopify.modal) {
+                            window.shopify.modal.open({
+                              variant: 'max',
+                              src: themePreviewData.themeEditorUrl,
+                              title: `Theme Editor - ${selectedProduct.title}`
+                            });
+                          } else {
+                            // Fallback: open in new window
+                            window.open(themePreviewData.themeEditorUrl, '_blank');
+                          }
+                        }}
+                        style={{
+                          padding: '12px 24px',
+                          background: '#10B981',
+                          color: '#FFFFFF',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
+                          transition: 'all 0.2s ease-in-out'
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.background = '#059669';
+                          e.target.style.transform = 'translateY(-1px)';
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.background = '#10B981';
+                          e.target.style.transform = 'translateY(0)';
+                        }}
+                      >
+                        🚀 Open Theme Editor
+                      </button>
+                    </div>
                   )}
 
                   {/* Widget Code Display */}
