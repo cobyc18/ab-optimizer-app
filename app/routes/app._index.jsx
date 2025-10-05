@@ -8,29 +8,86 @@ import ThemeEditorEmbed from "../components/ThemeEditorEmbed.jsx";
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
   
-  // Fetch Shopify products
-  const productsResponse = await admin.rest.get({
-    path: '/products.json',
-    query: { limit: 50 }
-  });
+  // Fetch Shopify products using GraphQL
+  let products = [];
+  try {
+    const productsResponse = await admin.graphql(`
+      query GetProducts {
+        products(first: 50) {
+          nodes {
+            id
+            title
+            handle
+            priceRangeV2 {
+              minVariantPrice {
+                amount
+                currencyCode
+              }
+            }
+            featuredImage {
+              url
+              altText
+            }
+            images(first: 1) {
+              nodes {
+                url
+                altText
+              }
+            }
+            variants(first: 1) {
+              nodes {
+                compareAtPrice
+                price
+              }
+            }
+            totalInventory
+            createdAt
+            status
+            tags
+          }
+        }
+      }
+    `);
+    
+    const productsJson = await productsResponse.json();
+    products = productsJson.data.products.nodes;
+    console.log("✅ Products fetched:", products.length);
+  } catch (error) {
+    console.error("❌ Error fetching products:", error);
+  }
   
-  const products = productsResponse.body.products || [];
-  
-  // Fetch theme information
-  const themesResponse = await admin.rest.get({
-    path: '/themes.json'
-  });
-  
-  const themes = themesResponse.body.themes || [];
-  const currentTheme = themes.find(theme => theme.role === 'main') || themes[0];
+  // Fetch theme information using GraphQL
+  let themeInfo = {};
+  try {
+    const themesResponse = await admin.graphql(`
+      query GetThemes {
+        themes(first: 10) {
+          nodes {
+            id
+            name
+            role
+          }
+        }
+      }
+    `);
+    
+    const themesJson = await themesResponse.json();
+    const themes = themesJson.data.themes.nodes;
+    const mainTheme = themes.find(t => t.role === "MAIN");
+    
+    themeInfo = {
+      themeId: mainTheme?.id,
+      themeName: mainTheme?.name,
+      themeRole: mainTheme?.role
+    };
+    console.log("✅ Theme info fetched:", themeInfo);
+  } catch (error) {
+    console.error("❌ Error fetching theme info:", error);
+  }
   
   return json({
     products,
-    themeInfo: currentTheme ? {
-      themeId: currentTheme.id,
-      themeName: currentTheme.name,
-      themeRole: currentTheme.role
-    } : null
+    themeInfo
   });
 };
 
@@ -578,9 +635,14 @@ export default function Index() {
                 }}>
                   {products.filter(product => 
                     product.title.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                    product.vendor?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
                     product.tags?.some(tag => tag.toLowerCase().includes(productSearchTerm.toLowerCase()))
-                  ).slice(0, 12).map((product) => (
+                  ).slice(0, 12).map((product) => {
+                    const price = product.priceRangeV2?.minVariantPrice?.amount || '0';
+                    const currency = product.priceRangeV2?.minVariantPrice?.currencyCode || 'USD';
+                    const imageUrl = product.featuredImage?.url || product.images?.nodes?.[0]?.url;
+                    const isBestseller = product.tags?.includes('bestseller') || product.tags?.includes('featured');
+                    
+                    return (
                   <div
                     key={product.id}
                     onClick={() => setSelectedProduct(product)}
@@ -610,10 +672,10 @@ export default function Index() {
                       position: 'relative',
                       overflow: 'hidden'
                     }}>
-                      {product.image ? (
+                      {imageUrl ? (
                         <img
-                          src={product.image.src}
-                          alt={product.title}
+                          src={imageUrl}
+                          alt={product.featuredImage?.altText || product.title}
                           style={{
                             width: '100%',
                             height: '100%',
@@ -668,14 +730,6 @@ export default function Index() {
                     </div>
                     
                     <div style={{
-                      fontSize: '14px',
-                      color: '#6B7280',
-                      marginBottom: '8px'
-                    }}>
-                      {product.vendor}
-                    </div>
-                    
-                    <div style={{
                       display: 'flex',
                       justifyContent: 'space-between',
                       alignItems: 'center',
@@ -686,16 +740,16 @@ export default function Index() {
                         fontWeight: '700',
                         color: '#059669'
                       }}>
-                        ${product.variants?.[0]?.price || '0.00'}
+                        {currency} {parseFloat(price).toFixed(2)}
                       </div>
                       
-                      {product.variants?.[0]?.compare_at_price && (
+                      {product.variants?.nodes?.[0]?.compareAtPrice && (
                         <div style={{
                           fontSize: '14px',
                           color: '#9CA3AF',
                           textDecoration: 'line-through'
                         }}>
-                          ${product.variants[0].compare_at_price}
+                          {currency} {parseFloat(product.variants.nodes[0].compareAtPrice).toFixed(2)}
                         </div>
                       )}
                     </div>
@@ -782,7 +836,8 @@ export default function Index() {
                       {selectedProduct?.id === product.id ? '✓ Selected' : 'Select Product'}
                     </button>
                   </div>
-                ))}
+                    );
+                  })}
                 </div>
               )}
             </div>
