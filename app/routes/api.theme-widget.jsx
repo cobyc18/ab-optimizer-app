@@ -7,9 +7,11 @@ export const action = async ({ request }) => {
   try {
     const { themeId, snippetName, snippetContent, widget, productId, position } = await request.json();
     
-    console.log("🔧 Injecting widget via GraphQL:", { themeId, snippetName, widget, productId, position });
+    console.log("🔧 Creating widget preview data:", { widget, productId, position });
     
-    // Generate widget snippet content with positioning
+    // Since we don't have write_themes permission, we'll create a preview system instead
+    // This generates the widget code and provides installation instructions
+    
     const widgetSnippet = `
 {% comment %}
   A/B Test Widget: ${widget}
@@ -22,58 +24,35 @@ ${snippetContent}
 
 {% comment %} End A/B Test Widget {% endcomment %}`;
 
-    // Use GraphQL mutation to create/update theme files
-    const mutation = `
-      mutation themeFilesUpsert($files: [OnlineStoreThemeFilesUpsertFileInput!]!, $themeId: ID!) {
-        themeFilesUpsert(files: $files, themeId: $themeId) {
-          upsertedThemeFiles {
-            filename
-          }
-          userErrors {
-            field
-            message
-          }
-        }
-      }
-    `;
-
-    const response = await admin.graphql(mutation, {
-      variables: {
-        themeId: themeId,
-        files: [
-          {
-            filename: `snippets/${snippetName}.liquid`,
-            body: {
-              type: "TEXT",
-              value: widgetSnippet
-            }
-          }
-        ]
-      }
-    });
-
-    const responseData = await response.json();
-    
-    if (responseData.data?.themeFilesUpsert?.userErrors?.length > 0) {
-      throw new Error(`GraphQL errors: ${responseData.data.themeFilesUpsert.userErrors.map(e => e.message).join(', ')}`);
-    }
-
-    console.log("✅ Widget snippet created via GraphQL:", responseData.data?.themeFilesUpsert?.upsertedThemeFiles?.[0]?.filename);
-
+    // Return preview data instead of trying to modify theme files
     return json({ 
       success: true, 
-      message: `Widget "${widget}" successfully added to your theme!`,
-      snippetKey: responseData.data?.themeFilesUpsert?.upsertedThemeFiles?.[0]?.filename,
+      message: `Widget "${widget}" preview generated successfully!`,
+      widgetCode: widgetSnippet,
+      snippetName,
       themeId,
       widget,
       productId,
-      position
+      position,
+      installationInstructions: `
+Installation Instructions:
+
+1. Go to your Shopify Admin → Online Store → Themes
+2. Click "Actions" → "Edit code" on your current theme
+3. Navigate to "Snippets" folder
+4. Create a new file called "${snippetName}.liquid"
+5. Copy and paste the widget code below
+6. Save the file
+7. Add {% include '${snippetName}' %} to your product template where you want the widget to appear
+
+Widget Code:
+${widgetSnippet}
+      `.trim()
     });
 
   } catch (error) {
-    console.error("❌ Error injecting widget via GraphQL:", error);
+    console.error("❌ Error creating widget preview:", error);
     
-    // Provide fallback instructions
     return json({ 
       success: false, 
       error: error.message,

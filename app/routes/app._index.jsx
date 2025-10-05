@@ -467,31 +467,61 @@ export default function TryLabDashboard() {
     if (!product || !widget) return;
 
     try {
-      // Generate mock product page data for preview
-      const previewData = {
-        product: {
-          title: product.title,
-          handle: product.handle,
-          price: product.variants?.[0]?.price || '$29.99',
-          image: product.image?.src || 'https://via.placeholder.com/400x400',
-          description: product.body_html || 'Product description goes here...',
-          variants: product.variants || []
-        },
-        widget: {
-          name: widget,
-          code: generateWidgetCode(widget, 'preview'),
-          position: widgetPosition
-        },
-        theme: {
-          name: 'Current Theme',
-          id: themeInfo.themeId
-        }
-      };
-
-      setThemePreviewData(previewData);
       setThemePreviewMode(true);
+      
+      // Generate widget code and get installation instructions
+      const widgetCode = generateWidgetCode(widget, 'preview');
+      const snippetName = `ab-test-${widget.toLowerCase().replace(/\s+/g, '-')}`;
+      
+      const response = await fetch('/api/theme-widget', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          themeId: themeInfo.themeId,
+          snippetName,
+          snippetContent: widgetCode,
+          widget,
+          productId: product.id,
+          position: widgetPosition
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.success) {
+        // Generate comprehensive preview data
+        const previewData = {
+          product: {
+            title: product.title,
+            handle: product.handle,
+            price: product.variants?.[0]?.price || '$29.99',
+            image: product.image?.src || 'https://via.placeholder.com/400x400',
+            description: product.body_html || 'Product description goes here...',
+            variants: product.variants || []
+          },
+          widget: {
+            name: widget,
+            code: data.widgetCode,
+            position: widgetPosition,
+            snippetName: data.snippetName
+          },
+          theme: {
+            name: 'Current Theme',
+            id: themeInfo.themeId
+          },
+          installationInstructions: data.installationInstructions
+        };
+
+        setThemePreviewData(previewData);
+      } else {
+        console.error('Preview generation failed:', data.error);
+        alert('Failed to generate preview: ' + data.error);
+      }
     } catch (error) {
       console.error('Error generating theme preview:', error);
+      alert('Error generating preview: ' + error.message);
+    } finally {
+      setThemePreviewMode(false);
     }
   };
 
@@ -3703,48 +3733,74 @@ export default function TryLabDashboard() {
                           alignItems: 'center',
                           gap: '12px'
                         }}>
+                          <h4 style={{
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            color: '#1F2937',
+                            margin: 0
+                          }}>
+                            🎨 Interactive Preview
+                          </h4>
+                          <span style={{
+                            background: '#10B981',
+                            color: '#FFFFFF',
+                            padding: '4px 8px',
+                            borderRadius: '4px',
+                            fontSize: '12px',
+                            fontWeight: '500'
+                          }}>
+                            {themePreviewData.widget.name}
+                          </span>
+                        </div>
+
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px'
+                        }}>
+                          <button
+                            onClick={() => {
+                              navigator.clipboard.writeText(themePreviewData.installationInstructions);
+                              alert('Installation instructions copied to clipboard!');
+                            }}
+                            style={{
+                              padding: '6px 12px',
+                              background: '#F3F4F6',
+                              color: '#6B7280',
+                              border: '1px solid #D1D5DB',
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            📋 Copy Code
+                          </button>
+                          
                           <button
                             onClick={() => generateThemePreview(selectedProduct, selectedIdea?.utility)}
+                            disabled={themePreviewMode}
                             style={{
-                              padding: '8px 16px',
-                              background: '#6B7280',
+                              padding: '6px 12px',
+                              background: themePreviewMode ? '#9CA3AF' : '#6B7280',
                               color: '#FFFFFF',
                               border: 'none',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontWeight: '500',
-                              cursor: 'pointer'
+                              borderRadius: '4px',
+                              fontSize: '12px',
+                              cursor: themePreviewMode ? 'not-allowed' : 'pointer'
                             }}
                           >
                             🔄 Regenerate
                           </button>
                           
                           <button
-                            onClick={() => injectWidgetIntoTheme(selectedIdea?.utility, selectedProduct, 'custom', widgetPosition)}
-                            style={{
-                              padding: '8px 16px',
-                              background: '#8B5CF6',
-                              color: '#FFFFFF',
-                              border: 'none',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontWeight: '500',
-                              cursor: 'pointer'
-                            }}
-                          >
-                            💾 Inject Widget
-                          </button>
-                          
-                          <button
                             onClick={() => openThemeEditor(selectedProduct, selectedIdea?.utility)}
                             style={{
-                              padding: '8px 16px',
+                              padding: '6px 12px',
                               background: '#10B981',
                               color: '#FFFFFF',
                               border: 'none',
-                              borderRadius: '6px',
-                              fontSize: '14px',
-                              fontWeight: '500',
+                              borderRadius: '4px',
+                              fontSize: '12px',
                               cursor: 'pointer'
                             }}
                           >
@@ -3939,6 +3995,50 @@ export default function TryLabDashboard() {
                       </div>
                     )}
 
+                    {/* Installation Instructions */}
+                    {themePreviewData && (
+                      <div style={{
+                        marginTop: '20px',
+                        padding: '16px',
+                        background: '#F0F9FF',
+                        borderRadius: '8px',
+                        border: '1px solid #3B82F6'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '8px',
+                          marginBottom: '12px'
+                        }}>
+                          <div style={{
+                            fontSize: '16px'
+                          }}>
+                            📋
+                          </div>
+                          <h4 style={{
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#1E40AF',
+                            margin: 0
+                          }}>
+                            Installation Instructions
+                          </h4>
+                        </div>
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#1E40AF',
+                          lineHeight: '1.5',
+                          whiteSpace: 'pre-line',
+                          background: '#FFFFFF',
+                          padding: '12px',
+                          borderRadius: '4px',
+                          border: '1px solid #DBEAFE'
+                        }}>
+                          {themePreviewData.installationInstructions}
+                        </div>
+                      </div>
+                    )}
+
                     {/* Widget Position Controls */}
                     {themePreviewData && (
                       <div style={{
@@ -4001,16 +4101,90 @@ export default function TryLabDashboard() {
                     {!themePreviewData && (
                       <div style={{
                         display: 'flex',
+                        flexDirection: 'column',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        minHeight: '300px',
+                        minHeight: '400px',
                         color: '#6B7280',
                         fontSize: '14px',
                         background: '#F9FAFB',
                         borderRadius: '8px',
-                        border: '2px dashed #E5E5E5'
+                        border: '2px dashed #E5E5E5',
+                        padding: '32px'
                       }}>
-                        Click "Generate Preview" to see how your widget will look
+                        <div style={{
+                          textAlign: 'center',
+                          marginBottom: '24px'
+                        }}>
+                          <div style={{
+                            fontSize: '48px',
+                            marginBottom: '16px'
+                          }}>
+                            🎨
+                          </div>
+                          <h3 style={{
+                            fontSize: '18px',
+                            fontWeight: '600',
+                            color: '#1F2937',
+                            marginBottom: '8px'
+                          }}>
+                            Theme Editor Preview
+                          </h3>
+                          <p style={{
+                            fontSize: '14px',
+                            color: '#6B7280',
+                            marginBottom: '24px',
+                            maxWidth: '400px'
+                          }}>
+                            Click "Generate Preview" to see how your widget will look on the product page and adjust its position
+                          </p>
+                        </div>
+                        
+                        <button
+                          onClick={() => generateThemePreview(selectedProduct, selectedIdea?.utility)}
+                          disabled={themePreviewMode}
+                          style={{
+                            padding: '12px 24px',
+                            background: themePreviewMode ? '#9CA3AF' : '#3B82F6',
+                            color: '#FFFFFF',
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            cursor: themePreviewMode ? 'not-allowed' : 'pointer',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '8px',
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          {themePreviewMode ? (
+                            <>
+                              <div style={{
+                                width: '16px',
+                                height: '16px',
+                                border: '2px solid #FFFFFF',
+                                borderTop: '2px solid transparent',
+                                borderRadius: '50%',
+                                animation: 'spin 1s linear infinite'
+                              }} />
+                              Generating Preview...
+                            </>
+                          ) : (
+                            <>
+                              ✨ Generate Preview
+                            </>
+                          )}
+                        </button>
+                        
+                        <style dangerouslySetInnerHTML={{
+                          __html: `
+                            @keyframes spin {
+                              0% { transform: rotate(0deg); }
+                              100% { transform: rotate(360deg); }
+                            }
+                          `
+                        }} />
                       </div>
                     )}
                   </div>
