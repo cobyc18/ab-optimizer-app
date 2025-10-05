@@ -17,8 +17,17 @@ export default function App() {
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <meta name="shopify-api-key" content={process.env.SHOPIFY_API_KEY} />
-        <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+        <script dangerouslySetInnerHTML={{
+          __html: `
+            // Load App Bridge script dynamically
+            (function() {
+              const script = document.createElement('script');
+              script.src = 'https://cdn.shopify.com/shopifycloud/app-bridge.js';
+              script.async = true;
+              document.head.appendChild(script);
+            })();
+          `
+        }} />
         <Meta />
         <Links />
       </head>

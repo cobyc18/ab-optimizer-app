@@ -1457,22 +1457,44 @@ export default function Index() {
       <script dangerouslySetInnerHTML={{
         __html: `
           window.openProductPreview = async function(productUrl, productTitle) {
-            if (window.shopify && window.shopify.modal) {
-              try {
-                await window.shopify.modal.open({
-                  variant: 'max',
-                  src: productUrl,
-                  title: productTitle || 'Product Preview'
-                });
-              } catch (error) {
-                console.error('Failed to open product preview modal:', error);
-                // Fallback to opening in new tab
-                window.open(productUrl, '_blank');
+            // Wait a bit for App Bridge to load if it's still loading
+            let attempts = 0;
+            const maxAttempts = 10;
+            
+            const tryOpenModal = async () => {
+              if (window.shopify && window.shopify.modal) {
+                try {
+                  await window.shopify.modal.open({
+                    variant: 'max',
+                    src: productUrl,
+                    title: productTitle || 'Product Preview'
+                  });
+                  return true;
+                } catch (error) {
+                  console.error('Failed to open product preview modal:', error);
+                  return false;
+                }
               }
-            } else {
-              console.warn('Shopify App Bridge not available, opening in new tab');
-              window.open(productUrl, '_blank');
+              return false;
+            };
+            
+            // Try immediately first
+            if (await tryOpenModal()) {
+              return;
             }
+            
+            // If not available, wait and retry
+            while (attempts < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 100));
+              if (await tryOpenModal()) {
+                return;
+              }
+              attempts++;
+            }
+            
+            // Fallback to opening in new tab
+            console.warn('Shopify App Bridge not available after waiting, opening in new tab');
+            window.open(productUrl, '_blank');
           };
         `
       }} />
