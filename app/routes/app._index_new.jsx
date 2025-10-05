@@ -44,7 +44,6 @@ export default function Index() {
   const [widgetPosition, setWidgetPosition] = useState({ x: 100, y: 100 });
   const [draggedElement, setDraggedElement] = useState(null);
   const [themePreviewData, setThemePreviewData] = useState(null);
-  const [productSearchTerm, setProductSearchTerm] = useState('');
 
   // A/B Test Ideas
   const abTestIdeas = [
@@ -447,226 +446,32 @@ export default function Index() {
                 Choose which product page will display your {selectedIdea?.utility} widget
               </p>
 
-              {/* Product Search */}
               <div style={{
-                background: '#F8FAFC',
-                border: '1px solid #E5E5E5',
-                borderRadius: '8px',
-                padding: '20px',
-                marginBottom: '24px'
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
+                gap: '16px'
               }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '16px'
-                }}>
-                  <div style={{
-                    fontSize: '20px'
-                  }}>
-                    🔍
-                  </div>
-                  <h4 style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    margin: 0
-                  }}>
-                    Search Products
-                  </h4>
-                </div>
-                
-                <input
-                  type="text"
-                  placeholder="Search by product name, vendor, or tags..."
-                  value={productSearchTerm}
-                  onChange={(e) => setProductSearchTerm(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    background: '#FFFFFF',
-                    transition: 'border-color 0.2s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#3B82F6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#D1D5DB';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-                
-                {productSearchTerm && (
-                  <div style={{
-                    marginTop: '12px',
-                    fontSize: '14px',
-                    color: '#6B7280'
-                  }}>
-                    Found {products.filter(product => 
-                      product.title.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                      product.vendor?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                      product.tags?.some(tag => tag.toLowerCase().includes(productSearchTerm.toLowerCase()))
-                    ).length} products matching "{productSearchTerm}"
-                  </div>
-                )}
-              </div>
-
-              {products.filter(product => 
-                product.title.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                product.vendor?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                product.tags?.some(tag => tag.toLowerCase().includes(productSearchTerm.toLowerCase()))
-              ).length === 0 ? (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: '300px',
-                  background: '#F9FAFB',
-                  borderRadius: '8px',
-                  border: '2px dashed #E5E5E5',
-                  padding: '32px',
-                  textAlign: 'center'
-                }}>
-                  <div style={{
-                    fontSize: '48px',
-                    marginBottom: '16px'
-                  }}>
-                    🔍
-                  </div>
-                  <h3 style={{
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}>
-                    No Products Found
-                  </h3>
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#6B7280',
-                    marginBottom: '16px',
-                    maxWidth: '400px'
-                  }}>
-                    No products match your search criteria. Try adjusting your search terms or clearing the search to see all products.
-                  </p>
-                  <button
-                    onClick={() => setProductSearchTerm('')}
-                    style={{
-                      padding: '8px 16px',
-                      background: '#3B82F6',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Clear Search
-                  </button>
-                </div>
-              ) : (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                  gap: '20px'
-                }}>
-                  {products.filter(product => 
-                    product.title.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                    product.vendor?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                    product.tags?.some(tag => tag.toLowerCase().includes(productSearchTerm.toLowerCase()))
-                  ).slice(0, 12).map((product) => (
+                {products.slice(0, 12).map((product) => (
                   <div
                     key={product.id}
                     onClick={() => setSelectedProduct(product)}
                     style={{
                       background: selectedProduct?.id === product.id ? '#F0F9FF' : '#FFFFFF',
                       border: selectedProduct?.id === product.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                      borderRadius: '12px',
-                      padding: '20px',
+                      borderRadius: '8px',
+                      padding: '16px',
                       cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)',
-                      boxShadow: selectedProduct?.id === product.id ? '0 8px 25px rgba(59, 130, 246, 0.15)' : '0 2px 8px rgba(0, 0, 0, 0.08)',
-                      position: 'relative',
-                      overflow: 'hidden'
+                      transition: 'all 0.2s ease'
                     }}
                   >
-                    {/* Product Image */}
-                    <div style={{
-                      width: '100%',
-                      height: '160px',
-                      background: '#F8FAFC',
-                      borderRadius: '8px',
-                      marginBottom: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'relative',
-                      overflow: 'hidden'
-                    }}>
-                      {product.image ? (
-                        <img
-                          src={product.image.src}
-                          alt={product.title}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            borderRadius: '8px'
-                          }}
-                        />
-                      ) : (
-                        <div style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#9CA3AF',
-                          fontSize: '48px'
-                        }}>
-                          📦
-                        </div>
-                      )}
-                      
-                      {/* Selection Indicator */}
-                      {selectedProduct?.id === product.id && (
-                        <div style={{
-                          position: 'absolute',
-                          top: '8px',
-                          right: '8px',
-                          background: '#3B82F6',
-                          color: '#FFFFFF',
-                          borderRadius: '50%',
-                          width: '24px',
-                          height: '24px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '14px',
-                          fontWeight: '600'
-                        }}>
-                          ✓
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Product Details */}
                     <div style={{
                       fontSize: '16px',
                       fontWeight: '600',
                       color: '#1F2937',
-                      marginBottom: '8px',
-                      lineHeight: '1.4'
+                      marginBottom: '8px'
                     }}>
                       {product.title}
                     </div>
-                    
                     <div style={{
                       fontSize: '14px',
                       color: '#6B7280',
@@ -674,117 +479,16 @@ export default function Index() {
                     }}>
                       {product.vendor}
                     </div>
-                    
                     <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '12px'
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#059669'
                     }}>
-                      <div style={{
-                        fontSize: '18px',
-                        fontWeight: '700',
-                        color: '#059669'
-                      }}>
-                        ${product.variants?.[0]?.price || '0.00'}
-                      </div>
-                      
-                      {product.variants?.[0]?.compare_at_price && (
-                        <div style={{
-                          fontSize: '14px',
-                          color: '#9CA3AF',
-                          textDecoration: 'line-through'
-                        }}>
-                          ${product.variants[0].compare_at_price}
-                        </div>
-                      )}
+                      ${product.variants?.[0]?.price || '0.00'}
                     </div>
-
-                    {/* Product Status */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      marginBottom: '12px'
-                    }}>
-                      <div style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: product.status === 'active' ? '#10B981' : '#6B7280'
-                      }} />
-                      <span style={{
-                        fontSize: '12px',
-                        color: '#6B7280',
-                        textTransform: 'capitalize'
-                      }}>
-                        {product.status}
-                      </span>
-                    </div>
-
-                    {/* Product Tags */}
-                    {product.tags && product.tags.length > 0 && (
-                      <div style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '4px',
-                        marginBottom: '12px'
-                      }}>
-                        {product.tags.slice(0, 3).map((tag, index) => (
-                          <span
-                            key={index}
-                            style={{
-                              background: '#F3F4F6',
-                              color: '#6B7280',
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              fontSize: '10px',
-                              fontWeight: '500'
-                            }}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {product.tags.length > 3 && (
-                          <span style={{
-                            background: '#F3F4F6',
-                            color: '#6B7280',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            fontSize: '10px',
-                            fontWeight: '500'
-                          }}>
-                            +{product.tags.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Selection Button */}
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        setSelectedProduct(product);
-                      }}
-                      style={{
-                        width: '100%',
-                        padding: '8px 16px',
-                        background: selectedProduct?.id === product.id ? '#3B82F6' : '#F3F4F6',
-                        color: selectedProduct?.id === product.id ? '#FFFFFF' : '#6B7280',
-                        border: 'none',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      {selectedProduct?.id === product.id ? '✓ Selected' : 'Select Product'}
-                    </button>
                   </div>
                 ))}
-                </div>
-              )}
+              </div>
             </div>
           )}
 
