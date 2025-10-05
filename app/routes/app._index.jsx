@@ -53,6 +53,30 @@ export const loader = async ({ request }) => {
   } catch (error) {
     console.error("❌ Error fetching products:", error);
   }
+
+  // Fetch theme information
+  let themeInfo = {};
+  try {
+    const shopRes = await admin.graphql(`query { shop { myshopifyDomain } }`);
+    const shopJson = await shopRes.json();
+    const shopDomain = shopJson.data.shop.myshopifyDomain;
+    
+    const themeRes = await admin.graphql(`query { themes(first: 5) { nodes { id name role } } }`);
+    const themeJson = await themeRes.json();
+    const themes = themeJson.data.themes.nodes;
+    const mainTheme = themes.find(t => t.role === "MAIN");
+    const themeId = mainTheme?.id.replace("gid://shopify/OnlineStoreTheme/", "");
+    
+    themeInfo = {
+      shopDomain,
+      themeId,
+      mainTheme,
+      themes
+    };
+    console.log("✅ Theme info fetched:", themeInfo);
+  } catch (error) {
+    console.error("❌ Error fetching theme info:", error);
+  }
   
   // Fetch real data from database
   let stats = {
@@ -152,7 +176,7 @@ export const loader = async ({ request }) => {
     // Keep default stats if database query fails
   }
 
-  return json({ stats, products });
+  return json({ stats, products, themeInfo });
 };
 
 // Helper function to format time ago
@@ -169,7 +193,7 @@ const getTimeAgo = (date) => {
 };
 
 export default function TryLabDashboard() {
-  const { stats, products } = useLoaderData();
+  const { stats, products, themeInfo } = useLoaderData();
   const { user } = useOutletContext();
   
   // Experiment creation modal state
@@ -187,6 +211,9 @@ export default function TryLabDashboard() {
   const [isDragging, setIsDragging] = useState(false);
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [swipeAnimation, setSwipeAnimation] = useState('');
+  const [themeEditorOpen, setThemeEditorOpen] = useState(false);
+  const [widgetPreview, setWidgetPreview] = useState(null);
+  const [placementHotspots, setPlacementHotspots] = useState([]);
   const [experimentData, setExperimentData] = useState({
     idea: null,
     product: null,
@@ -271,6 +298,160 @@ export default function TryLabDashboard() {
       }
     }
     setCardOffset(0);
+  };
+
+  // Theme Editor Functions
+  const openThemeEditor = (product, widget) => {
+    if (!themeInfo.shopDomain || !themeInfo.themeId) {
+      alert('Theme information not available. Please try again.');
+      return;
+    }
+
+    const productHandle = product.handle;
+    const encodedProductPath = encodeURIComponent(`/products/${productHandle}`);
+    const apiKey = "5ff212573a3e19bae68ca45eae0a80c4"; // App's client_id
+    
+    // Create deep link URL to theme editor with widget placement
+    const themeEditorUrl = `https://admin.shopify.com/store/${themeInfo.shopDomain.replace('.myshopify.com', '')}/themes/${themeInfo.themeId}/editor?previewPath=${encodedProductPath}&template=product&addAppBlockId=${apiKey}/${widget.id}&target=mainSection`;
+    
+    window.open(themeEditorUrl, '_blank');
+    setThemeEditorOpen(true);
+  };
+
+  const generateWidgetCode = (widget, placement) => {
+    const widgetTemplates = {
+      'Free Shipping Badge': `
+<div class="ab-test-widget free-shipping-badge" style="
+  background: linear-gradient(135deg, #10B981, #059669);
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 600;
+  margin: 16px 0;
+  text-align: center;
+  box-shadow: 0 2px 4px rgba(16, 185, 129, 0.2);
+">
+  🚚 Free shipping on orders over $50
+</div>`,
+      'Trust Badge': `
+<div class="ab-test-widget trust-badge" style="
+  background: #F8FAFC;
+  border: 2px solid #E2E8F0;
+  padding: 12px;
+  border-radius: 8px;
+  margin: 16px 0;
+  text-align: center;
+">
+  <div style="font-size: 24px; margin-bottom: 8px;">🛡️</div>
+  <div style="font-weight: 600; color: #1E293B; margin-bottom: 4px;">Secure Checkout</div>
+  <div style="font-size: 12px; color: #64748B;">SSL encrypted • 30-day returns</div>
+</div>`,
+      'Countdown Timer': `
+<div class="ab-test-widget countdown-timer" style="
+  background: linear-gradient(135deg, #EF4444, #DC2626);
+  color: white;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  text-align: center;
+  font-weight: 600;
+">
+  <div style="font-size: 18px; margin-bottom: 8px;">⏰ Limited Time Offer!</div>
+  <div style="font-size: 24px; font-weight: 700;" id="countdown-${Date.now()}">
+    <span id="hours">23</span>:<span id="minutes">59</span>:<span id="seconds">59</span>
+  </div>
+  <div style="font-size: 12px; margin-top: 4px;">Ends soon!</div>
+</div>`,
+      'Product Badge': `
+<div class="ab-test-widget product-badge" style="
+  background: linear-gradient(135deg, #F59E0B, #D97706);
+  color: white;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  display: inline-block;
+  margin: 8px 0;
+  box-shadow: 0 2px 4px rgba(245, 158, 11, 0.3);
+">
+  🏆 Best Seller
+</div>`,
+      'Social Proof': `
+<div class="ab-test-widget social-proof" style="
+  background: #F0F9FF;
+  border-left: 4px solid #3B82F6;
+  padding: 12px 16px;
+  margin: 16px 0;
+  border-radius: 0 6px 6px 0;
+">
+  <div style="display: flex; align-items: center; gap: 8px;">
+    <div style="font-size: 20px;">👥</div>
+    <div>
+      <div style="font-weight: 600; color: #1E293B;">12 people bought this in the last hour</div>
+      <div style="font-size: 12px; color: #64748B;">Join thousands of happy customers</div>
+    </div>
+  </div>
+</div>`
+    };
+
+    return widgetTemplates[widget] || `
+<div class="ab-test-widget custom-widget" style="
+  background: #F8FAFC;
+  border: 1px solid #E2E8F0;
+  padding: 16px;
+  border-radius: 8px;
+  margin: 16px 0;
+  text-align: center;
+">
+  <div style="font-weight: 600; color: #1E293B;">${widget}</div>
+  <div style="font-size: 12px; color: #64748B;">A/B Test Widget</div>
+</div>`;
+  };
+
+  const injectWidgetIntoTheme = async (widget, product, placement) => {
+    if (!themeInfo.themeId) {
+      alert('Theme ID not available. Please try again.');
+      return;
+    }
+
+    try {
+      // Generate widget code
+      const widgetCode = generateWidgetCode(widget, placement);
+      
+      // Create a snippet for the widget
+      const snippetName = `ab-test-${widget.toLowerCase().replace(/\s+/g, '-')}`;
+      const snippetContent = widgetCode;
+
+      // Inject the snippet into the theme
+      const response = await fetch('/api/inject-widget', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          themeId: themeInfo.themeId,
+          snippetName,
+          snippetContent,
+          widget,
+          productId: product.id
+        })
+      });
+
+      if (response.ok) {
+        alert(`Widget "${widget}" successfully added to your theme!`);
+        setExperimentData({
+          ...experimentData,
+          placement: placement,
+          variant: widget
+        });
+      } else {
+        throw new Error('Failed to inject widget');
+      }
+    } catch (error) {
+      console.error('Error injecting widget:', error);
+      alert('Failed to add widget to theme. Please try again or use the theme editor.');
+    }
   };
 
   const handleMouseDown = (e) => {
@@ -3076,14 +3257,16 @@ export default function TryLabDashboard() {
                               marginTop: '12px',
                               textAlign: 'center'
                             }}>
-                              <button style={{
-                                background: 'none',
-                                border: 'none',
-                                color: '#3B82F6',
-                                fontSize: '12px',
-                                cursor: 'pointer',
-                                textDecoration: 'underline'
-                              }}>
+                              <button 
+                                onClick={() => openThemeEditor(selectedProduct, selectedIdea)}
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: '#3B82F6',
+                                  fontSize: '12px',
+                                  cursor: 'pointer',
+                                  textDecoration: 'underline'
+                                }}>
                                 Open in Theme Editor...
                               </button>
                             </div>
