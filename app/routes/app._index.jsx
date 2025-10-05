@@ -214,6 +214,10 @@ export default function TryLabDashboard() {
   const [themeEditorOpen, setThemeEditorOpen] = useState(false);
   const [widgetPreview, setWidgetPreview] = useState(null);
   const [placementHotspots, setPlacementHotspots] = useState([]);
+  const [themePreviewMode, setThemePreviewMode] = useState(false);
+  const [widgetPosition, setWidgetPosition] = useState({ x: 0, y: 0 });
+  const [draggedElement, setDraggedElement] = useState(null);
+  const [themePreviewData, setThemePreviewData] = useState(null);
   const [experimentData, setExperimentData] = useState({
     idea: null,
     product: null,
@@ -409,7 +413,7 @@ export default function TryLabDashboard() {
 </div>`;
   };
 
-  const injectWidgetIntoTheme = async (widget, product, placement) => {
+  const injectWidgetIntoTheme = async (widget, product, placement, position = null) => {
     if (!themeInfo.themeId) {
       alert('Theme ID not available. Please try again.');
       return;
@@ -423,8 +427,8 @@ export default function TryLabDashboard() {
       const snippetName = `ab-test-${widget.toLowerCase().replace(/\s+/g, '-')}`;
       const snippetContent = widgetCode;
 
-      // Inject the snippet into the theme
-      const response = await fetch('/api/inject-widget', {
+      // Use the new GraphQL API
+      const response = await fetch('/api/theme-widget', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -434,23 +438,92 @@ export default function TryLabDashboard() {
           snippetName,
           snippetContent,
           widget,
-          productId: product.id
+          productId: product.id,
+          position: position || widgetPosition
         })
       });
 
-      if (response.ok) {
+      const result = await response.json();
+
+      if (response.ok && result.success) {
         alert(`Widget "${widget}" successfully added to your theme!`);
         setExperimentData({
           ...experimentData,
           placement: placement,
-          variant: widget
+          variant: widget,
+          position: position || widgetPosition
         });
       } else {
-        throw new Error('Failed to inject widget');
+        throw new Error(result.error || 'Failed to inject widget');
       }
     } catch (error) {
       console.error('Error injecting widget:', error);
       alert('Failed to add widget to theme. Please try again or use the theme editor.');
+    }
+  };
+
+  // Theme Preview Functions
+  const generateThemePreview = async (product, widget) => {
+    if (!product || !widget) return;
+
+    try {
+      // Generate mock product page data for preview
+      const previewData = {
+        product: {
+          title: product.title,
+          handle: product.handle,
+          price: product.variants?.[0]?.price || '$29.99',
+          image: product.image?.src || 'https://via.placeholder.com/400x400',
+          description: product.body_html || 'Product description goes here...',
+          variants: product.variants || []
+        },
+        widget: {
+          name: widget,
+          code: generateWidgetCode(widget, 'preview'),
+          position: widgetPosition
+        },
+        theme: {
+          name: 'Current Theme',
+          id: themeInfo.themeId
+        }
+      };
+
+      setThemePreviewData(previewData);
+      setThemePreviewMode(true);
+    } catch (error) {
+      console.error('Error generating theme preview:', error);
+    }
+  };
+
+  const handleWidgetDrag = (e) => {
+    if (!draggedElement) return;
+
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+
+    setWidgetPosition({ x, y });
+  };
+
+  const handleWidgetDragStart = (e) => {
+    setDraggedElement(e.target);
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleWidgetDragEnd = () => {
+    setDraggedElement(null);
+  };
+
+  const updateWidgetPosition = (newPosition) => {
+    setWidgetPosition(newPosition);
+    if (themePreviewData) {
+      setThemePreviewData({
+        ...themePreviewData,
+        widget: {
+          ...themePreviewData.widget,
+          position: newPosition
+        }
+      });
     }
   };
 
@@ -3533,6 +3606,429 @@ export default function TryLabDashboard() {
                     color: '#1F2937',
                     marginBottom: '8px'
                   }}>
+                    Theme Preview & Positioning
+                  </h3>
+                  
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    Preview how your widget will look on the product page and adjust its position
+                  </p>
+
+                  {/* Auto-generate preview when entering this step */}
+                  {!themePreviewData && selectedProduct && selectedIdea && (
+                    <div style={{
+                      background: '#F0F9FF',
+                      border: '1px solid #3B82F6',
+                      borderRadius: '6px',
+                      padding: '16px',
+                      marginBottom: '24px'
+                    }}>
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        marginBottom: '12px'
+                      }}>
+                        <div style={{
+                          width: '24px',
+                          height: '24px',
+                          background: '#3B82F6',
+                          borderRadius: '50%',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#FFFFFF',
+                          fontSize: '12px'
+                        }}>
+                          ℹ️
+                        </div>
+                        <span style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#1E40AF'
+                        }}>
+                          Ready to Preview
+                        </span>
+                      </div>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#1E40AF',
+                        margin: '0 0 16px 0'
+                      }}>
+                        Your widget "{selectedIdea.utility}" will be added to "{selectedProduct.title}". 
+                        Click below to generate a preview and position the widget.
+                      </p>
+                      <button
+                        onClick={() => generateThemePreview(selectedProduct, selectedIdea?.utility)}
+                        style={{
+                          padding: '8px 16px',
+                          background: '#3B82F6',
+                          color: '#FFFFFF',
+                          border: 'none',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        🔄 Generate Preview
+                      </button>
+                    </div>
+                  )}
+
+                  {/* Theme Preview Container */}
+                  <div style={{
+                    background: '#FFFFFF',
+                    border: '1px solid #E5E5E5',
+                    borderRadius: '8px',
+                    padding: '24px',
+                    marginBottom: '24px',
+                    position: 'relative'
+                  }}>
+                    {/* Preview Controls */}
+                    {themePreviewData && (
+                      <div style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        marginBottom: '20px',
+                        paddingBottom: '16px',
+                        borderBottom: '1px solid #E5E5E5'
+                      }}>
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px'
+                        }}>
+                          <button
+                            onClick={() => generateThemePreview(selectedProduct, selectedIdea?.utility)}
+                            style={{
+                              padding: '8px 16px',
+                              background: '#6B7280',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: '500',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            🔄 Regenerate
+                          </button>
+                          
+                          <button
+                            onClick={() => injectWidgetIntoTheme(selectedIdea?.utility, selectedProduct, 'custom', widgetPosition)}
+                            style={{
+                              padding: '8px 16px',
+                              background: '#8B5CF6',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: '500',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            💾 Inject Widget
+                          </button>
+                          
+                          <button
+                            onClick={() => openThemeEditor(selectedProduct, selectedIdea?.utility)}
+                            style={{
+                              padding: '8px 16px',
+                              background: '#10B981',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '14px',
+                              fontWeight: '500',
+                              cursor: 'pointer'
+                            }}
+                          >
+                            🎨 Open Theme Editor
+                          </button>
+                        </div>
+
+                        <div style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          background: '#F3F4F6',
+                          padding: '4px 8px',
+                          borderRadius: '4px'
+                        }}>
+                          Preview Mode
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Product Page Preview */}
+                    {themePreviewData && (
+                      <div style={{
+                        border: '2px solid #E5E5E5',
+                        borderRadius: '8px',
+                        background: '#F9FAFB',
+                        minHeight: '500px',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}>
+                        {/* Mock Product Page */}
+                        <div style={{
+                          background: '#FFFFFF',
+                          padding: '20px',
+                          position: 'relative',
+                          minHeight: '400px'
+                        }}>
+                          {/* Product Header */}
+                          <div style={{
+                            display: 'flex',
+                            gap: '20px',
+                            marginBottom: '24px'
+                          }}>
+                            <div style={{
+                              width: '200px',
+                              height: '200px',
+                              background: '#E5E5E5',
+                              borderRadius: '8px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: '#6B7280',
+                              fontSize: '14px'
+                            }}>
+                              Product Image
+                            </div>
+                            
+                            <div style={{ flex: 1 }}>
+                              <h2 style={{
+                                fontSize: '24px',
+                                fontWeight: '600',
+                                color: '#1F2937',
+                                margin: '0 0 8px 0'
+                              }}>
+                                {themePreviewData.product.title}
+                              </h2>
+                              
+                              <div style={{
+                                fontSize: '20px',
+                                fontWeight: '600',
+                                color: '#10B981',
+                                marginBottom: '16px'
+                              }}>
+                                {themePreviewData.product.price}
+                              </div>
+
+                              {/* Widget Preview - Draggable */}
+                              <div
+                                draggable
+                                onDragStart={handleWidgetDragStart}
+                                onDragEnd={handleWidgetDragEnd}
+                                onMouseMove={handleWidgetDrag}
+                                style={{
+                                  position: 'absolute',
+                                  left: widgetPosition.x,
+                                  top: widgetPosition.y,
+                                  cursor: 'grab',
+                                  zIndex: 10,
+                                  background: 'rgba(59, 130, 246, 0.1)',
+                                  border: '2px dashed #3B82F6',
+                                  borderRadius: '8px',
+                                  padding: '8px',
+                                  minWidth: '150px',
+                                  transform: 'translate(-50%, -50%)'
+                                }}
+                              >
+                                <div dangerouslySetInnerHTML={{ __html: themePreviewData.widget.code }} />
+                                <div style={{
+                                  position: 'absolute',
+                                  top: '-8px',
+                                  right: '-8px',
+                                  background: '#3B82F6',
+                                  color: '#FFFFFF',
+                                  borderRadius: '50%',
+                                  width: '20px',
+                                  height: '20px',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  fontSize: '12px',
+                                  cursor: 'grab'
+                                }}>
+                                  ⋮⋮
+                                </div>
+                              </div>
+
+                              <button style={{
+                                background: '#3B82F6',
+                                color: '#FFFFFF',
+                                border: 'none',
+                                borderRadius: '6px',
+                                padding: '12px 24px',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                cursor: 'pointer',
+                                marginTop: '16px'
+                              }}>
+                                Add to Cart
+                              </button>
+                            </div>
+                          </div>
+
+                          {/* Product Description */}
+                          <div style={{
+                            borderTop: '1px solid #E5E5E5',
+                            paddingTop: '20px'
+                          }}>
+                            <h3 style={{
+                              fontSize: '18px',
+                              fontWeight: '600',
+                              color: '#1F2937',
+                              marginBottom: '12px'
+                            }}>
+                              Product Description
+                            </h3>
+                            <p style={{
+                              color: '#6B7280',
+                              lineHeight: '1.6'
+                            }}>
+                              {themePreviewData.product.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        {/* Drop Zones */}
+                        <div style={{
+                          position: 'absolute',
+                          top: '0',
+                          left: '0',
+                          right: '0',
+                          bottom: '0',
+                          pointerEvents: 'none'
+                        }}>
+                          {[
+                            { label: 'Above Title', y: 20, x: 20 },
+                            { label: 'After Price', y: 120, x: 20 },
+                            { label: 'Before Add to Cart', y: 160, x: 20 },
+                            { label: 'After Description', y: 350, x: 20 }
+                          ].map((zone, index) => (
+                            <div
+                              key={index}
+                              style={{
+                                position: 'absolute',
+                                left: zone.x,
+                                top: zone.y,
+                                width: '200px',
+                                height: '40px',
+                                border: '2px dashed #E5E5E5',
+                                borderRadius: '4px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                fontSize: '12px',
+                                color: '#6B7280',
+                                background: 'rgba(255, 255, 255, 0.8)',
+                                opacity: 0.7
+                              }}
+                            >
+                              {zone.label}
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Widget Position Controls */}
+                    {themePreviewData && (
+                      <div style={{
+                        marginTop: '20px',
+                        padding: '16px',
+                        background: '#F9FAFB',
+                        borderRadius: '6px',
+                        border: '1px solid #E5E5E5'
+                      }}>
+                        <h4 style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          margin: '0 0 12px 0'
+                        }}>
+                          Widget Position Controls
+                        </h4>
+                        
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(4, 1fr)',
+                          gap: '8px'
+                        }}>
+                          {[
+                            { label: 'Above Title', position: { x: 100, y: 20 } },
+                            { label: 'After Price', position: { x: 100, y: 120 } },
+                            { label: 'Before Cart', position: { x: 100, y: 160 } },
+                            { label: 'After Desc', position: { x: 100, y: 350 } }
+                          ].map((preset, index) => (
+                            <button
+                              key={index}
+                              onClick={() => updateWidgetPosition(preset.position)}
+                              style={{
+                                padding: '8px 12px',
+                                background: '#FFFFFF',
+                                border: '1px solid #D1D5DB',
+                                borderRadius: '4px',
+                                fontSize: '12px',
+                                fontWeight: '500',
+                                color: '#1F2937',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s ease'
+                              }}
+                              onMouseOver={(e) => {
+                                e.target.style.background = '#F3F4F6';
+                                e.target.style.borderColor = '#3B82F6';
+                              }}
+                              onMouseOut={(e) => {
+                                e.target.style.background = '#FFFFFF';
+                                e.target.style.borderColor = '#D1D5DB';
+                              }}
+                            >
+                              {preset.label}
+                            </button>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+
+                    {!themePreviewData && (
+                      <div style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        minHeight: '300px',
+                        color: '#6B7280',
+                        fontSize: '14px',
+                        background: '#F9FAFB',
+                        borderRadius: '8px',
+                        border: '2px dashed #E5E5E5'
+                      }}>
+                        Click "Generate Preview" to see how your widget will look
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {currentStep === 5 && (
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
                     Review & launch
                   </h3>
                   
@@ -3982,6 +4478,7 @@ export default function TryLabDashboard() {
                   </div>
                 </div>
               )}
+
             </div>
 
             {/* Bottom Navigation Bar */}
@@ -3995,7 +4492,7 @@ export default function TryLabDashboard() {
             }}>
               {/* Step Progress */}
               <div style={{ display: 'flex', gap: '8px' }}>
-                {[1, 2, 3, 4].map((step) => (
+                {[1, 2, 3, 4, 5].map((step) => (
                   <div 
                     key={step}
                     style={{
@@ -4043,10 +4540,10 @@ export default function TryLabDashboard() {
                   </button>
                 )}
                 
-                {currentStep < 4 ? (
+                {currentStep < 6 ? (
                   <button 
                     onClick={() => setCurrentStep(currentStep + 1)}
-                    disabled={!selectedIdea || (currentStep === 2 && !selectedProduct) || (currentStep === 3 && !placementGuideOpen)}
+                    disabled={!selectedIdea || (currentStep === 2 && !selectedProduct) || (currentStep === 3 && !placementGuideOpen) || (currentStep === 5 && !themePreviewData)}
                     style={{
                       padding: '8px 16px',
                       background: '#3B82F6',
@@ -4056,7 +4553,7 @@ export default function TryLabDashboard() {
                       fontWeight: '500',
                       color: '#FFFFFF',
                       cursor: 'pointer',
-                      opacity: (!selectedIdea || (currentStep === 2 && !selectedProduct) || (currentStep === 3 && !placementGuideOpen)) ? 0.5 : 1
+                      opacity: (!selectedIdea || (currentStep === 2 && !selectedProduct) || (currentStep === 3 && !placementGuideOpen) || (currentStep === 5 && !themePreviewData)) ? 0.5 : 1
                     }}>
                     Next
                   </button>
