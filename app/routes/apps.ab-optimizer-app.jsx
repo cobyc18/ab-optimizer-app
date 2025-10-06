@@ -22,6 +22,123 @@ export const loader = async ({ request }) => {
     // Let's start with a simple test to make sure Liquid rendering works
     console.log('🔍 Attempting Liquid rendering for product:', productHandle);
     
+    // First, let's return a simple HTML response to test if the app proxy is working
+    const testResponse = new Response(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>App Proxy Working Test</title>
+          <meta charset="utf-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1">
+          <style>
+            body { 
+              font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+              margin: 0; 
+              padding: 20px; 
+              background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+              color: white;
+              min-height: 100vh;
+              display: flex;
+              align-items: center;
+              justify-content: center;
+            }
+            .container {
+              background: rgba(255,255,255,0.1);
+              padding: 40px;
+              border-radius: 20px;
+              text-align: center;
+              backdrop-filter: blur(10px);
+              border: 1px solid rgba(255,255,255,0.2);
+            }
+            .success-icon {
+              font-size: 4rem;
+              margin-bottom: 20px;
+            }
+            .product-info {
+              background: rgba(255,255,255,0.2);
+              padding: 20px;
+              border-radius: 10px;
+              margin: 20px 0;
+              text-align: left;
+            }
+            .product-info strong {
+              color: #fff;
+            }
+            .test-button {
+              background: rgba(255,255,255,0.3);
+              color: white;
+              border: 2px solid rgba(255,255,255,0.5);
+              padding: 15px 30px;
+              border-radius: 10px;
+              font-size: 16px;
+              cursor: pointer;
+              margin: 10px;
+              transition: all 0.3s ease;
+            }
+            .test-button:hover {
+              background: rgba(255,255,255,0.4);
+              transform: translateY(-2px);
+            }
+          </style>
+        </head>
+        <body>
+          <div class="container">
+            <div class="success-icon">🎉</div>
+            <h1>App Proxy Working!</h1>
+            <p>This confirms the app proxy is successfully serving content.</p>
+            
+            <div class="product-info">
+              <strong>Product Handle:</strong> ${productHandle}<br/>
+              <strong>Shop:</strong> ${session.shop}<br/>
+              <strong>Request URL:</strong> ${request.url}<br/>
+              <strong>Timestamp:</strong> ${new Date().toISOString()}
+            </div>
+            
+            <div>
+              <button class="test-button" onclick="alert('JavaScript is working!')">
+                🧪 Test JavaScript
+              </button>
+              <button class="test-button" onclick="window.parent.postMessage('iframe-loaded', '*')">
+                📡 Send Message to Parent
+              </button>
+            </div>
+            
+            <p style="margin-top: 30px; font-size: 14px; opacity: 0.8;">
+              If you can see this page, the app proxy is working correctly and CSP headers are set properly.
+            </p>
+          </div>
+          
+          <script>
+            console.log('🎉 App Proxy JavaScript loaded successfully!');
+            console.log('Product Handle:', '${productHandle}');
+            console.log('Shop:', '${session.shop}');
+            
+            // Send a message to the parent window to confirm iframe loaded
+            if (window.parent !== window) {
+              window.parent.postMessage({
+                type: 'app-proxy-loaded',
+                productHandle: '${productHandle}',
+                shop: '${session.shop}'
+              }, '*');
+            }
+          </script>
+        </body>
+      </html>
+    `, {
+      headers: {
+        'Content-Type': 'text/html; charset=utf-8',
+        'Content-Security-Policy': `frame-ancestors https://${session.shop} https://admin.shopify.com`,
+        'X-Frame-Options': 'ALLOWALL',
+        'Cache-Control': 'no-cache, no-store, must-revalidate'
+      }
+    });
+    
+    console.log('✅ Returning test HTML response for app proxy');
+    return testResponse;
+    
+    // Let's start with a simple test to make sure Liquid rendering works
+    console.log('🔍 Attempting Liquid rendering for product:', productHandle);
+    
     const response = liquid(`
       <!DOCTYPE html>
       <html>

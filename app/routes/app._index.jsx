@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import { useLoaderData, useOutletContext, Link } from "@remix-run/react";
-import { useState } from "react";
+import React, { useState } from "react";
 import { authenticate } from "../shopify.server.js";
 import prisma from "../db.server.js";
 // Using App Bridge modal for theme editor instead of custom iframe component
@@ -343,6 +343,19 @@ export default function Index() {
     setPreviewProduct(product);
     setProductPreviewOpen(true);
   };
+
+  // Listen for messages from the iframe
+  React.useEffect(() => {
+    const handleMessage = (event) => {
+      console.log('📨 Message received from iframe:', event.data);
+      if (event.data && event.data.type === 'app-proxy-loaded') {
+        console.log('✅ App proxy confirmed loaded:', event.data);
+      }
+    };
+
+    window.addEventListener('message', handleMessage);
+    return () => window.removeEventListener('message', handleMessage);
+  }, []);
 
   const closeProductPreview = () => {
     setProductPreviewOpen(false);
