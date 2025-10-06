@@ -350,12 +350,37 @@ export default function Index() {
     setPreviewProduct(product);
     setProductPreviewOpen(true);
     
-    // Set the preview URL to the app proxy (which will generate theme preview URL)
-    const productUrl = `https://${shop}/apps/ab-optimizer-app?product=${product.handle}`;
-    setPreviewUrl(productUrl);
+    // Generate theme preview URL directly (bypassing app proxy)
+    // We'll fetch the theme ID and generate the URL client-side
+    generateThemePreviewUrl(product.handle);
     setIframeLoading(true);
     setShowPasswordOverlay(false);
     setPasswordError('');
+  };
+
+  const generateThemePreviewUrl = async (productHandle) => {
+    try {
+      console.log('🎨 Fetching theme ID for product:', productHandle);
+      
+      // Fetch theme ID from our app
+      const response = await fetch(`/api/theme-id?shop=${shop}`);
+      const data = await response.json();
+      
+      if (data.themeId) {
+        const themePreviewUrl = `https://${shop}/products/${productHandle}?preview_theme_id=${data.themeId}`;
+        console.log('🌐 Generated theme preview URL for iframe:', themePreviewUrl);
+        
+        // Set the iframe URL directly - this will load the theme preview in the iframe
+        setPreviewUrl(themePreviewUrl);
+        setIframeLoading(false);
+      } else {
+        console.error('❌ Failed to get theme ID');
+        setIframeLoading(false);
+      }
+    } catch (error) {
+      console.error('❌ Error generating theme preview URL:', error);
+      setIframeLoading(false);
+    }
   };
 
   const handlePasswordSubmit = () => {
@@ -364,22 +389,20 @@ export default function Index() {
       return;
     }
 
-    // Update the iframe URL to include the password parameter
-    const newUrl = `https://${shop}/apps/ab-optimizer-app?product=${previewProduct.handle}&password=${encodeURIComponent(storePassword)}`;
-    setPreviewUrl(newUrl);
-    setIframeLoading(true);
-    setShowPasswordOverlay(false);
-    setPasswordError('');
-    
-    // Also try to send password to the iframe if it's already loaded
+    // For theme preview URLs, we need to handle password differently
+    // Since theme preview URLs are less restrictive, let's try to submit the password directly
     if (iframeRef.current && iframeRef.current.contentWindow) {
       try {
         iframeRef.current.contentWindow.postMessage({
           type: 'submit-password',
           password: storePassword
         }, '*');
+        
+        setShowPasswordOverlay(false);
+        setPasswordError('');
       } catch (error) {
-        console.log('Could not send message to iframe, using URL parameter instead');
+        console.error('Error submitting password:', error);
+        setPasswordError('Failed to submit password. Please try again.');
       }
     }
   };
