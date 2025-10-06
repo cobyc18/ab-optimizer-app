@@ -20,9 +20,48 @@ export const loader = async ({ request }) => {
   }
 
   try {
-    // Try to fetch the product page from the live store
-    const productUrl = `https://${session.shop}/products/${productHandle}`;
-    console.log('🌐 Fetching product page:', productUrl);
+    // Get the active theme ID using GraphQL
+    console.log('🎨 Fetching active theme...');
+    const themeResponse = await fetch(`https://${session.shop}/admin/api/2025-01/graphql.json`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Access-Token': session.accessToken
+      },
+      body: JSON.stringify({
+        query: `
+          query GetActiveTheme {
+            themes(first: 1, roles: [MAIN]) {
+              nodes {
+                id
+                name
+                role
+              }
+            }
+          }
+        `
+      })
+    });
+
+    const themeData = await themeResponse.json();
+    console.log('🎨 Theme data:', themeData);
+
+    if (!themeData.data?.themes?.nodes?.[0]) {
+      throw new Error('No active theme found');
+    }
+
+    const activeTheme = themeData.data.themes.nodes[0];
+    const themeId = activeTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
+    
+    console.log('✅ Active theme found:', {
+      id: themeId,
+      name: activeTheme.name,
+      role: activeTheme.role
+    });
+
+    // Generate theme preview URL with product
+    const themePreviewUrl = `https://${session.shop}/products/${productHandle}?preview_theme_id=${themeId}`;
+    console.log('🌐 Theme preview URL:', themePreviewUrl);
 
     const fetchOptions = {
       method: 'GET',
@@ -40,7 +79,7 @@ export const loader = async ({ request }) => {
       fetchOptions.headers['X-Password'] = password;
     }
 
-    const response = await fetch(productUrl, fetchOptions);
+    const response = await fetch(themePreviewUrl, fetchOptions);
     console.log('📡 Response status:', response.status);
 
     if (response.status === 200) {

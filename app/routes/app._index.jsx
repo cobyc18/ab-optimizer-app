@@ -350,7 +350,7 @@ export default function Index() {
     setPreviewProduct(product);
     setProductPreviewOpen(true);
     
-    // Set the preview URL to the app proxy
+    // Set the preview URL to the app proxy (which will generate theme preview URL)
     const productUrl = `https://${shop}/apps/ab-optimizer-app?product=${product.handle}`;
     setPreviewUrl(productUrl);
     setIframeLoading(true);
