@@ -394,6 +394,10 @@ export const action = async ({ request, params }) => {
           // Remove any existing CSP meta tags
           html = html.replace(/<meta[^>]*content-security-policy[^>]*>/gi, '');
           html = html.replace(/<meta[^>]*x-frame-options[^>]*>/gi, '');
+          
+          // Remove any remaining CSP-related content
+          html = html.replace(/frame-ancestors[^;]*;?/gi, '');
+          html = html.replace(/X-Frame-Options[^;]*;?/gi, '');
 
           // Inject JavaScript to communicate with parent window and handle password forms
           const injectedScript = `
@@ -401,11 +405,11 @@ export const action = async ({ request, params }) => {
               console.log('🎉 Password submitted successfully');
               
               // Check if we're still on a password page
-              const isPasswordPage = document.querySelector('input[type="password"]') !== null ||
-                                   document.title.includes('Password') ||
-                                   document.body.textContent.includes('password');
+              const stillOnPasswordPage = document.querySelector('input[type="password"]') !== null ||
+                                        document.title.includes('Password') ||
+                                        document.body.textContent.includes('password');
               
-              if (isPasswordPage) {
+              if (stillOnPasswordPage) {
                 console.log('❌ Still on password page - password may be incorrect');
                 if (window.parent !== window) {
                   window.parent.postMessage({
@@ -423,7 +427,40 @@ export const action = async ({ request, params }) => {
                 }
               }
               
-              // Intercept form submissions to prevent redirects
+              // Handle password submission for both forms and standalone password inputs
+              function handlePasswordSubmission(passwordValue) {
+                console.log('🔑 Submitting password:', passwordValue);
+                
+                const formData = new FormData();
+                formData.append('password', passwordValue);
+                
+                fetch(window.location.href, {
+                  method: 'POST',
+                  body: formData
+                })
+                .then(response => {
+                  if (response.ok) {
+                    return response.text();
+                  }
+                  throw new Error('Password submission failed');
+                })
+                .then(html => {
+                  document.open();
+                  document.write(html);
+                  document.close();
+                })
+                .catch(error => {
+                  console.error('❌ Password submission error:', error);
+                  if (window.parent !== window) {
+                    window.parent.postMessage({
+                      type: 'password-rejected',
+                      error: error.message
+                    }, '*');
+                  }
+                });
+              }
+              
+              // Intercept form submissions
               document.addEventListener('submit', function(e) {
                 const form = e.target;
                 if (form.tagName === 'FORM' && form.querySelector('input[type="password"]')) {
@@ -438,33 +475,28 @@ export const action = async ({ request, params }) => {
                     return;
                   }
                   
-                  // Submit via fetch to our proxy
-                  const formData = new FormData(form);
+                  handlePasswordSubmission(password);
+                }
+              });
+              
+              // Listen for password from parent (for standalone password inputs)
+              window.addEventListener('message', function(event) {
+                if (event.data && event.data.type === 'submit-password') {
+                  console.log('🔑 Received password from parent');
                   
-                  fetch(window.location.href, {
-                    method: 'POST',
-                    body: formData
-                  })
-                  .then(response => {
-                    if (response.ok) {
-                      return response.text();
-                    }
-                    throw new Error('Password submission failed');
-                  })
-                  .then(html => {
-                    document.open();
-                    document.write(html);
-                    document.close();
-                  })
-                  .catch(error => {
-                    console.error('❌ Password submission error:', error);
+                  const passwordInput = document.querySelector('input[type="password"]');
+                  if (passwordInput) {
+                    passwordInput.value = event.data.password;
+                    handlePasswordSubmission(event.data.password);
+                  } else {
+                    console.error('❌ Could not find password input');
                     if (window.parent !== window) {
                       window.parent.postMessage({
                         type: 'password-rejected',
-                        error: error.message
+                        error: 'Could not find password input'
                       }, '*');
                     }
-                  });
+                  }
                 }
               });
             </script>
