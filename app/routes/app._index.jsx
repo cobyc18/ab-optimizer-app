@@ -332,35 +332,90 @@ export default function Index() {
     setWidgetPosition(position);
   };
 
+  // Product Preview State
+  const [showPasswordOverlay, setShowPasswordOverlay] = React.useState(false);
+  const [storePassword, setStorePassword] = React.useState('');
+  const [passwordError, setPasswordError] = React.useState('');
+  const [iframeLoading, setIframeLoading] = React.useState(true);
+  const [previewUrl, setPreviewUrl] = React.useState('');
+  const iframeRef = React.useRef(null);
+
   // Product Preview Functions
   const openProductPreview = (product) => {
     console.log('🔍 Opening product preview:', {
       product: product.title,
       handle: product.handle,
-      shop: shop,
-      appProxyUrl: `https://${shop}/apps/ab-optimizer-app?product=${product.handle}`
+      shop: shop
     });
     setPreviewProduct(product);
     setProductPreviewOpen(true);
+    
+    // Set the preview URL to the app proxy
+    const productUrl = `https://${shop}/apps/ab-optimizer-app?product=${product.handle}`;
+    setPreviewUrl(productUrl);
+    setIframeLoading(true);
+    setShowPasswordOverlay(false);
+    setPasswordError('');
+  };
+
+  const handlePasswordSubmit = () => {
+    if (!storePassword.trim()) {
+      setPasswordError('Please enter a password');
+      return;
+    }
+
+    // Update the iframe URL to include the password parameter
+    const newUrl = `https://${shop}/apps/ab-optimizer-app?product=${previewProduct.handle}&password=${encodeURIComponent(storePassword)}`;
+    setPreviewUrl(newUrl);
+    setIframeLoading(true);
+    setShowPasswordOverlay(false);
+    setPasswordError('');
+    
+    // Also try to send password to the iframe if it's already loaded
+    if (iframeRef.current && iframeRef.current.contentWindow) {
+      try {
+        iframeRef.current.contentWindow.postMessage({
+          type: 'submit-password',
+          password: storePassword
+        }, '*');
+      } catch (error) {
+        console.log('Could not send message to iframe, using URL parameter instead');
+      }
+    }
+  };
+
+
+  const closeProductPreview = () => {
+    setProductPreviewOpen(false);
+    setPreviewProduct(null);
+    setShowPasswordOverlay(false);
+    setStorePassword('');
+    setPasswordError('');
   };
 
   // Listen for messages from the iframe
   React.useEffect(() => {
     const handleMessage = (event) => {
       console.log('📨 Message received from iframe:', event.data);
-      if (event.data && event.data.type === 'app-proxy-loaded') {
-        console.log('✅ App proxy confirmed loaded:', event.data);
+      
+      if (event.data && event.data.type === 'password-required') {
+        console.log('🔒 Password required, showing overlay');
+        setShowPasswordOverlay(true);
+        setIframeLoading(false);
+      } else if (event.data && event.data.type === 'password-accepted') {
+        console.log('✅ Password accepted');
+        setShowPasswordOverlay(false);
+        setPasswordError('');
+      } else if (event.data && event.data.type === 'password-rejected') {
+        console.log('❌ Password rejected');
+        setPasswordError('Incorrect password. Please try again.');
+        setStorePassword('');
       }
     };
 
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, []);
-
-  const closeProductPreview = () => {
-    setProductPreviewOpen(false);
-    setPreviewProduct(null);
-  };
 
   return (
     <div style={{
@@ -1587,19 +1642,146 @@ export default function Index() {
               background: '#F8FAFC'
             }}>
               {previewProduct.onlineStorePreviewUrl || previewProduct.handle ? (
-                <iframe
-                  src={`https://${shop}/apps/ab-optimizer-app?product=${previewProduct.handle}`}
-                  style={{
-                    width: '100%',
-                    height: '100%',
-                    border: 'none',
-                    borderRadius: '0 0 16px 16px'
-                  }}
-                  title={`Product Preview - ${previewProduct.title}`}
-                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-                  onLoad={() => console.log('✅ Iframe loaded successfully')}
-                  onError={(e) => console.error('❌ Iframe load error:', e)}
-                />
+                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
+                  {/* Password Overlay */}
+                  {showPasswordOverlay && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: 'rgba(0,0,0,0.8)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 1000
+                    }}>
+                      <div style={{
+                        background: 'white',
+                        padding: '30px',
+                        borderRadius: '12px',
+                        maxWidth: '400px',
+                        width: '90%',
+                        textAlign: 'center'
+                      }}>
+                        <h3 style={{ marginBottom: '20px', color: '#333' }}>
+                          🔒 Store Password Required
+                        </h3>
+                        <p style={{ color: '#666', marginBottom: '20px' }}>
+                          Your store is password protected. Please enter the password to view the product preview.
+                        </p>
+                        <input
+                          type="password"
+                          value={storePassword}
+                          onChange={(e) => setStorePassword(e.target.value)}
+                          placeholder="Enter store password"
+                          style={{
+                            width: '100%',
+                            padding: '12px',
+                            border: '2px solid #e1e5e9',
+                            borderRadius: '8px',
+                            fontSize: '16px',
+                            marginBottom: '20px'
+                          }}
+                          onKeyPress={(e) => {
+                            if (e.key === 'Enter') {
+                              handlePasswordSubmit();
+                            }
+                          }}
+                        />
+                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+                          <button
+                            onClick={handlePasswordSubmit}
+                            style={{
+                              background: '#10B981',
+                              color: 'white',
+                              border: 'none',
+                              padding: '12px 24px',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              fontSize: '16px'
+                            }}
+                          >
+                            Submit
+                          </button>
+                          <button
+                            onClick={() => setShowPasswordOverlay(false)}
+                            style={{
+                              background: '#6B7280',
+                              color: 'white',
+                              border: 'none',
+                              padding: '12px 24px',
+                              borderRadius: '8px',
+                              cursor: 'pointer',
+                              fontSize: '16px'
+                            }}
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                        {passwordError && (
+                          <p style={{ color: '#EF4444', marginTop: '10px', fontSize: '14px' }}>
+                            {passwordError}
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Loading State */}
+                  {iframeLoading && (
+                    <div style={{
+                      position: 'absolute',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      background: '#f8f9fa',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      zIndex: 100
+                    }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '4px solid #e1e5e9',
+                        borderTop: '4px solid #3B82F6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }}></div>
+                      <p style={{ marginTop: '20px', color: '#666' }}>
+                        Loading live product preview...
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Iframe */}
+                  <iframe
+                    ref={iframeRef}
+                    src={previewUrl}
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      border: 'none',
+                      borderRadius: '0 0 16px 16px',
+                      opacity: iframeLoading ? 0 : 1,
+                      transition: 'opacity 0.3s ease'
+                    }}
+                    title={`Product Preview - ${previewProduct.title}`}
+                    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation"
+                    onLoad={() => {
+                      console.log('✅ Iframe loaded successfully');
+                      setIframeLoading(false);
+                    }}
+                    onError={(e) => {
+                      console.error('❌ Iframe load error:', e);
+                      setIframeLoading(false);
+                    }}
+                  />
+                </div>
               ) : (
                 <div style={{
                   display: 'flex',
