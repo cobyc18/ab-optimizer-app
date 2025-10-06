@@ -59,20 +59,65 @@ export const action = async ({ request, params }) => {
       html = html.replace(/<meta[^>]*content-security-policy[^>]*>/gi, '');
       html = html.replace(/<meta[^>]*x-frame-options[^>]*>/gi, '');
 
-      // Inject JavaScript to communicate with parent window
-      const injectedScript = `
-        <script>
-          console.log('🎉 Password submitted successfully');
-          
-          // Send message to parent that page loaded successfully
-          if (window.parent !== window) {
-            window.parent.postMessage({
-              type: 'password-submitted',
-              storeDomain: '${storeDomain}'
-            }, '*');
-          }
-        </script>
-      `;
+        // Inject JavaScript to communicate with parent window and handle password forms
+        const injectedScript = `
+          <script>
+            console.log('🎉 Password submitted successfully');
+            
+            // Send message to parent that page loaded successfully
+            if (window.parent !== window) {
+              window.parent.postMessage({
+                type: 'password-submitted',
+                storeDomain: '${storeDomain}'
+              }, '*');
+            }
+            
+            // Intercept form submissions to prevent redirects
+            document.addEventListener('submit', function(e) {
+              const form = e.target;
+              if (form.tagName === 'FORM' && form.querySelector('input[type="password"]')) {
+                e.preventDefault();
+                console.log('🔒 Intercepted password form submission');
+                
+                const passwordInput = form.querySelector('input[type="password"]');
+                const password = passwordInput.value;
+                
+                if (!password) {
+                  console.error('❌ No password provided');
+                  return;
+                }
+                
+                // Submit via fetch to our proxy
+                const formData = new FormData(form);
+                
+                fetch(window.location.href, {
+                  method: 'POST',
+                  body: formData
+                })
+                .then(response => {
+                  if (response.ok) {
+                    return response.text();
+                  }
+                  throw new Error('Password submission failed');
+                })
+                .then(html => {
+                  document.open();
+                  document.write(html);
+                  document.close();
+                })
+                .catch(error => {
+                  console.error('❌ Password submission error:', error);
+                  if (window.parent !== window) {
+                    window.parent.postMessage({
+                      type: 'password-rejected',
+                      error: error.message
+                    }, '*');
+                  }
+                });
+              }
+            });
+          </script>
+        `;
 
       html = html.replace('</body>', injectedScript + '</body>');
 
@@ -205,6 +250,51 @@ export const loader = async ({ request, params }) => {
             }
           }
           
+          // Intercept form submissions to prevent redirects
+          document.addEventListener('submit', function(e) {
+            const form = e.target;
+            if (form.tagName === 'FORM' && form.querySelector('input[type="password"]')) {
+              e.preventDefault();
+              console.log('🔒 Intercepted password form submission');
+              
+              const passwordInput = form.querySelector('input[type="password"]');
+              const password = passwordInput.value;
+              
+              if (!password) {
+                console.error('❌ No password provided');
+                return;
+              }
+              
+              // Submit via fetch to our proxy
+              const formData = new FormData(form);
+              
+              fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+              })
+              .then(response => {
+                if (response.ok) {
+                  return response.text();
+                }
+                throw new Error('Password submission failed');
+              })
+              .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+              })
+              .catch(error => {
+                console.error('❌ Password submission error:', error);
+                if (window.parent !== window) {
+                  window.parent.postMessage({
+                    type: 'password-rejected',
+                    error: error.message
+                  }, '*');
+                }
+              });
+            }
+          });
+          
           // Listen for password from parent
           window.addEventListener('message', function(event) {
             if (event.data && event.data.type === 'submit-password') {
@@ -215,13 +305,11 @@ export const loader = async ({ request, params }) => {
               const passwordInput = document.querySelector('input[type="password"], input[name*="password"]');
               
               if (passwordForm && passwordInput) {
-                // Modify the form action to submit back to our proxy
-                const currentUrl = window.location.href;
-                passwordForm.action = currentUrl;
-                passwordForm.method = 'POST';
-                
                 passwordInput.value = event.data.password;
-                passwordForm.submit();
+                
+                // Trigger form submission (which will be intercepted above)
+                const submitEvent = new Event('submit', { bubbles: true, cancelable: true });
+                passwordForm.dispatchEvent(submitEvent);
               } else {
                 console.error('❌ Could not find password form');
                 if (window.parent !== window) {
