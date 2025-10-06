@@ -188,6 +188,9 @@ export const loader = async ({ request }) => {
     
     if (token) {
       storefrontAccessToken = token.accessToken;
+      console.log('✅ Storefront access token:', storefrontAccessToken ? 'Found' : 'Not found');
+    } else {
+      console.warn('⚠️ No storefront access token available');
     }
   } catch (error) {
     console.error('❌ Error managing Storefront API token:', error);
@@ -408,6 +411,9 @@ export default function Index() {
 
   // Product Preview Functions
   const openProductPreview = (product) => {
+    console.log('🔍 Opening product preview:', product.title);
+    console.log('🏪 Shop:', shop);
+    console.log('🔑 Access token:', storefrontAccessToken ? 'Available' : 'Missing');
     setPreviewProduct(product);
     setProductPreviewOpen(true);
   };
@@ -1642,10 +1648,11 @@ export default function Index() {
               background: '#F8FAFC',
               overflow: 'auto'
             }}>
-              <shopify-store 
-                store-domain={`https://${shop}`}
-                public-access-token={storefrontAccessToken}
-              >
+              {storefrontAccessToken ? (
+                <shopify-store 
+                  store-domain={`https://${shop}`}
+                  public-access-token={storefrontAccessToken}
+                >
                 <shopify-context type="product" handle={previewProduct.handle}>
                   <template>
                     <div style={{
@@ -1791,7 +1798,32 @@ export default function Index() {
                     </div>
                   </template>
                 </shopify-context>
-              </shopify-store>
+                </shopify-store>
+              ) : (
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  padding: '40px',
+                  textAlign: 'center'
+                }}>
+                  <div style={{
+                    fontSize: '18px',
+                    color: '#6B7280',
+                    marginBottom: '16px'
+                  }}>
+                    🔑 Setting up store access...
+                  </div>
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#9CA3AF'
+                  }}>
+                    Please wait while we connect to your store
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Modal Footer */}

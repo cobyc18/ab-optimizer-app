@@ -18,17 +18,7 @@ export default function App() {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
         <script src="https://cdn.shopify.com/storefront/web-components.js"></script>
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            // Load App Bridge script dynamically
-            (function() {
-              const script = document.createElement('script');
-              script.src = 'https://cdn.shopify.com/shopifycloud/app-bridge.js';
-              script.async = true;
-              document.head.appendChild(script);
-            })();
-          `
-        }} />
+        <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
         <Meta />
         <Links />
       </head>
