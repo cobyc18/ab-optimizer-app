@@ -400,6 +400,11 @@ export default function Index() {
       if (event.data && event.data.type === 'proxy-loaded') {
         console.log('✅ Reverse proxy loaded successfully');
         setIframeLoading(false);
+      } else if (event.data && event.data.type === 'password-submitted') {
+        console.log('✅ Password submitted successfully');
+        setShowPasswordOverlay(false);
+        setPasswordError('');
+        setIframeLoading(false);
       } else if (event.data && event.data.type === 'password-required') {
         console.log('🔒 Password required, showing overlay');
         setShowPasswordOverlay(true);
