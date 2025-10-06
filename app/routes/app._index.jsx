@@ -1522,7 +1522,7 @@ export default function Index() {
                 gap: '12px'
               }}>
                 <a
-                  href={previewProduct.onlineStorePreviewUrl || `https://${shop}/products/${previewProduct.handle}`}
+                  href={`https://${shop}/products/${previewProduct.handle}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   style={{
@@ -1569,7 +1569,7 @@ export default function Index() {
             }}>
               {previewProduct.onlineStorePreviewUrl || previewProduct.handle ? (
                 <iframe
-                  src={previewProduct.onlineStorePreviewUrl || `https://${shop}/products/${previewProduct.handle}`}
+                  src={`https://${shop}/apps/ab-optimizer-app?product=${previewProduct.handle}`}
                   style={{
                     width: '100%',
                     height: '100%',
