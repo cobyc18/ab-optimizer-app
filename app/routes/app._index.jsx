@@ -1778,7 +1778,7 @@ export default function Index() {
                       transition: 'opacity 0.3s ease'
                     }}
                     title={`Product Preview - ${previewProduct.title}`}
-                    sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation"
+                    sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation"
                     onLoad={() => {
                       console.log('✅ Iframe loaded successfully');
                       setIframeLoading(false);

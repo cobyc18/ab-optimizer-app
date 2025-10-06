@@ -55,13 +55,9 @@ export const action = async ({ request, params }) => {
       html = html.replace(/content-security-policy[^>]*>/gi, '');
       html = html.replace(/x-frame-options[^>]*>/gi, '');
       
-      // Add our own CSP headers that allow iframe embedding
-      html = html.replace(
-        /<head>/i, 
-        `<head>
-          <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com;">
-          <meta http-equiv="X-Frame-Options" content="ALLOWALL">`
-      );
+      // Remove any existing CSP meta tags
+      html = html.replace(/<meta[^>]*content-security-policy[^>]*>/gi, '');
+      html = html.replace(/<meta[^>]*x-frame-options[^>]*>/gi, '');
 
       // Inject JavaScript to communicate with parent window
       const injectedScript = `
@@ -178,13 +174,9 @@ export const loader = async ({ request, params }) => {
       html = html.replace(/content-security-policy[^>]*>/gi, '');
       html = html.replace(/x-frame-options[^>]*>/gi, '');
       
-      // Add our own CSP headers that allow iframe embedding
-      html = html.replace(
-        /<head>/i, 
-        `<head>
-          <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com;">
-          <meta http-equiv="X-Frame-Options" content="ALLOWALL">`
-      );
+      // Remove any existing CSP meta tags
+      html = html.replace(/<meta[^>]*content-security-policy[^>]*>/gi, '');
+      html = html.replace(/<meta[^>]*x-frame-options[^>]*>/gi, '');
 
       // Inject JavaScript to communicate with parent window
       const injectedScript = `
@@ -279,13 +271,9 @@ export const loader = async ({ request, params }) => {
         redirectHtml = redirectHtml.replace(/content-security-policy[^>]*>/gi, '');
         redirectHtml = redirectHtml.replace(/x-frame-options[^>]*>/gi, '');
         
-        // Add our CSP headers
-        redirectHtml = redirectHtml.replace(
-          /<head>/i, 
-          `<head>
-            <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com;">
-            <meta http-equiv="X-Frame-Options" content="ALLOWALL">`
-        );
+        // Remove any existing CSP meta tags
+        redirectHtml = redirectHtml.replace(/<meta[^>]*content-security-policy[^>]*>/gi, '');
+        redirectHtml = redirectHtml.replace(/<meta[^>]*x-frame-options[^>]*>/gi, '');
 
         // Inject password handling script
         const passwordScript = `
