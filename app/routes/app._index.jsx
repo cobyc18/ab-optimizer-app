@@ -1604,221 +1604,339 @@ export default function Index() {
               </div>
             </div>
 
-            {/* Storefront Web Components Product Display */}
+            {/* In-App Product Preview */}
             <div style={{
               flex: 1,
               position: 'relative',
               background: '#F8FAFC',
               overflow: 'auto'
             }}>
-              {storefrontAccessToken ? (
-                <shopify-store 
-                  store-domain={`https://${shop}`}
-                  public-access-token={storefrontAccessToken}
-                >
-                <shopify-context type="product" handle={previewProduct.handle}>
-                  <template>
-                    <div style={{
-                      padding: '24px',
-                      maxWidth: '1200px',
-                      margin: '0 auto'
+              <div style={{
+                padding: '24px',
+                maxWidth: '1200px',
+                margin: '0 auto'
+              }}>
+                {/* Product Header */}
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: '1fr 1fr',
+                  gap: '3rem',
+                  marginBottom: '3rem'
+                }}>
+                  {/* Product Image */}
+                  <div>
+                    <img
+                      src={previewProduct.featuredImage?.url || previewProduct.images?.[0]?.url}
+                      alt={previewProduct.title}
+                      style={{
+                        width: '100%',
+                        height: '500px',
+                        objectFit: 'cover',
+                        borderRadius: '12px',
+                        border: '1px solid #e1e5e9',
+                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                      }}
+                    />
+                  </div>
+
+                  {/* Product Info */}
+                  <div>
+                    <h1 style={{
+                      fontSize: '32px',
+                      fontWeight: '700',
+                      color: '#1F2937',
+                      marginBottom: '16px',
+                      lineHeight: '1.2'
                     }}>
-                      {/* Product Images */}
+                      {previewProduct.title}
+                    </h1>
+
+                    <div style={{
+                      fontSize: '24px',
+                      fontWeight: '600',
+                      color: '#059669',
+                      marginBottom: '24px'
+                    }}>
+                      ${previewProduct.price}
+                    </div>
+
+                    {/* Variants */}
+                    {previewProduct.variants && previewProduct.variants.length > 0 && (
                       <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: '1fr 1fr',
-                        gap: '24px',
-                        marginBottom: '32px'
+                        marginBottom: '24px',
+                        padding: '16px',
+                        background: '#ffffff',
+                        borderRadius: '8px',
+                        border: '1px solid #e1e5e9',
+                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
                       }}>
-                        <div>
-                          <shopify-media 
-                            query="product.featuredImage" 
-                            width="500" 
-                            height="500"
-                            style={{
-                              width: '100%',
-                              height: 'auto',
-                              borderRadius: '12px',
-                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                            }}
-                          ></shopify-media>
-                        </div>
-                        <div style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'center'
-                        }}>
-                          <h1 style={{
-                            fontSize: '32px',
-                            fontWeight: '700',
-                            color: '#1F2937',
-                            marginBottom: '16px',
-                            lineHeight: '1.2'
-                          }}>
-                            <shopify-data query="product.title"></shopify-data>
-                          </h1>
-                          
-                          <div style={{
-                            fontSize: '24px',
-                            fontWeight: '600',
-                            color: '#059669',
-                            marginBottom: '16px'
-                          }}>
-                            <shopify-money query="product.selectedOrFirstAvailableVariant.price"></shopify-money>
-                          </div>
-
-                          <div style={{
-                            marginBottom: '24px'
-                          }}>
-                            <shopify-variant-selector></shopify-variant-selector>
-                          </div>
-
-                          <button
-                            onclick="this.closest('shopify-store').buyNow(event);"
-                            style={{
-                              background: '#3B82F6',
-                              color: '#FFFFFF',
-                              border: 'none',
-                              borderRadius: '8px',
-                              padding: '12px 24px',
-                              fontSize: '16px',
-                              fontWeight: '600',
-                              cursor: 'pointer',
-                              transition: 'all 0.2s ease',
-                              marginBottom: '16px'
-                            }}
-                            onMouseOver={(e) => {
-                              e.target.style.background = '#2563EB';
-                            }}
-                            onMouseOut={(e) => {
-                              e.target.style.background = '#3B82F6';
-                            }}
-                          >
-                            Buy Now
-                          </button>
-                        </div>
-                      </div>
-
-                      {/* Product Description */}
-                      <div style={{
-                        background: '#FFFFFF',
-                        borderRadius: '12px',
-                        padding: '24px',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                        marginBottom: '24px'
-                      }}>
-                        <h3 style={{
-                          fontSize: '20px',
+                        <h4 style={{
+                          fontSize: '14px',
                           fontWeight: '600',
-                          color: '#1F2937',
-                          marginBottom: '16px'
+                          color: '#374151',
+                          marginBottom: '12px',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.05em'
                         }}>
-                          Product Description
-                        </h3>
-                        <div style={{
-                          fontSize: '16px',
-                          lineHeight: '1.6',
-                          color: '#4B5563'
-                        }}>
-                          <shopify-data query="product.descriptionHtml"></shopify-data>
-                        </div>
-                      </div>
-
-                      {/* Product Details */}
-                      <div style={{
-                        background: '#FFFFFF',
-                        borderRadius: '12px',
-                        padding: '24px',
-                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
-                      }}>
-                        <h3 style={{
-                          fontSize: '20px',
-                          fontWeight: '600',
-                          color: '#1F2937',
-                          marginBottom: '16px'
-                        }}>
-                          Product Details
-                        </h3>
+                          Variants ({previewProduct.variants.length})
+                        </h4>
                         <div style={{
                           display: 'grid',
-                          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                          gap: '16px'
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
+                          gap: '8px'
                         }}>
-                          <div>
-                            <strong>Vendor:</strong> <shopify-data query="product.vendor"></shopify-data>
-                          </div>
-                          <div>
-                            <strong>Product Type:</strong> <shopify-data query="product.productType"></shopify-data>
-                          </div>
-                          <div>
-                            <strong>SKU:</strong> <shopify-data query="product.selectedOrFirstAvailableVariant.sku"></shopify-data>
-                          </div>
-                          <div>
-                            <strong>Available:</strong> <shopify-data query="product.selectedOrFirstAvailableVariant.availableForSale"></shopify-data>
-                          </div>
+                          {previewProduct.variants.slice(0, 6).map((variant, index) => (
+                            <div
+                              key={variant.id}
+                              style={{
+                                padding: '8px 12px',
+                                background: '#f8fafc',
+                                border: '1px solid #d1d5db',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                textAlign: 'center',
+                                cursor: 'pointer',
+                                transition: 'all 0.2s'
+                              }}
+                              onMouseOver={(e) => {
+                                e.target.style.background = '#e5e7eb';
+                                e.target.style.borderColor = '#9ca3af';
+                              }}
+                              onMouseOut={(e) => {
+                                e.target.style.background = '#f8fafc';
+                                e.target.style.borderColor = '#d1d5db';
+                              }}
+                            >
+                              {variant.selectedOptions?.[0]?.value || `Variant ${index + 1}`}
+                              <br />
+                              <span style={{ color: '#6b7280', fontSize: '10px' }}>
+                                ${variant.price}
+                              </span>
+                            </div>
+                          ))}
                         </div>
                       </div>
+                    )}
+
+                    {/* Product Meta */}
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                      gap: '12px',
+                      fontSize: '14px',
+                      color: '#6B7280',
+                      marginBottom: '24px'
+                    }}>
+                      <div style={{
+                        padding: '12px',
+                        background: '#ffffff',
+                        borderRadius: '6px',
+                        border: '1px solid #e1e5e9'
+                      }}>
+                        <strong>Vendor:</strong><br />
+                        {previewProduct.vendor || 'N/A'}
+                      </div>
+                      <div style={{
+                        padding: '12px',
+                        background: '#ffffff',
+                        borderRadius: '6px',
+                        border: '1px solid #e1e5e9'
+                      }}>
+                        <strong>Type:</strong><br />
+                        {previewProduct.productType || 'N/A'}
+                      </div>
+                      <div style={{
+                        padding: '12px',
+                        background: '#ffffff',
+                        borderRadius: '6px',
+                        border: '1px solid #e1e5e9'
+                      }}>
+                        <strong>Available:</strong><br />
+                        <span style={{
+                          color: previewProduct.availableForSale ? '#059669' : '#dc2626',
+                          fontWeight: '600'
+                        }}>
+                          {previewProduct.availableForSale ? 'In Stock' : 'Out of Stock'}
+                        </span>
+                      </div>
                     </div>
-                  </template>
-                </shopify-context>
-                </shopify-store>
-              ) : (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                  padding: '40px',
-                  textAlign: 'center'
-                }}>
-                  <div style={{
-                    fontSize: '18px',
-                    color: '#6B7280',
-                    marginBottom: '16px'
-                  }}>
-                    📦 Product Preview
+
+                    {/* Action Buttons */}
+                    <div style={{
+                      display: 'flex',
+                      gap: '12px'
+                    }}>
+                      <button
+                        style={{
+                          flex: 1,
+                          padding: '16px 24px',
+                          background: '#3B82F6',
+                          color: 'white',
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s'
+                        }}
+                        onMouseOver={(e) => { e.target.style.background = '#2563EB'; }}
+                        onMouseOut={(e) => { e.target.style.background = '#3B82F6'; }}
+                      >
+                        Add to Cart
+                      </button>
+                      <button
+                        style={{
+                          padding: '16px 20px',
+                          background: '#ffffff',
+                          color: '#374151',
+                          border: '1px solid #d1d5db',
+                          borderRadius: '8px',
+                          fontSize: '16px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseOver={(e) => {
+                          e.target.style.background = '#f9fafb';
+                          e.target.style.borderColor = '#9ca3af';
+                        }}
+                        onMouseOut={(e) => {
+                          e.target.style.background = '#ffffff';
+                          e.target.style.borderColor = '#d1d5db';
+                        }}
+                      >
+                        View Store →
+                      </button>
+                    </div>
                   </div>
-                  <div style={{
-                    fontSize: '14px',
-                    color: '#9CA3AF',
-                    marginBottom: '20px'
-                  }}>
-                    {previewProduct.title}
-                  </div>
-                  <div style={{
-                    fontSize: '16px',
-                    color: '#3B82F6',
-                    marginBottom: '12px'
-                  }}>
-                    💰 ${previewProduct.price}
-                  </div>
-                  <div style={{
-                    fontSize: '14px',
-                    color: '#6B7280',
-                    marginBottom: '20px',
-                    maxWidth: '400px'
-                  }}>
-                    {previewProduct.description ? previewProduct.description.substring(0, 200) + '...' : 'No description available'}
-                  </div>
-                  <a
-                    href={previewProduct.onlineStorePreviewUrl || `https://${shop}/products/${previewProduct.handle}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{
-                      display: 'inline-block',
-                      padding: '12px 24px',
-                      background: '#3B82F6',
-                      color: 'white',
-                      textDecoration: 'none',
-                      borderRadius: '6px',
-                      fontWeight: '500'
-                    }}
-                  >
-                    View Full Product Page →
-                  </a>
                 </div>
-              )}
+
+                {/* Product Description */}
+                {previewProduct.description && (
+                  <div style={{
+                    marginTop: '3rem',
+                    padding: '24px',
+                    background: '#ffffff',
+                    borderRadius: '12px',
+                    border: '1px solid #e1e5e9',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+                    marginBottom: '24px'
+                  }}>
+                    <h3 style={{
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '16px'
+                    }}>
+                      Description
+                    </h3>
+                    <div style={{
+                      fontSize: '16px',
+                      lineHeight: '1.6',
+                      color: '#4B5563'
+                    }}>
+                      {previewProduct.description}
+                    </div>
+                  </div>
+                )}
+
+                {/* Product Images Gallery */}
+                {previewProduct.images && previewProduct.images.length > 1 && (
+                  <div style={{
+                    padding: '24px',
+                    background: '#ffffff',
+                    borderRadius: '12px',
+                    border: '1px solid #e1e5e9',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
+                    marginBottom: '24px'
+                  }}>
+                    <h3 style={{
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '16px'
+                    }}>
+                      Additional Images ({previewProduct.images.length - 1})
+                    </h3>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
+                      gap: '16px'
+                    }}>
+                      {previewProduct.images.slice(1, 6).map((image, index) => (
+                        <img
+                          key={index}
+                          src={image.url}
+                          alt={`${previewProduct.title} - Image ${index + 2}`}
+                          style={{
+                            width: '100%',
+                            height: '150px',
+                            objectFit: 'cover',
+                            borderRadius: '8px',
+                            border: '1px solid #e1e5e9',
+                            cursor: 'pointer',
+                            transition: 'transform 0.2s'
+                          }}
+                          onMouseOver={(e) => {
+                            e.target.style.transform = 'scale(1.02)';
+                          }}
+                          onMouseOut={(e) => {
+                            e.target.style.transform = 'scale(1)';
+                          }}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* SEO Info */}
+                {previewProduct.seo && (previewProduct.seo.title || previewProduct.seo.description) && (
+                  <div style={{
+                    padding: '24px',
+                    background: '#ffffff',
+                    borderRadius: '12px',
+                    border: '1px solid #e1e5e9',
+                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)'
+                  }}>
+                    <h3 style={{
+                      fontSize: '20px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '16px'
+                    }}>
+                      SEO Information
+                    </h3>
+                    <div style={{
+                      display: 'grid',
+                      gap: '16px',
+                      fontSize: '14px'
+                    }}>
+                      {previewProduct.seo.title && (
+                        <div style={{
+                          padding: '12px',
+                          background: '#f8fafc',
+                          borderRadius: '6px',
+                          border: '1px solid #e1e5e9'
+                        }}>
+                          <strong style={{ color: '#374151' }}>SEO Title:</strong><br />
+                          <span style={{ color: '#6B7280' }}>{previewProduct.seo.title}</span>
+                        </div>
+                      )}
+                      {previewProduct.seo.description && (
+                        <div style={{
+                          padding: '12px',
+                          background: '#f8fafc',
+                          borderRadius: '6px',
+                          border: '1px solid #e1e5e9'
+                        }}>
+                          <strong style={{ color: '#374151' }}>SEO Description:</strong><br />
+                          <span style={{ color: '#6B7280' }}>{previewProduct.seo.description}</span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Modal Footer */}
