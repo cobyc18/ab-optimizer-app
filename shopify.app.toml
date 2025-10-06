@@ -41,4 +41,4 @@ embedded = false
 [app_proxy]
 subpath = "ab-optimizer-app"
 prefix = "apps"
-  url = "https://ab-optimizer-app.onrender.com/apps/ab-optimizer-app"
+url = "https://ab-optimizer-app.onrender.com/apps/ab-optimizer-app"
