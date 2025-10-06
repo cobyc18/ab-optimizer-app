@@ -13,7 +13,7 @@ export const loader = async ({ request }) => {
   try {
     // Use Liquid to render the product page with the shop's theme
     // This is the proper way to show the exact product page as it appears on the live site
-    return liquid(`
+    const response = liquid(`
       {% comment %}
         This will render the product page exactly as it appears on the live site
         using the shop's current theme and all styling
@@ -179,11 +179,17 @@ export const loader = async ({ request }) => {
       {% endif %}
     `);
 
+    // Add proper CSP headers to allow framing from the shop domain
+    response.headers.set('Content-Security-Policy', `frame-ancestors https://${session.shop} https://admin.shopify.com`);
+    response.headers.set('X-Frame-Options', 'ALLOWALL');
+    
+    return response;
+
   } catch (error) {
     console.error('Error in product preview:', error);
     
     // Show error message
-    return liquid(`
+    const errorResponse = liquid(`
       <div style="padding: 40px; text-align: center; color: #666; background: #f8f9fa; border-radius: 8px; margin: 20px;">
         <h3>⚠️ Preview Error</h3>
         <p>Unable to load the product page preview.</p>
@@ -195,5 +201,11 @@ export const loader = async ({ request }) => {
         </div>
       </div>
     `);
+    
+    // Add proper CSP headers to error response as well
+    errorResponse.headers.set('Content-Security-Policy', `frame-ancestors https://${session.shop} https://admin.shopify.com`);
+    errorResponse.headers.set('X-Frame-Options', 'ALLOWALL');
+    
+    return errorResponse;
   }
 };
