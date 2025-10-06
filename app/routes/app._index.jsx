@@ -120,55 +120,17 @@ export const loader = async ({ request }) => {
     console.error("❌ Error fetching theme info:", error);
   }
   
-  // Try to get existing Storefront API access token (optional)
-  let storefrontAccessToken = null;
-  try {
-    // Only try to query existing tokens, don't create new ones
-    const existingTokensResponse = await admin.graphql(`
-      query GetStorefrontTokens {
-        shop {
-          storefrontAccessTokens(first: 10) {
-            nodes {
-              id
-              accessToken
-              title
-              accessScopes {
-                handle
-              }
-            }
-          }
-        }
-      }
-    `);
-    
-    const tokensData = await existingTokensResponse.json();
-    const existingTokens = tokensData.data?.shop?.storefrontAccessTokens?.nodes || [];
-    
-    // Look for an existing token with the right permissions
-    const token = existingTokens.find(t => 
-      t.accessScopes.some(scope => scope.handle.includes('unauthenticated_read_product_listings'))
-    );
-    
-    if (token) {
-      storefrontAccessToken = token.accessToken;
-      console.log('✅ Using existing Storefront API access token');
-    } else {
-      console.log('ℹ️ No existing Storefront API access token found - product preview will use basic mode');
-    }
-  } catch (error) {
-    console.log('ℹ️ Storefront API token query failed - product preview will use basic mode:', error.message);
-  }
+  // No Storefront API needed - using pure Admin API data
 
   return json({
     products,
     themeInfo,
-    shop: session.shop,
-    storefrontAccessToken
+    shop: session.shop
   });
 };
 
 export default function Index() {
-  const { products, themeInfo, shop, storefrontAccessToken } = useLoaderData();
+  const { products, themeInfo, shop } = useLoaderData();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedIdea, setSelectedIdea] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -376,7 +338,6 @@ export default function Index() {
   const openProductPreview = (product) => {
     console.log('🔍 Opening product preview:', product.title);
     console.log('🏪 Shop:', shop);
-    console.log('🔑 Storefront API:', storefrontAccessToken ? 'Enhanced mode available' : 'Using basic preview mode');
     setPreviewProduct(product);
     setProductPreviewOpen(true);
   };
