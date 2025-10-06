@@ -978,7 +978,7 @@ export default function Index() {
                           color: selectedProduct?.id === product.id ? '#FFFFFF' : '#6B7280',
                           border: 'none',
                           borderRadius: '6px',
-                          fontSize: '14px',
+                          fontSize: '15px',
                           fontWeight: '500',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease'
