@@ -1,76 +1,24 @@
-import { authenticate } from "../shopify.server";
-
-export const loader = async ({ request }) => {
-  const { session, liquid } = await authenticate.public.appProxy(request);
-
+export const loader = async ({ request, params }) => {
   const url = new URL(request.url);
-  const productHandle = url.searchParams.get("product");
-  const password = url.searchParams.get("password");
-
-  console.log('🔍 App Proxy Request:', {
+  const storeDomain = params["*"]; // This captures everything after /proxy/
+  
+  console.log('🔄 Reverse Proxy Request:', {
     url: request.url,
-    productHandle,
-    password: password ? '[PROVIDED]' : '[NOT PROVIDED]',
-    shop: session.shop,
+    storeDomain,
     userAgent: request.headers.get('user-agent')
   });
 
-  if (!productHandle) {
-    return new Response("Product handle is required", { status: 400 });
+  if (!storeDomain) {
+    return new Response("Store domain is required", { status: 400 });
   }
 
   try {
-    // Get the active theme ID using GraphQL
-    console.log('🎨 Fetching active theme...');
-    const themeResponse = await fetch(`https://${session.shop}/admin/api/2025-01/graphql.json`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-Shopify-Access-Token': session.accessToken
-      },
-      body: JSON.stringify({
-        query: `
-          query GetActiveTheme {
-            themes(first: 1, roles: [MAIN]) {
-              nodes {
-                id
-                name
-                role
-              }
-            }
-          }
-        `
-      })
-    });
+    // Construct the target URL
+    const targetUrl = `https://${storeDomain}`;
+    console.log('🎯 Fetching from target URL:', targetUrl);
 
-    const themeData = await themeResponse.json();
-    console.log('🎨 Theme data:', themeData);
-
-    if (!themeData.data?.themes?.nodes?.[0]) {
-      throw new Error('No active theme found');
-    }
-
-    const activeTheme = themeData.data.themes.nodes[0];
-    const themeId = activeTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
-    
-    console.log('✅ Active theme found:', {
-      originalId: activeTheme.id,
-      extractedId: themeId,
-      name: activeTheme.name,
-      role: activeTheme.role
-    });
-
-    // Generate theme preview URL with product
-    const themePreviewUrl = `https://${session.shop}/products/${productHandle}?preview_theme_id=${themeId}`;
-    console.log('🌐 Theme preview URL:', themePreviewUrl);
-    console.log('🔍 URL Components:', {
-      shop: session.shop,
-      productHandle,
-      themeId,
-      fullUrl: themePreviewUrl
-    });
-
-    const fetchOptions = {
+    // Fetch the HTML from the live store
+    const response = await fetch(targetUrl, {
       method: 'GET',
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; AB-Optimizer-App/1.0)',
@@ -79,17 +27,9 @@ export const loader = async ({ request }) => {
         'Accept-Encoding': 'gzip, deflate',
         'Connection': 'keep-alive',
       }
-    };
+    });
 
-    // If password is provided, add it to the request
-    if (password) {
-      fetchOptions.headers['X-Password'] = password;
-    }
-
-    console.log('🚀 Fetching theme preview URL...');
-    const response = await fetch(themePreviewUrl, fetchOptions);
-    console.log('📡 Response status:', response.status);
-    console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
+    console.log('📡 Target response status:', response.status);
 
     if (response.status === 200) {
       let html = await response.text();
@@ -102,21 +42,21 @@ export const loader = async ({ request }) => {
       html = html.replace(
         /<head>/i, 
         `<head>
-          <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://${session.shop} https://admin.shopify.com;">
+          <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com;">
           <meta http-equiv="X-Frame-Options" content="ALLOWALL">`
       );
 
       // Inject JavaScript to communicate with parent window
       const injectedScript = `
         <script>
-          console.log('🎉 Product page loaded in iframe');
+          console.log('🎉 Live store loaded in iframe via reverse proxy');
           
           // Send message to parent that page loaded successfully
           if (window.parent !== window) {
             window.parent.postMessage({
-              type: 'product-loaded',
-              productHandle: '${productHandle}',
-              shop: '${session.shop}'
+              type: 'proxy-loaded',
+              storeDomain: '${storeDomain}',
+              url: '${targetUrl}'
             }, '*');
           }
           
@@ -128,7 +68,7 @@ export const loader = async ({ request }) => {
             if (window.parent !== window) {
               window.parent.postMessage({
                 type: 'password-required',
-                productHandle: '${productHandle}'
+                storeDomain: '${storeDomain}'
               }, '*');
             }
           }
@@ -139,7 +79,7 @@ export const loader = async ({ request }) => {
               console.log('🔑 Received password from parent');
               
               // Find password form and submit it
-              const passwordForm = document.querySelector('form[action*="password"]');
+              const passwordForm = document.querySelector('form[action*="password"], form');
               const passwordInput = document.querySelector('input[type="password"], input[name*="password"]');
               
               if (passwordForm && passwordInput) {
@@ -161,47 +101,57 @@ export const loader = async ({ request }) => {
 
       html = html.replace('</body>', injectedScript + '</body>');
 
-      console.log('✅ Returning product page HTML');
+      console.log('✅ Serving proxied HTML with modified headers');
       return new Response(html, {
         headers: {
           'Content-Type': 'text/html; charset=utf-8',
-          'Content-Security-Policy': `frame-ancestors https://${session.shop} https://admin.shopify.com`,
+          'Content-Security-Policy': 'frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com',
           'X-Frame-Options': 'ALLOWALL',
           'Cache-Control': 'no-cache, no-store, must-revalidate'
         }
       });
     } else if (response.status === 302 || response.status === 301) {
-      // Redirect to password page
-      console.log('🔒 Redirecting to password page');
+      // Handle redirects (like password pages)
+      console.log('🔒 Redirect detected, likely password page');
       const redirectUrl = response.headers.get('location');
       
-      if (redirectUrl && redirectUrl.includes('password')) {
-        // Fetch the password page
-        const passwordResponse = await fetch(redirectUrl, fetchOptions);
-        let passwordHtml = await passwordResponse.text();
+      if (redirectUrl) {
+        // Follow the redirect
+        const redirectResponse = await fetch(redirectUrl, {
+          method: 'GET',
+          headers: {
+            'User-Agent': 'Mozilla/5.0 (compatible; AB-Optimizer-App/1.0)',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+            'Accept-Language': 'en-US,en;q=0.5',
+            'Accept-Encoding': 'gzip, deflate',
+            'Connection': 'keep-alive',
+          }
+        });
+        
+        let redirectHtml = await redirectResponse.text();
         
         // Remove CSP headers
-        passwordHtml = passwordHtml.replace(/content-security-policy[^>]*>/gi, '');
-        passwordHtml = passwordHtml.replace(/x-frame-options[^>]*>/gi, '');
+        redirectHtml = redirectHtml.replace(/content-security-policy[^>]*>/gi, '');
+        redirectHtml = redirectHtml.replace(/x-frame-options[^>]*>/gi, '');
         
         // Add our CSP headers
-        passwordHtml = passwordHtml.replace(
+        redirectHtml = redirectHtml.replace(
           /<head>/i, 
           `<head>
-            <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://${session.shop} https://admin.shopify.com;">
+            <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com;">
             <meta http-equiv="X-Frame-Options" content="ALLOWALL">`
         );
 
-        // Inject JavaScript for password handling
+        // Inject password handling script
         const passwordScript = `
           <script>
-            console.log('🔒 Password page loaded');
+            console.log('🔒 Password page loaded via reverse proxy');
             
             // Notify parent that password is required
             if (window.parent !== window) {
               window.parent.postMessage({
                 type: 'password-required',
-                productHandle: '${productHandle}'
+                storeDomain: '${storeDomain}'
               }, '*');
             }
             
@@ -230,12 +180,12 @@ export const loader = async ({ request }) => {
           </script>
         `;
 
-        passwordHtml = passwordHtml.replace('</body>', passwordScript + '</body>');
+        redirectHtml = redirectHtml.replace('</body>', passwordScript + '</body>');
 
-        return new Response(passwordHtml, {
+        return new Response(redirectHtml, {
           headers: {
             'Content-Type': 'text/html; charset=utf-8',
-            'Content-Security-Policy': `frame-ancestors https://${session.shop} https://admin.shopify.com`,
+            'Content-Security-Policy': 'frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com',
             'X-Frame-Options': 'ALLOWALL',
             'Cache-Control': 'no-cache, no-store, must-revalidate'
           }
@@ -244,23 +194,23 @@ export const loader = async ({ request }) => {
     }
 
     // If we get here, something went wrong
-    console.log('❌ Failed to load product page');
+    console.log('❌ Failed to fetch target URL');
     return new Response(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Preview Error</title>
+          <title>Proxy Error</title>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
-          <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://${session.shop} https://admin.shopify.com;">
+          <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com;">
           <meta http-equiv="X-Frame-Options" content="ALLOWALL">
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 40px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
           <div style="background: white; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 500px;">
             <div style="font-size: 3rem; margin-bottom: 20px;">⚠️</div>
-            <h2 style="color: #333; margin-bottom: 15px;">Preview Error</h2>
-            <p style="color: #666; margin-bottom: 30px;">Unable to load the product page preview.</p>
-            <a href="https://${session.shop}/products/${productHandle}" target="_blank" style="background: #10B981; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block;">
+            <h2 style="color: #333; margin-bottom: 15px;">Proxy Error</h2>
+            <p style="color: #666; margin-bottom: 30px;">Unable to fetch the requested page.</p>
+            <a href="${targetUrl}" target="_blank" style="background: #10B981; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block;">
               🌐 View Live Site
             </a>
           </div>
@@ -269,31 +219,31 @@ export const loader = async ({ request }) => {
     `, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Content-Security-Policy': `frame-ancestors https://${session.shop} https://admin.shopify.com`,
+        'Content-Security-Policy': 'frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com',
         'X-Frame-Options': 'ALLOWALL',
         'Cache-Control': 'no-cache, no-store, must-revalidate'
       }
     });
 
   } catch (error) {
-    console.error('Error in product preview:', error);
+    console.error('❌ Reverse proxy error:', error);
     return new Response(`
       <!DOCTYPE html>
       <html>
         <head>
-          <title>Preview Error</title>
+          <title>Proxy Error</title>
           <meta charset="utf-8">
           <meta name="viewport" content="width=device-width, initial-scale=1">
-          <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://${session.shop} https://admin.shopify.com;">
+          <meta http-equiv="Content-Security-Policy" content="frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com;">
           <meta http-equiv="X-Frame-Options" content="ALLOWALL">
         </head>
         <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; margin: 0; padding: 40px; background: #f8f9fa; display: flex; align-items: center; justify-content: center; min-height: 100vh;">
           <div style="background: white; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 20px rgba(0,0,0,0.1); max-width: 500px;">
             <div style="font-size: 3rem; margin-bottom: 20px;">❌</div>
-            <h2 style="color: #333; margin-bottom: 15px;">Preview Error</h2>
-            <p style="color: #666; margin-bottom: 10px;">Unable to load the product page preview.</p>
+            <h2 style="color: #333; margin-bottom: 15px;">Proxy Error</h2>
+            <p style="color: #666; margin-bottom: 10px;">Unable to fetch the requested page.</p>
             <p style="color: #999; font-size: 14px; margin-bottom: 30px;">Error: ${error.message}</p>
-            <a href="https://${session.shop}/products/${productHandle}" target="_blank" style="background: #10B981; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block;">
+            <a href="https://${storeDomain}" target="_blank" style="background: #10B981; color: white; padding: 12px 24px; border-radius: 6px; text-decoration: none; display: inline-block;">
               🌐 View Live Site
             </a>
           </div>
@@ -302,7 +252,7 @@ export const loader = async ({ request }) => {
     `, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        'Content-Security-Policy': `frame-ancestors https://${session.shop} https://admin.shopify.com`,
+        'Content-Security-Policy': 'frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com',
         'X-Frame-Options': 'ALLOWALL',
         'Cache-Control': 'no-cache, no-store, must-revalidate'
       }
