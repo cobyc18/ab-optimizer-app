@@ -4,7 +4,7 @@ client_id = "5ff212573a3e19bae68ca45eae0a80c4"
 name = "ab-optimizer-app"
 handle = "ab-optimizer-app"
 application_url = "https://ab-optimizer-app.onrender.com"
-  embedded = false
+  embedded = true
 
 [build]
 automatically_update_urls_on_dev = true
@@ -36,7 +36,7 @@ scopes = "write_products,read_themes,write_themes,write_app_proxy,read_orders,wr
   redirect_urls = ["https://ab-optimizer-app.onrender.com/auth/callback"]
 
 [pos]
-embedded = false
+embedded = true
 
 [app_proxy]
 subpath = "ab-optimizer-app"
