@@ -334,6 +334,12 @@ export default function Index() {
 
   // Product Preview Functions
   const openProductPreview = (product) => {
+    console.log('🔍 Opening product preview:', {
+      product: product.title,
+      handle: product.handle,
+      shop: shop,
+      appProxyUrl: `https://${shop}/apps/ab-optimizer-app?product=${product.handle}`
+    });
     setPreviewProduct(product);
     setProductPreviewOpen(true);
   };
@@ -1578,6 +1584,8 @@ export default function Index() {
                   }}
                   title={`Product Preview - ${previewProduct.title}`}
                   sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                  onLoad={() => console.log('✅ Iframe loaded successfully')}
+                  onError={(e) => console.error('❌ Iframe load error:', e)}
                 />
               ) : (
                 <div style={{
