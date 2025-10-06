@@ -409,15 +409,16 @@ export default function Index() {
         console.log('🔒 Password required, showing overlay');
         setShowPasswordOverlay(true);
         setIframeLoading(false);
-      } else if (event.data && event.data.type === 'password-accepted') {
-        console.log('✅ Password accepted');
-        setShowPasswordOverlay(false);
-        setPasswordError('');
-      } else if (event.data && event.data.type === 'password-rejected') {
-        console.log('❌ Password rejected');
-        setPasswordError('Incorrect password. Please try again.');
-        setStorePassword('');
-      }
+        } else if (event.data && event.data.type === 'password-accepted') {
+          console.log('✅ Password accepted - product page loaded');
+          setShowPasswordOverlay(false);
+          setPasswordError('');
+          setIframeLoading(false);
+        } else if (event.data && event.data.type === 'password-rejected') {
+          console.log('❌ Password rejected');
+          setPasswordError('Incorrect password. Please try again.');
+          setStorePassword('');
+        }
     };
 
     window.addEventListener('message', handleMessage);

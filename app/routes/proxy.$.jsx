@@ -375,90 +375,147 @@ export const action = async ({ request, params }) => {
 
     console.log('📡 Password submission response status:', response.status);
 
-    if (response.status === 200 || response.status === 302) {
-      let html = await response.text();
-      
-      // Remove CSP headers that prevent iframe embedding
-      html = html.replace(/content-security-policy[^>]*>/gi, '');
-      html = html.replace(/x-frame-options[^>]*>/gi, '');
-      
-      // Remove any existing CSP meta tags
-      html = html.replace(/<meta[^>]*content-security-policy[^>]*>/gi, '');
-      html = html.replace(/<meta[^>]*x-frame-options[^>]*>/gi, '');
+        if (response.status === 200) {
+          let html = await response.text();
+          
+          // Remove CSP headers that prevent iframe embedding
+          html = html.replace(/content-security-policy[^>]*>/gi, '');
+          html = html.replace(/x-frame-options[^>]*>/gi, '');
+          
+          // Remove any existing CSP meta tags
+          html = html.replace(/<meta[^>]*content-security-policy[^>]*>/gi, '');
+          html = html.replace(/<meta[^>]*x-frame-options[^>]*>/gi, '');
 
-        // Inject JavaScript to communicate with parent window and handle password forms
-        const injectedScript = `
-          <script>
-            console.log('🎉 Password submitted successfully');
-            
-            // Send message to parent that page loaded successfully
-            if (window.parent !== window) {
-              window.parent.postMessage({
-                type: 'password-submitted',
-                storeDomain: '${storeDomain}'
-              }, '*');
-            }
-            
-            // Intercept form submissions to prevent redirects
-            document.addEventListener('submit', function(e) {
-              const form = e.target;
-              if (form.tagName === 'FORM' && form.querySelector('input[type="password"]')) {
-                e.preventDefault();
-                console.log('🔒 Intercepted password form submission');
-                
-                const passwordInput = form.querySelector('input[type="password"]');
-                const password = passwordInput.value;
-                
-                if (!password) {
-                  console.error('❌ No password provided');
-                  return;
+          // Inject JavaScript to communicate with parent window and handle password forms
+          const injectedScript = `
+            <script>
+              console.log('🎉 Password submitted successfully');
+              
+              // Send message to parent that page loaded successfully
+              if (window.parent !== window) {
+                window.parent.postMessage({
+                  type: 'password-submitted',
+                  storeDomain: '${storeDomain}'
+                }, '*');
+              }
+              
+              // Intercept form submissions to prevent redirects
+              document.addEventListener('submit', function(e) {
+                const form = e.target;
+                if (form.tagName === 'FORM' && form.querySelector('input[type="password"]')) {
+                  e.preventDefault();
+                  console.log('🔒 Intercepted password form submission');
+                  
+                  const passwordInput = form.querySelector('input[type="password"]');
+                  const password = passwordInput.value;
+                  
+                  if (!password) {
+                    console.error('❌ No password provided');
+                    return;
+                  }
+                  
+                  // Submit via fetch to our proxy
+                  const formData = new FormData(form);
+                  
+                  fetch(window.location.href, {
+                    method: 'POST',
+                    body: formData
+                  })
+                  .then(response => {
+                    if (response.ok) {
+                      return response.text();
+                    }
+                    throw new Error('Password submission failed');
+                  })
+                  .then(html => {
+                    document.open();
+                    document.write(html);
+                    document.close();
+                  })
+                  .catch(error => {
+                    console.error('❌ Password submission error:', error);
+                    if (window.parent !== window) {
+                      window.parent.postMessage({
+                        type: 'password-rejected',
+                        error: error.message
+                      }, '*');
+                    }
+                  });
                 }
-                
-                // Submit via fetch to our proxy
-                const formData = new FormData(form);
-                
-                fetch(window.location.href, {
-                  method: 'POST',
-                  body: formData
-                })
-                .then(response => {
-                  if (response.ok) {
-                    return response.text();
-                  }
-                  throw new Error('Password submission failed');
-                })
-                .then(html => {
-                  document.open();
-                  document.write(html);
-                  document.close();
-                })
-                .catch(error => {
-                  console.error('❌ Password submission error:', error);
-                  if (window.parent !== window) {
-                    window.parent.postMessage({
-                      type: 'password-rejected',
-                      error: error.message
-                    }, '*');
-                  }
-                });
+              });
+            </script>
+          `;
+
+          html = html.replace('</body>', injectedScript + '</body>');
+
+          return new Response(html, {
+            headers: {
+              'Content-Type': 'text/html; charset=utf-8',
+              'Content-Security-Policy': 'frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com',
+              'X-Frame-Options': 'ALLOWALL',
+              'Cache-Control': 'no-cache, no-store, must-revalidate',
+              'Access-Control-Allow-Origin': '*',
+              'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+              'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+            }
+          });
+        } else if (response.status === 302 || response.status === 301) {
+          // Handle redirects after password submission
+          const redirectUrl = response.headers.get('location');
+          console.log('🔄 Password submission redirect to:', redirectUrl);
+          
+          if (redirectUrl) {
+            // Follow the redirect and fetch the actual product page
+            const redirectResponse = await fetch(redirectUrl, {
+              method: 'GET',
+              headers: {
+                'User-Agent': 'Mozilla/5.0 (compatible; AB-Optimizer-App/1.0)',
+                'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8',
+                'Accept-Language': 'en-US,en;q=0.5',
+                'Accept-Encoding': 'gzip, deflate',
+                'Connection': 'keep-alive',
               }
             });
-          </script>
-        `;
+            
+            let redirectHtml = await redirectResponse.text();
+            
+            // Remove CSP headers
+            redirectHtml = redirectHtml.replace(/content-security-policy[^>]*>/gi, '');
+            redirectHtml = redirectHtml.replace(/x-frame-options[^>]*>/gi, '');
+            
+            // Remove any existing CSP meta tags
+            redirectHtml = redirectHtml.replace(/<meta[^>]*content-security-policy[^>]*>/gi, '');
+            redirectHtml = redirectHtml.replace(/<meta[^>]*x-frame-options[^>]*>/gi, '');
 
-      html = html.replace('</body>', injectedScript + '</body>');
+            // Inject success script
+            const successScript = `
+              <script>
+                console.log('🎉 Password accepted - redirecting to product page');
+                
+                // Send message to parent that password was accepted
+                if (window.parent !== window) {
+                  window.parent.postMessage({
+                    type: 'password-accepted',
+                    storeDomain: '${storeDomain}'
+                  }, '*');
+                }
+              </script>
+            `;
+            
+            redirectHtml = redirectHtml.replace('</body>', successScript + '</body>');
 
-      return new Response(html, {
-        headers: {
-          'Content-Type': 'text/html; charset=utf-8',
-          'Content-Security-Policy': 'frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com',
-          'X-Frame-Options': 'ALLOWALL',
-          'Cache-Control': 'no-cache, no-store, must-revalidate',
-          'Access-Control-Allow-Origin': '*',
-          'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-          'Access-Control-Allow-Headers': 'Content-Type, Authorization'
-        }
-      });
+            return new Response(redirectHtml, {
+              headers: {
+                'Content-Type': 'text/html; charset=utf-8',
+                'Content-Security-Policy': 'frame-ancestors https://ab-optimizer-app.onrender.com https://admin.shopify.com',
+                'X-Frame-Options': 'ALLOWALL',
+                'Cache-Control': 'no-cache, no-store, must-revalidate',
+                'Access-Control-Allow-Origin': '*',
+                'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers': 'Content-Type, Authorization'
+              }
+            });
+          }
     } else {
       // Password was incorrect, return the password page again
         return new Response(`
