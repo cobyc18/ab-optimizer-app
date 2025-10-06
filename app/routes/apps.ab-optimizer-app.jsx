@@ -54,7 +54,8 @@ export const loader = async ({ request }) => {
     const themeId = activeTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
     
     console.log('✅ Active theme found:', {
-      id: themeId,
+      originalId: activeTheme.id,
+      extractedId: themeId,
       name: activeTheme.name,
       role: activeTheme.role
     });
@@ -62,6 +63,12 @@ export const loader = async ({ request }) => {
     // Generate theme preview URL with product
     const themePreviewUrl = `https://${session.shop}/products/${productHandle}?preview_theme_id=${themeId}`;
     console.log('🌐 Theme preview URL:', themePreviewUrl);
+    console.log('🔍 URL Components:', {
+      shop: session.shop,
+      productHandle,
+      themeId,
+      fullUrl: themePreviewUrl
+    });
 
     const fetchOptions = {
       method: 'GET',
@@ -79,8 +86,10 @@ export const loader = async ({ request }) => {
       fetchOptions.headers['X-Password'] = password;
     }
 
+    console.log('🚀 Fetching theme preview URL...');
     const response = await fetch(themePreviewUrl, fetchOptions);
     console.log('📡 Response status:', response.status);
+    console.log('📡 Response headers:', Object.fromEntries(response.headers.entries()));
 
     if (response.status === 200) {
       let html = await response.text();
