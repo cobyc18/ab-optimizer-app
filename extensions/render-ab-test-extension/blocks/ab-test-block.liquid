@@ -8,6 +8,13 @@
       "id": "ab_test_id",
       "label": "A/B Test ID",
       "default": "ab-123"
+    },
+    {
+      "type": "checkbox",
+      "id": "enable_dynamic_manipulation",
+      "label": "Enable Dynamic Manipulation",
+      "default": false,
+      "info": "Add real-time product page manipulation controls"
     }
   ]
 }
@@ -89,4 +96,9 @@
     }
   ]
 }
-{% endschema %} 
+{% endschema %}
+
+{% comment %} Dynamic Manipulation Integration {% endcomment %}
+{% if block.settings.enable_dynamic_manipulation %}
+  {% render 'dynamic-manipulator-integration', block: block %}
+{% endif %} 

@@ -48,5 +48,28 @@
     "people_viewing": "People viewing this page",
     "person_viewing": "Person viewing this page",
     "viewing_now": "viewing now"
+  },
+  "dynamic_manipulator": {
+    "name": "A/B Dynamic Manipulator",
+    "description": "Real-time product page customization for A/B testing",
+    "enable_dynamic_manipulation": "Enable Dynamic Manipulation",
+    "layout": "Layout",
+    "colors": "Colors",
+    "font_size": "Font Size",
+    "animation": "Animation",
+    "reset": "Reset",
+    "apply": "Apply",
+    "layouts": {
+      "grid": "Grid",
+      "stack": "Stack",
+      "side": "Side-by-Side",
+      "center": "Centered"
+    },
+    "animations": {
+      "none": "None",
+      "fade": "Fade",
+      "slide": "Slide",
+      "bounce": "Bounce"
+    }
   }
 }
