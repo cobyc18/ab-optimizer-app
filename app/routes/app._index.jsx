@@ -416,8 +416,9 @@ export default function Index() {
           setIframeLoading(false);
         } else if (event.data && event.data.type === 'password-rejected') {
           console.log('❌ Password rejected');
-          setPasswordError('Incorrect password. Please try again.');
+          setPasswordError(event.data.error || 'Incorrect password. Please try again.');
           setStorePassword('');
+          setShowPasswordOverlay(true);
         }
     };
 

@@ -374,9 +374,18 @@ export const action = async ({ request, params }) => {
     });
 
     console.log('📡 Password submission response status:', response.status);
+    console.log('📡 Password submission response headers:', Object.fromEntries(response.headers.entries()));
 
         if (response.status === 200) {
           let html = await response.text();
+          
+          // Check if we're still on a password page (incorrect password)
+          const isPasswordPage = html.includes('password') || 
+                                html.includes('Password') || 
+                                html.includes('input[type="password"]') ||
+                                html.includes('Enter password');
+          
+          console.log('🔍 Is still password page after submission:', isPasswordPage);
           
           // Remove CSP headers that prevent iframe embedding
           html = html.replace(/content-security-policy[^>]*>/gi, '');
@@ -391,12 +400,27 @@ export const action = async ({ request, params }) => {
             <script>
               console.log('🎉 Password submitted successfully');
               
-              // Send message to parent that page loaded successfully
-              if (window.parent !== window) {
-                window.parent.postMessage({
-                  type: 'password-submitted',
-                  storeDomain: '${storeDomain}'
-                }, '*');
+              // Check if we're still on a password page
+              const isPasswordPage = document.querySelector('input[type="password"]') !== null ||
+                                   document.title.includes('Password') ||
+                                   document.body.textContent.includes('password');
+              
+              if (isPasswordPage) {
+                console.log('❌ Still on password page - password may be incorrect');
+                if (window.parent !== window) {
+                  window.parent.postMessage({
+                    type: 'password-rejected',
+                    error: 'Incorrect password. Please try again.'
+                  }, '*');
+                }
+              } else {
+                console.log('✅ Password accepted - product page loaded');
+                if (window.parent !== window) {
+                  window.parent.postMessage({
+                    type: 'password-accepted',
+                    storeDomain: '${storeDomain}'
+                  }, '*');
+                }
               }
               
               // Intercept form submissions to prevent redirects
