@@ -3,13 +3,12 @@ import { boundary } from "@shopify/shopify-app-remix/server";
 import { authenticate } from "../shopify.server";
 import type { LoaderFunctionArgs } from "@remix-run/node";
 import { useState } from "react";
-import { AppProvider } from "@shopify/shopify-app-remix/react";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { admin, session } = await authenticate.admin(request);
+  const { admin } = await authenticate.admin(request);
   return { 
     user: {
-      shop: session.shop || '',
+      shop: (admin as any).shop || '',
       email: (admin as any).email || '',
       firstName: (admin as any).firstName || '',
       lastName: (admin as any).lastName || '',
@@ -17,9 +16,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
       locale: (admin as any).locale || 'en',
       collaborator: (admin as any).collaborator || false,
       emailVerified: (admin as any).emailVerified || false
-    },
-    apiKey: process.env.SHOPIFY_API_KEY || '',
-    shop: session.shop || ''
+    }
   };
 };
 
@@ -61,16 +58,11 @@ const navigation: NavigationItem[] = [
     href: "/app/inject-section",
     icon: "🚀",
     badge: "NEW"
-  },
-  {
-    name: "Dynamic Manipulator",
-    href: "/app/dynamic-manipulator",
-    icon: "🎨"
   }
 ];
 
 export default function App() {
-  const { user, apiKey, shop } = useLoaderData<typeof loader>();
+  const { user } = useLoaderData<typeof loader>();
   const location = useLocation();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
 
@@ -168,8 +160,7 @@ export default function App() {
   };
 
   return (
-    <AppProvider isEmbeddedApp apiKey={apiKey}>
-      <div style={{ display: 'flex', height: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)' }}>
+    <div style={{ display: 'flex', height: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)' }}>
       {/* Beautiful Sidebar */}
       <div style={{
         background: 'linear-gradient(180deg, #ffffff 0%, #fafbff 100%)',
@@ -326,7 +317,6 @@ export default function App() {
         </main>
       </div>
     </div>
-    </AppProvider>
   );
 }
 

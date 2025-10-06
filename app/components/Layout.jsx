@@ -7,15 +7,13 @@ import {
   HomeIcon,
   Bars3Icon,
   XMarkIcon,
-  UserCircleIcon,
-  PaintBrushIcon
+  UserCircleIcon
 } from "@heroicons/react/24/outline";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navigation = [
   { name: 'Dashboard', href: '/app', icon: HomeIcon },
   { name: 'A/B Tests', href: '/app/ab-tests', icon: BeakerIcon },
-  { name: 'Dynamic Manipulator', href: '/app/dynamic-manipulator', icon: PaintBrushIcon },
   { name: 'Analytics', href: '/app/analytics', icon: ChartBarIcon },
   { name: 'Settings', href: '/app/settings', icon: CogIcon },
 ];
