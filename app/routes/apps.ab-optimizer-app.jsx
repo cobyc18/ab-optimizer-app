@@ -18,42 +18,6 @@ export const loader = async ({ request }) => {
   }
 
   try {
-    // First, let's test with a simple response to make sure the app proxy is working
-    const testResponse = new Response(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>App Proxy Test</title>
-          <style>
-            body { font-family: Arial, sans-serif; padding: 20px; }
-            .header { background: #667eea; color: white; padding: 15px; border-radius: 8px; margin-bottom: 20px; }
-            .content { background: #f8f9fa; padding: 20px; border-radius: 8px; }
-          </style>
-        </head>
-        <body>
-          <div class="header">
-            <h2>🎉 App Proxy Working!</h2>
-            <p>Product Handle: ${productHandle}</p>
-            <p>Shop: ${session.shop}</p>
-          </div>
-          <div class="content">
-            <p>This confirms that the app proxy is working correctly.</p>
-            <p>If you can see this, the iframe is loading the app proxy content.</p>
-            <p>Now we can implement the full product preview.</p>
-          </div>
-        </body>
-      </html>
-    `, {
-      headers: {
-        'Content-Type': 'text/html',
-        'Content-Security-Policy': `frame-ancestors https://${session.shop} https://admin.shopify.com`,
-        'X-Frame-Options': 'ALLOWALL'
-      }
-    });
-    
-    console.log('✅ Returning test response for app proxy');
-    return testResponse;
-
     // Use Liquid to render the product page with the shop's theme
     // This is the proper way to show the exact product page as it appears on the live site
     const response = liquid(`

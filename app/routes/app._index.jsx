@@ -1574,77 +1574,19 @@ export default function Index() {
               background: '#F8FAFC'
             }}>
               {previewProduct.onlineStorePreviewUrl || previewProduct.handle ? (
-                <div style={{
-                  width: '100%',
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  background: '#f8f9fa',
-                  padding: '40px'
-                }}>
-                  <div style={{
-                    background: 'white',
-                    borderRadius: '12px',
-                    padding: '30px',
-                    boxShadow: '0 4px 20px rgba(0,0,0,0.1)',
-                    maxWidth: '500px',
-                    textAlign: 'center'
-                  }}>
-                    <h3 style={{ color: '#667eea', marginBottom: '20px' }}>
-                      🔧 App Proxy Configuration Required
-                    </h3>
-                    <p style={{ color: '#666', marginBottom: '20px' }}>
-                      The app proxy needs to be configured in Shopify to enable live product preview.
-                    </p>
-                    <div style={{ marginBottom: '20px' }}>
-                      <strong>App Proxy URL:</strong><br/>
-                      <code style={{ 
-                        background: '#f1f3f4', 
-                        padding: '8px 12px', 
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        wordBreak: 'break-all'
-                      }}>
-                        https://{shop}/apps/ab-optimizer-app?product={previewProduct.handle}
-                      </code>
-                    </div>
-                    <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                      <a 
-                        href={`https://${shop}/products/${previewProduct.handle}`} 
-                        target="_blank"
-                        style={{
-                          background: '#10B981',
-                          color: 'white',
-                          padding: '12px 24px',
-                          borderRadius: '8px',
-                          textDecoration: 'none',
-                          fontWeight: '500'
-                        }}
-                      >
-                        🌐 View Live Site
-                      </a>
-                      <button
-                        onClick={() => {
-                          console.log('Testing app proxy URL:', `https://${shop}/apps/ab-optimizer-app?product=${previewProduct.handle}`);
-                          window.open(`https://${shop}/apps/ab-optimizer-app?product=${previewProduct.handle}`, '_blank');
-                        }}
-                        style={{
-                          background: '#3B82F6',
-                          color: 'white',
-                          padding: '12px 24px',
-                          borderRadius: '8px',
-                          border: 'none',
-                          fontWeight: '500',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        🧪 Test App Proxy
-                      </button>
-                    </div>
-                  </div>
-                </div>
+                <iframe
+                  src={`https://${shop}/apps/ab-optimizer-app?product=${previewProduct.handle}`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    borderRadius: '0 0 16px 16px'
+                  }}
+                  title={`Product Preview - ${previewProduct.title}`}
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                  onLoad={() => console.log('✅ Iframe loaded successfully')}
+                  onError={(e) => console.error('❌ Iframe load error:', e)}
+                />
               ) : (
                 <div style={{
                   display: 'flex',
