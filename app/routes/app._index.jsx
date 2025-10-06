@@ -138,6 +138,8 @@ export default function Index() {
   const [draggedElement, setDraggedElement] = useState(null);
   const [themePreviewData, setThemePreviewData] = useState(null);
   const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [productPreviewOpen, setProductPreviewOpen] = useState(false);
+  const [previewProduct, setPreviewProduct] = useState(null);
 
   // A/B Test Ideas
   const abTestIdeas = [
@@ -332,13 +334,13 @@ export default function Index() {
 
   // Product Preview Functions
   const openProductPreview = (product) => {
-    const productUrl = product.onlineStorePreviewUrl || `https://${shop}/products/${product.handle}`;
-    if (window.openProductPreview) {
-      window.openProductPreview(productUrl, product.title);
-    } else {
-      // Fallback to opening in new tab
-      window.open(productUrl, '_blank');
-    }
+    setPreviewProduct(product);
+    setProductPreviewOpen(true);
+  };
+
+  const closeProductPreview = () => {
+    setProductPreviewOpen(false);
+    setPreviewProduct(null);
   };
 
   return (
@@ -1453,51 +1455,326 @@ export default function Index() {
         </div>
       </div>
 
-      {/* App Bridge Modal Script for Product Preview */}
-      <script dangerouslySetInnerHTML={{
-        __html: `
-          window.openProductPreview = async function(productUrl, productTitle) {
-            // Wait a bit for App Bridge to load if it's still loading
-            let attempts = 0;
-            const maxAttempts = 10;
-            
-            const tryOpenModal = async () => {
-              if (window.shopify && window.shopify.modal) {
-                try {
-                  await window.shopify.modal.open({
-                    variant: 'max',
-                    src: productUrl,
-                    title: productTitle || 'Product Preview'
-                  });
-                  return true;
-                } catch (error) {
-                  console.error('Failed to open product preview modal:', error);
-                  return false;
-                }
-              }
-              return false;
-            };
-            
-            // Try immediately first
-            if (await tryOpenModal()) {
-              return;
-            }
-            
-            // If not available, wait and retry
-            while (attempts < maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, 100));
-              if (await tryOpenModal()) {
-                return;
-              }
-              attempts++;
-            }
-            
-            // Fallback to opening in new tab
-            console.warn('Shopify App Bridge not available after waiting, opening in new tab');
-            window.open(productUrl, '_blank');
-          };
-        `
-      }} />
+      {/* Storefront Web Components Product Preview Modal */}
+      {productPreviewOpen && previewProduct && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.9)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: '16px',
+            width: '95vw',
+            height: '90vh',
+            maxWidth: '1400px',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
+          }}>
+            {/* Modal Header */}
+            <div style={{
+              background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+              color: '#FFFFFF',
+              padding: '16px 24px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexShrink: 0
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <h2 style={{
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  margin: 0,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  🛍️ Live Product Preview
+                </h2>
+                <div style={{
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  padding: '4px 8px',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  fontWeight: '500'
+                }}>
+                  {previewProduct.title}
+                </div>
+              </div>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px'
+              }}>
+                <a
+                  href={previewProduct.onlineStorePreviewUrl || `https://${shop}/products/${previewProduct.handle}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    color: '#FFFFFF',
+                    padding: '6px 12px',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    textDecoration: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '4px'
+                  }}
+                >
+                  🔗 Open in New Tab
+                </a>
+                <button
+                  onClick={closeProductPreview}
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.2)',
+                    border: 'none',
+                    borderRadius: '50%',
+                    width: '32px',
+                    height: '32px',
+                    color: '#FFFFFF',
+                    fontSize: '18px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center'
+                  }}
+                >
+                  ×
+                </button>
+              </div>
+            </div>
+
+            {/* Storefront Web Components Product Display */}
+            <div style={{
+              flex: 1,
+              position: 'relative',
+              background: '#F8FAFC',
+              overflow: 'auto'
+            }}>
+              <shopify-store store-domain={`https://${shop}`}>
+                <shopify-context type="product" handle={previewProduct.handle}>
+                  <template>
+                    <div style={{
+                      padding: '24px',
+                      maxWidth: '1200px',
+                      margin: '0 auto'
+                    }}>
+                      {/* Product Images */}
+                      <div style={{
+                        display: 'grid',
+                        gridTemplateColumns: '1fr 1fr',
+                        gap: '24px',
+                        marginBottom: '32px'
+                      }}>
+                        <div>
+                          <shopify-media 
+                            query="product.featuredImage" 
+                            width="500" 
+                            height="500"
+                            style={{
+                              width: '100%',
+                              height: 'auto',
+                              borderRadius: '12px',
+                              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                            }}
+                          ></shopify-media>
+                        </div>
+                        <div style={{
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'center'
+                        }}>
+                          <h1 style={{
+                            fontSize: '32px',
+                            fontWeight: '700',
+                            color: '#1F2937',
+                            marginBottom: '16px',
+                            lineHeight: '1.2'
+                          }}>
+                            <shopify-data query="product.title"></shopify-data>
+                          </h1>
+                          
+                          <div style={{
+                            fontSize: '24px',
+                            fontWeight: '600',
+                            color: '#059669',
+                            marginBottom: '16px'
+                          }}>
+                            <shopify-money query="product.selectedOrFirstAvailableVariant.price"></shopify-money>
+                          </div>
+
+                          <div style={{
+                            marginBottom: '24px'
+                          }}>
+                            <shopify-variant-selector></shopify-variant-selector>
+                          </div>
+
+                          <button
+                            onclick="getElementById('store').buyNow(event);"
+                            style={{
+                              background: '#3B82F6',
+                              color: '#FFFFFF',
+                              border: 'none',
+                              borderRadius: '8px',
+                              padding: '12px 24px',
+                              fontSize: '16px',
+                              fontWeight: '600',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              marginBottom: '16px'
+                            }}
+                            onMouseOver={(e) => {
+                              e.target.style.background = '#2563EB';
+                            }}
+                            onMouseOut={(e) => {
+                              e.target.style.background = '#3B82F6';
+                            }}
+                          >
+                            Buy Now
+                          </button>
+                        </div>
+                      </div>
+
+                      {/* Product Description */}
+                      <div style={{
+                        background: '#FFFFFF',
+                        borderRadius: '12px',
+                        padding: '24px',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                        marginBottom: '24px'
+                      }}>
+                        <h3 style={{
+                          fontSize: '20px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          marginBottom: '16px'
+                        }}>
+                          Product Description
+                        </h3>
+                        <div style={{
+                          fontSize: '16px',
+                          lineHeight: '1.6',
+                          color: '#4B5563'
+                        }}>
+                          <shopify-data query="product.descriptionHtml"></shopify-data>
+                        </div>
+                      </div>
+
+                      {/* Product Details */}
+                      <div style={{
+                        background: '#FFFFFF',
+                        borderRadius: '12px',
+                        padding: '24px',
+                        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                      }}>
+                        <h3 style={{
+                          fontSize: '20px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          marginBottom: '16px'
+                        }}>
+                          Product Details
+                        </h3>
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                          gap: '16px'
+                        }}>
+                          <div>
+                            <strong>Vendor:</strong> <shopify-data query="product.vendor"></shopify-data>
+                          </div>
+                          <div>
+                            <strong>Product Type:</strong> <shopify-data query="product.productType"></shopify-data>
+                          </div>
+                          <div>
+                            <strong>SKU:</strong> <shopify-data query="product.selectedOrFirstAvailableVariant.sku"></shopify-data>
+                          </div>
+                          <div>
+                            <strong>Available:</strong> <shopify-data query="product.selectedOrFirstAvailableVariant.availableForSale"></shopify-data>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </template>
+                </shopify-context>
+              </shopify-store>
+            </div>
+
+            {/* Modal Footer */}
+            <div style={{
+              background: '#F8FAFC',
+              padding: '16px 24px',
+              borderTop: '1px solid #E5E5E5',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              flexShrink: 0
+            }}>
+              <div style={{
+                fontSize: '12px',
+                color: '#6B7280'
+              }}>
+                💡 This is exactly how customers see this product on your live store
+              </div>
+              <div style={{
+                display: 'flex',
+                gap: '12px'
+              }}>
+                <button
+                  onClick={closeProductPreview}
+                  style={{
+                    padding: '8px 16px',
+                    background: '#F3F4F6',
+                    color: '#6B7280',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  Close Preview
+                </button>
+                <button
+                  onClick={() => {
+                    setSelectedProduct(previewProduct);
+                    closeProductPreview();
+                  }}
+                  style={{
+                    padding: '8px 16px',
+                    background: '#3B82F6',
+                    color: '#FFFFFF',
+                    border: 'none',
+                    borderRadius: '6px',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    cursor: 'pointer'
+                  }}
+                >
+                  ✓ Select This Product
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style dangerouslySetInnerHTML={{
         __html: `
