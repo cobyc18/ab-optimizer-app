@@ -120,10 +120,10 @@ export const loader = async ({ request }) => {
     console.error("❌ Error fetching theme info:", error);
   }
   
-  // Create or get Storefront API access token
+  // Try to get existing Storefront API access token (optional)
   let storefrontAccessToken = null;
   try {
-    // First, try to get existing tokens
+    // Only try to query existing tokens, don't create new ones
     const existingTokensResponse = await admin.graphql(`
       query GetStorefrontTokens {
         shop {
@@ -144,56 +144,19 @@ export const loader = async ({ request }) => {
     const tokensData = await existingTokensResponse.json();
     const existingTokens = tokensData.data?.shop?.storefrontAccessTokens?.nodes || [];
     
-    // Look for a token with the right scopes or create a new one
-    let token = existingTokens.find(t => 
+    // Look for an existing token with the right permissions
+    const token = existingTokens.find(t => 
       t.accessScopes.some(scope => scope.handle.includes('unauthenticated_read_product_listings'))
     );
     
-    if (!token) {
-      // Create a new storefront access token
-      const createTokenResponse = await admin.graphql(`
-        mutation CreateStorefrontToken($input: StorefrontAccessTokenInput!) {
-          storefrontAccessTokenCreate(input: $input) {
-            storefrontAccessToken {
-              accessToken
-              title
-              accessScopes {
-                handle
-              }
-            }
-            userErrors {
-              field
-              message
-            }
-          }
-        }
-      `, {
-        variables: {
-          input: {
-            title: "A/B Optimizer App Storefront Access"
-          }
-        }
-      });
-      
-      const createTokenData = await createTokenResponse.json();
-      if (createTokenData.data?.storefrontAccessTokenCreate?.storefrontAccessToken) {
-        token = createTokenData.data.storefrontAccessTokenCreate.storefrontAccessToken;
-        console.log('✅ Created new Storefront API access token');
-      } else {
-        console.error('❌ Error creating Storefront API token:', createTokenData.data?.storefrontAccessTokenCreate?.userErrors);
-      }
-    } else {
-      console.log('✅ Using existing Storefront API access token');
-    }
-    
     if (token) {
       storefrontAccessToken = token.accessToken;
-      console.log('✅ Storefront access token:', storefrontAccessToken ? 'Found' : 'Not found');
+      console.log('✅ Using existing Storefront API access token');
     } else {
-      console.warn('⚠️ No storefront access token available');
+      console.log('ℹ️ No existing Storefront API access token found - product preview will use basic mode');
     }
   } catch (error) {
-    console.error('❌ Error managing Storefront API token:', error);
+    console.log('ℹ️ Storefront API token query failed - product preview will use basic mode:', error.message);
   }
 
   return json({
@@ -413,7 +376,7 @@ export default function Index() {
   const openProductPreview = (product) => {
     console.log('🔍 Opening product preview:', product.title);
     console.log('🏪 Shop:', shop);
-    console.log('🔑 Access token:', storefrontAccessToken ? 'Available' : 'Missing');
+    console.log('🔑 Storefront API:', storefrontAccessToken ? 'Enhanced mode available' : 'Using basic preview mode');
     setPreviewProduct(product);
     setProductPreviewOpen(true);
   };
@@ -1814,14 +1777,46 @@ export default function Index() {
                     color: '#6B7280',
                     marginBottom: '16px'
                   }}>
-                    🔑 Setting up store access...
+                    📦 Product Preview
                   </div>
                   <div style={{
                     fontSize: '14px',
-                    color: '#9CA3AF'
+                    color: '#9CA3AF',
+                    marginBottom: '20px'
                   }}>
-                    Please wait while we connect to your store
+                    {previewProduct.title}
                   </div>
+                  <div style={{
+                    fontSize: '16px',
+                    color: '#3B82F6',
+                    marginBottom: '12px'
+                  }}>
+                    💰 ${previewProduct.price}
+                  </div>
+                  <div style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '20px',
+                    maxWidth: '400px'
+                  }}>
+                    {previewProduct.description ? previewProduct.description.substring(0, 200) + '...' : 'No description available'}
+                  </div>
+                  <a
+                    href={previewProduct.onlineStorePreviewUrl || `https://${shop}/products/${previewProduct.handle}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    style={{
+                      display: 'inline-block',
+                      padding: '12px 24px',
+                      background: '#3B82F6',
+                      color: 'white',
+                      textDecoration: 'none',
+                      borderRadius: '6px',
+                      fontWeight: '500'
+                    }}
+                  >
+                    View Full Product Page →
+                  </a>
                 </div>
               )}
             </div>
