@@ -120,15 +120,89 @@ export const loader = async ({ request }) => {
     console.error("❌ Error fetching theme info:", error);
   }
   
+  // Create or get Storefront API access token
+  let storefrontAccessToken = null;
+  try {
+    // First, try to get existing tokens
+    const existingTokensResponse = await admin.graphql(`
+      query GetStorefrontTokens {
+        shop {
+          storefrontAccessTokens(first: 10) {
+            nodes {
+              id
+              accessToken
+              title
+              accessScopes {
+                handle
+              }
+            }
+          }
+        }
+      }
+    `);
+    
+    const tokensData = await existingTokensResponse.json();
+    const existingTokens = tokensData.data?.shop?.storefrontAccessTokens?.nodes || [];
+    
+    // Look for a token with the right scopes or create a new one
+    let token = existingTokens.find(t => 
+      t.accessScopes.some(scope => scope.handle.includes('unauthenticated_read_product_listings'))
+    );
+    
+    if (!token) {
+      // Create a new storefront access token
+      const createTokenResponse = await admin.graphql(`
+        mutation CreateStorefrontToken($input: StorefrontAccessTokenInput!) {
+          storefrontAccessTokenCreate(input: $input) {
+            storefrontAccessToken {
+              accessToken
+              title
+              accessScopes {
+                handle
+              }
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+      `, {
+        variables: {
+          input: {
+            title: "A/B Optimizer App Storefront Access"
+          }
+        }
+      });
+      
+      const createTokenData = await createTokenResponse.json();
+      if (createTokenData.data?.storefrontAccessTokenCreate?.storefrontAccessToken) {
+        token = createTokenData.data.storefrontAccessTokenCreate.storefrontAccessToken;
+        console.log('✅ Created new Storefront API access token');
+      } else {
+        console.error('❌ Error creating Storefront API token:', createTokenData.data?.storefrontAccessTokenCreate?.userErrors);
+      }
+    } else {
+      console.log('✅ Using existing Storefront API access token');
+    }
+    
+    if (token) {
+      storefrontAccessToken = token.accessToken;
+    }
+  } catch (error) {
+    console.error('❌ Error managing Storefront API token:', error);
+  }
+
   return json({
     products,
     themeInfo,
-    shop: session.shop
+    shop: session.shop,
+    storefrontAccessToken
   });
 };
 
 export default function Index() {
-  const { products, themeInfo, shop } = useLoaderData();
+  const { products, themeInfo, shop, storefrontAccessToken } = useLoaderData();
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedIdea, setSelectedIdea] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -1568,7 +1642,10 @@ export default function Index() {
               background: '#F8FAFC',
               overflow: 'auto'
             }}>
-              <shopify-store store-domain={`https://${shop}`}>
+              <shopify-store 
+                store-domain={`https://${shop}`}
+                public-access-token={storefrontAccessToken}
+              >
                 <shopify-context type="product" handle={previewProduct.handle}>
                   <template>
                     <div style={{
@@ -1627,7 +1704,7 @@ export default function Index() {
                           </div>
 
                           <button
-                            onclick="getElementById('store').buyNow(event);"
+                            onclick="this.closest('shopify-store').buyNow(event);"
                             style={{
                               background: '#3B82F6',
                               color: '#FFFFFF',
