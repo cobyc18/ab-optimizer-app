@@ -5,13 +5,8 @@ import styles from "./styles.module.css";
 
 export const loader = async ({ request }) => {
   const url = new URL(request.url);
-  
-  console.log('🔍 Root route accessed:', url.href);
-  console.log('🔍 Shop parameter:', url.searchParams.get("shop"));
-  console.log('🔍 All search params:', Object.fromEntries(url.searchParams.entries()));
 
   if (url.searchParams.get("shop")) {
-    console.log('🔍 Redirecting to /app with params:', url.searchParams.toString());
     throw redirect(`/app?${url.searchParams.toString()}`);
   }
 

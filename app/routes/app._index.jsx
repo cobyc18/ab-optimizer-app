@@ -120,8 +120,6 @@ export const loader = async ({ request }) => {
     console.error("❌ Error fetching theme info:", error);
   }
   
-  // No Storefront API needed - using pure Admin API data
-
   return json({
     products,
     themeInfo,
@@ -906,7 +904,7 @@ export default function Index() {
                           color: selectedProduct?.id === product.id ? '#FFFFFF' : '#6B7280',
                           border: 'none',
                           borderRadius: '6px',
-                          fontSize: '15px',
+                          fontSize: '14px',
                           fontWeight: '500',
                           cursor: 'pointer',
                           transition: 'all 0.2s ease'
@@ -1457,7 +1455,7 @@ export default function Index() {
         </div>
       </div>
 
-      {/* Storefront Web Components Product Preview Modal */}
+      {/* Product Preview Modal - Live Storefront Preview */}
       {productPreviewOpen && previewProduct && (
         <div style={{
           position: 'fixed',
@@ -1563,292 +1561,58 @@ export default function Index() {
               </div>
             </div>
 
-            {/* Simple Product Preview with Admin API Data */}
+            {/* Live Preview Iframe */}
             <div style={{
               flex: 1,
               position: 'relative',
-              background: '#F8FAFC',
-              overflow: 'auto'
+              background: '#F8FAFC'
             }}>
-              <div style={{
-                padding: '24px',
-                maxWidth: '1200px',
-                margin: '0 auto'
-              }}>
-                {/* Product Header */}
+              {previewProduct.onlineStorePreviewUrl || previewProduct.handle ? (
+                <iframe
+                  src={previewProduct.onlineStorePreviewUrl || `https://${shop}/products/${previewProduct.handle}`}
+                  style={{
+                    width: '100%',
+                    height: '100%',
+                    border: 'none',
+                    borderRadius: '0 0 16px 16px'
+                  }}
+                  title={`Product Preview - ${previewProduct.title}`}
+                  sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                />
+              ) : (
                 <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: '1fr 1fr',
-                  gap: '3rem',
-                  marginBottom: '3rem'
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  height: '100%',
+                  color: '#6B7280'
                 }}>
-                  {/* Product Image */}
-                  <div>
-                    <img
-                      src={previewProduct.featuredImage?.url || previewProduct.images?.[0]?.url}
-                      alt={previewProduct.title}
-                      style={{
-                        width: '100%',
-                        height: '500px',
-                        objectFit: 'cover',
-                        borderRadius: '12px',
-                        border: '1px solid #e1e5e9',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                      }}
-                    />
+                  <div style={{
+                    fontSize: '48px',
+                    marginBottom: '16px'
+                  }}>
+                    🚫
                   </div>
-
-                  {/* Product Info */}
-                  <div>
-                    <h1 style={{
-                      fontSize: '32px',
-                      fontWeight: '700',
-                      color: '#1F2937',
-                      marginBottom: '16px',
-                      lineHeight: '1.2'
-                    }}>
-                      {previewProduct.title}
-                    </h1>
-
-                    <div style={{
-                      fontSize: '24px',
-                      fontWeight: '600',
-                      color: '#059669',
-                      marginBottom: '24px'
-                    }}>
-                      ${previewProduct.priceRangeV2?.minVariantPrice?.amount || '0.00'}
-                    </div>
-
-                    {/* Variants */}
-                    {previewProduct.variants && previewProduct.variants.length > 0 && (
-                      <div style={{
-                        marginBottom: '24px',
-                        padding: '16px',
-                        background: '#ffffff',
-                        borderRadius: '8px',
-                        border: '1px solid #e1e5e9',
-                        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)'
-                      }}>
-                        <h4 style={{
-                          fontSize: '14px',
-                          fontWeight: '600',
-                          color: '#374151',
-                          marginBottom: '12px',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.05em'
-                        }}>
-                          Variants ({previewProduct.variants.length})
-                        </h4>
-                        <div style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(auto-fit, minmax(120px, 1fr))',
-                          gap: '8px'
-                        }}>
-                          {previewProduct.variants.slice(0, 6).map((variant, index) => (
-                            <div
-                              key={variant.id}
-                              style={{
-                                padding: '8px 12px',
-                                background: '#f8fafc',
-                                border: '1px solid #d1d5db',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                textAlign: 'center',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s'
-                              }}
-                              onMouseOver={(e) => {
-                                e.target.style.background = '#e5e7eb';
-                                e.target.style.borderColor = '#9ca3af';
-                              }}
-                              onMouseOut={(e) => {
-                                e.target.style.background = '#f8fafc';
-                                e.target.style.borderColor = '#d1d5db';
-                              }}
-                            >
-                              {variant.selectedOptions?.[0]?.value || `Variant ${index + 1}`}
-                              <br />
-                              <span style={{ color: '#6b7280', fontSize: '10px' }}>
-                                ${variant.price}
-                              </span>
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Product Meta */}
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                      gap: '12px',
-                      fontSize: '14px',
-                      color: '#6B7280',
-                      marginBottom: '24px'
-                    }}>
-                      <div style={{
-                        padding: '12px',
-                        background: '#ffffff',
-                        borderRadius: '6px',
-                        border: '1px solid #e1e5e9'
-                      }}>
-                        <strong>Vendor:</strong><br />
-                        {previewProduct.vendor || 'N/A'}
-                      </div>
-                      <div style={{
-                        padding: '12px',
-                        background: '#ffffff',
-                        borderRadius: '6px',
-                        border: '1px solid #e1e5e9'
-                      }}>
-                        <strong>Type:</strong><br />
-                        {previewProduct.productType || 'N/A'}
-                      </div>
-                      <div style={{
-                        padding: '12px',
-                        background: '#ffffff',
-                        borderRadius: '6px',
-                        border: '1px solid #e1e5e9'
-                      }}>
-                        <strong>Available:</strong><br />
-                        <span style={{
-                          color: previewProduct.totalInventory > 0 ? '#059669' : '#dc2626',
-                          fontWeight: '600'
-                        }}>
-                          {previewProduct.totalInventory > 0 ? 'In Stock' : 'Out of Stock'}
-                        </span>
-                      </div>
-                    </div>
-
-                    {/* Action Buttons */}
-                    <div style={{
-                      display: 'flex',
-                      gap: '12px'
-                    }}>
-                      <button
-                        style={{
-                          flex: 1,
-                          padding: '16px 24px',
-                          background: '#3B82F6',
-                          color: 'white',
-                          border: 'none',
-                          borderRadius: '8px',
-                          fontSize: '16px',
-                          fontWeight: '600',
-                          cursor: 'pointer',
-                          transition: 'background-color 0.2s'
-                        }}
-                        onMouseOver={(e) => { e.target.style.background = '#2563EB'; }}
-                        onMouseOut={(e) => { e.target.style.background = '#3B82F6'; }}
-                      >
-                        Add to Cart
-                      </button>
-                      <button
-                        onClick={() => window.open(`https://${shop}/products/${previewProduct.handle}`, '_blank')}
-                        style={{
-                          padding: '16px 20px',
-                          background: '#ffffff',
-                          color: '#374151',
-                          border: '1px solid #d1d5db',
-                          borderRadius: '8px',
-                          fontSize: '16px',
-                          fontWeight: '500',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s'
-                        }}
-                        onMouseOver={(e) => {
-                          e.target.style.background = '#f9fafb';
-                          e.target.style.borderColor = '#9ca3af';
-                        }}
-                        onMouseOut={(e) => {
-                          e.target.style.background = '#ffffff';
-                          e.target.style.borderColor = '#d1d5db';
-                        }}
-                      >
-                        View Store →
-                      </button>
-                    </div>
-                  </div>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Preview Not Available
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    textAlign: 'center',
+                    maxWidth: '400px',
+                    lineHeight: '1.5'
+                  }}>
+                    This product doesn't have a preview URL or handle available. 
+                    The product might not be published to the online store.
+                  </p>
                 </div>
-
-                {/* Product Description */}
-                {previewProduct.description && (
-                  <div style={{
-                    marginTop: '3rem',
-                    padding: '24px',
-                    background: '#ffffff',
-                    borderRadius: '12px',
-                    border: '1px solid #e1e5e9',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
-                    marginBottom: '24px'
-                  }}>
-                    <h3 style={{
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      marginBottom: '16px'
-                    }}>
-                      Description
-                    </h3>
-                    <div style={{
-                      fontSize: '16px',
-                      lineHeight: '1.6',
-                      color: '#4B5563'
-                    }}>
-                      {previewProduct.description}
-                    </div>
-                  </div>
-                )}
-
-                {/* Product Images Gallery */}
-                {previewProduct.images && previewProduct.images.length > 1 && (
-                  <div style={{
-                    padding: '24px',
-                    background: '#ffffff',
-                    borderRadius: '12px',
-                    border: '1px solid #e1e5e9',
-                    boxShadow: '0 2px 8px rgba(0, 0, 0, 0.05)',
-                    marginBottom: '24px'
-                  }}>
-                    <h3 style={{
-                      fontSize: '20px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      marginBottom: '16px'
-                    }}>
-                      Additional Images ({previewProduct.images.length - 1})
-                    </h3>
-                    <div style={{
-                      display: 'grid',
-                      gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
-                      gap: '16px'
-                    }}>
-                      {previewProduct.images.slice(1, 6).map((image, index) => (
-                        <img
-                          key={index}
-                          src={image.url}
-                          alt={`${previewProduct.title} - Image ${index + 2}`}
-                          style={{
-                            width: '100%',
-                            height: '150px',
-                            objectFit: 'cover',
-                            borderRadius: '8px',
-                            border: '1px solid #e1e5e9',
-                            cursor: 'pointer',
-                            transition: 'transform 0.2s'
-                          }}
-                          onMouseOver={(e) => {
-                            e.target.style.transform = 'scale(1.02)';
-                          }}
-                          onMouseOut={(e) => {
-                            e.target.style.transform = 'scale(1)';
-                          }}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
+              )}
             </div>
 
             {/* Modal Footer */}

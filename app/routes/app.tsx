@@ -5,26 +5,19 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 import { useState } from "react";
 
 export const loader = async ({ request }: LoaderFunctionArgs) => {
-  try {
-    console.log('🔍 App route loader called');
-    const { admin } = await authenticate.admin(request);
-    console.log('🔍 Authentication successful, admin:', admin);
-    return { 
-      user: {
-        shop: (admin as any).shop || '',
-        email: (admin as any).email || '',
-        firstName: (admin as any).firstName || '',
-        lastName: (admin as any).lastName || '',
-        accountOwner: (admin as any).accountOwner || false,
-        locale: (admin as any).locale || 'en',
-        collaborator: (admin as any).collaborator || false,
-        emailVerified: (admin as any).emailVerified || false
-      }
-    };
-  } catch (error) {
-    console.error('❌ Authentication failed in app route:', error);
-    throw error;
-  }
+  const { admin } = await authenticate.admin(request);
+  return { 
+    user: {
+      shop: (admin as any).shop || '',
+      email: (admin as any).email || '',
+      firstName: (admin as any).firstName || '',
+      lastName: (admin as any).lastName || '',
+      accountOwner: (admin as any).accountOwner || false,
+      locale: (admin as any).locale || 'en',
+      collaborator: (admin as any).collaborator || false,
+      emailVerified: (admin as any).emailVerified || false
+    }
+  };
 };
 
 interface NavigationItem {
