@@ -1212,7 +1212,7 @@ export default function Dashboard() {
                   lineHeight: '20px',
                   flex: 1
                 }}>
-                  Your Progress!
+                  Your Progress
                 </p>
                 <div style={{ width: '16px', height: '16px', flexShrink: 0 }}>
                   <img alt="Arrow Down" src={imgArrowDown2} style={{ width: '100%', height: '100%' }} />
