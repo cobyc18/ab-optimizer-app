@@ -3,1903 +3,1515 @@ import { useLoaderData, useOutletContext, Link } from "@remix-run/react";
 import React, { useState } from "react";
 import { authenticate } from "../shopify.server.js";
 import prisma from "../db.server.js";
-// Using App Bridge modal for theme editor instead of custom iframe component
+
+// Figma Design Assets - using exact URLs from Figma
+const imgOption11 = "http://localhost:3845/assets/d48cc262e275c8268a268985b2afdfac992cf82a.png";
+const imgPlaceholder = "http://localhost:3845/assets/c9fc7d6b793322789590ccef37f7182244140e0c.png";
+const imgTryLab = "http://localhost:3845/assets/ef6b13f0fd5212ac876c7e1fd3199ccecc56dad9.svg";
+const img = "http://localhost:3845/assets/b5c9a49a2261b2416025a79cd7d9dd6cbfc9658c.svg";
+const imgCultureTube = "http://localhost:3845/assets/cf28cd19afe656dc8b46f5937016390d82168068.svg";
+const imgFrame2147224424 = "http://localhost:3845/assets/efa39d32573b3a5b358191daec34021e25764ff5.svg";
+const imgLibrary = "http://localhost:3845/assets/b0c7cc936ce4033e4a3be1dd05c8652a4ac4a208.svg";
+const imgSetting = "http://localhost:3845/assets/3a6f557c50a8c28dd7c0eaa9f9af18d5d423db40.svg";
+const imgVideo = "http://localhost:3845/assets/e06f33da30f1b2eaf1af76aa79a12b922a7ae7a5.svg";
+const imgLogout = "http://localhost:3845/assets/f1bc06ff26e0c1ce023694aa2bbc6d1baeb98698.svg";
+const imgGroup1000003393 = "http://localhost:3845/assets/9cdfedb15f38de1d7549dce3b40da36973a9c05c.svg";
+const imgLine59 = "http://localhost:3845/assets/e6acbfb8fe84220030b4f382c623d290af131b73.svg";
+const imgLine60 = "http://localhost:3845/assets/6fdefdaad07bd3176f051dff8664b72fd8565c7f.svg";
+const imgChart = "http://localhost:3845/assets/baf7e28d166b5b283321a852774ef1bdd14f27a6.svg";
+const imgGraph = "http://localhost:3845/assets/9b9af956aa583e2a99412e20df5a9e75bf80fdde.svg";
+const imgVector = "http://localhost:3845/assets/da7df0a45c49be40bfd8767d7103c37efb03f0d6.svg";
+const imgVector1 = "http://localhost:3845/assets/7fe5008c9a6b1cdaf9549ca56f945723f1c85e3e.svg";
+const imgVector2 = "http://localhost:3845/assets/5d87a99546af2943d8d4e590bffe963d4ba1d7d5.svg";
+const imgVector3 = "http://localhost:3845/assets/8aeda563b5d07bb246e3269201982a2bf0695893.svg";
+const imgVector4 = "http://localhost:3845/assets/2ae20abf3ffb8c7432949e47b2eddc72bfe88a95.svg";
+const imgVector5 = "http://localhost:3845/assets/c2fb7636bba790f8abc5759046d31f9ff97d4089.svg";
+const imgVector6 = "http://localhost:3845/assets/e31598c7df06d3cb5a36f62a3bdd510d4b822902.svg";
+const imgFrame2147224432 = "http://localhost:3845/assets/ca4a9b03e163123f65241c5ace3845bafc2a1c4e.svg";
+const imgLayer2 = "http://localhost:3845/assets/a9d2b4484df880300053ddc291d4b1508de9f48f.svg";
+const imgFrame2147224435 = "http://localhost:3845/assets/452785d63818a5c8e8198f86e2110ab26729a23a.svg";
+const img1 = "http://localhost:3845/assets/37f6433eecfe4bba5b55652b996eea8eaa31c272.svg";
+const img2 = "http://localhost:3845/assets/aefdaaf09d8161efbb1ad9e2e4ead3a58332e535.svg";
+const imgVector7 = "http://localhost:3845/assets/b1a8dd9dcb2f9bc57c5aee95b80168b4fe14075d.svg";
+const imgVector8 = "http://localhost:3845/assets/df7e41cc4bc8037fa1f6aaf47c08634a8d8a9f77.svg";
+const imgVector9 = "http://localhost:3845/assets/6b645facef47ae73e16a70930d235fb4da42ee2d.svg";
+const imgAward = "http://localhost:3845/assets/ba2a64095bc32a278cda21c35ac6bfc74c380c27.svg";
+const imgArrowDown2 = "http://localhost:3845/assets/7b59df041cbdc8736eebfca56f0496ca2e5e0b89.svg";
+const imgLine62 = "http://localhost:3845/assets/bf7975f6f2b4c3943998210f73b65bf83b77b6df.svg";
+const imgLine63 = "http://localhost:3845/assets/276e1036c5497ca9ab217e45810a262790fc3fbd.svg";
+const img01IconsLineArrowCircleDownCopy = "http://localhost:3845/assets/70f910ecaf96baffa20bd5afa6db3cbfe4bbe132.svg";
+const img01IconsLineArrowCircleDownCopy2 = "http://localhost:3845/assets/a937be020ad68012fc33358c50294cd0b9cca41c.svg";
+
+// Figma Design Variables
+const figmaColors = {
+  black: "#202226",
+  themeDark: "#464255",
+  basicFill: "#C5CEE0",
+  white: "#ffffff",
+  blue: "#0038ff",
+  lightBlue: "#97cdff",
+  orange: "#ef9362",
+  green: "#29ad00",
+  yellow: "#f4b207",
+  gray: "#e6e6e6",
+  lightGray: "#84818a",
+  darkGray: "#151515"
+};
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
   
-  // Fetch Shopify products using GraphQL
-  let products = [];
-  try {
-    const productsResponse = await admin.graphql(`
-      query GetProducts {
-        products(first: 50) {
-          nodes {
-            id
-            title
-            handle
-            description
-            descriptionHtml
-            vendor
-            productType
-            priceRangeV2 {
-              minVariantPrice {
-                amount
-                currencyCode
-              }
-              maxVariantPrice {
-                amount
-                currencyCode
-              }
-            }
-            featuredImage {
-              url
-              altText
-              width
-              height
-            }
-            images(first: 10) {
-              nodes {
-                url
-                altText
-                width
-                height
-              }
-            }
-            variants(first: 20) {
-              nodes {
-                id
-                title
-                price
-                compareAtPrice
-                availableForSale
-                selectedOptions {
-                  name
-                  value
-                }
-                image {
-                  url
-                  altText
-                }
-                inventoryQuantity
-              }
-            }
-            totalInventory
-            createdAt
-            updatedAt
-            status
-            tags
-            seo {
-              title
-              description
-            }
-            options {
-              id
-              name
-              values
-            }
-            onlineStorePreviewUrl
-          }
-        }
+  // Mock data for dashboard
+  const mockData = {
+    user: {
+      name: "Zac",
+      level: "Legend Scientist",
+      xp: 2100,
+      maxXp: 3000
+    },
+    experiments: [
+      {
+        id: 1,
+        name: "Returns Badge VS Without",
+        status: "running",
+        variantA: 2100,
+        variantB: 2160,
+        runtime: "48h",
+        goal: "80%"
       }
-    `);
-    
-    const productsJson = await productsResponse.json();
-    products = productsJson.data.products.nodes;
-    console.log("✅ Products fetched:", products.length);
-  } catch (error) {
-    console.error("❌ Error fetching products:", error);
-  }
-  
-  // Fetch theme information using GraphQL
-  let themeInfo = {};
-  try {
-    const themesResponse = await admin.graphql(`
-      query GetThemes {
-        themes(first: 10) {
-          nodes {
-            id
-            name
-            role
-          }
-        }
-      }
-    `);
-    
-    const themesJson = await themesResponse.json();
-    const themes = themesJson.data.themes.nodes;
-    const mainTheme = themes.find(t => t.role === "MAIN");
-    
-    themeInfo = {
-      themeId: mainTheme?.id,
-      themeName: mainTheme?.name,
-      themeRole: mainTheme?.role
-    };
-    console.log("✅ Theme info fetched:", themeInfo);
-  } catch (error) {
-    console.error("❌ Error fetching theme info:", error);
-  }
-  
+    ],
+    testCards: [
+      { id: 1, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+      { id: 2, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+      { id: 3, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+      { id: 4, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" }
+    ],
+    queuedTests: [
+      { name: "Shipping badge Design Test" },
+      { name: "Feature Bullet Points Test" },
+      { name: "Fomo Badge Test" },
+      { name: "Scarcity signals Test" },
+      { name: "Shipping badge Design Test" },
+      { name: "Shipping badge Design Test" }
+    ],
+    recentActivities: [
+      { action: "Paused Badge Test", date: "July 26, 2025" },
+      { action: "Winner Found from Scarcity Test", date: "July 26, 2025" },
+      { action: "Variation Test Launched", date: "July 26, 2025" },
+      { action: "80% Confidence Level Achieve on Running Test", date: "July 26, 2025" },
+      { action: "New Progress Level Reached", date: "July 26, 2025" },
+      { action: "You've Run Tests for 60 Days in a Row", date: "July 26, 2025" }
+    ]
+  };
+
   return json({
-    products,
-    themeInfo,
+    ...mockData,
     shop: session.shop
   });
 };
 
-export default function Index() {
-  const { products, themeInfo, shop } = useLoaderData();
-  const [currentStep, setCurrentStep] = useState(1);
-  const [selectedIdea, setSelectedIdea] = useState(null);
-  const [selectedProduct, setSelectedProduct] = useState(null);
-  const [placementGuideOpen, setPlacementGuideOpen] = useState(false);
-  const [themePreviewMode, setThemePreviewMode] = useState(false);
-  const [widgetPosition, setWidgetPosition] = useState({ x: 100, y: 100 });
-  const [draggedElement, setDraggedElement] = useState(null);
-  const [themePreviewData, setThemePreviewData] = useState(null);
-  const [productSearchTerm, setProductSearchTerm] = useState('');
-  const [productPreviewOpen, setProductPreviewOpen] = useState(false);
-  const [previewProduct, setPreviewProduct] = useState(null);
+export default function Dashboard() {
+  const { user, experiments, testCards, queuedTests, recentActivities, shop } = useLoaderData();
+  const [selectedNavItem, setSelectedNavItem] = useState("Home");
+  const [expandedTests, setExpandedTests] = useState(new Set());
 
-  // A/B Test Ideas
-  const abTestIdeas = [
-    {
-      id: 1,
-      utility: 'Social Proof',
-      rationale: 'Shows recent purchases, increases trust by 12-15%',
-      style: 'Elegant',
-      preview: '👥 127 people bought this in the last 24 hours'
-    },
-    {
-      id: 2,
-      utility: 'Urgency Scarcity',
-      rationale: 'Creates FOMO, boosts conversion by 8-10%',
-      style: 'Bold',
-      preview: '⚡ Only 3 left in stock!'
-    },
-    {
-      id: 3,
-      utility: 'Countdown Timer',
-      rationale: 'Creates urgency, boosts checkout by 5-7%',
-      style: 'Energetic',
-      preview: '⏰ Limited time offer!'
-    },
-    {
-      id: 4,
-      utility: 'Product Reviews',
-      rationale: 'Builds credibility, increases sales by 18-22%',
-      style: 'Trustworthy',
-      preview: '⭐ 4.8/5 from 1,247 reviews'
+  const toggleTestExpansion = (testName) => {
+    const newExpanded = new Set(expandedTests);
+    if (newExpanded.has(testName)) {
+      newExpanded.delete(testName);
+    } else {
+      newExpanded.add(testName);
     }
+    setExpandedTests(newExpanded);
+  };
+
+  const navigationItems = [
+    { id: "Home", label: "Home", icon: img, active: true },
+    { id: "Experiments Hub", label: "Experiments Hub", icon: imgCultureTube, active: false },
+    { id: "Insights & Report", label: "Insights & Report", icon: imgFrame2147224424, active: false },
+    { id: "Widget Library", label: "Widget Library", icon: imgLibrary, active: false },
+    { id: "Settings", label: "Settings", icon: imgSetting, active: false },
+    { id: "Help / Onboarding", label: "Help / Onboarding", icon: imgVideo, active: false },
+    { id: "Log out", label: "Log out", icon: imgLogout, active: false }
   ];
 
-  // Theme Preview Functions
-  const generateThemePreview = async (product, widget) => {
-    if (!product || !widget) {
-      console.log('❌ Missing product or widget:', { product, widget });
-      return;
-    }
-
-    try {
-      setThemePreviewMode(true);
-      
-      // Generate widget code based on the selected widget type
-      let widgetCode = '';
-      let snippetName = '';
-      
-      switch (widget) {
-        case 'Social Proof':
-          snippetName = 'social_proof_widget';
-          widgetCode = `
-<!-- Social Proof Widget -->
-<div class="social-proof-widget" style="
-  background: #F0F9FF;
-  border: 1px solid #3B82F6;
-  border-radius: 8px;
-  padding: 16px;
-  margin: 16px 0;
-  text-align: center;
-">
-  <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-    <span style="font-size: 18px;">👥</span>
-    <span style="font-weight: 600; color: #1E40AF;">
-      127 people bought this in the last 24 hours
-    </span>
-  </div>
-</div>`;
-          break;
-        case 'Urgency Scarcity':
-          snippetName = 'urgency_scarcity_widget';
-          widgetCode = `
-<!-- Urgency Scarcity Widget -->
-<div class="urgency-scarcity-widget" style="
-  background: #FEF2F2;
-  border: 1px solid #EF4444;
-  border-radius: 8px;
-  padding: 16px;
-  margin: 16px 0;
-  text-align: center;
-">
-  <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-    <span style="font-size: 18px;">⚡</span>
-    <span style="font-weight: 600; color: #DC2626;">
-      Only 3 left in stock!
-    </span>
-  </div>
-</div>`;
-          break;
-        case 'Countdown Timer':
-          snippetName = 'countdown_timer_widget';
-          widgetCode = `
-<!-- Countdown Timer Widget -->
-<div class="countdown-timer-widget" style="
-  background: #FFFBEB;
-  border: 1px solid #F59E0B;
-  border-radius: 8px;
-  padding: 16px;
-  margin: 16px 0;
-  text-align: center;
-">
-  <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-    <span style="font-size: 18px;">⏰</span>
-    <span style="font-weight: 600; color: #D97706;">
-      Limited time offer!
-    </span>
-  </div>
-</div>`;
-          break;
-        case 'Product Reviews':
-          snippetName = 'product_reviews_widget';
-          widgetCode = `
-<!-- Product Reviews Widget -->
-<div class="product-reviews-widget" style="
-  background: #F0FDF4;
-  border: 1px solid #10B981;
-  border-radius: 8px;
-  padding: 16px;
-  margin: 16px 0;
-  text-align: center;
-">
-  <div style="display: flex; align-items: center; justify-content: center; gap: 8px;">
-    <span style="font-size: 18px;">⭐</span>
-    <span style="font-weight: 600; color: #059669;">
-      4.8/5 from 1,247 reviews
-    </span>
-  </div>
-</div>`;
-          break;
-        default:
-          snippetName = 'custom_widget';
-          widgetCode = `<!-- Custom Widget -->`;
-      }
-      
-      const response = await fetch('/api/theme-widget', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          themeId: themeInfo?.themeId || 'default-theme',
-          snippetName,
-          snippetContent: widgetCode,
-          widget,
-          productId: product.id,
-          position: widgetPosition
-        })
-      });
-      
-      const data = await response.json();
-      
-      if (data.success) {
-        setThemePreviewData({
-          widget: { name: widget },
-          widgetCode: data.widgetCode,
-          themeEditorUrl: data.themeEditorUrl,
-          installationInstructions: data.installationInstructions
-        });
-      } else {
-        console.error('Failed to generate preview:', data.error);
-      }
-    } catch (error) {
-      console.error('Error generating theme preview:', error);
-    } finally {
-      setThemePreviewMode(false);
-    }
-  };
-
-  // Widget Drag Functions
-  const handleWidgetDragStart = (e) => {
-    setDraggedElement(e.target);
-    e.target.style.opacity = '0.5';
-  };
-
-  const handleWidgetDrag = (e) => {
-    if (!draggedElement) return;
-    
-    const rect = e.target.getBoundingClientRect();
-    const x = e.clientX - rect.left;
-    const y = e.clientY - rect.top;
-    
-    setWidgetPosition({ x, y });
-  };
-
-  const handleWidgetDragEnd = (e) => {
-    if (draggedElement) {
-      draggedElement.style.opacity = '1';
-      setDraggedElement(null);
-    }
-  };
-
-  const updateWidgetPosition = (position) => {
-    setWidgetPosition(position);
-  };
-
-  // Product Preview State
-  const [showPasswordOverlay, setShowPasswordOverlay] = React.useState(false);
-  const [storePassword, setStorePassword] = React.useState('');
-  const [passwordError, setPasswordError] = React.useState('');
-  const [iframeLoading, setIframeLoading] = React.useState(true);
-  const [previewUrl, setPreviewUrl] = React.useState('');
-  const iframeRef = React.useRef(null);
-
-  // Product Preview Functions
-  const openProductPreview = (product) => {
-    console.log('🔍 Opening product preview:', {
-      product: product.title,
-      handle: product.handle,
-      shop: shop
-    });
-    setPreviewProduct(product);
-    setProductPreviewOpen(true);
-    
-    // Generate reverse proxy URL
-    const proxyUrl = `https://ab-optimizer-app.onrender.com/proxy/${shop}/products/${product.handle}`;
-    console.log('🌐 Generated reverse proxy URL:', proxyUrl);
-    
-    setPreviewUrl(proxyUrl);
-    setIframeLoading(true);
-    setShowPasswordOverlay(false);
-    setPasswordError('');
-  };
-
-  const handlePasswordSubmit = () => {
-    if (!storePassword.trim()) {
-      setPasswordError('Please enter a password');
-      return;
-    }
-
-    // Send password to the iframe
-    if (iframeRef.current && iframeRef.current.contentWindow) {
-      try {
-        iframeRef.current.contentWindow.postMessage({
-          type: 'submit-password',
-          password: storePassword
-        }, '*');
-        
-        setShowPasswordOverlay(false);
-        setPasswordError('');
-      } catch (error) {
-        console.error('Error submitting password:', error);
-        setPasswordError('Failed to submit password. Please try again.');
-      }
-    }
-  };
-
-
-  const closeProductPreview = () => {
-    setProductPreviewOpen(false);
-    setPreviewProduct(null);
-    setShowPasswordOverlay(false);
-    setStorePassword('');
-    setPasswordError('');
-  };
-
-  // Listen for messages from the iframe
-  React.useEffect(() => {
-    const handleMessage = (event) => {
-      console.log('📨 Message received from iframe:', event.data);
-      
-      if (event.data && event.data.type === 'proxy-loaded') {
-        console.log('✅ Reverse proxy loaded successfully');
-        setIframeLoading(false);
-      } else if (event.data && event.data.type === 'password-submitted') {
-        console.log('✅ Password submitted successfully');
-        setShowPasswordOverlay(false);
-        setPasswordError('');
-        setIframeLoading(false);
-      } else if (event.data && event.data.type === 'password-required') {
-        console.log('🔒 Password required, showing overlay');
-        setShowPasswordOverlay(true);
-        setIframeLoading(false);
-        } else if (event.data && event.data.type === 'password-accepted') {
-          console.log('✅ Password accepted - product page loaded');
-          setShowPasswordOverlay(false);
-          setPasswordError('');
-          setIframeLoading(false);
-        } else if (event.data && event.data.type === 'password-rejected') {
-          console.log('❌ Password rejected');
-          setPasswordError(event.data.error || 'Incorrect password. Please try again.');
-          setStorePassword('');
-          setShowPasswordOverlay(true);
-        }
-    };
-
-    window.addEventListener('message', handleMessage);
-    return () => window.removeEventListener('message', handleMessage);
-  }, []);
-
   return (
-    <div style={{
-      minHeight: '100vh',
-      background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-      padding: '20px'
-    }}>
-      <div style={{
-        maxWidth: '1200px',
-        margin: '0 auto',
-        background: '#FFFFFF',
-        borderRadius: '16px',
-        boxShadow: '0 20px 40px rgba(0, 0, 0, 0.1)',
-        overflow: 'hidden'
-      }}>
-        {/* Header */}
+    <div style={{ backgroundColor: figmaColors.gray, position: 'relative', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
+      {/* LEFT SIDEBAR */}
+      <div style={{ position: 'absolute', left: '26px', top: 0 }}>
+        {/* Background line */}
         <div style={{
-          background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-          color: '#FFFFFF',
-          padding: '32px',
-          textAlign: 'center'
+          position: 'absolute',
+          backgroundColor: 'rgba(230,230,230,0.85)',
+          height: '2342px',
+          left: 'calc(12.5% + 107.5px)',
+          mixBlendMode: 'multiply',
+          top: 0,
+          transform: 'translateX(-50%)',
+          width: '1px'
+        }} />
+        
+        {/* TryLab Logo */}
+        <div style={{
+          position: 'absolute',
+          height: '44.613px',
+          left: '134.49px',
+          top: '67.39px',
+          width: '159.51px'
         }}>
-          <h1 style={{
-            fontSize: '32px',
-            fontWeight: '700',
-            margin: '0 0 8px 0',
-            background: 'linear-gradient(135deg, #FFFFFF 0%, #E0E7FF 100%)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text'
-          }}>
-            🚀 A/B Test Optimizer
-          </h1>
-          <p style={{
-            fontSize: '16px',
-            margin: 0,
-            opacity: 0.9
-          }}>
-            Boost your conversion rates with data-driven widget experiments
-          </p>
+          <img alt="TryLab" src={imgTryLab} style={{ width: '100%', height: '100%' }} />
+        </div>
+        
+        {/* User Avatar */}
+        <div style={{
+          position: 'absolute',
+          left: '26px',
+          width: '108.793px',
+          height: '108.793px',
+          top: '35.1px'
+        }}>
+          <img alt="User Avatar" src={imgOption11} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+        
+        {/* Navigation Menu */}
+        <div style={{
+          position: 'absolute',
+          left: 'calc(4.167% + 94px)',
+          top: '178.32px',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          alignItems: 'flex-start'
+        }}>
+          {navigationItems.map((item, index) => (
+            <div
+              key={item.id}
+              onClick={() => setSelectedNavItem(item.id)}
+              style={{
+                backgroundColor: selectedNavItem === item.id ? figmaColors.blue : 'transparent',
+                display: 'flex',
+                gap: '16px',
+                alignItems: 'center',
+                padding: '16px 24px',
+                borderRadius: selectedNavItem === item.id ? '12px' : '60px',
+                width: '252px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <div style={{ width: '28px', height: '28px', flexShrink: 0 }}>
+                <img alt={item.label} src={item.icon} style={{ width: '100%', height: '100%' }} />
+              </div>
+              <p style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 500,
+                fontSize: '16px',
+                color: selectedNavItem === item.id ? figmaColors.white : figmaColors.themeDark,
+                margin: 0,
+                letterSpacing: '0.4px'
+              }}>
+                {item.label}
+              </p>
+            </div>
+          ))}
+        </div>
+        
+        {/* Trial Banner */}
+        <div style={{
+          position: 'absolute',
+          backgroundColor: figmaColors.orange,
+          left: 'calc(4.167% + 103.5px)',
+          top: '736px',
+          transform: 'translateX(-50%)',
+          padding: '30px 25px',
+          borderRadius: '20px',
+          width: '230px'
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '35px', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '35px', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', alignItems: 'flex-start' }}>
+                <p style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 600,
+                  fontSize: '16px',
+                  color: figmaColors.darkGray,
+                  margin: 0,
+                  letterSpacing: '0.4px'
+                }}>
+                  You have 9 days on the Pro free trial
+                </p>
+                <div style={{ width: '180px', height: '0px' }}>
+                  <img alt="Progress" src={imgGroup1000003393} style={{ width: '100%' }} />
+                </div>
+              </div>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 400,
+                fontSize: '14px',
+                color: figmaColors.darkGray,
+                margin: 0,
+                letterSpacing: '0.4px',
+                lineHeight: '20px'
+              }}>
+                Usage is unlimited while on trial and will reset when the trial ends.
+              </p>
+            </div>
+            <button style={{
+              backgroundColor: figmaColors.blue,
+              border: 'none',
+              borderRadius: '12px',
+              padding: '12px 22px',
+              cursor: 'pointer'
+            }}>
+              <p style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 500,
+                fontSize: '14px',
+                color: figmaColors.white,
+                margin: 0,
+                letterSpacing: '0.4px'
+              }}>
+                Upgrade your free trial →
+              </p>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* MAIN CONTENT */}
+      <div style={{ position: 'absolute', left: 'calc(16.667% + 78px)', top: '55.43px', width: '1455px' }}>
+        {/* Header */}
+        <div style={{ height: '79.568px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', alignItems: 'flex-start', position: 'absolute', left: 0, top: 'calc(50% + 6.284px)', transform: 'translateY(-50%)' }}>
+            <p style={{
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 400,
+              fontSize: '44px',
+              color: figmaColors.darkGray,
+              margin: 0
+            }}>
+              Welcome Back, {user.name}
+            </p>
+            <p style={{
+              fontSize: '16px',
+              color: '#202020',
+              margin: 0,
+              lineHeight: '26px'
+            }}>
+              Ready to test and grow your business
+            </p>
+          </div>
+          
+          {/* New Experiment Button */}
+          <div style={{ position: 'absolute', right: 0, top: '49.73%', bottom: 0 }}>
+            <button style={{
+              backgroundColor: '#3e3bf3',
+              border: 'none',
+              borderRadius: '5px',
+              padding: '12px 24px',
+              cursor: 'pointer'
+            }}>
+              <p style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 500,
+                fontSize: '14px',
+                color: figmaColors.white,
+                margin: 0
+              }}>
+                + New Experiment
+              </p>
+            </button>
+          </div>
         </div>
 
-        {/* Progress Bar */}
+        {/* Experiment Overview Section */}
         <div style={{
-          background: '#F8FAFC',
-          padding: '24px 32px',
-          borderBottom: '1px solid #E5E5E5'
+          position: 'absolute',
+          left: '175px',
+          top: '175px',
+          width: '1455px',
+          height: '869px',
+          backgroundColor: figmaColors.lightBlue,
+          borderRadius: '20px'
+        }}>
+          {/* Background */}
+          <div style={{
+            position: 'absolute',
+            left: 'calc(62.5% - 74.5px)',
+            top: '175px',
+            transform: 'translateX(-50%)',
+            width: '1455px',
+            height: '869px',
+            backgroundColor: figmaColors.lightBlue,
+            borderRadius: '20px'
+          }} />
+          
+          {/* Experiment Title */}
+          <div style={{
+            position: 'absolute',
+            left: 'calc(16.667% + 123px)',
+            top: '921px'
+          }}>
+            <div style={{
+              position: 'absolute',
+              left: 'calc(16.667% + 123px)',
+              top: '929.5px',
+              transform: 'translateY(-50%)',
+              width: '469px'
+            }}>
+              <p style={{
+                fontFamily: 'Geist, sans-serif',
+                fontWeight: 500,
+                fontSize: '24px',
+                color: figmaColors.darkGray,
+                margin: 0,
+                lineHeight: '32px'
+              }}>
+                Returns Badge VS Without
+              </p>
+            </div>
+            
+            {/* Progress Line */}
+            <div style={{
+              position: 'absolute',
+              left: 'calc(16.667% + 124.068px)',
+              top: '993px',
+              width: '467.932px',
+              height: '0px'
+            }}>
+              <img alt="Line" src={imgLine59} style={{ width: '100%' }} />
+            </div>
+            <div style={{
+              position: 'absolute',
+              left: 'calc(16.667% + 124.068px)',
+              top: '993px',
+              width: '398.787px',
+              height: '0px'
+            }}>
+              <img alt="Line" src={imgLine60} style={{ width: '100%' }} />
+            </div>
+            
+            {/* Goal */}
+            <div style={{
+              position: 'absolute',
+              left: 'calc(16.667% + 123px)',
+              top: '970px',
+              width: '416.651px',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <div>
+                <p style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 400,
+                  fontSize: '14px',
+                  color: figmaColors.darkGray,
+                  margin: 0,
+                  lineHeight: '15px'
+                }}>
+                  Goal
+                </p>
+              </div>
+              <div>
+                <p style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 400,
+                  fontSize: '14px',
+                  color: figmaColors.darkGray,
+                  margin: 0,
+                  lineHeight: '15px'
+                }}>
+                  80%
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          {/* Stats */}
+          <div style={{
+            position: 'absolute',
+            left: 'calc(50% + 53px)',
+            top: '921px',
+            display: 'flex',
+            gap: '55px',
+            alignItems: 'center'
+          }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start', width: '113px' }}>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '24px',
+                color: figmaColors.darkGray,
+                margin: 0,
+                lineHeight: '38.704px',
+                letterSpacing: '0.344px'
+              }}>
+                48 h
+              </p>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 400,
+                fontSize: '16px',
+                color: figmaColors.blue,
+                margin: 0,
+                lineHeight: '34.833px'
+              }}>
+                Total Run Time
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start', width: '133px' }}>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '24px',
+                color: figmaColors.darkGray,
+                margin: 0,
+                lineHeight: '38.704px',
+                letterSpacing: '0.344px'
+              }}>
+                2,100
+              </p>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 400,
+                fontSize: '16px',
+                color: figmaColors.blue,
+                margin: 0,
+                lineHeight: '34.833px'
+              }}>
+                Variant A
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start', width: '133px' }}>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '24px',
+                color: figmaColors.darkGray,
+                margin: 0,
+                lineHeight: '38.704px',
+                letterSpacing: '0.344px'
+              }}>
+                2,160
+              </p>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 400,
+                fontSize: '16px',
+                color: figmaColors.blue,
+                margin: 0,
+                lineHeight: '34.833px'
+              }}>
+                Variant B
+              </p>
+            </div>
+          </div>
+          
+          {/* Action Buttons */}
+          <div style={{
+            position: 'absolute',
+            height: '105.453px',
+            left: 'calc(83.333% + 22px)',
+            top: '902px',
+            width: '186px'
+          }}>
+            <button style={{
+              position: 'absolute',
+              backgroundColor: figmaColors.blue,
+              borderRadius: '5px',
+              border: 'none',
+              padding: '12px 24px',
+              cursor: 'pointer',
+              top: 0,
+              left: 0,
+              right: 0,
+              height: '45px'
+            }}>
+              <p style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 500,
+                fontSize: '14px',
+                color: figmaColors.white,
+                margin: 0
+              }}>
+                End Experiment
+              </p>
+            </button>
+            <button style={{
+              position: 'absolute',
+              backgroundColor: figmaColors.lightBlue,
+              border: `1px solid ${figmaColors.blue}`,
+              borderRadius: '5px',
+              padding: '12px 24px',
+              cursor: 'pointer',
+              bottom: 0,
+              left: 0,
+              right: 0,
+              height: '45px'
+            }}>
+              <p style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 500,
+                fontSize: '14px',
+                color: figmaColors.blue,
+                margin: 0
+              }}>
+                View Story
+              </p>
+            </button>
+          </div>
+          
+          {/* Chart Area */}
+          <div style={{
+            position: 'absolute',
+            left: 'calc(16.667% + 156px)',
+            top: '406.18px',
+            width: '1246.31px',
+            height: '262.306px'
+          }}>
+            <div style={{
+              position: 'absolute',
+              bottom: 0,
+              left: 'calc(62.5% - 57.366px)',
+              top: '-5.89%',
+              transform: 'translateX(-50%)',
+              width: '1246.31px',
+              height: '262.306px'
+            }}>
+              <img alt="Chart" src={imgChart} style={{ width: '100%', height: '100%' }} />
+            </div>
+          </div>
+          
+          {/* Legend */}
+          <div style={{
+            position: 'absolute',
+            left: 'calc(87.5% - 32.114px)',
+            top: '230px',
+            transform: 'translateX(-50%)',
+            width: '144.92px',
+            height: '26.086px',
+            display: 'flex',
+            gap: '11.594px',
+            alignItems: 'center'
+          }}>
+            <div style={{
+              backgroundColor: '#3d3af3',
+              borderRadius: '4px',
+              width: '17.39px',
+              height: '17.39px',
+              flexShrink: 0
+            }} />
+            <p style={{
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 400,
+              fontSize: '17.39px',
+              color: figmaColors.themeDark,
+              margin: 0
+            }}>
+              Variant
+            </p>
+          </div>
+          
+          <div style={{
+            position: 'absolute',
+            left: 'calc(95.833% - 61.472px)',
+            top: '230px',
+            transform: 'translateX(-50%)',
+            width: '144.92px',
+            height: '26.086px',
+            display: 'flex',
+            gap: '11.594px',
+            alignItems: 'center'
+          }}>
+            <div style={{
+              backgroundColor: figmaColors.orange,
+              borderRadius: '4px',
+              width: '17.39px',
+              height: '17.39px',
+              flexShrink: 0
+            }} />
+            <p style={{
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 400,
+              fontSize: '17.39px',
+              color: figmaColors.themeDark,
+              margin: 0
+            }}>
+              Control
+            </p>
+          </div>
+          
+          {/* Experiment Overview Text */}
+          <div style={{
+            position: 'absolute',
+            left: 'calc(45.833% - 437px)',
+            top: '230px',
+            width: '816px'
+          }}>
+            <p style={{
+              fontFamily: 'Geist, sans-serif',
+              fontWeight: 500,
+              fontSize: '24px',
+              color: figmaColors.blue,
+              margin: '0 0 10px 0',
+              lineHeight: '32px'
+            }}>
+              Experiment Overview
+            </p>
+            <div>
+              <span style={{
+                fontFamily: 'Geist, sans-serif',
+                fontWeight: 500,
+                fontSize: '32px',
+                color: figmaColors.darkGray,
+                lineHeight: '40px'
+              }}>
+                Returns badge is leading 7.4% ATC with 70% certainty.
+              </span>
+              <span style={{
+                fontFamily: 'Geist, sans-serif',
+                fontWeight: 300,
+                fontSize: '24px',
+                color: figmaColors.darkGray,
+                lineHeight: '32px'
+              }}>
+                We suggest keeping the test active for a few more days to reach a more certain conclusion
+              </span>
+            </div>
+          </div>
+          
+          {/* AutoPilot */}
+          <div style={{
+            position: 'absolute',
+            left: 'calc(16.667% + 123px)',
+            top: '858px',
+            display: 'flex',
+            gap: '15px',
+            alignItems: 'center'
+          }}>
+            <div style={{ width: '28px', height: '28px', flexShrink: 0 }}>
+              <img alt="Graph" src={imgGraph} style={{ width: '100%', height: '100%' }} />
+            </div>
+            <div style={{ display: 'flex', gap: '10px', alignItems: 'center', flexShrink: 0 }}>
+              <div style={{ width: '17.256px', height: '17.552px', flexShrink: 0 }}>
+                <img alt="Vector" src={imgVector} style={{ width: '100%', height: '100%' }} />
+              </div>
+              <div>
+                <p style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 500,
+                  fontSize: '16px',
+                  color: figmaColors.blue,
+                  margin: 0
+                }}>
+                  AutoPilot On
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Ideas To Try Section */}
+        <div style={{
+          position: 'absolute',
+          left: 'calc(16.667% + 78px)',
+          top: '1124px',
+          display: 'flex',
+          gap: '10px',
+          alignItems: 'center'
+        }}>
+          <div style={{ width: '40px', height: '40px', flexShrink: 0 }}>
+            <img alt="Frame" src={imgFrame2147224435} style={{ width: '100%', height: '100%' }} />
+          </div>
+          <p style={{
+            fontFamily: 'Geist, sans-serif',
+            fontWeight: 500,
+            fontSize: '32px',
+            color: figmaColors.lightGray,
+            margin: 0
+          }}>
+            Ideas To Try
+          </p>
+        </div>
+        
+        {/* Navigation Arrows */}
+        <div style={{
+          position: 'absolute',
+          left: 'calc(91.667% - 9px)',
+          top: '1124px',
+          width: '93px',
+          height: '40px',
+          display: 'flex',
+          gap: '11px',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}>
           <div style={{
+            border: '0.714px solid #414042',
+            borderRadius: '25px',
+            width: '50px',
+            height: '50px',
             display: 'flex',
-            justifyContent: 'space-between',
             alignItems: 'center',
-            marginBottom: '16px'
+            justifyContent: 'center',
+            cursor: 'pointer'
           }}>
-            {[1, 2, 3, 4, 5].map((step) => (
-              <div key={step} style={{
+            <div style={{ width: '22.857px', height: '22.857px' }}>
+              <img alt="Arrow Left" src={img1} style={{ width: '100%', height: '100%' }} />
+            </div>
+          </div>
+          <div style={{
+            border: '0.714px solid ' + figmaColors.blue,
+            borderRadius: '25px',
+            width: '50px',
+            height: '50px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer'
+          }}>
+            <div style={{ width: '22.857px', height: '22.857px' }}>
+              <img alt="Arrow Right" src={img2} style={{ width: '100%', height: '100%' }} />
+            </div>
+          </div>
+        </div>
+
+        {/* Test Cards */}
+        <div style={{
+          position: 'absolute',
+          left: 'calc(16.667% + 78px)',
+          top: '1219px',
+          width: '1522px',
+          display: 'flex',
+          gap: '25px',
+          alignItems: 'center',
+          overflow: 'hidden'
+        }}>
+          {testCards.map((card, index) => (
+            <div
+              key={card.id}
+              style={{
+                backgroundColor: figmaColors.gray,
+                border: `1px solid ${figmaColors.blue}`,
+                borderRadius: '24px',
+                padding: '40px',
+                width: '308px',
+                flexShrink: 0,
                 display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
+                flexDirection: 'column',
+                gap: '20px',
+                alignItems: 'flex-start',
+                cursor: 'pointer',
+                transition: 'transform 0.2s ease'
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.transform = 'translateY(-5px)';
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.transform = 'translateY(0)';
+              }}
+            >
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'flex-start' }}>
+                  <div style={{ width: '308px', height: '245px', borderRadius: '10px', overflow: 'hidden' }}>
+                    <img alt="Placeholder" src={imgPlaceholder} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start' }}>
+                    <p style={{
+                      fontFamily: 'Geist, sans-serif',
+                      fontWeight: 600,
+                      fontSize: '24px',
+                      color: figmaColors.darkGray,
+                      margin: 0
+                    }}>
+                      {card.name}
+                    </p>
+                    <p style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontWeight: 500,
+                      fontSize: '14px',
+                      color: figmaColors.darkGray,
+                      margin: 0,
+                      lineHeight: '20px',
+                      width: '308px'
+                    }}>
+                      {card.description}
+                    </p>
+                  </div>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '308px' }}>
+                  <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+                    <div style={{ width: '68px', height: '68px', flexShrink: 0 }}>
+                      <img alt="Frame" src={imgFrame2147224432} style={{ width: '100%', height: '100%' }} />
+                    </div>
+                    <div style={{
+                      backgroundColor: figmaColors.yellow,
+                      borderRadius: '20px',
+                      padding: '5px 12px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}>
+                      <p style={{
+                        fontFamily: 'Poppins, sans-serif',
+                        fontWeight: 500,
+                        fontSize: '14px',
+                        color: figmaColors.yellow,
+                        margin: 0,
+                        letterSpacing: '0.4px'
+                      }}>
+                        {card.status}
+                      </p>
+                    </div>
+                  </div>
+                  <div style={{
+                    border: `1px solid ${figmaColors.green}`,
+                    borderRadius: '43px',
+                    width: '68px',
+                    height: '68px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer'
+                  }}>
+                    <div style={{ width: '28.544px', height: '24.013px' }}>
+                      <img alt="Layer" src={imgLayer2} style={{ width: '100%', height: '100%' }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        
+        {/* Gradient Overlay */}
+        <div style={{
+          position: 'absolute',
+          background: 'linear-gradient(to right, rgba(255,255,255,0), #e6e6e6)',
+          height: '580px',
+          right: 0,
+          top: '1199px',
+          width: '245px'
+        }} />
+
+        {/* Summary Section */}
+        <div style={{
+          position: 'absolute',
+          left: 'calc(16.667% + 78px)',
+          top: '1879px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '30px',
+          alignItems: 'flex-start'
+        }}>
+          <div style={{ display: 'flex', gap: '38px', alignItems: 'center', width: '853px' }}>
+            <p style={{
+              fontFamily: 'Geist, sans-serif',
+              fontWeight: 500,
+              fontSize: '32px',
+              color: figmaColors.darkGray,
+              margin: 0,
+              flex: 1
+            }}>
+              Summary
+            </p>
+            <div style={{
+              borderRadius: '8px',
+              padding: '6px 0',
+              cursor: 'pointer'
+            }}>
+              <p style={{
+                fontFamily: 'SF Pro, sans-serif',
+                fontWeight: 400,
+                fontSize: '16px',
+                color: figmaColors.blue,
+                margin: 0,
+                lineHeight: '24px',
+                textAlign: 'center'
+              }}>
+                View More
+              </p>
+            </div>
+          </div>
+          
+          {/* Summary Cards Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(2, 415.412px)',
+            gridTemplateRows: 'repeat(2, 232.686px)',
+            gap: '40px'
+          }}>
+            {/* Revenue Impact Card */}
+            <div style={{
+              gridColumn: '2',
+              gridRow: '1',
+              backgroundColor: figmaColors.lightBlue,
+              borderRadius: '20px',
+              width: '415.412px',
+              height: '232.686px',
+              position: 'relative'
+            }}>
+              <div style={{
+                position: 'absolute',
+                left: '40.41px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '107px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '40px',
+                alignItems: 'flex-start'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', alignItems: 'flex-start', width: '100%' }}>
+                  <p style={{
+                    fontFamily: 'Geist, sans-serif',
+                    fontWeight: 500,
+                    fontSize: '44px',
+                    color: '#14213d',
+                    margin: 0,
+                    lineHeight: '32px',
+                    width: '100%'
+                  }}>
+                    +12%
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '14px',
+                    color: '#14213d',
+                    margin: 0,
+                    lineHeight: '20px',
+                    width: '100%'
+                  }}>
+                    Revenue Impact
+                  </p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'flex-start' }}>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 600,
+                    fontSize: '16px',
+                    color: figmaColors.blue,
+                    margin: 0,
+                    lineHeight: '16px'
+                  }}>
+                    + 23%
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '12px',
+                    color: '#14213d',
+                    margin: 0,
+                    lineHeight: '14px'
+                  }}>
+                    This month
+                  </p>
+                </div>
+              </div>
+              <div style={{
+                position: 'absolute',
+                left: 'calc(50% + 121.706px)',
+                top: 'calc(50% + 31.157px)',
+                transform: 'translate(-50%, -50%)',
+                width: '92px',
+                height: '81px'
+              }}>
+                <img alt="Vector" src={imgVector7} style={{ width: '100%', height: '100%' }} />
+              </div>
+            </div>
+            
+            {/* Total Test Ran Card */}
+            <div style={{
+              gridColumn: '1',
+              gridRow: '1',
+              backgroundColor: figmaColors.lightBlue,
+              borderRadius: '20px',
+              width: '415.412px',
+              height: '232.686px',
+              position: 'relative'
+            }}>
+              <div style={{
+                position: 'absolute',
+                left: '40.41px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '107px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '40px',
+                alignItems: 'flex-start'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', alignItems: 'flex-start', width: '100%' }}>
+                  <p style={{
+                    fontFamily: 'Geist, sans-serif',
+                    fontWeight: 500,
+                    fontSize: '44px',
+                    color: '#14213d',
+                    margin: 0,
+                    lineHeight: '32px'
+                  }}>
+                    $ 15,221.00
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '14px',
+                    color: '#14213d',
+                    margin: 0,
+                    lineHeight: '20px',
+                    width: '100%'
+                  }}>
+                    Total Test Ran
+                  </p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'flex-start' }}>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 600,
+                    fontSize: '16px',
+                    color: figmaColors.blue,
+                    margin: 0,
+                    lineHeight: '16px'
+                  }}>
+                    - 253%
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '12px',
+                    color: '#14213d',
+                    margin: 0,
+                    lineHeight: '14px'
+                  }}>
+                    This month
+                  </p>
+                </div>
+              </div>
+              <div style={{
+                position: 'absolute',
+                left: 'calc(50% + 120.294px)',
+                top: 'calc(50% + 25.657px)',
+                transform: 'translate(-50%, -50%)',
+                width: '94px',
+                height: '92px'
+              }}>
+                <img alt="Vector" src={imgVector8} style={{ width: '100%', height: '100%' }} />
+              </div>
+            </div>
+            
+            {/* Total Tested Impressions Card */}
+            <div style={{
+              gridColumn: '1',
+              gridRow: '2',
+              backgroundColor: figmaColors.lightBlue,
+              borderRadius: '20px',
+              width: '415.412px',
+              height: '232.686px',
+              position: 'relative'
+            }}>
+              <div style={{
+                position: 'absolute',
+                left: '40.41px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '107px',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '40px',
+                alignItems: 'flex-start'
+              }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', alignItems: 'flex-start', width: '100%' }}>
+                  <p style={{
+                    fontFamily: 'Geist, sans-serif',
+                    fontWeight: 500,
+                    fontSize: '44px',
+                    color: '#14213d',
+                    margin: 0,
+                    lineHeight: '32px'
+                  }}>
+                    2,15,221
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '14px',
+                    color: '#14213d',
+                    margin: 0,
+                    lineHeight: '20px'
+                  }}>
+                    Total Tested Impressions
+                  </p>
+                </div>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'flex-start' }}>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 600,
+                    fontSize: '16px',
+                    color: figmaColors.blue,
+                    margin: 0,
+                    lineHeight: '16px'
+                  }}>
+                    + 250%
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '12px',
+                    color: '#14213d',
+                    margin: 0,
+                    lineHeight: '14px'
+                  }}>
+                    This month
+                  </p>
+                </div>
+              </div>
+              <div style={{
+                position: 'absolute',
+                left: 'calc(50% + 119.294px)',
+                top: '112px',
+                transform: 'translateX(-50%)',
+                width: '96px',
+                height: '76px'
+              }}>
+                <img alt="Vector" src={imgVector9} style={{ width: '100%', height: '100%' }} />
+              </div>
+            </div>
+            
+            {/* Progress Card */}
+            <div style={{
+              gridColumn: '2',
+              gridRow: '2',
+              backgroundColor: figmaColors.blue,
+              borderRadius: '20px',
+              width: '415.412px',
+              height: '232.686px',
+              position: 'relative'
+            }}>
+              <div style={{
+                position: 'absolute',
+                left: '20px',
+                top: '20px',
+                width: '373.333px',
+                height: '24px',
+                display: 'flex',
+                gap: '8px',
+                alignItems: 'center'
+              }}>
+                <div style={{ width: '24px', height: '24px', flexShrink: 0 }}>
+                  <img alt="Award" src={imgAward} style={{ width: '100%', height: '100%' }} />
+                </div>
+                <p style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 400,
+                  fontSize: '14px',
+                  color: figmaColors.white,
+                  margin: 0,
+                  lineHeight: '20px',
+                  flex: 1
+                }}>
+                  Your Progress
+                </p>
+                <div style={{ width: '16px', height: '16px', flexShrink: 0 }}>
+                  <img alt="Arrow Down" src={imgArrowDown2} style={{ width: '100%', height: '100%' }} />
+                </div>
+              </div>
+              
+              <p style={{
+                position: 'absolute',
+                left: '20px',
+                top: '59px',
+                width: '373.333px',
+                fontFamily: 'Geist, sans-serif',
+                fontWeight: 600,
+                fontSize: '24px',
+                color: figmaColors.white,
+                margin: 0,
+                lineHeight: '32px'
+              }}>
+                {user.level}
+              </p>
+              
+              <div style={{
+                position: 'absolute',
+                left: '20px',
+                bottom: '13.05%',
+                width: '371px',
+                height: '24px'
               }}>
                 <div style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  background: currentStep >= step ? '#4F46E5' : '#E5E5E5',
-                  color: currentStep >= step ? '#FFFFFF' : '#9CA3AF',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '14px',
-                  fontWeight: '600'
+                  position: 'absolute',
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  top: '76.47%',
+                  background: 'linear-gradient(to right, #97cdff 0%, #ef9362 85%)',
+                  borderRadius: '2000px'
+                }} />
+                <p style={{
+                  position: 'absolute',
+                  left: 0,
+                  top: 'calc(50% - 17px)',
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 500,
+                  fontSize: '12px',
+                  color: figmaColors.lightBlue,
+                  margin: 0,
+                  lineHeight: '18px'
                 }}>
-                  {step}
+                  Level Progress
+                </p>
+                <p style={{
+                  position: 'absolute',
+                  right: '0.06%',
+                  top: 'calc(50% - 17px)',
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 400,
+                  fontSize: '12px',
+                  color: figmaColors.white,
+                  margin: 0,
+                  lineHeight: '18px',
+                  textAlign: 'right'
+                }}>
+                  {user.xp} / {user.maxXp} XP
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Recent Activities */}
+        <div style={{
+          position: 'absolute',
+          left: 'calc(66.667% + 22px)',
+          top: '1941px',
+          width: '551px',
+          backgroundColor: '#d9d9d9',
+          borderRadius: '20px',
+          padding: '40px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '25px',
+          alignItems: 'flex-start'
+        }}>
+          <p style={{
+            fontFamily: 'Geist, sans-serif',
+            fontWeight: 500,
+            fontSize: '32px',
+            color: figmaColors.darkGray,
+            margin: 0,
+            width: '100%'
+          }}>
+            Recent Activities
+          </p>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px', alignItems: 'flex-start', width: '100%' }}>
+            {recentActivities.map((activity, index) => (
+              <div key={index} style={{ width: '100%' }}>
+                <div style={{ width: '100%' }}>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '16px',
+                    color: figmaColors.darkGray,
+                    margin: '0 0 0 0',
+                    lineHeight: '25.27px'
+                  }}>
+                    {activity.action}
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '12px',
+                    color: figmaColors.lightGray,
+                    margin: '0 0 0 0',
+                    lineHeight: '22px'
+                  }}>
+                    {activity.date}
+                  </p>
                 </div>
-                {step < 5 && (
-                  <div style={{
-                    width: '60px',
-                    height: '2px',
-                    background: currentStep > step ? '#4F46E5' : '#E5E5E5',
-                    margin: '0 8px'
-                  }} />
+                {index < recentActivities.length - 1 && (
+                  <div style={{ width: '100%', height: '1px', margin: '15px 0' }}>
+                    <img alt="Line" src={imgLine63} style={{ width: '100%' }} />
+                  </div>
                 )}
               </div>
             ))}
           </div>
-          <div style={{
-            fontSize: '14px',
-            color: '#6B7280',
-            textAlign: 'center'
-          }}>
-            Step {currentStep} of 5
-          </div>
         </div>
 
-        {/* Main Content */}
-        <div style={{
-          padding: '32px'
+        {/* Queued Ideas Section */}
+        <p style={{
+          position: 'absolute',
+          left: 'calc(25% - 82px)',
+          top: '2527px',
+          fontFamily: 'Geist, sans-serif',
+          fontWeight: 500,
+          fontSize: '32px',
+          color: figmaColors.darkGray,
+          margin: 0
         }}>
-          {/* Step 1: Choose A/B Test Idea */}
-          {currentStep === 1 && (
-            <div style={{
-              animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: 'translateX(0)',
-              opacity: 1
-            }}>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1F2937',
-                marginBottom: '8px'
-              }}>
-                Choose Your A/B Test Idea
-              </h3>
-              <p style={{
-                fontSize: '14px',
-                color: '#6B7280',
-                marginBottom: '24px'
-              }}>
-                Select a widget type that will help boost your conversion rates
-              </p>
+          Queued Ideas
+        </p>
 
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                gap: '16px'
-              }}>
-                {abTestIdeas.map((idea) => (
-                  <div
-                    key={idea.id}
-                    onClick={() => setSelectedIdea(idea)}
-                    style={{
-                      background: selectedIdea?.id === idea.id ? '#F0F9FF' : '#FFFFFF',
-                      border: selectedIdea?.id === idea.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                      borderRadius: '12px',
-                      padding: '20px',
-                      cursor: 'pointer',
-                      transition: 'all 0.2s ease',
-                      transform: selectedIdea?.id === idea.id ? 'scale(1.02)' : 'scale(1)'
-                    }}
-                  >
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      marginBottom: '12px'
-                    }}>
-                      <div style={{
-                        fontSize: '24px'
-                      }}>
-                        {idea.utility === 'Social Proof' && '👥'}
-                        {idea.utility === 'Urgency Scarcity' && '⚡'}
-                        {idea.utility === 'Countdown Timer' && '⏰'}
-                        {idea.utility === 'Product Reviews' && '⭐'}
-                      </div>
-                      <h4 style={{
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        margin: 0
-                      }}>
-                        {idea.utility}
-                      </h4>
-                    </div>
-                    <p style={{
-                      fontSize: '14px',
-                      color: '#6B7280',
-                      marginBottom: '12px',
-                      lineHeight: '1.5'
-                    }}>
-                      {idea.rationale}
-                    </p>
-                    <div style={{
-                      background: '#F9FAFB',
-                      border: '1px solid #E5E5E5',
-                      borderRadius: '6px',
-                      padding: '12px',
-                      fontSize: '13px',
-                      color: '#374151',
-                      fontStyle: 'italic'
-                    }}>
-                      Preview: {idea.preview}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Select Product */}
-          {currentStep === 2 && (
-            <div style={{
-              animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: 'translateX(0)',
-              opacity: 1
-            }}>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1F2937',
-                marginBottom: '8px'
-              }}>
-                Select Product to Test
-              </h3>
-              <p style={{
-                fontSize: '14px',
-                color: '#6B7280',
-                marginBottom: '24px'
-              }}>
-                Choose which product page will display your {selectedIdea?.utility} widget
-              </p>
-
-              {/* Product Search */}
-              <div style={{
-                background: '#F8FAFC',
-                border: '1px solid #E5E5E5',
-                borderRadius: '8px',
-                padding: '20px',
-                marginBottom: '24px'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '12px',
-                  marginBottom: '16px'
-                }}>
-                  <div style={{
-                    fontSize: '20px'
-                  }}>
-                    🔍
-                  </div>
-                  <h4 style={{
+        {/* Queued Tests List */}
+        <div style={{
+          position: 'absolute',
+          left: 'calc(16.667% + 78px)',
+          top: '2580px',
+          width: '1455px',
+          height: '415px'
+        }}>
+          <div style={{
+            position: 'absolute',
+            inset: 0,
+            backgroundColor: 'rgba(255,255,255,0.85)',
+            border: `1px solid ${figmaColors.basicFill}`,
+            borderRadius: '24px'
+          }} />
+          <div style={{
+            position: 'absolute',
+            bottom: '85.54%',
+            left: 0,
+            right: 0,
+            top: 0,
+            backgroundColor: '#dbdbdb',
+            borderRadius: '24px 24px 0 0'
+          }} />
+          
+          {/* Header */}
+          <p style={{
+            position: 'absolute',
+            left: '92.92%',
+            right: '3.57%',
+            top: 'calc(50% - 185.5px)',
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 600,
+            fontSize: '16px',
+            color: figmaColors.darkGray,
+            margin: 0,
+            lineHeight: '16px'
+          }}>
+            Action
+          </p>
+          <p style={{
+            position: 'absolute',
+            left: '3.09%',
+            right: '88.66%',
+            top: 'calc(50% - 185.5px)',
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 600,
+            fontSize: '16px',
+            color: figmaColors.darkGray,
+            margin: 0,
+            lineHeight: '16px'
+          }}>
+            Test Name
+          </p>
+          
+          {/* Tests List */}
+          <div style={{
+            position: 'absolute',
+            left: '45px',
+            top: '86px',
+            width: '1365px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            alignItems: 'center'
+          }}>
+            {queuedTests.map((test, index) => (
+              <div key={index} style={{ width: '100%' }}>
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '100%',
+                    cursor: 'pointer',
+                    padding: '10px',
+                    borderRadius: '8px',
+                    transition: 'background-color 0.2s ease'
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = 'rgba(0, 56, 255, 0.05)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = 'transparent';
+                  }}
+                  onClick={() => toggleTestExpansion(test.name)}
+                >
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
                     fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    margin: 0
+                    color: figmaColors.darkGray,
+                    margin: 0,
+                    lineHeight: '25.27px'
                   }}>
-                    Search Products
-                  </h4>
+                    {test.name}
+                  </p>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    width: '60px'
+                  }}>
+                    <div style={{ width: '20px', height: '20px', flexShrink: 0 }}>
+                      <img alt="Arrow" src={img01IconsLineArrowCircleDownCopy} style={{ width: '100%', height: '100%' }} />
+                    </div>
+                    <div style={{ width: '20px', height: '20px', flexShrink: 0 }}>
+                      <img alt="Arrow" src={img01IconsLineArrowCircleDownCopy2} style={{ width: '100%', height: '100%' }} />
+                    </div>
+                  </div>
                 </div>
                 
-                <input
-                  type="text"
-                  placeholder="Search by product name, vendor, or tags..."
-                  value={productSearchTerm}
-                  onChange={(e) => setProductSearchTerm(e.target.value)}
-                  style={{
-                    width: '100%',
-                    padding: '12px 16px',
-                    border: '1px solid #D1D5DB',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    background: '#FFFFFF',
-                    transition: 'border-color 0.2s ease'
-                  }}
-                  onFocus={(e) => {
-                    e.target.style.borderColor = '#3B82F6';
-                    e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                  }}
-                  onBlur={(e) => {
-                    e.target.style.borderColor = '#D1D5DB';
-                    e.target.style.boxShadow = 'none';
-                  }}
-                />
-                
-                {productSearchTerm && (
+                {/* Separator */}
+                {index < queuedTests.length - 1 && (
                   <div style={{
-                    marginTop: '12px',
-                    fontSize: '14px',
-                    color: '#6B7280'
+                    width: '100%',
+                    height: '1px',
+                    backgroundColor: figmaColors.basicFill,
+                    margin: '16px 0'
+                  }} />
+                )}
+                
+                {/* Expanded Content */}
+                {expandedTests.has(test.name) && (
+                  <div style={{
+                    marginTop: '16px',
+                    padding: '20px',
+                    backgroundColor: 'rgba(0, 56, 255, 0.05)',
+                    borderRadius: '12px',
+                    border: `1px solid ${figmaColors.blue}`
                   }}>
-                    Found {products.filter(product => 
-                      product.title.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                      product.vendor?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                      product.tags?.some(tag => tag.toLowerCase().includes(productSearchTerm.toLowerCase()))
-                    ).length} products matching "{productSearchTerm}"
+                    <p style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontWeight: 500,
+                      fontSize: '14px',
+                      color: figmaColors.darkGray,
+                      margin: '0 0 10px 0'
+                    }}>
+                      Test Details
+                    </p>
+                    <p style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontWeight: 400,
+                      fontSize: '14px',
+                      color: figmaColors.themeDark,
+                      margin: 0,
+                      lineHeight: '20px'
+                    }}>
+                      This test is queued and ready to be launched. Click to configure test parameters and start the experiment.
+                    </p>
                   </div>
                 )}
               </div>
-
-              {products.filter(product => 
-                product.title.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                product.vendor?.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                product.tags?.some(tag => tag.toLowerCase().includes(productSearchTerm.toLowerCase()))
-              ).length === 0 ? (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  minHeight: '300px',
-                  background: '#F9FAFB',
-                  borderRadius: '8px',
-                  border: '2px dashed #E5E5E5',
-                  padding: '32px',
-                  textAlign: 'center'
-                }}>
-                  <div style={{
-                    fontSize: '48px',
-                    marginBottom: '16px'
-                  }}>
-                    🔍
-                  </div>
-                  <h3 style={{
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}>
-                    No Products Found
-                  </h3>
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#6B7280',
-                    marginBottom: '16px',
-                    maxWidth: '400px'
-                  }}>
-                    No products match your search criteria. Try adjusting your search terms or clearing the search to see all products.
-                  </p>
-                  <button
-                    onClick={() => setProductSearchTerm('')}
-                    style={{
-                      padding: '8px 16px',
-                      background: '#3B82F6',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    Clear Search
-                  </button>
-                </div>
-              ) : (
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                  gap: '20px'
-                }}>
-                  {products.filter(product => 
-                    product.title.toLowerCase().includes(productSearchTerm.toLowerCase()) ||
-                    product.tags?.some(tag => tag.toLowerCase().includes(productSearchTerm.toLowerCase()))
-                  ).slice(0, 12).map((product) => {
-                    const price = product.priceRangeV2?.minVariantPrice?.amount || '0';
-                    const currency = product.priceRangeV2?.minVariantPrice?.currencyCode || 'USD';
-                    const imageUrl = product.featuredImage?.url || product.images?.nodes?.[0]?.url;
-                    const isBestseller = product.tags?.includes('bestseller') || product.tags?.includes('featured');
-                    
-                    return (
-                  <div
-                    key={product.id}
-                    onClick={() => setSelectedProduct(product)}
-                    style={{
-                      background: selectedProduct?.id === product.id ? '#F0F9FF' : '#FFFFFF',
-                      border: selectedProduct?.id === product.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                      borderRadius: '12px',
-                      padding: '20px',
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)',
-                      boxShadow: selectedProduct?.id === product.id ? '0 8px 25px rgba(59, 130, 246, 0.15)' : '0 2px 8px rgba(0, 0, 0, 0.08)',
-                      position: 'relative',
-                      overflow: 'hidden'
-                    }}
-                  >
-                    {/* Product Image */}
-                    <div style={{
-                      width: '100%',
-                      height: '160px',
-                      background: '#F8FAFC',
-                      borderRadius: '8px',
-                      marginBottom: '16px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'relative',
-                      overflow: 'hidden'
-                    }}>
-                      {imageUrl ? (
-                        <img
-                          src={imageUrl}
-                          alt={product.featuredImage?.altText || product.title}
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            borderRadius: '8px'
-                          }}
-                        />
-                      ) : (
-                        <div style={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          color: '#9CA3AF',
-                          fontSize: '48px'
-                        }}>
-                          📦
-                        </div>
-                      )}
-                      
-                      {/* Selection Indicator */}
-                      {selectedProduct?.id === product.id && (
-                        <div style={{
-                          position: 'absolute',
-                          top: '8px',
-                          right: '8px',
-                          background: '#3B82F6',
-                          color: '#FFFFFF',
-                          borderRadius: '50%',
-                          width: '24px',
-                          height: '24px',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          fontSize: '14px',
-                          fontWeight: '600'
-                        }}>
-                          ✓
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Product Details */}
-                    <div style={{
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      marginBottom: '8px',
-                      lineHeight: '1.4'
-                    }}>
-                      {product.title}
-                    </div>
-                    
-                    <div style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      alignItems: 'center',
-                      marginBottom: '12px'
-                    }}>
-                      <div style={{
-                        fontSize: '18px',
-                        fontWeight: '700',
-                        color: '#059669'
-                      }}>
-                        {currency} {parseFloat(price).toFixed(2)}
-                      </div>
-                      
-                      {product.variants?.nodes?.[0]?.compareAtPrice && (
-                        <div style={{
-                          fontSize: '14px',
-                          color: '#9CA3AF',
-                          textDecoration: 'line-through'
-                        }}>
-                          {currency} {parseFloat(product.variants.nodes[0].compareAtPrice).toFixed(2)}
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Product Status */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px',
-                      marginBottom: '12px'
-                    }}>
-                      <div style={{
-                        width: '8px',
-                        height: '8px',
-                        borderRadius: '50%',
-                        background: product.status === 'active' ? '#10B981' : '#6B7280'
-                      }} />
-                      <span style={{
-                        fontSize: '12px',
-                        color: '#6B7280',
-                        textTransform: 'capitalize'
-                      }}>
-                        {product.status}
-                      </span>
-                    </div>
-
-                    {/* Product Tags */}
-                    {product.tags && product.tags.length > 0 && (
-                      <div style={{
-                        display: 'flex',
-                        flexWrap: 'wrap',
-                        gap: '4px',
-                        marginBottom: '12px'
-                      }}>
-                        {product.tags.slice(0, 3).map((tag, index) => (
-                          <span
-                            key={index}
-                            style={{
-                              background: '#F3F4F6',
-                              color: '#6B7280',
-                              padding: '2px 6px',
-                              borderRadius: '4px',
-                              fontSize: '10px',
-                              fontWeight: '500'
-                            }}
-                          >
-                            {tag}
-                          </span>
-                        ))}
-                        {product.tags.length > 3 && (
-                          <span style={{
-                            background: '#F3F4F6',
-                            color: '#6B7280',
-                            padding: '2px 6px',
-                            borderRadius: '4px',
-                            fontSize: '10px',
-                            fontWeight: '500'
-                          }}>
-                            +{product.tags.length - 3} more
-                          </span>
-                        )}
-                      </div>
-                    )}
-
-                    {/* Action Buttons */}
-                    <div style={{
-                      display: 'flex',
-                      gap: '8px'
-                    }}>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          openProductPreview(product);
-                        }}
-                        style={{
-                          flex: 1,
-                          padding: '8px 12px',
-                          background: '#F8FAFC',
-                          color: '#374151',
-                          border: '1px solid #D1D5DB',
-                          borderRadius: '6px',
-                          fontSize: '12px',
-                          fontWeight: '500',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          display: 'flex',
-                          alignItems: 'center',
-                          justifyContent: 'center',
-                          gap: '4px'
-                        }}
-                      >
-                        👁️ Preview
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setSelectedProduct(product);
-                        }}
-                        style={{
-                          flex: 2,
-                          padding: '8px 16px',
-                          background: selectedProduct?.id === product.id ? '#3B82F6' : '#F3F4F6',
-                          color: selectedProduct?.id === product.id ? '#FFFFFF' : '#6B7280',
-                          border: 'none',
-                          borderRadius: '6px',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        {selectedProduct?.id === product.id ? '✓ Selected' : 'Select Product'}
-                      </button>
-                    </div>
-                  </div>
-                    );
-                  })}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Step 3: Placement Guide */}
-          {currentStep === 3 && (
-            <div style={{
-              animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: 'translateX(0)',
-              opacity: 1
-            }}>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1F2937',
-                marginBottom: '8px'
-              }}>
-                Widget Placement Guide
-              </h3>
-              <p style={{
-                fontSize: '14px',
-                color: '#6B7280',
-                marginBottom: '24px'
-              }}>
-                Learn where to place your {selectedIdea?.utility} widget for maximum impact
-              </p>
-
-              <div style={{
-                background: '#F8FAFC',
-                border: '1px solid #E5E5E5',
-                borderRadius: '8px',
-                padding: '24px',
-                marginBottom: '24px'
-              }}>
-                <h4 style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#1F2937',
-                  marginBottom: '16px'
-                }}>
-                  📍 Optimal Placement Locations
-                </h4>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '16px'
-                }}>
-                  {[
-                    { position: 'Above Title', impact: 'High', reason: 'First impression' },
-                    { position: 'After Price', impact: 'Very High', reason: 'Price justification' },
-                    { position: 'Before Cart', impact: 'Very High', reason: 'Last chance' },
-                    { position: 'After Description', impact: 'Medium', reason: 'Reinforcement' }
-                  ].map((item, index) => (
-                    <div key={index} style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #E5E5E5',
-                      borderRadius: '6px',
-                      padding: '16px'
-                    }}>
-                      <div style={{
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        marginBottom: '4px'
-                      }}>
-                        {item.position}
-                      </div>
-                      <div style={{
-                        fontSize: '12px',
-                        color: '#6B7280',
-                        marginBottom: '8px'
-                      }}>
-                        {item.reason}
-                      </div>
-                      <div style={{
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        color: item.impact === 'Very High' ? '#DC2626' : item.impact === 'High' ? '#D97706' : '#059669',
-                        background: item.impact === 'Very High' ? '#FEF2F2' : item.impact === 'High' ? '#FFFBEB' : '#F0FDF4',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        display: 'inline-block'
-                      }}>
-                        {item.impact} Impact
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <button
-                onClick={() => setPlacementGuideOpen(true)}
-                style={{
-                  padding: '12px 24px',
-                  background: '#3B82F6',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  cursor: 'pointer'
-                }}
-              >
-                ✅ I understand the placement strategy
-              </button>
-            </div>
-          )}
-
-          {/* Step 4: Professional Theme Editor */}
-          {currentStep === 4 && (
-            <div style={{
-              animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: 'translateX(0)',
-              opacity: 1
-            }}>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1F2937',
-                marginBottom: '8px'
-              }}>
-                Professional Theme Editor
-              </h3>
-              
-              {!selectedProduct && (
-                <div style={{
-                  background: '#FEF3C7',
-                  border: '1px solid #F59E0B',
-                  borderRadius: '8px',
-                  padding: '16px',
-                  marginBottom: '24px'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '12px',
-                    marginBottom: '12px'
-                  }}>
-                    <div style={{
-                      fontSize: '20px'
-                    }}>
-                      ⚠️
-                    </div>
-                    <h4 style={{
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#92400E',
-                      margin: 0
-                    }}>
-                      Product Selection Required
-                    </h4>
-                  </div>
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#92400E',
-                    marginBottom: '16px',
-                    lineHeight: '1.5'
-                  }}>
-                    You need to select a product before you can use the theme editor. Please go back and select a product first.
-                  </p>
-                  <button
-                    onClick={() => setCurrentStep(2)}
-                    style={{
-                      padding: '8px 16px',
-                      background: '#F59E0B',
-                      color: '#FFFFFF',
-                      border: 'none',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      cursor: 'pointer'
-                    }}
-                  >
-                    ← Back to Product Selection
-                  </button>
-                </div>
-              )}
-              
-              <p style={{
-                fontSize: '14px',
-                color: '#6B7280',
-                marginBottom: '24px'
-              }}>
-                Experience the full Shopify theme editor within your app. Position your widget exactly where you want it.
-              </p>
-
-              {/* Professional Theme Editor */}
-              {selectedProduct && selectedIdea && (
-                <div style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E5E5E5',
-                  borderRadius: '8px',
-                  padding: '24px',
-                  marginBottom: '24px',
-                  position: 'relative'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    justifyContent: 'space-between',
-                    alignItems: 'center',
-                    marginBottom: '20px',
-                    paddingBottom: '16px',
-                    borderBottom: '1px solid #E5E5E5'
-                  }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px'
-                    }}>
-                      <h4 style={{
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        margin: 0
-                      }}>
-                        🎨 Professional Theme Editor
-                      </h4>
-                      <span style={{
-                        background: '#10B981',
-                        color: '#FFFFFF',
-                        padding: '4px 8px',
-                        borderRadius: '4px',
-                        fontSize: '12px',
-                        fontWeight: '500'
-                      }}>
-                        {selectedIdea.utility}
-                      </span>
-                    </div>
-
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '8px'
-                    }}>
-                      <button
-                        onClick={() => generateThemePreview(selectedProduct, selectedIdea?.utility)}
-                        style={{
-                          padding: '8px 16px',
-                          background: '#3B82F6',
-                          color: '#FFFFFF',
-                          border: 'none',
-                          borderRadius: '6px',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          cursor: 'pointer'
-                        }}
-                      >
-                        🚀 Launch Theme Editor
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Theme Editor using App Bridge Modal */}
-                  {themePreviewData && (
-                    <div style={{
-                      background: '#F9FAFB',
-                      border: '2px dashed #D1D5DB',
-                      borderRadius: '8px',
-                      padding: '40px',
-                      textAlign: 'center'
-                    }}>
-                      <div style={{
-                        fontSize: '48px',
-                        marginBottom: '16px'
-                      }}>
-                        🎨
-                      </div>
-                      <h4 style={{
-                        fontSize: '18px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        marginBottom: '8px'
-                      }}>
-                        Theme Editor Ready
-                      </h4>
-                      <p style={{
-                        fontSize: '14px',
-                        color: '#6B7280',
-                        marginBottom: '24px',
-                        lineHeight: '1.5'
-                      }}>
-                        Click "Open Theme Editor" to launch the full Shopify theme editor in a modal where you can position your widget and see real-time changes.
-                      </p>
-                      
-                      <button
-                        onClick={() => {
-                          // Use App Bridge modal to open theme editor
-                          if (window.shopify && window.shopify.modal) {
-                            window.shopify.modal.open({
-                              variant: 'max',
-                              src: themePreviewData.themeEditorUrl,
-                              title: `Theme Editor - ${selectedProduct.title}`
-                            });
-                          } else {
-                            // Fallback: open in new window
-                            window.open(themePreviewData.themeEditorUrl, '_blank');
-                          }
-                        }}
-                        style={{
-                          padding: '12px 24px',
-                          background: '#10B981',
-                          color: '#FFFFFF',
-                          border: 'none',
-                          borderRadius: '8px',
-                          fontSize: '16px',
-                          fontWeight: '600',
-                          cursor: 'pointer',
-                          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.1)',
-                          transition: 'all 0.2s ease-in-out'
-                        }}
-                        onMouseOver={(e) => {
-                          e.target.style.background = '#059669';
-                          e.target.style.transform = 'translateY(-1px)';
-                        }}
-                        onMouseOut={(e) => {
-                          e.target.style.background = '#10B981';
-                          e.target.style.transform = 'translateY(0)';
-                        }}
-                      >
-                        🚀 Open Theme Editor
-                      </button>
-                    </div>
-                  )}
-
-                  {/* Widget Code Display */}
-                  {themePreviewData && (
-                    <div style={{
-                      background: '#F8FAFC',
-                      border: '1px solid #E2E8F0',
-                      borderRadius: '8px',
-                      padding: '20px',
-                      marginTop: '20px'
-                    }}>
-                      <h4 style={{
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        marginBottom: '12px'
-                      }}>
-                        📋 Generated Widget Code
-                      </h4>
-                      <div style={{
-                        background: '#FFFFFF',
-                        border: '1px solid #E5E5E5',
-                        borderRadius: '6px',
-                        padding: '16px',
-                        fontFamily: 'monospace',
-                        fontSize: '12px',
-                        color: '#374151',
-                        whiteSpace: 'pre-wrap',
-                        maxHeight: '200px',
-                        overflowY: 'auto'
-                      }}>
-                        {themePreviewData.widgetCode}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Step 5: Review & Launch */}
-          {currentStep === 5 && (
-            <div style={{
-              animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-              transform: 'translateX(0)',
-              opacity: 1
-            }}>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1F2937',
-                marginBottom: '8px'
-              }}>
-                Review & Launch
-              </h3>
-              
-              {/* Summary Card */}
-              <div style={{
-                background: '#F8FAFC',
-                border: '1px solid #E5E5E5',
-                borderRadius: '8px',
-                padding: '24px',
-                marginBottom: '24px'
-              }}>
-                <h4 style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#1F2937',
-                  marginBottom: '16px'
-                }}>
-                  📊 A/B Test Summary
-                </h4>
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                  gap: '16px'
-                }}>
-                  <div>
-                    <div style={{
-                      fontSize: '14px',
-                      color: '#6B7280',
-                      marginBottom: '4px'
-                    }}>
-                      Widget Type
-                    </div>
-                    <div style={{
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#1F2937'
-                    }}>
-                      {selectedIdea?.utility}
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{
-                      fontSize: '14px',
-                      color: '#6B7280',
-                      marginBottom: '4px'
-                    }}>
-                      Product
-                    </div>
-                    <div style={{
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#1F2937'
-                    }}>
-                      {selectedProduct?.title}
-                    </div>
-                  </div>
-                  <div>
-                    <div style={{
-                      fontSize: '14px',
-                      color: '#6B7280',
-                      marginBottom: '4px'
-                    }}>
-                      Expected Impact
-                    </div>
-                    <div style={{
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#059669'
-                    }}>
-                      {selectedIdea?.rationale}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <button
-                style={{
-                  padding: '16px 32px',
-                  background: '#10B981',
-                  color: '#FFFFFF',
-                  border: 'none',
-                  borderRadius: '8px',
-                  fontSize: '18px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  width: '100%'
-                }}
-              >
-                🚀 Launch A/B Test
-              </button>
-            </div>
-          )}
-        </div>
-
-        {/* Navigation */}
-        <div style={{
-          background: '#F8FAFC',
-          padding: '24px 32px',
-          borderTop: '1px solid #E5E5E5',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}>
-          <button
-            onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
-            disabled={currentStep === 1}
-            style={{
-              padding: '8px 16px',
-              background: currentStep === 1 ? '#F3F4F6' : '#FFFFFF',
-              color: currentStep === 1 ? '#9CA3AF' : '#374151',
-              border: '1px solid #D1D5DB',
-              borderRadius: '6px',
-              fontSize: '14px',
-              fontWeight: '500',
-              cursor: currentStep === 1 ? 'not-allowed' : 'pointer'
-            }}
-          >
-            ← Previous
-          </button>
-
-          <div style={{
-            fontSize: '14px',
-            color: '#6B7280'
-          }}>
-            Step {currentStep} of 5
+            ))}
           </div>
-
-          {currentStep < 5 ? (
-            <button 
-              onClick={() => setCurrentStep(currentStep + 1)}
-              disabled={!selectedIdea || (currentStep === 2 && !selectedProduct) || (currentStep === 3 && !placementGuideOpen) || (currentStep === 4 && !themePreviewData)}
-              style={{
-                padding: '8px 16px',
-                background: '#3B82F6',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                color: '#FFFFFF'
-              }}
-            >
-              Next →
-            </button>
-          ) : (
-            <button
-              style={{
-                padding: '8px 16px',
-                background: '#10B981',
-                border: 'none',
-                borderRadius: '6px',
-                fontSize: '14px',
-                fontWeight: '500',
-                cursor: 'pointer',
-                color: '#FFFFFF'
-              }}
-            >
-              🚀 Launch Test
-            </button>
-          )}
         </div>
       </div>
-
-      {/* Product Preview Modal - Live Storefront Preview */}
-      {productPreviewOpen && previewProduct && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-          background: 'rgba(0, 0, 0, 0.9)',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          zIndex: 1000,
-          padding: '20px'
-        }}>
-          <div style={{
-            background: '#FFFFFF',
-            borderRadius: '16px',
-            width: '95vw',
-            height: '90vh',
-            maxWidth: '1400px',
-            overflow: 'hidden',
-            display: 'flex',
-            flexDirection: 'column',
-            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
-          }}>
-            {/* Modal Header */}
-            <div style={{
-              background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-              color: '#FFFFFF',
-              padding: '16px 24px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexShrink: 0
-            }}>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px'
-              }}>
-                <h2 style={{
-                  fontSize: '18px',
-                  fontWeight: '700',
-                  margin: 0,
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  🛍️ Live Product Preview
-                </h2>
-                <div style={{
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  padding: '4px 8px',
-                  borderRadius: '6px',
-                  fontSize: '12px',
-                  fontWeight: '500'
-                }}>
-                  {previewProduct.title}
-                </div>
-              </div>
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px'
-              }}>
-                <a
-                  href={`https://${shop}/products/${previewProduct.handle}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    color: '#FFFFFF',
-                    padding: '6px 12px',
-                    borderRadius: '6px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    textDecoration: 'none',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '4px'
-                  }}
-                >
-                  🔗 Open in New Tab
-                </a>
-                <button
-                  onClick={closeProductPreview}
-                  style={{
-                    background: 'rgba(255, 255, 255, 0.2)',
-                    border: 'none',
-                    borderRadius: '50%',
-                    width: '32px',
-                    height: '32px',
-                    color: '#FFFFFF',
-                    fontSize: '18px',
-                    cursor: 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                >
-                  ×
-                </button>
-              </div>
-            </div>
-
-            {/* Live Preview Iframe */}
-            <div style={{
-              flex: 1,
-              position: 'relative',
-              background: '#F8FAFC'
-            }}>
-              {previewProduct.onlineStorePreviewUrl || previewProduct.handle ? (
-                <div style={{ width: '100%', height: '100%', position: 'relative' }}>
-                  {/* Password Overlay */}
-                  {showPasswordOverlay && (
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: 'rgba(0,0,0,0.8)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      zIndex: 1000
-                    }}>
-                      <div style={{
-                        background: 'white',
-                        padding: '30px',
-                        borderRadius: '12px',
-                        maxWidth: '400px',
-                        width: '90%',
-                        textAlign: 'center'
-                      }}>
-                        <h3 style={{ marginBottom: '20px', color: '#333' }}>
-                          🔒 Store Password Required
-                        </h3>
-                        <p style={{ color: '#666', marginBottom: '20px' }}>
-                          Your store is password protected. Please enter the password to view the product preview.
-                        </p>
-                        <input
-                          type="password"
-                          value={storePassword}
-                          onChange={(e) => setStorePassword(e.target.value)}
-                          placeholder="Enter store password"
-                          style={{
-                            width: '100%',
-                            padding: '12px',
-                            border: '2px solid #e1e5e9',
-                            borderRadius: '8px',
-                            fontSize: '16px',
-                            marginBottom: '20px'
-                          }}
-                          onKeyPress={(e) => {
-                            if (e.key === 'Enter') {
-                              handlePasswordSubmit();
-                            }
-                          }}
-                        />
-                        <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-                          <button
-                            onClick={handlePasswordSubmit}
-                            style={{
-                              background: '#10B981',
-                              color: 'white',
-                              border: 'none',
-                              padding: '12px 24px',
-                              borderRadius: '8px',
-                              cursor: 'pointer',
-                              fontSize: '16px'
-                            }}
-                          >
-                            Submit
-                          </button>
-                          <button
-                            onClick={() => setShowPasswordOverlay(false)}
-                            style={{
-                              background: '#6B7280',
-                              color: 'white',
-                              border: 'none',
-                              padding: '12px 24px',
-                              borderRadius: '8px',
-                              cursor: 'pointer',
-                              fontSize: '16px'
-                            }}
-                          >
-                            Cancel
-                          </button>
-                        </div>
-                        {passwordError && (
-                          <p style={{ color: '#EF4444', marginTop: '10px', fontSize: '14px' }}>
-                            {passwordError}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Loading State */}
-                  {iframeLoading && (
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      background: '#f8f9fa',
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      zIndex: 100
-                    }}>
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        border: '4px solid #e1e5e9',
-                        borderTop: '4px solid #3B82F6',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite'
-                      }}></div>
-                      <p style={{ marginTop: '20px', color: '#666' }}>
-                        Loading live product preview...
-                      </p>
-                    </div>
-                  )}
-
-                  {/* Iframe */}
-                  <iframe
-                    ref={iframeRef}
-                    src={previewUrl}
-                    style={{
-                      width: '100%',
-                      height: '100%',
-                      border: 'none',
-                      borderRadius: '0 0 16px 16px',
-                      opacity: iframeLoading ? 0 : 1,
-                      transition: 'opacity 0.3s ease'
-                    }}
-                    title={`Product Preview - ${previewProduct.title}`}
-                    sandbox="allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox allow-top-navigation"
-                    onLoad={() => {
-                      console.log('✅ Iframe loaded successfully');
-                      setIframeLoading(false);
-                    }}
-                    onError={(e) => {
-                      console.error('❌ Iframe load error:', e);
-                      setIframeLoading(false);
-                    }}
-                  />
-                </div>
-              ) : (
-                <div style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                  color: '#6B7280'
-                }}>
-                  <div style={{
-                    fontSize: '48px',
-                    marginBottom: '16px'
-                  }}>
-                    🚫
-                  </div>
-                  <h3 style={{
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}>
-                    Preview Not Available
-                  </h3>
-                  <p style={{
-                    fontSize: '14px',
-                    textAlign: 'center',
-                    maxWidth: '400px',
-                    lineHeight: '1.5'
-                  }}>
-                    This product doesn't have a preview URL or handle available. 
-                    The product might not be published to the online store.
-                  </p>
-                </div>
-              )}
-            </div>
-
-            {/* Modal Footer */}
-            <div style={{
-              background: '#F8FAFC',
-              padding: '16px 24px',
-              borderTop: '1px solid #E5E5E5',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              flexShrink: 0
-            }}>
-              <div style={{
-                fontSize: '12px',
-                color: '#6B7280'
-              }}>
-                💡 This is exactly how customers see this product on your live store
-              </div>
-              <div style={{
-                display: 'flex',
-                gap: '12px'
-              }}>
-                <button
-                  onClick={closeProductPreview}
-                  style={{
-                    padding: '8px 16px',
-                    background: '#F3F4F6',
-                    color: '#6B7280',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  Close Preview
-                </button>
-                <button
-                  onClick={() => {
-                    setSelectedProduct(previewProduct);
-                    closeProductPreview();
-                  }}
-                  style={{
-                    padding: '8px 16px',
-                    background: '#3B82F6',
-                    color: '#FFFFFF',
-                    border: 'none',
-                    borderRadius: '6px',
-                    fontSize: '14px',
-                    fontWeight: '500',
-                    cursor: 'pointer'
-                  }}
-                >
-                  ✓ Select This Product
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style dangerouslySetInnerHTML={{
-        __html: `
-          @keyframes slideInFromRight {
-            0% {
-              transform: translateX(100%);
-              opacity: 0;
-            }
-            100% {
-              transform: translateX(0);
-              opacity: 1;
-            }
-          }
-        `
-      }} />
     </div>
   );
 }
