@@ -115,7 +115,14 @@ export default function Dashboard() {
   };
 
   return (
-    <div style={{ padding: '20px', fontFamily: 'Inter, sans-serif', backgroundColor: figmaColors.gray, minHeight: '100vh' }}>
+    <div style={{ 
+      padding: '40px 60px', 
+      fontFamily: 'Inter, sans-serif', 
+      backgroundColor: figmaColors.gray, 
+      minHeight: 'calc(100vh - 80px)',
+      maxWidth: '1400px',
+      margin: '0 auto'
+    }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <div>
@@ -422,7 +429,7 @@ export default function Dashboard() {
       </div>
 
       {/* Test Cards */}
-      <div style={{ display: 'flex', gap: '25px', marginBottom: '40px', overflowX: 'auto', paddingBottom: '10px' }}>
+      <div style={{ display: 'flex', gap: '25px', marginBottom: '40px', overflowX: 'auto', paddingBottom: '10px', maxWidth: '100%' }}>
         {testCards.map((card, index) => (
           <div
             key={card.id}
@@ -431,7 +438,7 @@ export default function Dashboard() {
               border: `1px solid ${figmaColors.blue}`,
               borderRadius: '24px',
               padding: '40px',
-              minWidth: '308px',
+              minWidth: '280px',
               flexShrink: 0,
               display: 'flex',
               flexDirection: 'column',
@@ -449,7 +456,7 @@ export default function Dashboard() {
           >
             <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'flex-start' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'flex-start' }}>
-                <div style={{ width: '308px', height: '245px', borderRadius: '10px', overflow: 'hidden' }}>
+                <div style={{ width: '280px', height: '200px', borderRadius: '10px', overflow: 'hidden' }}>
                   <img alt="Placeholder" src={imgPlaceholder} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start' }}>
@@ -469,13 +476,13 @@ export default function Dashboard() {
                     color: figmaColors.darkGray,
                     margin: 0,
                     lineHeight: '20px',
-                    width: '308px'
+                    width: '280px'
                   }}>
                     {card.description}
                   </p>
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '308px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '280px' }}>
                 <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
                   <div style={{ width: '68px', height: '68px' }}>
                     <img alt="Frame" src={imgFrame2147224432} style={{ width: '100%', height: '100%' }} />
@@ -549,7 +556,7 @@ export default function Dashboard() {
         {/* Summary Cards Grid */}
         <div style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
           gap: '20px',
           marginBottom: '40px'
         }}>
@@ -793,7 +800,7 @@ export default function Dashboard() {
       </div>
 
       {/* Recent Activities and Queued Ideas Row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px' }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '40px' }}>
         {/* Recent Activities */}
         <div style={{
           backgroundColor: '#d9d9d9',
