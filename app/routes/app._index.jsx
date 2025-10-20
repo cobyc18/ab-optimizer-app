@@ -120,8 +120,7 @@ export default function Dashboard() {
       fontFamily: 'Inter, sans-serif', 
       backgroundColor: figmaColors.gray, 
       minHeight: 'calc(100vh - 80px)',
-      maxWidth: '1400px',
-      margin: '0 auto'
+      maxWidth: '1400px'
     }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
@@ -199,8 +198,15 @@ export default function Dashboard() {
         </div>
         
         {/* Stats */}
-        <div style={{ display: 'flex', gap: '55px', marginBottom: '30px', flexWrap: 'wrap' }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+        <div style={{ 
+          display: 'flex', 
+          gap: '55px', 
+          marginBottom: '30px', 
+          flexWrap: 'wrap',
+          justifyContent: 'center',
+          alignItems: 'center'
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <p style={{
               fontFamily: 'Inter, sans-serif',
               fontWeight: 600,
@@ -221,7 +227,7 @@ export default function Dashboard() {
               Total Run Time
             </p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <p style={{
               fontFamily: 'Inter, sans-serif',
               fontWeight: 600,
@@ -241,7 +247,7 @@ export default function Dashboard() {
               Variant A
             </p>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             <p style={{
               fontFamily: 'Inter, sans-serif',
               fontWeight: 600,
