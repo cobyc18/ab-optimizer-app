@@ -1,329 +1,198 @@
-import { Link, Outlet, useLoaderData, useRouteError, useLocation } from "@remix-run/react";
-import { boundary } from "@shopify/shopify-app-remix/server";
-import { authenticate } from "../shopify.server";
-import type { LoaderFunctionArgs } from "@remix-run/node";
+import { Outlet, useLocation } from "@remix-run/react";
 import { useState } from "react";
 
-export const loader = async ({ request }: LoaderFunctionArgs) => {
-  const { admin } = await authenticate.admin(request);
-  return { 
-    user: {
-      shop: (admin as any).shop || '',
-      email: (admin as any).email || '',
-      firstName: (admin as any).firstName || '',
-      lastName: (admin as any).lastName || '',
-      accountOwner: (admin as any).accountOwner || false,
-      locale: (admin as any).locale || 'en',
-      collaborator: (admin as any).collaborator || false,
-      emailVerified: (admin as any).emailVerified || false
-    }
-  };
+// Figma Design Assets - Sidebar specific assets
+const imgOption11 = "http://localhost:3845/assets/d48cc262e275c8268a268985b2afdfac992cf82a.png";
+const imgTryLab = "http://localhost:3845/assets/ef6b13f0fd5212ac876c7e1fd3199ccecc56dad9.svg";
+const img = "http://localhost:3845/assets/b5c9a49a2261b2416025a79cd7d9dd6cbfc9658c.svg";
+const imgCultureTube = "http://localhost:3845/assets/cf28cd19afe656dc8b46f5937016390d82168068.svg";
+const imgFrame2147224424 = "http://localhost:3845/assets/efa39d32573b3a5b358191daec34021e25764ff5.svg";
+const imgLibrary = "http://localhost:3845/assets/b0c7cc936ce4033e4a3be1dd05c8652a4ac4a208.svg";
+const imgSetting = "http://localhost:3845/assets/3a6f557c50a8c28dd7c0eaa9f9af18d5d423db40.svg";
+const imgVideo = "http://localhost:3845/assets/e06f33da30f1b2eaf1af76aa79a12b922a7ae7a5.svg";
+const imgLogout = "http://localhost:3845/assets/f1bc06ff26e0c1ce023694aa2bbc6d1baeb98698.svg";
+const imgGroup1000003393 = "http://localhost:3845/assets/9cdfedb15f38de1d7549dce3b40da36973a9c05c.svg";
+
+// Figma Design Variables
+const figmaColors = {
+  black: "#202226",
+  themeDark: "#464255",
+  basicFill: "#C5CEE0",
+  white: "#ffffff",
+  blue: "#0038ff",
+  lightBlue: "#97cdff",
+  orange: "#ef9362",
+  green: "#29ad00",
+  yellow: "#f4b207",
+  gray: "#e6e6e6",
+  lightGray: "#84818a",
+  darkGray: "#151515"
 };
 
-interface NavigationItem {
-  name: string;
-  href: string;
-  badge?: string;
-  icon: string;
-}
-
-const navigation: NavigationItem[] = [
-  {
-    name: "Dashboard",
-    href: "/app",
-    icon: "📊"
-  },
-  {
-    name: "Create A/B Test",
-    href: "/app/ab-tests",
-    icon: "🧪"
-  },
-  {
-    name: "Manage A/B Tests",
-    href: "/app/manage-tests",
-    icon: "⚙️"
-  },
-  {
-    name: "Analytics",
-    href: "/app/analytics",
-    icon: "📈"
-  },
-  {
-    name: "Recipe Library",
-    href: "/app/recipe-library",
-    icon: "📚"
-  },
-  {
-    name: "Section Injector",
-    href: "/app/inject-section",
-    icon: "🚀",
-    badge: "NEW"
-  }
-];
-
-export default function App() {
-  const { user } = useLoaderData<typeof loader>();
+export default function AppLayout() {
   const location = useLocation();
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [selectedNavItem, setSelectedNavItem] = useState("Home");
 
-  const isActive = (path: string) => {
-    if (path === '/app') {
-      return location.pathname === '/app' || location.pathname === '/app/';
-    }
-    return location.pathname.startsWith(path);
-  };
-
-  const toggleSidebar = () => {
-    setIsSidebarCollapsed(!isSidebarCollapsed);
-  };
-
-  const SidebarItem = ({ item }: { item: NavigationItem }) => {
-    const isActiveItem = isActive(item.href);
-    
-    return (
-      <Link to={item.href} style={{ textDecoration: 'none' }}>
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: '12px 16px',
-            margin: '4px 8px',
-            borderRadius: '12px',
-            color: isActiveItem ? '#1f2937' : '#6b7280',
-            background: isActiveItem 
-              ? 'linear-gradient(135deg, rgba(196, 181, 253, 0.15) 0%, rgba(167, 139, 250, 0.08) 100%)' 
-              : 'transparent',
-            border: isActiveItem ? '1px solid rgba(196, 181, 253, 0.3)' : '1px solid transparent',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            position: 'relative',
-            transform: 'translateY(0)',
-          }}
-          onMouseEnter={(e) => {
-            if (!isActiveItem) {
-              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(196, 181, 253, 0.1) 0%, rgba(167, 139, 250, 0.05) 100%)';
-              e.currentTarget.style.color = '#1f2937';
-              e.currentTarget.style.transform = 'translateY(-1px)';
-              e.currentTarget.style.boxShadow = '0 4px 6px -1px rgba(139, 92, 246, 0.1)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!isActiveItem) {
-              e.currentTarget.style.background = 'transparent';
-              e.currentTarget.style.color = '#6b7280';
-              e.currentTarget.style.transform = 'translateY(0)';
-              e.currentTarget.style.boxShadow = 'none';
-            }
-          }}
-        >
-          <span style={{ fontSize: '18px', marginRight: '12px', opacity: isActiveItem ? 1 : 0.8 }}>
-            {item.icon}
-          </span>
-          {!isSidebarCollapsed && (
-            <>
-              <span style={{ 
-                fontWeight: isActiveItem ? '600' : '500',
-                fontSize: '16px',
-                flex: 1
-              }}>
-                {item.name}
-              </span>
-              {item.badge && (
-                <span style={{
-                  fontSize: '10px',
-                  background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
-                  color: 'white',
-                  padding: '2px 8px',
-                  borderRadius: '10px',
-                  fontWeight: '600',
-                  marginLeft: '8px'
-                }}>
-                  {item.badge}
-                </span>
-              )}
-            </>
-          )}
-          {isActiveItem && (
-            <div style={{
-              position: 'absolute',
-              left: '0',
-              top: '0',
-              bottom: '0',
-              width: '4px',
-              background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
-              borderRadius: '0 2px 2px 0'
-            }} />
-          )}
-        </div>
-      </Link>
-    );
-  };
+  const navigationItems = [
+    { id: "Home", label: "Home", icon: img, href: "/app", active: true },
+    { id: "Experiments Hub", label: "Experiments Hub", icon: imgCultureTube, href: "/app/experiments", active: false },
+    { id: "Insights & Report", label: "Insights & Report", icon: imgFrame2147224424, href: "/app/insights", active: false },
+    { id: "Widget Library", label: "Widget Library", icon: imgLibrary, href: "/app/widgets", active: false },
+    { id: "Settings", label: "Settings", icon: imgSetting, href: "/app/settings", active: false },
+    { id: "Help / Onboarding", label: "Help / Onboarding", icon: imgVideo, href: "/app/help", active: false },
+    { id: "Log out", label: "Log out", icon: imgLogout, href: "/auth/logout", active: false }
+  ];
 
   return (
-    <div style={{ display: 'flex', height: '100vh', background: 'linear-gradient(135deg, #f8fafc 0%, #f1f5f9 50%, #e2e8f0 100%)' }}>
-      {/* Beautiful Sidebar */}
-      <div style={{
-        background: 'linear-gradient(180deg, #ffffff 0%, #fafbff 100%)',
-        boxShadow: '4px 0 20px rgba(139, 92, 246, 0.15)',
-        display: 'flex',
-        flexDirection: 'column',
-        borderRight: '1px solid rgba(196, 181, 253, 0.3)',
-        transition: 'all 0.3s ease',
-        width: isSidebarCollapsed ? '80px' : '280px',
-        position: 'relative',
-        overflow: 'hidden'
-      }}>
-        {/* Sidebar Header */}
+    <div style={{ backgroundColor: figmaColors.gray, position: 'relative', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
+      {/* LEFT SIDEBAR */}
+      <div style={{ position: 'absolute', left: '26px', top: 0, zIndex: 10 }}>
+        {/* Background line */}
         <div style={{
-          padding: '24px 20px',
-          borderBottom: '1px solid rgba(196, 181, 253, 0.3)',
-          background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
-          color: 'white'
+          position: 'absolute',
+          backgroundColor: 'rgba(230,230,230,0.85)',
+          height: '2342px',
+          left: 'calc(12.5% + 107.5px)',
+          mixBlendMode: 'multiply',
+          top: 0,
+          transform: 'translateX(-50%)',
+          width: '1px'
+        }} />
+        
+        {/* TryLab Logo */}
+        <div style={{
+          position: 'absolute',
+          height: '44.613px',
+          left: '134.49px',
+          top: '67.39px',
+          width: '159.51px'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center' }}>
-            <div style={{
-              width: '40px',
-              height: '40px',
-              background: 'rgba(255, 255, 255, 0.3)',
-              borderRadius: '12px',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              backdropFilter: 'blur(8px)',
-              border: '1px solid rgba(255, 255, 255, 0.5)'
-            }}>
-              <span style={{ color: 'white', fontWeight: 'bold', fontSize: '16px' }}>TL</span>
-            </div>
-            {!isSidebarCollapsed && (
-              <div style={{ marginLeft: '12px' }}>
-                <span style={{ fontWeight: '600', fontSize: '16px' }}>TryLabs Inc.</span>
-                <div style={{ fontSize: '12px', opacity: 0.8, marginTop: '2px' }}>A/B Testing Pro</div>
+          <img alt="TryLab" src={imgTryLab} style={{ width: '100%', height: '100%' }} />
+        </div>
+        
+        {/* User Avatar */}
+        <div style={{
+          position: 'absolute',
+          left: '26px',
+          width: '108.793px',
+          height: '108.793px',
+          top: '35.1px'
+        }}>
+          <img alt="User Avatar" src={imgOption11} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        </div>
+        
+        {/* Navigation Menu */}
+        <div style={{
+          position: 'absolute',
+          left: 'calc(4.167% + 94px)',
+          top: '178.32px',
+          transform: 'translateX(-50%)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+          alignItems: 'flex-start'
+        }}>
+          {navigationItems.map((item, index) => (
+            <a
+              key={item.id}
+              href={item.href}
+              onClick={() => setSelectedNavItem(item.id)}
+              style={{
+                backgroundColor: selectedNavItem === item.id ? figmaColors.blue : 'transparent',
+                display: 'flex',
+                gap: '16px',
+                alignItems: 'center',
+                padding: '16px 24px',
+                borderRadius: selectedNavItem === item.id ? '12px' : '60px',
+                width: '252px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                textDecoration: 'none'
+              }}
+            >
+              <div style={{ width: '28px', height: '28px', flexShrink: 0 }}>
+                <img alt={item.label} src={item.icon} style={{ width: '100%', height: '100%' }} />
               </div>
-            )}
+              <p style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 500,
+                fontSize: '16px',
+                color: selectedNavItem === item.id ? figmaColors.white : figmaColors.themeDark,
+                margin: 0,
+                letterSpacing: '0.4px'
+              }}>
+                {item.label}
+              </p>
+            </a>
+          ))}
+        </div>
+        
+        {/* Trial Banner */}
+        <div style={{
+          position: 'absolute',
+          backgroundColor: figmaColors.orange,
+          left: 'calc(4.167% + 103.5px)',
+          top: '736px',
+          transform: 'translateX(-50%)',
+          padding: '30px 25px',
+          borderRadius: '20px',
+          width: '230px'
+        }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '35px', alignItems: 'flex-start' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '35px', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', alignItems: 'flex-start' }}>
+                <p style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 600,
+                  fontSize: '16px',
+                  color: figmaColors.darkGray,
+                  margin: 0,
+                  letterSpacing: '0.4px'
+                }}>
+                  You have 9 days on the Pro free trial
+                </p>
+                <div style={{ width: '180px', height: '0px' }}>
+                  <img alt="Progress" src={imgGroup1000003393} style={{ width: '100%' }} />
+                </div>
+              </div>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 400,
+                fontSize: '14px',
+                color: figmaColors.darkGray,
+                margin: 0,
+                letterSpacing: '0.4px',
+                lineHeight: '20px'
+              }}>
+                Usage is unlimited while on trial and will reset when the trial ends.
+              </p>
+            </div>
+            <button style={{
+              backgroundColor: figmaColors.blue,
+              border: 'none',
+              borderRadius: '12px',
+              padding: '12px 22px',
+              cursor: 'pointer'
+            }}>
+              <p style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 500,
+                fontSize: '14px',
+                color: figmaColors.white,
+                margin: 0,
+                letterSpacing: '0.4px'
+              }}>
+                Upgrade your free trial →
+              </p>
+            </button>
           </div>
         </div>
-
-        {/* Navigation Items */}
-        <nav style={{ flex: 1, padding: '16px 8px' }}>
-          <div style={{ marginBottom: '16px' }}>
-            {!isSidebarCollapsed && (
-              <div style={{
-                fontSize: '20px',
-                fontWeight: '600',
-                color: '#1f2937',
-                textTransform: 'uppercase',
-                letterSpacing: '0.5px',
-                marginBottom: '8px',
-                paddingLeft: '16px'
-              }}>
-                Navigation
-              </div>
-            )}
-            <div>
-              {navigation.map((item) => (
-                <SidebarItem key={item.name} item={item} />
-              ))}
-            </div>
-          </div>
-        </nav>
       </div>
 
-      {/* Expand/Collapse Button */}
-      <button
-        onClick={toggleSidebar}
-        style={{
-          position: 'absolute',
-          top: '105px',
-          left: isSidebarCollapsed ? '60px' : '260px',
-          transform: 'translateX(-50%)',
-          width: '24px',
-          height: '24px',
-          borderRadius: '50%',
-          background: 'rgba(196, 181, 253, 0.8)',
-          border: '1px solid rgba(196, 181, 253, 0.3)',
-          color: '#ffffff',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          cursor: 'pointer',
-          fontSize: '21px',
-          fontWeight: 'bold',
-          transition: 'all 0.2s ease',
-          zIndex: 1000,
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.2)'
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = '#c4b5fd';
-          e.currentTarget.style.transform = 'translateX(-50%) scale(1.1)';
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = 'rgba(196, 181, 253, 0.8)';
-          e.currentTarget.style.transform = 'translateX(-50%) scale(1)';
-        }}
-      >
-        {isSidebarCollapsed ? '→' : '←'}
-      </button>
-
-      {/* Main Content */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-        {/* Beautiful Top Bar */}
-        <div style={{
-          background: 'linear-gradient(135deg, #ffffff 0%, #fafbff 100%)',
-          borderBottom: '1px solid rgba(196, 181, 253, 0.2)',
-          padding: '16px 24px',
-          boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                <div style={{
-                  width: '8px',
-                  height: '8px',
-                  background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
-                  borderRadius: '50%',
-                  animation: 'pulse 2s infinite'
-                }}></div>
-                <span style={{ fontSize: '14px', color: '#374151', fontWeight: '500' }}>
-                  {user.shop}
-                </span>
-              </div>
-            </div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-              <div style={{
-                width: '40px',
-                height: '40px',
-                background: 'linear-gradient(135deg, #c4b5fd 0%, #a78bfa 100%)',
-                borderRadius: '50%',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.2)'
-              }}>
-                <span style={{ 
-                  color: 'white', 
-                  fontSize: '16px', 
-                  fontWeight: '600'
-                }}>
-                  {user.firstName ? user.firstName.charAt(0) : 'U'}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Main content area */}
-        <main style={{ flex: 1, overflowY: 'auto', padding: '32px' }}>
-          <Outlet context={{ user }} />
-        </main>
+      {/* MAIN CONTENT AREA - Adjusted for sidebar */}
+      <div style={{ marginLeft: '300px', minHeight: '100vh' }}>
+        <Outlet />
       </div>
     </div>
   );
 }
-
-export function ErrorBoundary() {
-  return boundary.error(useRouteError());
-}
-
-export const headers = (headersArgs: any) => {
-  return boundary.headers(headersArgs);
-}; 
