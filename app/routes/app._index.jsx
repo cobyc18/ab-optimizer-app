@@ -231,115 +231,130 @@ export default function Dashboard() {
             </div>
           </div>
         </div>
-        
-        {/* Stats */}
+
+        {/* Stats and Action Buttons Row */}
         <div style={{ 
           display: 'flex', 
-          gap: '55px', 
-          marginBottom: '30px', 
-          flexWrap: 'wrap',
-          justifyContent: 'center',
-          alignItems: 'center'
+          justifyContent: 'space-between', 
+          alignItems: 'center',
+          marginBottom: '30px'
         }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <p style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 600,
-              fontSize: '24px',
-              color: figmaColors.darkGray,
-              margin: 0,
-              lineHeight: '38.704px'
-            }}>
-              48 h
-            </p>
-            <p style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 400,
-              fontSize: '16px',
-              color: figmaColors.blue,
-              margin: 0
-            }}>
-              Total Run Time
-            </p>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <p style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 600,
-              fontSize: '24px',
-              color: figmaColors.darkGray,
-              margin: 0
-            }}>
-              2,100
-            </p>
-            <p style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 400,
-              fontSize: '16px',
-              color: figmaColors.blue,
-              margin: 0
-            }}>
-              Variant A
-            </p>
-          </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-            <p style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 600,
-              fontSize: '24px',
-              color: figmaColors.darkGray,
-              margin: 0
-            }}>
-              2,160
-            </p>
-            <p style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 400,
-              fontSize: '16px',
-              color: figmaColors.blue,
-              margin: 0
-            }}>
-              Variant B
-            </p>
-          </div>
-        </div>
-        
-        {/* Action Buttons */}
-        <div style={{ display: 'flex', gap: '15px', marginBottom: '30px' }}>
-          <button style={{
-            backgroundColor: figmaColors.blue,
-            borderRadius: '5px',
-            border: 'none',
-            padding: '12px 24px',
-            cursor: 'pointer'
+          {/* Stats */}
+          <div style={{ 
+            display: 'flex', 
+            gap: '55px', 
+            alignItems: 'center'
           }}>
-            <p style={{
-              fontFamily: 'Poppins, sans-serif',
-              fontWeight: 500,
-              fontSize: '14px',
-              color: figmaColors.white,
-              margin: 0
-            }}>
-              End Experiment
-            </p>
-          </button>
-          <button style={{
-            backgroundColor: figmaColors.lightBlue,
-            border: `1px solid ${figmaColors.blue}`,
-            borderRadius: '5px',
-            padding: '12px 24px',
-            cursor: 'pointer'
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '24px',
+                color: figmaColors.darkGray,
+                margin: 0,
+                lineHeight: '38.704px'
+              }}>
+                48 h
+              </p>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 400,
+                fontSize: '16px',
+                color: figmaColors.blue,
+                margin: 0
+              }}>
+                Total Run Time
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '24px',
+                color: figmaColors.darkGray,
+                margin: 0
+              }}>
+                2,100
+              </p>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 400,
+                fontSize: '16px',
+                color: figmaColors.blue,
+                margin: 0
+              }}>
+                Variant A
+              </p>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '24px',
+                color: figmaColors.darkGray,
+                margin: 0
+              }}>
+                2,160
+              </p>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 400,
+                fontSize: '16px',
+                color: figmaColors.blue,
+                margin: 0
+              }}>
+                Variant B
+              </p>
+            </div>
+          </div>
+
+          {/* Action Buttons - Stacked Vertically */}
+          <div style={{ 
+            display: 'flex', 
+            flexDirection: 'column',
+            gap: '10px',
+            width: '186px',
+            height: '105px'
           }}>
-            <p style={{
-              fontFamily: 'Poppins, sans-serif',
-              fontWeight: 500,
-              fontSize: '14px',
-              color: figmaColors.blue,
-              margin: 0
+            <button style={{
+              backgroundColor: figmaColors.blue,
+              borderRadius: '5px',
+              border: 'none',
+              padding: '12px 24px',
+              cursor: 'pointer',
+              height: '48px',
+              flex: 1
             }}>
-              View Story
-            </p>
-          </button>
+              <p style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 500,
+                fontSize: '14px',
+                color: figmaColors.white,
+                margin: 0
+              }}>
+                End Experiment
+              </p>
+            </button>
+            <button style={{
+              backgroundColor: figmaColors.lightBlue,
+              border: `1px solid ${figmaColors.blue}`,
+              borderRadius: '5px',
+              padding: '12px 24px',
+              cursor: 'pointer',
+              height: '48px',
+              flex: 1
+            }}>
+              <p style={{
+                fontFamily: 'Poppins, sans-serif',
+                fontWeight: 500,
+                fontSize: '14px',
+                color: figmaColors.blue,
+                margin: 0
+              }}>
+                View Story
+              </p>
+            </button>
+          </div>
         </div>
         
         {/* Chart Area */}
