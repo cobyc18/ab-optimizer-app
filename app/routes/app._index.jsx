@@ -207,6 +207,62 @@ export default function Dashboard() {
           </div>
         </div>
 
+        {/* Chart Area with X/Y Axes */}
+        <div style={{ marginBottom: '30px', position: 'relative' }}>
+          {/* Chart Image */}
+          <img alt="Chart" src={imgChart} style={{ width: '100%', maxWidth: '800px' }} />
+          
+          {/* Y-Axis Labels */}
+          <div style={{
+            position: 'absolute',
+            left: '0px',
+            top: '0px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '55px',
+            alignItems: 'center',
+            fontSize: '18px',
+            color: 'rgba(21,21,21,0.7)',
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 400
+          }}>
+            <p style={{ margin: 0 }}>5</p>
+            <p style={{ margin: 0 }}>4</p>
+            <p style={{ margin: 0 }}>3</p>
+            <p style={{ margin: 0 }}>2</p>
+            <p style={{ margin: 0 }}>1</p>
+            <p style={{ margin: 0 }}>0</p>
+          </div>
+          
+          {/* X-Axis Labels */}
+          <div style={{
+            position: 'absolute',
+            bottom: '0px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            display: 'flex',
+            gap: '70px',
+            alignItems: 'center',
+            fontSize: '18px',
+            color: 'rgba(21,21,21,0.7)',
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 400
+          }}>
+            <p style={{ margin: 0 }}>JAN</p>
+            <p style={{ margin: 0 }}>FEB</p>
+            <p style={{ margin: 0 }}>MAR</p>
+            <p style={{ margin: 0 }}>APR</p>
+            <p style={{ margin: 0 }}>MAY</p>
+            <p style={{ margin: 0 }}>JUN</p>
+            <p style={{ margin: 0 }}>JUL</p>
+            <p style={{ margin: 0 }}>AUG</p>
+            <p style={{ margin: 0 }}>SEP</p>
+            <p style={{ margin: 0 }}>OCT</p>
+            <p style={{ margin: 0 }}>NOV</p>
+            <p style={{ margin: 0 }}>DEC</p>
+          </div>
+        </div>
+
         {/* Experiment Title */}
         <div style={{ marginBottom: '30px' }}>
           <p style={{
@@ -355,11 +411,6 @@ export default function Dashboard() {
               </p>
             </button>
           </div>
-        </div>
-        
-        {/* Chart Area */}
-        <div style={{ marginBottom: '30px' }}>
-          <img alt="Chart" src={imgChart} style={{ width: '100%', maxWidth: '800px' }} />
         </div>
         
         {/* Legend */}
