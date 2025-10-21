@@ -173,6 +173,40 @@ export default function Dashboard() {
         marginBottom: '40px',
         position: 'relative'
       }}>
+        {/* Experiment Overview Text */}
+        <div style={{ marginBottom: '30px' }}>
+          <p style={{
+            fontFamily: 'Geist, sans-serif',
+            fontWeight: 500,
+            fontSize: '24px',
+            color: figmaColors.blue,
+            margin: '0 0 15px 0',
+            lineHeight: '32px'
+          }}>
+            Experiment Overview
+          </p>
+          <div>
+            <span style={{
+              fontFamily: 'Geist, sans-serif',
+              fontWeight: 500,
+              fontSize: '20px',
+              color: figmaColors.darkGray,
+              lineHeight: '28px'
+            }}>
+              Returns badge is leading 7.4% ATC with 70% certainty.
+            </span>
+            <span style={{
+              fontFamily: 'Geist, sans-serif',
+              fontWeight: 300,
+              fontSize: '18px',
+              color: figmaColors.darkGray,
+              lineHeight: '24px'
+            }}>
+              We suggest keeping the test active for a few more days to reach a more certain conclusion
+            </span>
+          </div>
+        </div>
+
         {/* Experiment Title */}
         <div style={{ marginBottom: '30px' }}>
           <p style={{
@@ -326,40 +360,6 @@ export default function Dashboard() {
             <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400, fontSize: '16px', color: figmaColors.themeDark, margin: 0 }}>
               Control
             </p>
-          </div>
-        </div>
-        
-        {/* Experiment Overview Text */}
-        <div style={{ marginBottom: '30px' }}>
-          <p style={{
-            fontFamily: 'Geist, sans-serif',
-            fontWeight: 500,
-            fontSize: '24px',
-            color: figmaColors.blue,
-            margin: '0 0 15px 0',
-            lineHeight: '32px'
-          }}>
-            Experiment Overview
-          </p>
-          <div>
-            <span style={{
-              fontFamily: 'Geist, sans-serif',
-              fontWeight: 500,
-              fontSize: '20px',
-              color: figmaColors.darkGray,
-              lineHeight: '28px'
-            }}>
-              Returns badge is leading 7.4% ATC with 70% certainty.
-            </span>
-            <span style={{
-              fontFamily: 'Geist, sans-serif',
-              fontWeight: 300,
-              fontSize: '18px',
-              color: figmaColors.darkGray,
-              lineHeight: '24px'
-            }}>
-              We suggest keeping the test active for a few more days to reach a more certain conclusion
-            </span>
           </div>
         </div>
         
