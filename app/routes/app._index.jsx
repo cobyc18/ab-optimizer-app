@@ -120,7 +120,8 @@ export default function Dashboard() {
       fontFamily: 'Inter, sans-serif', 
       backgroundColor: figmaColors.gray, 
       minHeight: 'calc(100vh - 80px)',
-      maxWidth: '1400px'
+      maxWidth: '1400px',
+      marginLeft: '60px'
     }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>

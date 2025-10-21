@@ -46,7 +46,7 @@ export default function AppLayout() {
   return (
     <div style={{ backgroundColor: figmaColors.gray, position: 'relative', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
       {/* LEFT SIDEBAR */}
-      <div style={{ position: 'absolute', left: '26px', top: 0, zIndex: 10 }}>
+      <div style={{ position: 'absolute', left: '60px', top: 0, zIndex: 10 }}>
         {/* Background line */}
         <div style={{
           position: 'absolute',
@@ -190,7 +190,7 @@ export default function AppLayout() {
       </div>
 
       {/* MAIN CONTENT AREA - Adjusted for sidebar */}
-      <div style={{ marginLeft: '300px', minHeight: '100vh' }}>
+      <div style={{ marginLeft: '350px', minHeight: '100vh' }}>
         <Outlet />
       </div>
     </div>
