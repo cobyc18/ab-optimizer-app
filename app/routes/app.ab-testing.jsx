@@ -1,4 +1,4 @@
-import { useLoaderData, Form, useActionData } from "@remix-run/react";
+import { useLoaderData, Form, useActionData, useFetcher } from "@remix-run/react";
 import { 
   AppProvider as PolarisAppProvider,
   Page, 
@@ -21,6 +21,8 @@ export const links = () => [{ rel: "stylesheet", href: polarisStyles }];
 export default function ABTesting() {
   const { shopDomain, themeId, themeGid, productTemplates, products } = useLoaderData();
   const actionData = useActionData();
+  const fetcher = useFetcher();
+  const duplicateFetcher = useFetcher();
   const [templateA, setTemplateA] = useState(productTemplates[0] || "");
   const [templateB, setTemplateB] = useState("");
   const [trafficSplit, setTrafficSplit] = useState("50");
@@ -59,30 +61,26 @@ export default function ABTesting() {
       formData.append("actionType", "getProductForTemplate");
       formData.append("template", selectedTemplate);
       
-      fetch("/app/ab-testing", {
-        method: "POST",
-        body: formData
-      })
-      .then(response => response.json())
-      .then(data => {
-        if (data.success) {
-          setAssociatedProduct({
-            handle: data.productHandle,
-            title: data.productTitle,
-            isFallback: data.fallback || false
-          });
-        }
-        setIsLoadingProduct(false);
-      })
-      .catch(error => {
-        console.error("Error fetching associated product:", error);
-        setIsLoadingProduct(false);
-      });
+      fetcher.submit(formData, { method: "post" });
     }
   }, [selectedTemplate]);
 
+  // Handle fetcher response for product lookup
+  useEffect(() => {
+    if (fetcher.data && fetcher.state === "idle") {
+      setIsLoadingProduct(false);
+      if (fetcher.data.success) {
+        setAssociatedProduct({
+          handle: fetcher.data.productHandle,
+          title: fetcher.data.productTitle,
+          isFallback: fetcher.data.fallback || false
+        });
+      }
+    }
+  }, [fetcher.data, fetcher.state]);
+
   // Handler for OK button (create duplicate template and open in theme editor)
-  const handleOk = async () => {
+  const handleOk = () => {
     if (!duplicateTemplateName.trim()) {
       setPreviewError("Please enter a name for the duplicate template");
       return;
@@ -91,22 +89,21 @@ export default function ABTesting() {
     setIsCreatingTemplate(true);
     setPreviewError(null);
 
-    try {
-      // Create duplicate template
-      const formData = new FormData();
-      formData.append("actionType", "duplicateTemplate");
-      formData.append("template", selectedTemplate);
-      formData.append("newName", duplicateTemplateName.trim());
-      formData.append("themeId", themeGid);
+    // Create duplicate template
+    const formData = new FormData();
+    formData.append("actionType", "duplicateTemplate");
+    formData.append("template", selectedTemplate);
+    formData.append("newName", duplicateTemplateName.trim());
+    formData.append("themeId", themeGid);
 
-      const response = await fetch("/app/ab-testing", {
-        method: "POST",
-        body: formData
-      });
+    duplicateFetcher.submit(formData, { method: "post" });
+  };
 
-      const data = await response.json();
-
-      if (data.success) {
+  // Handle duplicate fetcher response
+  useEffect(() => {
+    if (duplicateFetcher.data && duplicateFetcher.state === "idle") {
+      setIsCreatingTemplate(false);
+      if (duplicateFetcher.data.success) {
         // Open the duplicated template in theme editor
         const productHandle = associatedProduct?.handle || inferredProductHandle;
         const previewPath = `/products/${productHandle}?view=${duplicateTemplateName.trim()}`;
@@ -116,15 +113,10 @@ export default function ABTesting() {
         const url = `https://admin.shopify.com/store/${shopShort}/themes/${themeIdNum}/editor?previewPath=${encodeURIComponent(previewPath)}`;
         window.open(url, "_blank");
       } else {
-        setPreviewError(data.error || "Failed to create duplicate template");
+        setPreviewError(duplicateFetcher.data.error || "Failed to create duplicate template");
       }
-    } catch (error) {
-      console.error("Error creating duplicate template:", error);
-      setPreviewError("Failed to create duplicate template");
-    } finally {
-      setIsCreatingTemplate(false);
     }
-  };
+  }, [duplicateFetcher.data, duplicateFetcher.state, associatedProduct, inferredProductHandle, duplicateTemplateName, shopDomain, themeId]);
 
   return (
     <PolarisAppProvider i18n={polarisTranslations}>
@@ -165,14 +157,14 @@ export default function ABTesting() {
                 )}
                 
                 {previewError && <Banner status="critical">{previewError}</Banner>}
-                <Button
-                  primary
-                  disabled={!selectedTemplate || !duplicateTemplateName.trim() || isCreatingTemplate}
-                  onClick={handleOk}
-                  loading={isCreatingTemplate}
-                >
-                  {isCreatingTemplate ? "Creating Template..." : "Create & Open in Theme Editor"}
-                </Button>
+              <Button
+                primary
+                disabled={!selectedTemplate || !duplicateTemplateName.trim() || duplicateFetcher.state === "submitting"}
+                onClick={handleOk}
+                loading={duplicateFetcher.state === "submitting"}
+              >
+                {duplicateFetcher.state === "submitting" ? "Creating Template..." : "Create & Open in Theme Editor"}
+              </Button>
               </BlockStack>
             </Card>
           </Layout.Section>
