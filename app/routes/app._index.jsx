@@ -346,7 +346,7 @@ export const loader = async ({ request }) => {
       queuedTests: [
         { name: "Shipping badge Design Test" },
         { name: "Feature Bullet Points Test" },
-        { name: "Fomo Badge Test" },
+        { name: "Fomo Badge Test!" },
         { name: "Scarcity signals Test" },
         { name: "Shipping badge Design Test" },
         { name: "Shipping badge Design Test" }
