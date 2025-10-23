@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { useLoaderData, useActionData, useOutletContext } from "@remix-run/react";
+import { useLoaderData, useActionData } from "@remix-run/react";
 import { useState, useEffect } from "react";
 import { authenticate } from "../shopify.server";
 import prisma from "../db.server";
@@ -502,7 +502,6 @@ export const action = async ({ request }) => {
 export default function ABTesting() {
   const { shopDomain, themeId, themeGid, productTemplates, products } = useLoaderData();
   const actionData = useActionData();
-  const { user } = useOutletContext();
   
   // Form state with proper defaults
   const [templateA, setTemplateA] = useState("");
