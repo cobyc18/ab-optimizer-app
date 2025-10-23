@@ -191,6 +191,28 @@ export const action = async ({ request }) => {
               variant: variant,
               value: totalPrice
             });
+
+            // Trigger winner analysis after purchase event
+            try {
+              console.log(`🔍 Triggering winner analysis for test ${activeTest.id}`);
+              const analysisResponse = await fetch(`${process.env.APPLICATION_URL || 'https://ab-optimizer-app.onrender.com'}/webhooks/analyze-winner`, {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${session.accessToken}`
+                },
+                body: JSON.stringify({ testId: activeTest.id })
+              });
+              
+              if (analysisResponse.ok) {
+                const analysisResult = await analysisResponse.json();
+                if (analysisResult.status === 'winner_declared') {
+                  console.log(`🎉 WINNER DECLARED: ${analysisResult.winner} for test ${activeTest.id}`);
+                }
+              }
+            } catch (analysisError) {
+              console.error(`❌ Error triggering winner analysis:`, analysisError);
+            }
           } catch (purchaseError) {
             console.error(`❌ Error logging purchase event for product ${productId}:`, purchaseError);
             console.error("Error details:", {

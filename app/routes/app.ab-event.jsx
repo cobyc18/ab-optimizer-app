@@ -127,6 +127,29 @@ export const action = async ({ request }) => {
 
     console.log("✅ A/B event logged successfully:", event.id);
 
+    // Trigger winner analysis for significant events (purchase, add_to_cart)
+    if (eventType === 'purchase' || eventType === 'add_to_cart') {
+      try {
+        console.log(`🔍 Triggering winner analysis for test ${testId} after ${eventType} event`);
+        const analysisResponse = await fetch(`${process.env.APPLICATION_URL || 'https://ab-optimizer-app.onrender.com'}/webhooks/analyze-winner`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ testId: testId })
+        });
+        
+        if (analysisResponse.ok) {
+          const analysisResult = await analysisResponse.json();
+          if (analysisResult.status === 'winner_declared') {
+            console.log(`🎉 WINNER DECLARED: ${analysisResult.winner} for test ${testId}`);
+          }
+        }
+      } catch (analysisError) {
+        console.error(`❌ Error triggering winner analysis:`, analysisError);
+      }
+    }
+
     return json({ 
       success: true, 
       eventId: event.id,

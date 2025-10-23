@@ -1,8 +1,180 @@
 import { json } from "@remix-run/node";
 import { useLoaderData, useOutletContext, Link } from "@remix-run/react";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { authenticate } from "../shopify.server.js";
 import prisma from "../db.server.js";
+
+// ---------- Statistical Analysis Functions ----------
+function betaSample(alpha, beta) {
+  // Gamma sampler (Marsaglia-Tsang) for alpha >= 0. Note: works okay for integer+1 priors.
+  function gammaSample(k) {
+    if (k < 1) {
+      // use boost for shape < 1
+      const d = gammaSample(k + 1);
+      return d * Math.pow(Math.random(), 1 / k);
+    }
+    const d = k - 1 / 3;
+    const c = 1 / Math.sqrt(9 * d);
+    while (true) {
+      let x = 0;
+      // Normal(0,1) approx using Box-Muller
+      const u1 = Math.random();
+      const u2 = Math.random();
+      x = Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2);
+      const v = 1 + c * x;
+      if (v <= 0) continue;
+      const v3 = v * v * v;
+      const u = Math.random();
+      if (u < 1 - 0.331 * (x * x * x * x)) return d * v3;
+      if (Math.log(u) < 0.5 * x * x + d * (1 - v3 + Math.log(v3))) return d * v3;
+    }
+  }
+  const x = gammaSample(alpha);
+  const y = gammaSample(beta);
+  return x / (x + y);
+}
+
+function samplePosteriors(bsA, btA, bsB, btB, samples = 10000) {
+  const pA = new Array(samples);
+  const pB = new Array(samples);
+  for (let i = 0; i < samples; i++) {
+    pA[i] = betaSample(bsA, btA);
+    pB[i] = betaSample(bsB, btB);
+  }
+  return { pA, pB };
+}
+
+function summarizeSamples(pA, pB) {
+  const samples = pA.length;
+  let winsB = 0, winsA = 0;
+  let sumRelLift = 0; // (B - A) / A
+  let sumAbsLift = 0; // (B - A)
+  const relLifts = [];
+  for (let i = 0; i < samples; i++) {
+    const a = pA[i], b = pB[i];
+    if (b > a) winsB++;
+    if (a > b) winsA++;
+    const abs = b - a;
+    const rel = a === 0 ? null : abs / a;
+    sumAbsLift += abs;
+    sumRelLift += (rel === null ? 0 : rel);
+    relLifts.push(rel);
+  }
+  const probB = winsB / samples;
+  const probA = winsA / samples;
+  const expAbsLift = sumAbsLift / samples;
+  const expRelLift = sumRelLift / samples;
+
+  // credible intervals for absolute lift
+  const absSamples = new Array(samples);
+  for (let i = 0; i < samples; i++) absSamples[i] = pB[i] - pA[i];
+  absSamples.sort((x, y) => x - y);
+  const ciLow = absSamples[Math.floor(samples * 0.025)];
+  const ciHigh = absSamples[Math.floor(samples * 0.975)];
+
+  return {
+    probB,
+    probA,
+    expectedAbsLift: expAbsLift,
+    expectedRelLift: expRelLift,
+    ci95: [ciLow, ciHigh],
+  };
+}
+
+function analyzeABDualMetric(input) {
+  const { control, variant, mode = 'standard', daysRunning = 0, samples = 10000, businessMDE = 0.0 } = input;
+
+  // thresholds and minima per your notes
+  const MODE = {
+    fast: { threshold: 0.90, minN: 500, minDays: 3 },
+    standard: { threshold: 0.95, minN: 1500, minDays: 7 },
+    careful: { threshold: 0.975, minN: 3000, minDays: 10 }
+  }[mode];
+
+  // Build posteriors for both metrics: Beta(success+1, failures+1)
+  const atcA_alpha = control.atcSuccesses + 1;
+  const atcA_beta = (control.visits - control.atcSuccesses) + 1;
+  const atcB_alpha = variant.atcSuccesses + 1;
+  const atcB_beta = (variant.visits - variant.atcSuccesses) + 1;
+
+  const purA_alpha = control.purchaseSuccesses + 1;
+  const purA_beta = (control.visits - control.purchaseSuccesses) + 1;
+  const purB_alpha = variant.purchaseSuccesses + 1;
+  const purB_beta = (variant.visits - variant.purchaseSuccesses) + 1;
+
+  // sample posteriors
+  const atcSamples = samplePosteriors(atcA_alpha, atcA_beta, atcB_alpha, atcB_beta, samples);
+  const purSamples = samplePosteriors(purA_alpha, purA_beta, purB_alpha, purB_beta, samples);
+
+  const atcSummary = summarizeSamples(atcSamples.pA, atcSamples.pB);
+  const purSummary = summarizeSamples(purSamples.pA, purSamples.pB);
+
+  // combined / joint probability: fraction where EITHER purchase sample OR atc sample shows B > A
+  let jointWins = 0;
+  for (let i = 0; i < samples; i++) {
+    if (purSamples.pB[i] > purSamples.pA[i] || atcSamples.pB[i] > atcSamples.pA[i]) jointWins++;
+  }
+  const probJoint = jointWins / samples;
+
+  // Decide using the rules described earlier:
+  const perVariantMinN = MODE.minN;
+  const haveMinN = (control.visits >= perVariantMinN && variant.visits >= perVariantMinN);
+  const haveMinDays = (daysRunning >= MODE.minDays);
+
+  // Simple decision logic: prefer purchases. If purchases sparse, rely on ATC as fallback.
+  let decision = 'no_clear_winner';
+  const t = MODE.threshold;
+
+  // Primary purchase-based rule
+  if (haveMinN && haveMinDays) {
+    if (purSummary.probB >= t && purSummary.expectedRelLift >= businessMDE) {
+      decision = 'variant_wins_on_purchases';
+    } else if (purSummary.probA >= t) {
+      decision = 'control_wins_on_purchases';
+    } else {
+      // fallback: if purchases inconclusive but ATC strong
+      if (atcSummary.probB >= t && atcSummary.expectedRelLift >= businessMDE) {
+        decision = 'variant_likely_on_atc_but_purchases_inconclusive';
+      }
+    }
+  } else {
+    // insufficient purchases; use hybrid approach
+    const lowerThreshold = Math.max(0.80, t - 0.05); // allow small relaxation
+    if (purSummary.probB >= lowerThreshold && atcSummary.probB >= t) {
+      decision = 'variant_probable_based_on_purchases_and_strong_atc';
+    } else if (probJoint >= t) {
+      decision = 'variant_probable_by_joint_metric';
+    }
+  }
+
+  // build result object
+  return {
+    mode,
+    daysRunning,
+    control,
+    variant,
+    atc: {
+      probB: atcSummary.probB,
+      expectedAbsLift: atcSummary.expectedAbsLift,
+      expectedRelLift: atcSummary.expectedRelLift,
+      ci95: atcSummary.ci95,
+      totals: { control_visits: control.visits, variant_visits: variant.visits }
+    },
+    purchases: {
+      probB: purSummary.probB,
+      expectedAbsLift: purSummary.expectedAbsLift,
+      expectedRelLift: purSummary.expectedRelLift,
+      ci95: purSummary.ci95,
+      totals: { control_visits: control.visits, variant_visits: variant.visits }
+    },
+    joint: {
+      probJoint
+    },
+    decision,
+    haveMinN,
+    haveMinDays
+  };
+}
 
 // Figma Design Assets - Dashboard specific assets
 const imgPlaceholder = "http://localhost:3845/assets/c9fc7d6b793322789590ccef37f7182244140e0c.png";
@@ -51,53 +223,149 @@ const figmaColors = {
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
   
-  // Mock data for dashboard
-  const mockData = {
-    user: {
-      name: "Zac",
-      level: "Legend Scientist",
-      xp: 2100,
-      maxXp: 3000
-    },
-    experiments: [
-      {
-        id: 1,
-        name: "Returns Badge VS Without",
-        status: "running",
-        variantA: 2100,
-        variantB: 2160,
-        runtime: "48h",
-        goal: "80%"
-      }
-    ],
-    testCards: [
-      { id: 1, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-      { id: 2, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-      { id: 3, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-      { id: 4, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" }
-    ],
-    queuedTests: [
-      { name: "Shipping badge Design Test" },
-      { name: "Feature Bullet Points Test" },
-      { name: "Fomo Badge Test" },
-      { name: "Scarcity signals Test" },
-      { name: "Shipping badge Design Test" },
-      { name: "Shipping badge Design Test" }
-    ],
-    recentActivities: [
-      { action: "Paused Badge Test", date: "July 26, 2025" },
-      { action: "Winner Found from Scarcity Test", date: "July 26, 2025" },
-      { action: "Variation Test Launched", date: "July 26, 2025" },
-      { action: "80% Confidence Level Achieve on Running Test", date: "July 26, 2025" },
-      { action: "New Progress Level Reached", date: "July 26, 2025" },
-      { action: "You've Run Tests for 60 Days in a Row", date: "July 26, 2025" }
-    ]
-  };
+  try {
+    // Fetch active A/B tests
+    const activeTests = await prisma.aBTest.findMany({
+      where: { 
+        shop: session.shop,
+        status: 'active'
+      },
+      orderBy: { createdAt: 'desc' }
+    });
 
-  return json({
-    ...mockData,
-    shop: session.shop
-  });
+    // For each active test, get event data and analyze for winners
+    const experimentsWithAnalysis = await Promise.all(
+      activeTests.map(async (test) => {
+        // Get events for this test
+        const events = await prisma.aBEvent.findMany({
+          where: { testId: test.id },
+          orderBy: { createdAt: 'asc' }
+        });
+
+        // Calculate metrics for each variant
+        const controlEvents = events.filter(e => e.variant === 'A');
+        const variantEvents = events.filter(e => e.variant === 'B');
+
+        const controlVisits = controlEvents.filter(e => e.eventType === 'impression').length;
+        const variantVisits = variantEvents.filter(e => e.eventType === 'impression').length;
+        
+        const controlAtc = controlEvents.filter(e => e.eventType === 'add_to_cart').length;
+        const variantAtc = variantEvents.filter(e => e.eventType === 'add_to_cart').length;
+        
+        const controlPurchases = controlEvents.filter(e => e.eventType === 'purchase').length;
+        const variantPurchases = variantEvents.filter(e => e.eventType === 'purchase').length;
+
+        // Calculate days running
+        const daysRunning = test.createdAt ? 
+          Math.floor((new Date() - new Date(test.createdAt)) / (1000 * 60 * 60 * 24)) : 0;
+
+        // Analyze for winner if we have enough data
+        let analysis = null;
+        let winnerDeclared = false;
+        
+        if (controlVisits >= 100 && variantVisits >= 100) { // Minimum data threshold
+          const testData = {
+            control: {
+              visits: controlVisits,
+              atcSuccesses: controlAtc,
+              purchaseSuccesses: controlPurchases
+            },
+            variant: {
+              visits: variantVisits,
+              atcSuccesses: variantAtc,
+              purchaseSuccesses: variantPurchases
+            },
+            mode: 'standard',
+            daysRunning: daysRunning,
+            businessMDE: 0.05
+          };
+
+          analysis = analyzeABDualMetric(testData);
+          
+          // Check if we have a clear winner
+          if (analysis.decision !== 'no_clear_winner') {
+            winnerDeclared = true;
+            
+            // Update test status to completed with winner
+            await prisma.aBTest.update({
+              where: { id: test.id },
+              data: { 
+                status: 'completed',
+                winner: analysis.decision.includes('variant') ? 'B' : 'A',
+                completedAt: new Date()
+              }
+            });
+          }
+        }
+
+        return {
+          id: test.id,
+          name: test.name,
+          status: winnerDeclared ? 'completed' : 'running',
+          variantA: controlVisits,
+          variantB: variantVisits,
+          runtime: `${daysRunning}d`,
+          goal: "95%",
+          analysis: analysis,
+          winnerDeclared: winnerDeclared,
+          winner: winnerDeclared ? (analysis.decision.includes('variant') ? 'B' : 'A') : null
+        };
+      })
+    );
+
+    // Get recent activities from database
+    const recentActivities = await prisma.aBTest.findMany({
+      where: { shop: session.shop },
+      orderBy: { updatedAt: 'desc' },
+      take: 6
+    }).then(tests => 
+      tests.map(test => ({
+        action: test.status === 'completed' ? 
+          `Winner Found: ${test.name}` : 
+          test.status === 'active' ? 
+          `Test Launched: ${test.name}` : 
+          `Test ${test.status}: ${test.name}`,
+        date: test.updatedAt.toLocaleDateString()
+      }))
+    );
+
+    return json({
+      user: {
+        name: "Zac",
+        level: "Legend Scientist", 
+        xp: 2100,
+        maxXp: 3000
+      },
+      experiments: experimentsWithAnalysis,
+      testCards: [
+        { id: 1, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+        { id: 2, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+        { id: 3, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+        { id: 4, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" }
+      ],
+      queuedTests: [
+        { name: "Shipping badge Design Test" },
+        { name: "Feature Bullet Points Test" },
+        { name: "Fomo Badge Test" },
+        { name: "Scarcity signals Test" },
+        { name: "Shipping badge Design Test" },
+        { name: "Shipping badge Design Test" }
+      ],
+      recentActivities: recentActivities,
+      shop: session.shop
+    });
+  } catch (error) {
+    console.error("Error loading dashboard data:", error);
+    return json({
+      user: { name: "Zac", level: "Legend Scientist", xp: 2100, maxXp: 3000 },
+      experiments: [],
+      testCards: [],
+      queuedTests: [],
+      recentActivities: [],
+      shop: session.shop,
+      error: "Failed to load dashboard data"
+    });
+  }
 };
 
 export default function Dashboard() {
@@ -164,6 +432,90 @@ export default function Dashboard() {
           </p>
         </button>
       </div>
+
+      {/* Winner Declaration Section - Only show when winners are declared */}
+      {experiments.some(exp => exp.winnerDeclared) && (
+        <div style={{
+          backgroundColor: figmaColors.green,
+          borderRadius: '20px',
+          padding: '30px',
+          marginBottom: '40px',
+          border: '2px solid #1a7f1a'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
+            <img alt="Award" src={imgAward} style={{ width: '32px', height: '32px' }} />
+            <h2 style={{
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 600,
+              fontSize: '24px',
+              color: figmaColors.white,
+              margin: 0
+            }}>
+              🎉 Winners Declared!
+            </h2>
+          </div>
+          
+          {experiments.filter(exp => exp.winnerDeclared).map((experiment, index) => (
+            <div key={index} style={{
+              backgroundColor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              padding: '20px',
+              marginBottom: index < experiments.filter(exp => exp.winnerDeclared).length - 1 ? '15px' : '0'
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <h3 style={{
+                  fontFamily: 'Poppins, sans-serif',
+                  fontWeight: 500,
+                  fontSize: '18px',
+                  color: figmaColors.white,
+                  margin: 0
+                }}>
+                  {experiment.name}
+                </h3>
+                <div style={{
+                  backgroundColor: figmaColors.white,
+                  color: figmaColors.green,
+                  padding: '6px 12px',
+                  borderRadius: '20px',
+                  fontSize: '14px',
+                  fontWeight: 600
+                }}>
+                  Winner: Variant {experiment.winner}
+                </div>
+              </div>
+              
+              {experiment.analysis && (
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
+                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
+                    <p style={{ color: figmaColors.white, margin: '0 0 5px 0', fontSize: '12px', opacity: 0.8 }}>Purchase Win Probability</p>
+                    <p style={{ color: figmaColors.white, margin: 0, fontSize: '16px', fontWeight: 600 }}>
+                      {(experiment.analysis.purchases.probB * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
+                    <p style={{ color: figmaColors.white, margin: '0 0 5px 0', fontSize: '12px', opacity: 0.8 }}>Expected Lift</p>
+                    <p style={{ color: figmaColors.white, margin: 0, fontSize: '16px', fontWeight: 600 }}>
+                      +{(experiment.analysis.purchases.expectedRelLift * 100).toFixed(1)}%
+                    </p>
+                  </div>
+                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
+                    <p style={{ color: figmaColors.white, margin: '0 0 5px 0', fontSize: '12px', opacity: 0.8 }}>Total Visitors</p>
+                    <p style={{ color: figmaColors.white, margin: 0, fontSize: '16px', fontWeight: 600 }}>
+                      {experiment.analysis.control.visits + experiment.analysis.variant.visits}
+                    </p>
+                  </div>
+                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
+                    <p style={{ color: figmaColors.white, margin: '0 0 5px 0', fontSize: '12px', opacity: 0.8 }}>Decision</p>
+                    <p style={{ color: figmaColors.white, margin: 0, fontSize: '14px', fontWeight: 500 }}>
+                      {experiment.analysis.decision.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
 
       {/* Experiment Overview Section */}
       <div style={{
