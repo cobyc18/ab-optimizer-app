@@ -35,9 +35,9 @@ export default function AppLayout() {
 
   const navigationItems = [
     { id: "Home", label: "Home", icon: img, href: "/app", active: true },
-    { id: "A/B Testing", label: "A/B Testing", icon: imgCultureTube, href: "/app/ab-tests", active: false },
+    { id: "A/B Testing", label: "A/B Testing", icon: imgCultureTube, href: "/app/ab-tests", active: true },
     { id: "Experiments Hub", label: "Experiments Hub", icon: imgCultureTube, href: "/app/experiments", active: false },
-    { id: "Insights & Report", label: "Insights & Report", icon: imgFrame2147224424, href: "/app/insights", active: false },
+    { id: "Insights & Report", label: "Insights & Report", icon: imgFrame2147224424, href: "/app/analytics", active: true },
     { id: "Widget Library", label: "Widget Library", icon: imgLibrary, href: "/app/widgets", active: false },
     { id: "Settings", label: "Settings", icon: imgSetting, href: "/app/settings", active: false },
     { id: "Help / Onboarding", label: "Help / Onboarding", icon: imgVideo, href: "/app/help", active: false },
