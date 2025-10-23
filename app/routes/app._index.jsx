@@ -318,16 +318,26 @@ export const loader = async ({ request }) => {
       where: { shop: session.shop },
       orderBy: { updatedAt: 'desc' },
       take: 6
-    }).then(tests => 
-      tests.map(test => ({
+    }).then(tests => {
+      const activities = tests.map(test => ({
         action: test.status === 'completed' ? 
           `Winner Found: ${test.name}` : 
           test.status === 'active' ? 
           `Test Launched: ${test.name}` : 
           `Test ${test.status}: ${test.name}`,
         date: test.updatedAt.toLocaleDateString()
-      }))
-    );
+      }));
+      
+      // If no activities from database, add some default ones
+      if (activities.length === 0) {
+        return [
+          { action: "Welcome to A/B Optimizer!", date: new Date().toLocaleDateString() },
+          { action: "Ready to start your first test", date: new Date().toLocaleDateString() }
+        ];
+      }
+      
+      return activities;
+    });
 
     return json({
       user: {
@@ -359,9 +369,24 @@ export const loader = async ({ request }) => {
     return json({
       user: { name: "Zac", level: "Legend Scientist", xp: 2100, maxXp: 3000 },
       experiments: [],
-      testCards: [],
-      queuedTests: [],
-      recentActivities: [],
+      testCards: [
+        { id: 1, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+        { id: 2, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+        { id: 3, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+        { id: 4, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" }
+      ],
+      queuedTests: [
+        { name: "Shipping badge Design Test" },
+        { name: "Feature Bullet Points Test" },
+        { name: "Fomo Badge Test!" },
+        { name: "Scarcity signals Test" },
+        { name: "Shipping badge Design Test" },
+        { name: "Shipping badge Design Test" }
+      ],
+      recentActivities: [
+        { action: "Welcome to A/B Optimizer!", date: new Date().toLocaleDateString() },
+        { action: "Ready to start your first test", date: new Date().toLocaleDateString() }
+      ],
       shop: session.shop,
       error: "Failed to load dashboard data"
     });

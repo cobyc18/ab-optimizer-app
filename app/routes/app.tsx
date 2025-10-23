@@ -1,5 +1,5 @@
-import { Outlet, useLocation } from "@remix-run/react";
-import { useState } from "react";
+import { Outlet, useLocation, Link } from "@remix-run/react";
+import { useState, useEffect } from "react";
 
 // Figma Design Assets - Sidebar specific assets
 const imgOption11 = "http://localhost:3845/assets/d48cc262e275c8268a268985b2afdfac992cf82a.png";
@@ -34,15 +34,24 @@ export default function AppLayout() {
   const [selectedNavItem, setSelectedNavItem] = useState("Home");
 
   const navigationItems = [
-    { id: "Home", label: "Home", icon: img, href: "/app", active: true },
-    { id: "A/B Testing", label: "A/B Testing", icon: imgCultureTube, href: "/app/ab-tests", active: true },
-    { id: "Experiments Hub", label: "Experiments Hub", icon: imgCultureTube, href: "/app/experiments", active: false },
-    { id: "Insights & Report", label: "Insights & Report", icon: imgFrame2147224424, href: "/app/analytics", active: true },
-    { id: "Widget Library", label: "Widget Library", icon: imgLibrary, href: "/app/widgets", active: false },
-    { id: "Settings", label: "Settings", icon: imgSetting, href: "/app/settings", active: false },
-    { id: "Help / Onboarding", label: "Help / Onboarding", icon: imgVideo, href: "/app/help", active: false },
-    { id: "Log out", label: "Log out", icon: imgLogout, href: "/auth/logout", active: false }
+    { id: "Home", label: "Home", icon: img, href: "/app" },
+    { id: "A/B Testing", label: "A/B Testing", icon: imgCultureTube, href: "/app/ab-tests" },
+    { id: "Experiments Hub", label: "Experiments Hub", icon: imgCultureTube, href: "/app/experiments" },
+    { id: "Insights & Report", label: "Insights & Report", icon: imgFrame2147224424, href: "/app/analytics" },
+    { id: "Widget Library", label: "Widget Library", icon: imgLibrary, href: "/app/widgets" },
+    { id: "Settings", label: "Settings", icon: imgSetting, href: "/app/settings" },
+    { id: "Help / Onboarding", label: "Help / Onboarding", icon: imgVideo, href: "/app/help" },
+    { id: "Log out", label: "Log out", icon: imgLogout, href: "/auth/logout" }
   ];
+
+  // Update selected item based on current location
+  useEffect(() => {
+    const currentPath = location.pathname;
+    const currentItem = navigationItems.find(item => item.href === currentPath);
+    if (currentItem) {
+      setSelectedNavItem(currentItem.id);
+    }
+  }, [location.pathname]);
 
   return (
     <div style={{ backgroundColor: figmaColors.gray, position: 'relative', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
@@ -94,9 +103,9 @@ export default function AppLayout() {
           alignItems: 'flex-start'
         }}>
           {navigationItems.map((item, index) => (
-            <a
+            <Link
               key={item.id}
-              href={item.href}
+              to={item.href}
               onClick={() => setSelectedNavItem(item.id)}
               style={{
                 backgroundColor: selectedNavItem === item.id ? figmaColors.blue : 'transparent',
@@ -124,7 +133,7 @@ export default function AppLayout() {
               }}>
                 {item.label}
               </p>
-            </a>
+            </Link>
           ))}
         </div>
         
