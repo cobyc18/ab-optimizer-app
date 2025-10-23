@@ -86,9 +86,9 @@ function analyzeABDualMetric(input) {
 
   // thresholds and minima per your notes
   const MODE = {
-    fast: { threshold: 0.90, minN: 500, minDays: 3 },
-    standard: { threshold: 0.95, minN: 1500, minDays: 7 },
-    careful: { threshold: 0.975, minN: 3000, minDays: 10 }
+    fast: { threshold: 0.70, minN: 1, minDays: 0 }, // Lowered for testing
+    standard: { threshold: 0.75, minN: 1, minDays: 0 }, // Lowered for testing
+    careful: { threshold: 0.80, minN: 1, minDays: 0 } // Lowered for testing
   }[mode];
 
   // Build posteriors for both metrics: Beta(success+1, failures+1)
@@ -263,7 +263,7 @@ export const loader = async ({ request }) => {
         let analysis = null;
         let winnerDeclared = false;
         
-        if (controlVisits >= 100 && variantVisits >= 100) { // Minimum data threshold
+        if (controlVisits >= 1 && variantVisits >= 1) { // Lowered threshold for testing
           const testData = {
             control: {
               visits: controlVisits,

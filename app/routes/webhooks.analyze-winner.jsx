@@ -77,9 +77,9 @@ function analyzeABDualMetric(input) {
   const { control, variant, mode = 'standard', daysRunning = 0, samples = 10000, businessMDE = 0.0 } = input;
 
   const MODE = {
-    fast: { threshold: 0.90, minN: 500, minDays: 3 },
-    standard: { threshold: 0.95, minN: 1500, minDays: 7 },
-    careful: { threshold: 0.975, minN: 3000, minDays: 10 }
+    fast: { threshold: 0.70, minN: 1, minDays: 0 }, // Lowered for testing
+    standard: { threshold: 0.75, minN: 1, minDays: 0 }, // Lowered for testing
+    careful: { threshold: 0.80, minN: 1, minDays: 0 } // Lowered for testing
   }[mode];
 
   const atcA_alpha = control.atcSuccesses + 1;
@@ -198,8 +198,8 @@ export const action = async ({ request }) => {
     const controlPurchases = controlEvents.filter(e => e.eventType === 'purchase').length;
     const variantPurchases = variantEvents.filter(e => e.eventType === 'purchase').length;
 
-    // Only analyze if we have minimum data
-    if (controlVisits < 100 || variantVisits < 100) {
+    // Only analyze if we have minimum data (lowered for testing)
+    if (controlVisits < 1 || variantVisits < 1) {
       console.log(`Insufficient data for test ${testId}: ${controlVisits} vs ${variantVisits} visits`);
       return json({ status: "skipped", reason: "insufficient_data" });
     }
