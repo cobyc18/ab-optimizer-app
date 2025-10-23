@@ -230,7 +230,7 @@ export const loader = async ({ request }) => {
         shop: session.shop,
         status: 'active'
       },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { startDate: 'desc' }
     });
 
     // For each active test, get event data and analyze for winners
@@ -256,8 +256,8 @@ export const loader = async ({ request }) => {
         const variantPurchases = variantEvents.filter(e => e.eventType === 'purchase').length;
 
         // Calculate days running
-        const daysRunning = test.createdAt ? 
-          Math.floor((new Date() - new Date(test.createdAt)) / (1000 * 60 * 60 * 24)) : 0;
+        const daysRunning = test.startDate ? 
+          Math.floor((new Date() - new Date(test.startDate)) / (1000 * 60 * 60 * 24)) : 0;
 
         // Analyze for winner if we have enough data
         let analysis = null;
@@ -316,7 +316,7 @@ export const loader = async ({ request }) => {
     // Get recent activities from database
     const recentActivities = await prisma.aBTest.findMany({
       where: { shop: session.shop },
-      orderBy: { updatedAt: 'desc' },
+      orderBy: { startDate: 'desc' },
       take: 6
     }).then(tests => {
       const activities = tests.map(test => ({
@@ -325,7 +325,7 @@ export const loader = async ({ request }) => {
           test.status === 'active' ? 
           `Test Launched: ${test.name}` : 
           `Test ${test.status}: ${test.name}`,
-        date: test.updatedAt.toLocaleDateString()
+        date: test.startDate.toLocaleDateString()
       }));
       
       // If no activities from database, add some default ones
