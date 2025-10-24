@@ -224,17 +224,6 @@ export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
   
   try {
-    // Fetch all A/B tests to see what statuses exist
-    const allTests = await prisma.aBTest.findMany({
-      where: { shop: session.shop },
-      orderBy: { startDate: 'desc' }
-    });
-
-    console.log(`🔍 Dashboard: Found ${allTests.length} total tests for shop ${session.shop}`);
-    allTests.forEach(test => {
-      console.log(`  Test: ${test.name}, Status: ${test.status}, Winner: ${test.winner}`);
-    });
-
     // Fetch all A/B tests (both active and completed with winners)
     const allTests = await prisma.aBTest.findMany({
       where: { 
@@ -244,7 +233,10 @@ export const loader = async ({ request }) => {
       orderBy: { startDate: 'desc' }
     });
 
-    console.log(`🔍 Dashboard: Found ${allTests.length} tests (active + completed)`);
+    console.log(`🔍 Dashboard: Found ${allTests.length} tests for shop ${session.shop}`);
+    allTests.forEach(test => {
+      console.log(`  Test: ${test.name}, Status: ${test.status}, Winner: ${test.winner}`);
+    });
 
     // For each test, get event data and analyze for winners
     const experimentsWithAnalysis = await Promise.all(
