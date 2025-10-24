@@ -224,14 +224,27 @@ export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
   
   try {
-    // Fetch active A/B tests
+    // Fetch all A/B tests to see what statuses exist
+    const allTests = await prisma.aBTest.findMany({
+      where: { shop: session.shop },
+      orderBy: { startDate: 'desc' }
+    });
+
+    console.log(`🔍 Dashboard: Found ${allTests.length} total tests for shop ${session.shop}`);
+    allTests.forEach(test => {
+      console.log(`  Test: ${test.name}, Status: ${test.status}, Winner: ${test.winner}`);
+    });
+
+    // Fetch active A/B tests (try different status values)
     const activeTests = await prisma.aBTest.findMany({
       where: { 
         shop: session.shop,
-        status: 'active'
+        status: { in: ['active', 'running', 'live'] }
       },
       orderBy: { startDate: 'desc' }
     });
+
+    console.log(`🔍 Dashboard: Found ${activeTests.length} active tests`);
 
     // For each active test, get event data and analyze for winners
     const experimentsWithAnalysis = await Promise.all(
@@ -254,6 +267,10 @@ export const loader = async ({ request }) => {
         
         const controlPurchases = controlEvents.filter(e => e.eventType === 'purchase').length;
         const variantPurchases = variantEvents.filter(e => e.eventType === 'purchase').length;
+
+        console.log(`🔍 Test ${test.id} (${test.name}):`);
+        console.log(`  Control: ${controlVisits} visits, ${controlAtc} ATC, ${controlPurchases} purchases`);
+        console.log(`  Variant: ${variantVisits} visits, ${variantAtc} ATC, ${variantPurchases} purchases`);
 
         // Calculate days running
         const daysRunning = test.startDate ? 
@@ -282,9 +299,15 @@ export const loader = async ({ request }) => {
 
           analysis = analyzeABDualMetric(testData);
           
+          console.log(`🔍 Analysis for test ${test.id}:`);
+          console.log(`  Decision: ${analysis.decision}`);
+          console.log(`  Purchase prob B: ${(analysis.purchases.probB * 100).toFixed(1)}%`);
+          console.log(`  ATC prob B: ${(analysis.atc.probB * 100).toFixed(1)}%`);
+          
           // Check if we have a clear winner
           if (analysis.decision !== 'no_clear_winner') {
             winnerDeclared = true;
+            console.log(`🎉 WINNER DECLARED for test ${test.id}: ${analysis.decision}`);
             
             // Update test status to completed with winner
             await prisma.aBTest.update({
@@ -292,9 +315,11 @@ export const loader = async ({ request }) => {
               data: { 
                 status: 'completed',
                 winner: analysis.decision.includes('variant') ? 'B' : 'A',
-                completedAt: new Date()
+                endDate: new Date()
               }
             });
+          } else {
+            console.log(`⏳ No clear winner yet for test ${test.id}`);
           }
         }
 

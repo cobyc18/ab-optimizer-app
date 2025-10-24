@@ -41,7 +41,11 @@ export const action = async ({ request }) => {
         path: `orders/${payload.order_id}.json`,
       });
 
-      const order = orderResponse.data.order;
+      const order = orderResponse.data?.order;
+      if (!order) {
+        console.error("Order not found in response:", orderResponse);
+        return json({ status: "error", message: "Order not found" }, { status: 404 });
+      }
       console.log("Retrieved order details:", order.name);
 
       // Process each line item in the order
@@ -56,10 +60,13 @@ export const action = async ({ request }) => {
           console.log(`Processing line item - Product ID: ${productId}, Variant ID: ${variantId}, Quantity: ${quantity}, Price: ${price}`);
 
           // Check if this product has an active A/B test
+          console.log(`🔍 Looking for active test for product ${productId} in shop ${session.shop}`);
+          
           const activeTest = await prisma.aBTest.findFirst({
             where: {
               productId: String(productId),
-              status: "running",
+              shop: session.shop,
+              status: { in: ['active', 'running', 'live'] },
               startDate: { lte: new Date() },
               OR: [
                 { endDate: null },
@@ -67,6 +74,12 @@ export const action = async ({ request }) => {
               ]
             }
           });
+
+          if (activeTest) {
+            console.log(`✅ Found active test: ${activeTest.name} (${activeTest.id})`);
+          } else {
+            console.log(`❌ No active test found for product ${productId}`);
+          }
 
           if (activeTest) {
             console.log(`Found active A/B test for product ${productId}:`, activeTest.id);
