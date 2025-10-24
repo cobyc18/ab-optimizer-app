@@ -252,7 +252,7 @@ export const loader = async ({ request }) => {
         // Get events for this test
         const events = await prisma.aBEvent.findMany({
           where: { testId: test.id },
-          orderBy: { createdAt: 'asc' }
+          orderBy: { timestamp: 'asc' }
         });
 
         // Calculate metrics for each variant
