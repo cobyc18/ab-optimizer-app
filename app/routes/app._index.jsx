@@ -566,7 +566,7 @@ export default function Dashboard() {
                   <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
                     <p style={{ color: figmaColors.white, margin: '0 0 5px 0', fontSize: '12px', opacity: 0.8 }}>Total Visitors</p>
                     <p style={{ color: figmaColors.white, margin: 0, fontSize: '16px', fontWeight: 600 }}>
-                      {experiment.analysis.control.visits + experiment.analysis.variant.visits}
+                      {experiment.variantA + experiment.variantB}
                     </p>
                   </div>
                   <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
