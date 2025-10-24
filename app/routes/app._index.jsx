@@ -256,8 +256,9 @@ export const loader = async ({ request }) => {
         });
 
         // Calculate metrics for each variant
-        const controlEvents = events.filter(e => e.variant === 'A');
-        const variantEvents = events.filter(e => e.variant === 'B');
+        // Control is typically the original template (default), Variant is the new template
+        const controlEvents = events.filter(e => e.variant === 'default');
+        const variantEvents = events.filter(e => e.variant === 'default-product-2');
 
         const controlVisits = controlEvents.filter(e => e.eventType === 'impression').length;
         const variantVisits = variantEvents.filter(e => e.eventType === 'impression').length;
@@ -269,6 +270,9 @@ export const loader = async ({ request }) => {
         const variantPurchases = variantEvents.filter(e => e.eventType === 'purchase').length;
 
         console.log(`🔍 Test ${test.id} (${test.name}):`);
+        console.log(`  Total events: ${events.length}`);
+        console.log(`  Control events: ${controlEvents.length} (variant: default)`);
+        console.log(`  Variant events: ${variantEvents.length} (variant: default-product-2)`);
         console.log(`  Control: ${controlVisits} visits, ${controlAtc} ATC, ${controlPurchases} purchases`);
         console.log(`  Variant: ${variantVisits} visits, ${variantAtc} ATC, ${variantPurchases} purchases`);
 
