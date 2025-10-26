@@ -562,12 +562,17 @@ export default function Dashboard() {
   const testScreenshotAPI = async () => {
     try {
       setTestResult('Testing...');
-      const response = await fetch('/api/test-screenshot', {
+      const response = await fetch('/api/screenshot-alt', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' }
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          previewUrl: 'https://example.com',
+          productHandle: 'test-product',
+          themeId: '123456789'
+        })
       });
       const result = await response.json();
-      setTestResult(result.success ? '✅ Test passed!' : `❌ Test failed: ${result.error}`);
+      setTestResult(result.success ? '✅ Test passed! Screenshot API is working.' : `❌ Test failed: ${result.error}`);
     } catch (error) {
       setTestResult(`❌ Test error: ${error.message}`);
     }
