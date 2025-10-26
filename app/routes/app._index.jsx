@@ -483,8 +483,9 @@ export default function Dashboard() {
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
-  const [showIframePreview, setShowIframePreview] = useState(false);
-  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
+  const [showScreenshotPreview, setShowScreenshotPreview] = useState(false);
+  const [isLoadingScreenshot, setIsLoadingScreenshot] = useState(false);
+  const [screenshotUrl, setScreenshotUrl] = useState('');
 
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
@@ -512,22 +513,56 @@ export default function Dashboard() {
     }
   };
 
-  const toggleIframePreview = () => {
-    if (previewUrl) {
-      setIsLoadingPreview(true);
-      setShowIframePreview(!showIframePreview);
-      // Simulate loading time for better UX
-      setTimeout(() => {
-        setIsLoadingPreview(false);
-      }, 1000);
+  const generateScreenshot = async () => {
+    if (previewUrl && selectedTheme && selectedProduct) {
+      setIsLoadingScreenshot(true);
+      setShowScreenshotPreview(true);
+      
+      try {
+        const response = await fetch('/api/screenshot', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            previewUrl,
+            productHandle: selectedProduct.handle,
+            themeId: selectedTheme.id.replace('gid://shopify/OnlineStoreTheme/', '')
+          })
+        });
+
+        const result = await response.json();
+        
+        if (result.success) {
+          setScreenshotUrl(result.screenshotUrl);
+        } else {
+          console.error('Screenshot generation failed:', result.error);
+          setShowScreenshotPreview(false);
+        }
+      } catch (error) {
+        console.error('Error generating screenshot:', error);
+        setShowScreenshotPreview(false);
+      } finally {
+        setIsLoadingScreenshot(false);
+      }
+    }
+  };
+
+  const toggleScreenshotPreview = () => {
+    if (showScreenshotPreview) {
+      setShowScreenshotPreview(false);
+      setScreenshotUrl('');
+    } else {
+      generateScreenshot();
     }
   };
 
   // Update preview URL when theme or product changes
   useEffect(() => {
     generatePreviewUrl();
-    // Hide iframe when selections change
-    setShowIframePreview(false);
+    // Hide screenshot when selections change
+    setShowScreenshotPreview(false);
+    setScreenshotUrl('');
   }, [selectedTheme, selectedProduct]);
 
   return (
@@ -1734,14 +1769,16 @@ export default function Dashboard() {
                   </p>
                 </button>
                 <button
-                  onClick={toggleIframePreview}
+                  onClick={toggleScreenshotPreview}
+                  disabled={isLoadingScreenshot}
                   style={{
-                    backgroundColor: showIframePreview ? figmaColors.orange : figmaColors.green,
+                    backgroundColor: showScreenshotPreview ? figmaColors.orange : figmaColors.green,
                     border: 'none',
                     borderRadius: '8px',
                     padding: '12px 24px',
-                    cursor: 'pointer',
-                    whiteSpace: 'nowrap'
+                    cursor: isLoadingScreenshot ? 'not-allowed' : 'pointer',
+                    whiteSpace: 'nowrap',
+                    opacity: isLoadingScreenshot ? 0.7 : 1
                   }}
                 >
                   <p style={{
@@ -1751,15 +1788,15 @@ export default function Dashboard() {
                     color: figmaColors.white,
                     margin: 0
                   }}>
-                    {showIframePreview ? 'Hide Preview' : 'Show Preview'}
+                    {isLoadingScreenshot ? 'Generating...' : showScreenshotPreview ? 'Hide Preview' : 'Generate Screenshot'}
                   </p>
                 </button>
               </div>
             </div>
           )}
 
-          {/* Iframe Preview Section */}
-          {showIframePreview && previewUrl && (
+          {/* Screenshot Preview Section */}
+          {showScreenshotPreview && previewUrl && (
             <div style={{ marginBottom: '30px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                 <label style={{
@@ -1769,10 +1806,10 @@ export default function Dashboard() {
                   color: figmaColors.darkGray,
                   margin: 0
                 }}>
-                  Live Preview
+                  Static Preview
                 </label>
                 <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-                  {isLoadingPreview && (
+                  {isLoadingScreenshot && (
                     <div style={{
                       width: '20px',
                       height: '20px',
@@ -1837,23 +1874,25 @@ export default function Dashboard() {
                     color: figmaColors.darkGray,
                     margin: 0
                   }}>
-                    Preview Mode
+                    Screenshot Preview
                   </p>
                 </div>
                 
-                {/* Iframe Container */}
+                {/* Screenshot Container */}
                 <div style={{
-                  height: '600px',
+                  minHeight: '600px',
                   position: 'relative',
-                  backgroundColor: figmaColors.gray
+                  backgroundColor: figmaColors.gray,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}>
-                  {isLoadingPreview ? (
+                  {isLoadingScreenshot ? (
                     <div style={{
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      height: '100%',
                       gap: '20px'
                     }}>
                       <div style={{
@@ -1871,22 +1910,55 @@ export default function Dashboard() {
                         color: figmaColors.darkGray,
                         margin: 0
                       }}>
-                        Loading Preview...
+                        Generating Screenshot...
+                      </p>
+                      <p style={{
+                        fontFamily: 'Inter, sans-serif',
+                        fontWeight: 400,
+                        fontSize: '14px',
+                        color: figmaColors.lightGray,
+                        margin: 0,
+                        textAlign: 'center'
+                      }}>
+                        This may take a few seconds
                       </p>
                     </div>
+                  ) : screenshotUrl ? (
+                    <div style={{
+                      width: '100%',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center'
+                    }}>
+                      <img
+                        src={screenshotUrl}
+                        alt="Product Preview Screenshot"
+                        style={{
+                          maxWidth: '100%',
+                          height: 'auto',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                        }}
+                      />
+                    </div>
                   ) : (
-                    <iframe
-                      src={previewUrl}
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        border: 'none',
-                        backgroundColor: figmaColors.white
-                      }}
-                      title="Product Preview"
-                      sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
-                      loading="lazy"
-                    />
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '20px'
+                    }}>
+                      <p style={{
+                        fontFamily: 'Inter, sans-serif',
+                        fontWeight: 500,
+                        fontSize: '16px',
+                        color: figmaColors.darkGray,
+                        margin: 0
+                      }}>
+                        Screenshot will appear here
+                      </p>
+                    </div>
                   )}
                 </div>
                 
@@ -1906,7 +1978,7 @@ export default function Dashboard() {
                     color: figmaColors.lightGray,
                     margin: 0
                   }}>
-                    This preview shows how your product will appear to customers
+                    Static screenshot generated with Puppeteer
                   </p>
                   <button
                     onClick={() => window.open(previewUrl, '_blank')}
@@ -1925,7 +1997,7 @@ export default function Dashboard() {
                       color: figmaColors.blue,
                       margin: 0
                     }}>
-                      Open Full Size
+                      Open Live Page
                     </p>
                   </button>
                 </div>
@@ -2001,7 +2073,7 @@ export default function Dashboard() {
                     margin: 0,
                     lineHeight: '20px'
                   }}>
-                    • <strong>Live Preview:</strong> Use the "Show Preview" button to see the product page rendered directly in your dashboard
+                    • <strong>Static Screenshots:</strong> Use the "Generate Screenshot" button to capture a static image using Puppeteer
                   </p>
                   <p style={{
                     fontFamily: 'Inter, sans-serif',
@@ -2011,7 +2083,7 @@ export default function Dashboard() {
                     margin: 0,
                     lineHeight: '20px'
                   }}>
-                    • <strong>Advanced:</strong> For static screenshots, you can use headless browsers (Puppeteer/Selenium) to capture images
+                    • <strong>Server-Side Rendering:</strong> Screenshots are generated on the server using headless Chrome for accurate previews
                   </p>
                 </div>
               </div>
