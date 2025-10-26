@@ -14,7 +14,8 @@ export const action = async ({ request }) => {
         "--no-sandbox", 
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage"
-      ]
+      ],
+      executablePath: puppeteer.executablePath()
     });
     
     console.log('✅ Browser launched');

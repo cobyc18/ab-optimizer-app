@@ -50,9 +50,14 @@ export const action = async ({ request }) => {
           "--single-process",
           "--disable-gpu",
           "--disable-web-security",
-          "--disable-features=VizDisplayCompositor"
+          "--disable-features=VizDisplayCompositor",
+          "--disable-background-timer-throttling",
+          "--disable-backgrounding-occluded-windows",
+          "--disable-renderer-backgrounding"
         ],
-        timeout: 30000
+        timeout: 30000,
+        // Use the installed Chrome browser
+        executablePath: puppeteer.executablePath()
       });
       console.log('✅ Puppeteer launched successfully');
     } catch (puppeteerError) {
@@ -63,8 +68,9 @@ export const action = async ({ request }) => {
         return json({ 
           error: "Puppeteer launch failed in development", 
           details: puppeteerError.message,
-          suggestion: "Try running: npm install puppeteer && npm run dev",
+          suggestion: "Try running: npx puppeteer browsers install chrome",
           troubleshooting: [
+            "Install Chrome for Puppeteer: npx puppeteer browsers install chrome",
             "Make sure Chrome/Chromium is installed",
             "Check if you have sufficient permissions",
             "Try running with: sudo npm run dev (if on Linux/Mac)",
