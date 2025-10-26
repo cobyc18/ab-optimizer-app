@@ -520,7 +520,7 @@ export default function Dashboard() {
       setShowScreenshotPreview(true);
       
       try {
-        const response = await fetch('/api/screenshot', {
+        const response = await fetch('/api/screenshot-alt', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

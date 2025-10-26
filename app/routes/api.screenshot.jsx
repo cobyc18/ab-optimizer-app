@@ -77,26 +77,28 @@ export const action = async ({ request }) => {
         timeout: 30000
       };
       
-      // Try different Chrome paths
-      if (executablePath) {
-        launchConfig.executablePath = executablePath;
-      } else {
-        // Try common Chrome paths on Linux
-        const commonPaths = [
-          '/usr/bin/google-chrome',
-          '/usr/bin/google-chrome-stable',
-          '/usr/bin/chromium-browser',
-          '/usr/bin/chromium',
-          '/opt/google/chrome/chrome'
-        ];
-        
-        for (const chromePath of commonPaths) {
-          if (fs.existsSync(chromePath)) {
-            console.log('🔍 Found system Chrome at:', chromePath);
-            launchConfig.executablePath = chromePath;
-            break;
-          }
+      // Try different Chrome paths - prioritize system Chrome
+      const chromePaths = [
+        '/usr/bin/google-chrome-stable',  // System Chrome (preferred)
+        '/usr/bin/google-chrome',
+        '/usr/bin/chromium-browser',
+        '/usr/bin/chromium',
+        '/opt/google/chrome/chrome',
+        executablePath  // Puppeteer's Chrome (fallback)
+      ].filter(Boolean);
+      
+      let chromeFound = false;
+      for (const chromePath of chromePaths) {
+        if (chromePath && fs.existsSync(chromePath)) {
+          console.log('🔍 Found Chrome at:', chromePath);
+          launchConfig.executablePath = chromePath;
+          chromeFound = true;
+          break;
         }
+      }
+      
+      if (!chromeFound) {
+        console.log('⚠️ No Chrome executable found, trying without explicit path');
       }
       
       browser = await puppeteer.launch(launchConfig);
