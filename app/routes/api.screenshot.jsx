@@ -6,6 +6,7 @@ import fs from "fs";
 
 // Check if we're in a development environment
 const isDevelopment = process.env.NODE_ENV === 'development';
+const isLocal = process.env.NODE_ENV === 'development' && !process.env.RENDER;
 
 export const action = async ({ request }) => {
   const { session } = await authenticate.admin(request);
@@ -79,6 +80,26 @@ export const action = async ({ request }) => {
       console.log('✅ Puppeteer launched successfully');
     } catch (puppeteerError) {
       console.error('❌ Puppeteer launch failed:', puppeteerError);
+      
+      // For local development, provide a mock screenshot
+      if (isLocal) {
+        console.log('🏠 Local development: Creating mock screenshot');
+        const mockFilename = `mock-preview-${productHandle}-${themeId}-${Date.now()}.png`;
+        const mockOutputPath = path.join(process.cwd(), 'public', 'screenshots', mockFilename);
+        
+        // Create a simple mock screenshot (1x1 pixel PNG)
+        const mockImageBuffer = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
+        fs.writeFileSync(mockOutputPath, mockImageBuffer);
+        
+        const mockScreenshotUrl = `/screenshots/${mockFilename}`;
+        return json({ 
+          success: true, 
+          screenshotUrl: mockScreenshotUrl,
+          filename: mockFilename,
+          mock: true,
+          message: "Mock screenshot created for local development"
+        });
+      }
       
       // In development, provide a more helpful error message
       if (isDevelopment) {
