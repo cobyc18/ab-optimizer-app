@@ -20,7 +20,8 @@
     "postinstall": "prisma generate",
     "install-chrome": "npx puppeteer browsers install chrome",
     "test-chrome": "node scripts/install-chrome.js",
-    "render-build": "node scripts/simple-build.js"
+    "render-build": "node scripts/simple-build.js",
+    "install-chrome-render": "node scripts/install-chrome-render.js"
   },
   "keywords": [
     "shopify",

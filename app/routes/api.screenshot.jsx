@@ -104,10 +104,10 @@ export const action = async ({ request }) => {
     } catch (puppeteerError) {
       console.error('❌ Puppeteer launch failed:', puppeteerError);
       
-      // For local development, provide a mock screenshot
-      if (isLocal) {
-        console.log('🏠 Local development: Creating mock screenshot');
-        const mockFilename = `mock-preview-${productHandle}-${themeId}-${Date.now()}.png`;
+      // For local development or when Chrome is not available, provide a mock screenshot
+      if (isLocal || puppeteerError.message.includes('Could not find Chrome')) {
+        console.log('🏠 Creating fallback screenshot (Chrome not available)');
+        const mockFilename = `fallback-preview-${productHandle}-${themeId}-${Date.now()}.png`;
         const mockOutputPath = path.join(process.cwd(), 'public', 'screenshots', mockFilename);
         
         // Create a simple mock screenshot (1x1 pixel PNG)
@@ -120,7 +120,8 @@ export const action = async ({ request }) => {
           screenshotUrl: mockScreenshotUrl,
           filename: mockFilename,
           mock: true,
-          message: "Mock screenshot created for local development"
+          message: "Fallback screenshot created (Chrome not available)",
+          note: "This is a placeholder image. Chrome installation may be needed for real screenshots."
         });
       }
       
