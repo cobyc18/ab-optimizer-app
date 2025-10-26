@@ -483,6 +483,8 @@ export default function Dashboard() {
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
+  const [showIframePreview, setShowIframePreview] = useState(false);
+  const [isLoadingPreview, setIsLoadingPreview] = useState(false);
 
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
@@ -510,20 +512,40 @@ export default function Dashboard() {
     }
   };
 
+  const toggleIframePreview = () => {
+    if (previewUrl) {
+      setIsLoadingPreview(true);
+      setShowIframePreview(!showIframePreview);
+      // Simulate loading time for better UX
+      setTimeout(() => {
+        setIsLoadingPreview(false);
+      }, 1000);
+    }
+  };
+
   // Update preview URL when theme or product changes
   useEffect(() => {
     generatePreviewUrl();
+    // Hide iframe when selections change
+    setShowIframePreview(false);
   }, [selectedTheme, selectedProduct]);
 
   return (
-    <div style={{ 
-      padding: '40px 60px', 
-      fontFamily: 'Inter, sans-serif', 
-      backgroundColor: figmaColors.gray, 
-      minHeight: 'calc(100vh - 80px)',
-      maxWidth: '1400px',
-      marginLeft: '60px'
-    }}>
+    <>
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
+      <div style={{ 
+        padding: '40px 60px', 
+        fontFamily: 'Inter, sans-serif', 
+        backgroundColor: figmaColors.gray, 
+        minHeight: 'calc(100vh - 80px)',
+        maxWidth: '1400px',
+        marginLeft: '60px'
+      }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <div>
@@ -1711,6 +1733,202 @@ export default function Dashboard() {
                     Open Preview
                   </p>
                 </button>
+                <button
+                  onClick={toggleIframePreview}
+                  style={{
+                    backgroundColor: showIframePreview ? figmaColors.orange : figmaColors.green,
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    color: figmaColors.white,
+                    margin: 0
+                  }}>
+                    {showIframePreview ? 'Hide Preview' : 'Show Preview'}
+                  </p>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Iframe Preview Section */}
+          {showIframePreview && previewUrl && (
+            <div style={{ marginBottom: '30px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
+                <label style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 600,
+                  fontSize: '16px',
+                  color: figmaColors.darkGray,
+                  margin: 0
+                }}>
+                  Live Preview
+                </label>
+                <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+                  {isLoadingPreview && (
+                    <div style={{
+                      width: '20px',
+                      height: '20px',
+                      border: `2px solid ${figmaColors.basicFill}`,
+                      borderTop: `2px solid ${figmaColors.blue}`,
+                      borderRadius: '50%',
+                      animation: 'spin 1s linear infinite'
+                    }} />
+                  )}
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '12px',
+                    color: figmaColors.lightGray,
+                    margin: 0
+                  }}>
+                    {selectedTheme?.name} • {selectedProduct?.title}
+                  </p>
+                </div>
+              </div>
+              
+              <div style={{
+                border: `2px solid ${figmaColors.basicFill}`,
+                borderRadius: '12px',
+                overflow: 'hidden',
+                backgroundColor: figmaColors.white,
+                position: 'relative'
+              }}>
+                {/* Preview Header */}
+                <div style={{
+                  backgroundColor: figmaColors.lightBlue,
+                  padding: '12px 20px',
+                  borderBottom: `1px solid ${figmaColors.basicFill}`,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                    <div style={{
+                      width: '12px',
+                      height: '12px',
+                      backgroundColor: '#ff5f57',
+                      borderRadius: '50%'
+                    }} />
+                    <div style={{
+                      width: '12px',
+                      height: '12px',
+                      backgroundColor: '#ffbd2e',
+                      borderRadius: '50%'
+                    }} />
+                    <div style={{
+                      width: '12px',
+                      height: '12px',
+                      backgroundColor: '#28ca42',
+                      borderRadius: '50%'
+                    }} />
+                  </div>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    color: figmaColors.darkGray,
+                    margin: 0
+                  }}>
+                    Preview Mode
+                  </p>
+                </div>
+                
+                {/* Iframe Container */}
+                <div style={{
+                  height: '600px',
+                  position: 'relative',
+                  backgroundColor: figmaColors.gray
+                }}>
+                  {isLoadingPreview ? (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                      gap: '20px'
+                    }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        border: `4px solid ${figmaColors.basicFill}`,
+                        borderTop: `4px solid ${figmaColors.blue}`,
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                      }} />
+                      <p style={{
+                        fontFamily: 'Inter, sans-serif',
+                        fontWeight: 500,
+                        fontSize: '16px',
+                        color: figmaColors.darkGray,
+                        margin: 0
+                      }}>
+                        Loading Preview...
+                      </p>
+                    </div>
+                  ) : (
+                    <iframe
+                      src={previewUrl}
+                      style={{
+                        width: '100%',
+                        height: '100%',
+                        border: 'none',
+                        backgroundColor: figmaColors.white
+                      }}
+                      title="Product Preview"
+                      sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-popups-to-escape-sandbox"
+                      loading="lazy"
+                    />
+                  )}
+                </div>
+                
+                {/* Preview Footer */}
+                <div style={{
+                  backgroundColor: figmaColors.gray,
+                  padding: '10px 20px',
+                  borderTop: `1px solid ${figmaColors.basicFill}`,
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center'
+                }}>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '12px',
+                    color: figmaColors.lightGray,
+                    margin: 0
+                  }}>
+                    This preview shows how your product will appear to customers
+                  </p>
+                  <button
+                    onClick={() => window.open(previewUrl, '_blank')}
+                    style={{
+                      backgroundColor: 'transparent',
+                      border: `1px solid ${figmaColors.blue}`,
+                      borderRadius: '6px',
+                      padding: '6px 12px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    <p style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontWeight: 500,
+                      fontSize: '12px',
+                      color: figmaColors.blue,
+                      margin: 0
+                    }}>
+                      Open Full Size
+                    </p>
+                  </button>
+                </div>
               </div>
             </div>
           )}
@@ -1783,7 +2001,17 @@ export default function Dashboard() {
                     margin: 0,
                     lineHeight: '20px'
                   }}>
-                    • <strong>Alternative:</strong> For static previews, you can use headless browsers (Puppeteer/Selenium) to capture screenshots
+                    • <strong>Live Preview:</strong> Use the "Show Preview" button to see the product page rendered directly in your dashboard
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '14px',
+                    color: figmaColors.darkGray,
+                    margin: 0,
+                    lineHeight: '20px'
+                  }}>
+                    • <strong>Advanced:</strong> For static screenshots, you can use headless browsers (Puppeteer/Selenium) to capture images
                   </p>
                 </div>
               </div>
@@ -1791,6 +2019,7 @@ export default function Dashboard() {
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </>
   );
 }
