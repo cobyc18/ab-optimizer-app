@@ -224,6 +224,46 @@ export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
   
   try {
+    // Fetch themes for preview functionality
+    const themesResponse = await admin.graphql(`
+      query getThemes {
+        themes(first: 10) {
+          edges {
+            node {
+              id
+              name
+              role
+            }
+          }
+        }
+      }
+    `);
+    
+    const themesData = await themesResponse.json();
+    const themes = themesData.data?.themes?.edges?.map(edge => edge.node) || [];
+    
+    // Fetch products for preview
+    const productsResponse = await admin.graphql(`
+      query getProducts {
+        products(first: 20) {
+          edges {
+            node {
+              id
+              title
+              handle
+              featuredImage {
+                url
+                altText
+              }
+            }
+          }
+        }
+      }
+    `);
+    
+    const productsData = await productsResponse.json();
+    const products = productsData.data?.products?.edges?.map(edge => edge.node) || [];
+
     // Fetch all A/B tests (both active and completed with winners)
     const allTests = await prisma.aBTest.findMany({
       where: { 
@@ -402,6 +442,8 @@ export const loader = async ({ request }) => {
         { name: "Shipping badge Design Test" }
       ],
       recentActivities: recentActivities,
+      themes: themes,
+      products: products,
       shop: session.shop
     });
   } catch (error) {
@@ -427,6 +469,8 @@ export const loader = async ({ request }) => {
         { action: "Welcome to A/B Optimizer!", date: new Date().toLocaleDateString() },
         { action: "Ready to start your first test", date: new Date().toLocaleDateString() }
       ],
+      themes: [],
+      products: [],
       shop: session.shop,
       error: "Failed to load dashboard data"
     });
@@ -434,8 +478,11 @@ export const loader = async ({ request }) => {
 };
 
 export default function Dashboard() {
-  const { user, experiments, testCards, queuedTests, recentActivities, shop } = useLoaderData();
+  const { user, experiments, testCards, queuedTests, recentActivities, themes, products, shop } = useLoaderData();
   const [expandedTests, setExpandedTests] = useState(new Set());
+  const [selectedTheme, setSelectedTheme] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState('');
 
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
@@ -446,6 +493,27 @@ export default function Dashboard() {
     }
     setExpandedTests(newExpanded);
   };
+
+  const generatePreviewUrl = () => {
+    if (selectedTheme && selectedProduct) {
+      const themeId = selectedTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
+      const productHandle = selectedProduct.handle;
+      const baseUrl = `https://${shop}`;
+      const previewUrl = `${baseUrl}/products/${productHandle}?preview_theme_id=${themeId}`;
+      setPreviewUrl(previewUrl);
+    }
+  };
+
+  const openPreviewInNewTab = () => {
+    if (previewUrl) {
+      window.open(previewUrl, '_blank');
+    }
+  };
+
+  // Update preview URL when theme or product changes
+  useEffect(() => {
+    generatePreviewUrl();
+  }, [selectedTheme, selectedProduct]);
 
   return (
     <div style={{ 
@@ -1476,6 +1544,249 @@ export default function Dashboard() {
                   )}
                 </div>
               ))}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Theme Preview Section */}
+      <div style={{ marginTop: '60px' }}>
+        <div style={{ marginBottom: '30px' }}>
+          <p style={{
+            fontFamily: 'Geist, sans-serif',
+            fontWeight: 500,
+            fontSize: '32px',
+            color: figmaColors.darkGray,
+            margin: '0 0 10px 0'
+          }}>
+            Theme Preview
+          </p>
+          <p style={{
+            fontFamily: 'Inter, sans-serif',
+            fontWeight: 400,
+            fontSize: '16px',
+            color: figmaColors.lightGray,
+            margin: 0,
+            lineHeight: '24px'
+          }}>
+            Preview how your products look under different themes. Perfect for testing A/B variants before launching.
+          </p>
+        </div>
+
+        <div style={{
+          backgroundColor: figmaColors.white,
+          borderRadius: '20px',
+          padding: '40px',
+          border: `1px solid ${figmaColors.basicFill}`
+        }}>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '40px', marginBottom: '30px' }}>
+            {/* Theme Selection */}
+            <div>
+              <label style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '16px',
+                color: figmaColors.darkGray,
+                marginBottom: '15px',
+                display: 'block'
+              }}>
+                Select Theme
+              </label>
+              <select
+                value={selectedTheme?.id || ''}
+                onChange={(e) => {
+                  const theme = themes.find(t => t.id === e.target.value);
+                  setSelectedTheme(theme);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: `1px solid ${figmaColors.basicFill}`,
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontFamily: 'Inter, sans-serif',
+                  backgroundColor: figmaColors.white,
+                  color: figmaColors.darkGray
+                }}
+              >
+                <option value="">Choose a theme...</option>
+                {themes.map((theme) => (
+                  <option key={theme.id} value={theme.id}>
+                    {theme.name} {theme.role === 'MAIN' ? '(Main)' : ''}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Product Selection */}
+            <div>
+              <label style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '16px',
+                color: figmaColors.darkGray,
+                marginBottom: '15px',
+                display: 'block'
+              }}>
+                Select Product
+              </label>
+              <select
+                value={selectedProduct?.id || ''}
+                onChange={(e) => {
+                  const product = products.find(p => p.id === e.target.value);
+                  setSelectedProduct(product);
+                }}
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: `1px solid ${figmaColors.basicFill}`,
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontFamily: 'Inter, sans-serif',
+                  backgroundColor: figmaColors.white,
+                  color: figmaColors.darkGray
+                }}
+              >
+                <option value="">Choose a product...</option>
+                {products.map((product) => (
+                  <option key={product.id} value={product.id}>
+                    {product.title}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          {/* Preview URL Display */}
+          {previewUrl && (
+            <div style={{ marginBottom: '30px' }}>
+              <label style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '16px',
+                color: figmaColors.darkGray,
+                marginBottom: '15px',
+                display: 'block'
+              }}>
+                Preview URL
+              </label>
+              <div style={{
+                display: 'flex',
+                gap: '10px',
+                alignItems: 'center'
+              }}>
+                <input
+                  type="text"
+                  value={previewUrl}
+                  readOnly
+                  style={{
+                    flex: 1,
+                    padding: '12px 16px',
+                    border: `1px solid ${figmaColors.basicFill}`,
+                    borderRadius: '8px',
+                    fontSize: '14px',
+                    fontFamily: 'Inter, sans-serif',
+                    backgroundColor: figmaColors.gray,
+                    color: figmaColors.darkGray
+                  }}
+                />
+                <button
+                  onClick={openPreviewInNewTab}
+                  style={{
+                    backgroundColor: figmaColors.blue,
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    color: figmaColors.white,
+                    margin: 0
+                  }}>
+                    Open Preview
+                  </p>
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Instructions */}
+          <div style={{
+            backgroundColor: figmaColors.lightBlue,
+            borderRadius: '12px',
+            padding: '20px',
+            border: `1px solid ${figmaColors.blue}`
+          }}>
+            <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
+              <div style={{
+                width: '24px',
+                height: '24px',
+                backgroundColor: figmaColors.blue,
+                borderRadius: '50%',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0,
+                marginTop: '2px'
+              }}>
+                <p style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 600,
+                  fontSize: '14px',
+                  color: figmaColors.white,
+                  margin: 0
+                }}>
+                  i
+                </p>
+              </div>
+              <div>
+                <p style={{
+                  fontFamily: 'Inter, sans-serif',
+                  fontWeight: 600,
+                  fontSize: '16px',
+                  color: figmaColors.blue,
+                  margin: '0 0 10px 0'
+                }}>
+                  How Theme Preview Works
+                </p>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '14px',
+                    color: figmaColors.darkGray,
+                    margin: 0,
+                    lineHeight: '20px'
+                  }}>
+                    • <strong>URL Method:</strong> The preview URL uses <code>?preview_theme_id=</code> parameter to show your product under a different theme
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '14px',
+                    color: figmaColors.darkGray,
+                    margin: 0,
+                    lineHeight: '20px'
+                  }}>
+                    • <strong>Perfect for A/B Testing:</strong> Test how your product variants look under different themes before launching
+                  </p>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 400,
+                    fontSize: '14px',
+                    color: figmaColors.darkGray,
+                    margin: 0,
+                    lineHeight: '20px'
+                  }}>
+                    • <strong>Alternative:</strong> For static previews, you can use headless browsers (Puppeteer/Selenium) to capture screenshots
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
