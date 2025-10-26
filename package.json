@@ -17,7 +17,9 @@
     "setup": "node scripts/setup.js",
     "test:db": "node scripts/test-db.js",
     "start": "node scripts/test-db.js && npx prisma migrate deploy && remix-serve ./build/index.js",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "install-chrome": "npx puppeteer browsers install chrome",
+    "test-chrome": "node scripts/install-chrome.js"
   },
   "keywords": [
     "shopify",

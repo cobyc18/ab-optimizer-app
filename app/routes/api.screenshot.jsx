@@ -38,7 +38,19 @@ export const action = async ({ request }) => {
     let browser;
     try {
       console.log('🚀 Launching Puppeteer...');
-      browser = await puppeteer.launch({
+      
+      // Try to get the executable path, with fallback
+      let executablePath;
+      try {
+        executablePath = puppeteer.executablePath();
+        console.log('🔍 Chrome executable path:', executablePath);
+      } catch (pathError) {
+        console.log('⚠️ Could not get executable path, trying without it');
+        executablePath = undefined;
+      }
+      
+      // Launch configuration
+      const launchConfig = {
         headless: "new",
         args: [
           "--no-sandbox", 
@@ -55,10 +67,15 @@ export const action = async ({ request }) => {
           "--disable-backgrounding-occluded-windows",
           "--disable-renderer-backgrounding"
         ],
-        timeout: 30000,
-        // Use the installed Chrome browser
-        executablePath: puppeteer.executablePath()
-      });
+        timeout: 30000
+      };
+      
+      // Only add executablePath if we have it
+      if (executablePath) {
+        launchConfig.executablePath = executablePath;
+      }
+      
+      browser = await puppeteer.launch(launchConfig);
       console.log('✅ Puppeteer launched successfully');
     } catch (puppeteerError) {
       console.error('❌ Puppeteer launch failed:', puppeteerError);
@@ -71,10 +88,11 @@ export const action = async ({ request }) => {
           suggestion: "Try running: npx puppeteer browsers install chrome",
           troubleshooting: [
             "Install Chrome for Puppeteer: npx puppeteer browsers install chrome",
-            "Make sure Chrome/Chromium is installed",
+            "If on Linux server (Render/Vercel): Chrome may need to be installed for Linux",
             "Check if you have sufficient permissions",
             "Try running with: sudo npm run dev (if on Linux/Mac)",
-            "Consider using puppeteer-core with a local Chrome installation"
+            "Consider using puppeteer-core with a local Chrome installation",
+            "For production: Ensure Chrome is installed in the deployment environment"
           ]
         }, { status: 500 });
       }

@@ -8,15 +8,33 @@ export const action = async ({ request }) => {
     
     // Test basic Puppeteer functionality
     console.log('🚀 Launching test browser...');
-    const browser = await puppeteer.launch({
+    
+    // Try to get the executable path, with fallback
+    let executablePath;
+    try {
+      executablePath = puppeteer.executablePath();
+      console.log('🔍 Chrome executable path:', executablePath);
+    } catch (pathError) {
+      console.log('⚠️ Could not get executable path, trying without it');
+      executablePath = undefined;
+    }
+    
+    // Launch configuration
+    const launchConfig = {
       headless: "new",
       args: [
         "--no-sandbox", 
         "--disable-setuid-sandbox",
         "--disable-dev-shm-usage"
-      ],
-      executablePath: puppeteer.executablePath()
-    });
+      ]
+    };
+    
+    // Only add executablePath if we have it
+    if (executablePath) {
+      launchConfig.executablePath = executablePath;
+    }
+    
+    const browser = await puppeteer.launch(launchConfig);
     
     console.log('✅ Browser launched');
     const page = await browser.newPage();
