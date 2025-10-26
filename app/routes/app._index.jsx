@@ -486,6 +486,7 @@ export default function Dashboard() {
   const [showScreenshotPreview, setShowScreenshotPreview] = useState(false);
   const [isLoadingScreenshot, setIsLoadingScreenshot] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState('');
+  const [testResult, setTestResult] = useState('');
 
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
@@ -536,7 +537,8 @@ export default function Dashboard() {
         if (result.success) {
           setScreenshotUrl(result.screenshotUrl);
         } else {
-          console.error('Screenshot generation failed:', result.error);
+          console.error('Screenshot generation failed:', result);
+          alert(`Screenshot generation failed: ${result.error}\n\nDetails: ${result.details}\n\nSuggestion: ${result.suggestion || 'Please try again or contact support.'}`);
           setShowScreenshotPreview(false);
         }
       } catch (error) {
@@ -554,6 +556,20 @@ export default function Dashboard() {
       setScreenshotUrl('');
     } else {
       generateScreenshot();
+    }
+  };
+
+  const testScreenshotAPI = async () => {
+    try {
+      setTestResult('Testing...');
+      const response = await fetch('/api/test-screenshot', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const result = await response.json();
+      setTestResult(result.success ? '✅ Test passed!' : `❌ Test failed: ${result.error}`);
+    } catch (error) {
+      setTestResult(`❌ Test error: ${error.message}`);
     }
   };
 
@@ -1791,7 +1807,41 @@ export default function Dashboard() {
                     {isLoadingScreenshot ? 'Generating...' : showScreenshotPreview ? 'Hide Preview' : 'Generate Screenshot'}
                   </p>
                 </button>
+                <button
+                  onClick={testScreenshotAPI}
+                  style={{
+                    backgroundColor: figmaColors.orange,
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    cursor: 'pointer',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    color: figmaColors.white,
+                    margin: 0
+                  }}>
+                    Test API
+                  </p>
+                </button>
               </div>
+              {testResult && (
+                <div style={{ marginTop: '10px', padding: '10px', backgroundColor: figmaColors.lightBlue, borderRadius: '8px' }}>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    color: figmaColors.darkGray,
+                    margin: 0
+                  }}>
+                    {testResult}
+                  </p>
+                </div>
+              )}
             </div>
           )}
 
