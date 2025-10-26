@@ -1,21 +1,42 @@
+# Use Node.js 18 Alpine as base image
 FROM node:18-alpine
-RUN apk add --no-cache openssl
 
-EXPOSE 3000
+# Install system dependencies for Chrome
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    freetype-dev \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    wget \
+    gnupg
 
+# Set Puppeteer to use the installed Chromium
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
+# Create app directory
 WORKDIR /app
 
-ENV NODE_ENV=production
+# Copy package files
+COPY package*.json ./
 
-COPY package.json package-lock.json* ./
+# Install dependencies
+RUN npm ci --only=production
 
-RUN npm ci --omit=dev && npm cache clean --force
-# Remove CLI packages since we don't need them in production by default.
-# Remove this line if you want to run CLI commands in your container.
-RUN npm remove @shopify/cli
-
+# Copy app source
 COPY . .
 
+# Generate Prisma client
+RUN npx prisma generate
+
+# Build the app
 RUN npm run build
 
-CMD ["npm", "run", "docker-start"]
+# Expose port
+EXPOSE 3000
+
+# Start the app
+CMD ["npm", "start"]

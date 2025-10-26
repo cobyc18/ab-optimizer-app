@@ -45,6 +45,12 @@ export const action = async ({ request }) => {
       try {
         executablePath = puppeteer.executablePath();
         console.log('🔍 Chrome executable path:', executablePath);
+        
+        // Check if the executable actually exists
+        if (!fs.existsSync(executablePath)) {
+          console.log('⚠️ Chrome executable not found at path, trying without it');
+          executablePath = undefined;
+        }
       } catch (pathError) {
         console.log('⚠️ Could not get executable path, trying without it');
         executablePath = undefined;
@@ -71,9 +77,26 @@ export const action = async ({ request }) => {
         timeout: 30000
       };
       
-      // Only add executablePath if we have it
+      // Try different Chrome paths
       if (executablePath) {
         launchConfig.executablePath = executablePath;
+      } else {
+        // Try common Chrome paths on Linux
+        const commonPaths = [
+          '/usr/bin/google-chrome',
+          '/usr/bin/google-chrome-stable',
+          '/usr/bin/chromium-browser',
+          '/usr/bin/chromium',
+          '/opt/google/chrome/chrome'
+        ];
+        
+        for (const chromePath of commonPaths) {
+          if (fs.existsSync(chromePath)) {
+            console.log('🔍 Found system Chrome at:', chromePath);
+            launchConfig.executablePath = chromePath;
+            break;
+          }
+        }
       }
       
       browser = await puppeteer.launch(launchConfig);
