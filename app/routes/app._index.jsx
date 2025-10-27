@@ -520,7 +520,7 @@ export default function Dashboard() {
       setShowScreenshotPreview(true);
       
       try {
-        const response = await fetch('/api/screenshot-real', {
+        const response = await fetch('/api/screenshot-selenium', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -562,14 +562,9 @@ export default function Dashboard() {
   const testScreenshotAPI = async () => {
     try {
       setTestResult('Testing...');
-      const response = await fetch('/api/screenshot-real', {
+      const response = await fetch('/api/test-selenium', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          previewUrl: 'https://example.com',
-          productHandle: 'test-product',
-          themeId: '123456789'
-        })
+        headers: { 'Content-Type': 'application/json' }
       });
       const result = await response.json();
       setTestResult(result.success ? '✅ Test passed! Screenshot API is working.' : `❌ Test failed: ${result.error}`);

@@ -6,17 +6,17 @@ const fs = require('fs');
 console.log('🚀 Installing Chrome system-wide for Render.com...');
 
 try {
-  // Install system dependencies and Chrome
-  console.log('📦 Installing system dependencies...');
+  // Install system dependencies and Chrome for Selenium
+  console.log('📦 Installing system dependencies for Selenium...');
   
   // Update package lists and install Chrome
   const installCommands = [
     'apt-get update',
-    'apt-get install -y wget gnupg',
+    'apt-get install -y wget gnupg software-properties-common',
     'wget -q -O - https://dl.google.com/linux/linux_signing_key.pub | apt-key add -',
     'echo "deb [arch=amd64] http://dl.google.com/linux/chrome/deb/ stable main" > /etc/apt/sources.list.d/google-chrome.list',
     'apt-get update',
-    'apt-get install -y google-chrome-stable'
+    'apt-get install -y google-chrome-stable chromium-browser'
   ];
   
   for (const cmd of installCommands) {

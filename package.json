@@ -21,7 +21,8 @@
     "install-chrome": "npx puppeteer browsers install chrome",
     "test-chrome": "node scripts/install-chrome.js",
     "render-build": "node scripts/system-chrome-build.js",
-    "install-chrome-render": "node scripts/install-chrome-render.js"
+    "install-chrome-render": "node scripts/install-chrome-render.js",
+    "test-selenium": "node scripts/test-selenium.js"
   },
   "keywords": [
     "shopify",
@@ -96,6 +97,7 @@
     "react-icons": "^5.5.0",
     "react-resizable-panels": "^3.0.4",
     "recharts": "^3.1.0",
+    "selenium-webdriver": "^4.38.0",
     "tailwind-merge": "^3.3.1",
     "tailwindcss": "^4.1.11",
     "tailwindcss-animate": "^1.0.7",
