@@ -487,6 +487,7 @@ export default function Dashboard() {
   const [isLoadingScreenshot, setIsLoadingScreenshot] = useState(false);
   const [screenshotUrl, setScreenshotUrl] = useState('');
   const [testResult, setTestResult] = useState('');
+  const [storePassword, setStorePassword] = useState('');
 
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
@@ -528,7 +529,8 @@ export default function Dashboard() {
           body: JSON.stringify({
             previewUrl,
             productHandle: selectedProduct.handle,
-            themeId: selectedTheme.id.replace('gid://shopify/OnlineStoreTheme/', '')
+            themeId: selectedTheme.id.replace('gid://shopify/OnlineStoreTheme/', ''),
+            storePassword: storePassword
           })
         });
 
@@ -1727,6 +1729,46 @@ export default function Dashboard() {
                   </option>
                 ))}
               </select>
+            </div>
+
+            {/* Store Password */}
+            <div>
+              <label style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 600,
+                fontSize: '16px',
+                color: figmaColors.darkGray,
+                marginBottom: '15px',
+                display: 'block'
+              }}>
+                Store Password (if protected)
+              </label>
+              <input
+                type="password"
+                value={storePassword}
+                onChange={(e) => setStorePassword(e.target.value)}
+                placeholder="Enter your store password if it's password protected"
+                style={{
+                  width: '100%',
+                  padding: '12px 16px',
+                  border: `1px solid ${figmaColors.basicFill}`,
+                  borderRadius: '8px',
+                  fontSize: '16px',
+                  fontFamily: 'Inter, sans-serif',
+                  backgroundColor: figmaColors.white,
+                  color: figmaColors.darkGray
+                }}
+              />
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 400,
+                fontSize: '14px',
+                color: figmaColors.lightGray,
+                margin: '8px 0 0 0',
+                lineHeight: '20px'
+              }}>
+                Required if your store has password protection enabled
+              </p>
             </div>
           </div>
 

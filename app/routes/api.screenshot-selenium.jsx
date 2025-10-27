@@ -9,7 +9,7 @@ export const action = async ({ request }) => {
   const { admin } = await authenticate.admin(request);
   
   try {
-    const { previewUrl, productHandle, themeId } = await request.json();
+    const { previewUrl, productHandle, themeId, storePassword } = await request.json();
     
     console.log('📸 Generating screenshot using Selenium...');
     console.log('🔗 Preview URL:', previewUrl);
@@ -71,9 +71,46 @@ export const action = async ({ request }) => {
       await driver.get(previewUrl);
       console.log('🌐 Navigated to preview URL');
       
-      // Wait for the page to load
+      // Check if we're on a password page
+      const currentUrl = await driver.getCurrentUrl();
+      console.log('🔍 Current URL:', currentUrl);
+      
+      // Handle password protection
+      if (currentUrl.includes('password') || await driver.getTitle().then(title => title.toLowerCase().includes('password'))) {
+        console.log('🔐 Store is password protected, attempting to bypass...');
+        
+        try {
+          // Look for password input field
+          const passwordField = await driver.findElement(By.name('password'));
+          const password = storePassword || process.env.SHOPIFY_STORE_PASSWORD || 'your-store-password';
+          
+          console.log('🔑 Entering store password...');
+          await passwordField.sendKeys(password);
+          
+          // Look for submit button or form
+          try {
+            const submitButton = await driver.findElement(By.css('button[type="submit"], input[type="submit"], .btn-submit'));
+            await submitButton.click();
+            console.log('✅ Password submitted');
+          } catch (submitError) {
+            // Try pressing Enter
+            await passwordField.sendKeys('\n');
+            console.log('✅ Password submitted via Enter key');
+          }
+          
+          // Wait for redirect after password submission
+          await driver.sleep(3000);
+          console.log('⏳ Waiting for password verification...');
+          
+        } catch (passwordError) {
+          console.log('⚠️ Could not handle password protection:', passwordError.message);
+          // Continue anyway, might be a different type of protection
+        }
+      }
+      
+      // Wait for the page to load (either after password or directly)
       await driver.wait(until.titleContains(''), 10000);
-      await driver.sleep(2000); // Additional wait for content to load
+      await driver.sleep(3000); // Additional wait for content to load
       
       // Take screenshot
       const screenshot = await driver.takeScreenshot();
