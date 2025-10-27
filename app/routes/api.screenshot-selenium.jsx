@@ -26,15 +26,29 @@ export const action = async ({ request }) => {
     let driver;
     
     try {
-      // Configure Chrome options for headless mode
+      // Configure Chrome options for fast headless mode
       const chromeOptions = new chrome.Options();
-      chromeOptions.addArguments('--headless');
+      chromeOptions.addArguments('--headless=new');
       chromeOptions.addArguments('--no-sandbox');
       chromeOptions.addArguments('--disable-dev-shm-usage');
       chromeOptions.addArguments('--disable-gpu');
+      chromeOptions.addArguments('--disable-software-rasterizer');
+      chromeOptions.addArguments('--disable-background-timer-throttling');
+      chromeOptions.addArguments('--disable-backgrounding-occluded-windows');
+      chromeOptions.addArguments('--disable-renderer-backgrounding');
+      chromeOptions.addArguments('--disable-features=TranslateUI');
+      chromeOptions.addArguments('--disable-ipc-flooding-protection');
       chromeOptions.addArguments('--window-size=1200,800');
       chromeOptions.addArguments('--disable-web-security');
       chromeOptions.addArguments('--disable-features=VizDisplayCompositor');
+      chromeOptions.addArguments('--disable-extensions');
+      chromeOptions.addArguments('--disable-plugins');
+      chromeOptions.addArguments('--aggressive-cache-discard');
+      chromeOptions.addArguments('--memory-pressure-off');
+      chromeOptions.addArguments('--disable-background-networking');
+      chromeOptions.addArguments('--disable-sync');
+      chromeOptions.addArguments('--disable-default-apps');
+      chromeOptions.addArguments('--disable-component-extensions-with-background-pages');
       
       // Try different Chrome executable paths
       const chromePaths = [
@@ -98,8 +112,8 @@ export const action = async ({ request }) => {
             console.log('✅ Password submitted via Enter key');
           }
           
-          // Wait for redirect after password submission
-          await driver.sleep(3000);
+          // Wait for redirect after password submission (reduced wait time)
+          await driver.sleep(1000);
           console.log('⏳ Waiting for password verification...');
           
           // After password submission, navigate to the specific product URL again
@@ -113,9 +127,9 @@ export const action = async ({ request }) => {
         }
       }
       
-      // Wait for the page to load and verify we're on the right page
-      await driver.wait(until.titleContains(''), 10000);
-      await driver.sleep(3000); // Additional wait for content to load
+      // Wait for the page to load and verify we're on the right page (optimized)
+      await driver.wait(until.titleContains(''), 5000);
+      await driver.sleep(1000); // Reduced wait for content to load
       
       // Verify we're on the correct product page
       const finalUrl = await driver.getCurrentUrl();
@@ -127,20 +141,36 @@ export const action = async ({ request }) => {
       if (!finalUrl.includes(productHandle)) {
         console.log('⚠️ Not on correct product page, attempting to navigate again...');
         await driver.get(previewUrl);
-        await driver.sleep(2000);
+        await driver.sleep(500);
       }
       
-      // Wait for product page content to load
+      // Wait for product page content to load (optimized with images)
       try {
-        // Wait for common product page elements
-        await driver.wait(until.elementLocated(By.css('main, .product, [data-product], .product-page')), 10000);
+        // Wait for common product page elements with shorter timeout
+        await driver.wait(until.elementLocated(By.css('main, .product, [data-product], .product-page')), 3000);
         console.log('✅ Product page content loaded');
+        
+        // Wait for images to load (but with timeout)
+        await driver.executeScript(`
+          return Promise.all(
+            Array.from(document.images).map(img => {
+              if (img.complete) return Promise.resolve();
+              return new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = resolve; // Don't fail on broken images
+                setTimeout(resolve, 2000); // Max 2 second wait per image
+              });
+            })
+          );
+        `);
+        console.log('✅ Images loaded');
+        
       } catch (waitError) {
         console.log('⚠️ Could not find product page elements, proceeding anyway');
       }
       
-      // Additional wait for images and dynamic content
-      await driver.sleep(2000);
+      // Minimal wait for final content
+      await driver.sleep(500);
       
       // Get the full page dimensions
       const fullPageHeight = await driver.executeScript('return Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);');
@@ -161,8 +191,8 @@ export const action = async ({ request }) => {
       
       console.log('🖼️ Resized browser window to full page height');
       
-      // Wait a moment for the resize to take effect
-      await driver.sleep(1000);
+      // Wait a moment for the resize to take effect (optimized)
+      await driver.sleep(300);
       
       // Take full page screenshot
       const screenshot = await driver.takeScreenshot();
