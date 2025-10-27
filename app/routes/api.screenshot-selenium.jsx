@@ -69,11 +69,11 @@ export const action = async ({ request }) => {
       
       // Navigate to the preview URL
       await driver.get(previewUrl);
-      console.log('🌐 Navigated to preview URL');
+      console.log('🌐 Navigated to preview URL:', previewUrl);
       
       // Check if we're on a password page
       const currentUrl = await driver.getCurrentUrl();
-      console.log('🔍 Current URL:', currentUrl);
+      console.log('🔍 Current URL after navigation:', currentUrl);
       
       // Handle password protection
       if (currentUrl.includes('password') || await driver.getTitle().then(title => title.toLowerCase().includes('password'))) {
@@ -102,15 +102,45 @@ export const action = async ({ request }) => {
           await driver.sleep(3000);
           console.log('⏳ Waiting for password verification...');
           
+          // After password submission, navigate to the specific product URL again
+          console.log('🔄 Re-navigating to product URL after password bypass...');
+          await driver.get(previewUrl);
+          console.log('🌐 Re-navigated to:', previewUrl);
+          
         } catch (passwordError) {
           console.log('⚠️ Could not handle password protection:', passwordError.message);
           // Continue anyway, might be a different type of protection
         }
       }
       
-      // Wait for the page to load (either after password or directly)
+      // Wait for the page to load and verify we're on the right page
       await driver.wait(until.titleContains(''), 10000);
       await driver.sleep(3000); // Additional wait for content to load
+      
+      // Verify we're on the correct product page
+      const finalUrl = await driver.getCurrentUrl();
+      const pageTitle = await driver.getTitle();
+      console.log('🔍 Final URL:', finalUrl);
+      console.log('📄 Page title:', pageTitle);
+      
+      // Check if we're on the correct product page
+      if (!finalUrl.includes(productHandle)) {
+        console.log('⚠️ Not on correct product page, attempting to navigate again...');
+        await driver.get(previewUrl);
+        await driver.sleep(2000);
+      }
+      
+      // Wait for product page content to load
+      try {
+        // Wait for common product page elements
+        await driver.wait(until.elementLocated(By.css('main, .product, [data-product], .product-page')), 10000);
+        console.log('✅ Product page content loaded');
+      } catch (waitError) {
+        console.log('⚠️ Could not find product page elements, proceeding anyway');
+      }
+      
+      // Additional wait for images and dynamic content
+      await driver.sleep(2000);
       
       // Take screenshot
       const screenshot = await driver.takeScreenshot();

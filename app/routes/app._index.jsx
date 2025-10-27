@@ -505,6 +505,9 @@ export default function Dashboard() {
       const productHandle = selectedProduct.handle;
       const baseUrl = `https://${shop}`;
       const previewUrl = `${baseUrl}/products/${productHandle}?preview_theme_id=${themeId}`;
+      console.log('🔗 Generated preview URL:', previewUrl);
+      console.log('📦 Product handle:', productHandle);
+      console.log('🎨 Theme ID:', themeId);
       setPreviewUrl(previewUrl);
     }
   };
