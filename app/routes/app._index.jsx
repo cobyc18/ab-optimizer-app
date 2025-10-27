@@ -520,7 +520,7 @@ export default function Dashboard() {
       setShowScreenshotPreview(true);
       
       try {
-        const response = await fetch('/api/screenshot-alt', {
+        const response = await fetch('/api/screenshot-real', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -562,7 +562,7 @@ export default function Dashboard() {
   const testScreenshotAPI = async () => {
     try {
       setTestResult('Testing...');
-      const response = await fetch('/api/screenshot-alt', {
+      const response = await fetch('/api/screenshot-real', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1995,6 +1995,26 @@ export default function Dashboard() {
                           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                         }}
                       />
+                      <button
+                        onClick={() => window.open(previewUrl, '_blank')}
+                        style={{
+                          marginTop: '16px',
+                          padding: '12px 24px',
+                          backgroundColor: figmaColors.primaryBlue,
+                          color: figmaColors.white,
+                          border: 'none',
+                          borderRadius: '8px',
+                          fontFamily: 'Inter, sans-serif',
+                          fontWeight: 500,
+                          fontSize: '14px',
+                          cursor: 'pointer',
+                          transition: 'background-color 0.2s ease'
+                        }}
+                        onMouseOver={(e) => e.target.style.backgroundColor = '#357ABD'}
+                        onMouseOut={(e) => e.target.style.backgroundColor = figmaColors.primaryBlue}
+                      >
+                        View Live Preview
+                      </button>
                     </div>
                   ) : (
                     <div style={{
