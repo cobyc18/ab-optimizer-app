@@ -2027,8 +2027,8 @@ export default function Dashboard() {
                     }}>
                       <div style={{
                         width: '100%',
-                        maxWidth: '1000px',
-                        height: '600px',
+                        maxWidth: '1200px',
+                        height: '800px',
                         overflow: 'auto',
                         border: `2px solid ${figmaColors.basicFill}`,
                         borderRadius: '12px',
@@ -2059,6 +2059,16 @@ export default function Dashboard() {
                           }}
                         />
                       </div>
+                      <p style={{
+                        fontFamily: 'Inter, sans-serif',
+                        fontWeight: 400,
+                        fontSize: '14px',
+                        color: figmaColors.lightGray,
+                        margin: '12px 0 0 0',
+                        textAlign: 'center'
+                      }}>
+                        📸 Full-page screenshot - scroll to see all content
+                      </p>
                       <div style={{
                         display: 'flex',
                         gap: '12px',

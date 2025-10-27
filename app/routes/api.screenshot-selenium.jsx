@@ -142,18 +142,31 @@ export const action = async ({ request }) => {
       // Additional wait for images and dynamic content
       await driver.sleep(2000);
       
+      // Get the full page dimensions
+      const fullPageHeight = await driver.executeScript('return Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);');
+      const viewportHeight = await driver.executeScript('return window.innerHeight;');
+      const viewportWidth = await driver.executeScript('return window.innerWidth;');
+      
+      console.log('📏 Page dimensions:', {
+        fullHeight: fullPageHeight,
+        viewportHeight: viewportHeight,
+        viewportWidth: viewportWidth
+      });
+      
+      // Set the browser window to capture the full page height
+      await driver.manage().window().setRect({
+        width: viewportWidth,
+        height: fullPageHeight
+      });
+      
+      console.log('🖼️ Resized browser window to full page height');
+      
+      // Wait a moment for the resize to take effect
+      await driver.sleep(1000);
+      
       // Take full page screenshot
       const screenshot = await driver.takeScreenshot();
       console.log('📸 Full page screenshot captured');
-      
-      // Also try to scroll down to capture more content
-      try {
-        await driver.executeScript('window.scrollTo(0, document.body.scrollHeight/2);');
-        await driver.sleep(1000);
-        console.log('📜 Scrolled to middle of page');
-      } catch (scrollError) {
-        console.log('⚠️ Could not scroll:', scrollError.message);
-      }
       
       // Save screenshot to file
       fs.writeFileSync(outputPath, screenshot, 'base64');
