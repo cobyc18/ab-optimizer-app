@@ -2025,36 +2025,97 @@ export default function Dashboard() {
                       flexDirection: 'column',
                       alignItems: 'center'
                     }}>
-                      <img
-                        src={screenshotUrl}
-                        alt="Product Preview Screenshot"
-                        style={{
-                          maxWidth: '100%',
-                          height: 'auto',
-                          borderRadius: '8px',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                        }}
-                      />
-                      <button
-                        onClick={() => window.open(previewUrl, '_blank')}
-                        style={{
-                          marginTop: '16px',
-                          padding: '12px 24px',
-                          backgroundColor: figmaColors.primaryBlue,
-                          color: figmaColors.white,
-                          border: 'none',
-                          borderRadius: '8px',
-                          fontFamily: 'Inter, sans-serif',
-                          fontWeight: 500,
-                          fontSize: '14px',
-                          cursor: 'pointer',
-                          transition: 'background-color 0.2s ease'
-                        }}
-                        onMouseOver={(e) => e.target.style.backgroundColor = '#357ABD'}
-                        onMouseOut={(e) => e.target.style.backgroundColor = figmaColors.primaryBlue}
-                      >
-                        View Live Preview
-                      </button>
+                      <div style={{
+                        width: '100%',
+                        maxWidth: '1000px',
+                        height: '600px',
+                        overflow: 'auto',
+                        border: `2px solid ${figmaColors.basicFill}`,
+                        borderRadius: '12px',
+                        backgroundColor: figmaColors.white,
+                        boxShadow: '0 8px 24px rgba(0, 0, 0, 0.1)'
+                      }}>
+                        <img
+                          src={screenshotUrl}
+                          alt="Product Preview Screenshot"
+                          style={{
+                            width: '100%',
+                            height: 'auto',
+                            display: 'block',
+                            cursor: 'zoom-in'
+                          }}
+                          onClick={() => {
+                            // Open full-size image in new tab
+                            const newWindow = window.open();
+                            newWindow.document.write(`
+                              <html>
+                                <head><title>Product Preview - Full Size</title></head>
+                                <body style="margin:0; padding:20px; background:#f5f5f5; text-align:center;">
+                                  <img src="${screenshotUrl}" style="max-width:100%; height:auto; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1);" />
+                                  <p style="margin-top:20px; font-family:Arial,sans-serif; color:#666;">Click and drag to pan, scroll to zoom</p>
+                                </body>
+                              </html>
+                            `);
+                          }}
+                        />
+                      </div>
+                      <div style={{
+                        display: 'flex',
+                        gap: '12px',
+                        marginTop: '16px',
+                        flexWrap: 'wrap',
+                        justifyContent: 'center'
+                      }}>
+                        <button
+                          onClick={() => window.open(previewUrl, '_blank')}
+                          style={{
+                            padding: '12px 24px',
+                            backgroundColor: figmaColors.primaryBlue,
+                            color: figmaColors.white,
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontFamily: 'Inter, sans-serif',
+                            fontWeight: 500,
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s ease'
+                          }}
+                          onMouseOver={(e) => e.target.style.backgroundColor = '#357ABD'}
+                          onMouseOut={(e) => e.target.style.backgroundColor = figmaColors.primaryBlue}
+                        >
+                          View Live Preview
+                        </button>
+                        <button
+                          onClick={() => {
+                            const newWindow = window.open();
+                            newWindow.document.write(`
+                              <html>
+                                <head><title>Product Preview - Full Size</title></head>
+                                <body style="margin:0; padding:20px; background:#f5f5f5; text-align:center;">
+                                  <img src="${screenshotUrl}" style="max-width:100%; height:auto; border-radius:8px; box-shadow:0 4px 12px rgba(0,0,0,0.1);" />
+                                  <p style="margin-top:20px; font-family:Arial,sans-serif; color:#666;">Full-size product preview</p>
+                                </body>
+                              </html>
+                            `);
+                          }}
+                          style={{
+                            padding: '12px 24px',
+                            backgroundColor: figmaColors.lightBlue,
+                            color: figmaColors.white,
+                            border: 'none',
+                            borderRadius: '8px',
+                            fontFamily: 'Inter, sans-serif',
+                            fontWeight: 500,
+                            fontSize: '14px',
+                            cursor: 'pointer',
+                            transition: 'background-color 0.2s ease'
+                          }}
+                          onMouseOver={(e) => e.target.style.backgroundColor = '#4A90E2'}
+                          onMouseOut={(e) => e.target.style.backgroundColor = figmaColors.lightBlue}
+                        >
+                          Open Full Size
+                        </button>
+                      </div>
                     </div>
                   ) : (
                     <div style={{

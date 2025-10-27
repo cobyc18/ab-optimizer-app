@@ -32,7 +32,7 @@ export const action = async ({ request }) => {
       chromeOptions.addArguments('--no-sandbox');
       chromeOptions.addArguments('--disable-dev-shm-usage');
       chromeOptions.addArguments('--disable-gpu');
-      chromeOptions.addArguments('--window-size=800,600');
+      chromeOptions.addArguments('--window-size=1200,800');
       chromeOptions.addArguments('--disable-web-security');
       chromeOptions.addArguments('--disable-features=VizDisplayCompositor');
       
@@ -142,9 +142,18 @@ export const action = async ({ request }) => {
       // Additional wait for images and dynamic content
       await driver.sleep(2000);
       
-      // Take screenshot
+      // Take full page screenshot
       const screenshot = await driver.takeScreenshot();
-      console.log('📸 Screenshot captured');
+      console.log('📸 Full page screenshot captured');
+      
+      // Also try to scroll down to capture more content
+      try {
+        await driver.executeScript('window.scrollTo(0, document.body.scrollHeight/2);');
+        await driver.sleep(1000);
+        console.log('📜 Scrolled to middle of page');
+      } catch (scrollError) {
+        console.log('⚠️ Could not scroll:', scrollError.message);
+      }
       
       // Save screenshot to file
       fs.writeFileSync(outputPath, screenshot, 'base64');
