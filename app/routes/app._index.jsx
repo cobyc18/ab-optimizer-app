@@ -2574,10 +2574,11 @@ export default function Dashboard() {
                   display: 'flex',
                   flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center'
+                  justifyContent: 'flex-start',
+                  padding: '20px 0'
                 }}>
                   <h3 style={{
-                    fontSize: '24px',
+                    fontSize: '20px',
                     fontWeight: '600',
                     color: '#1F2937',
                     marginBottom: '8px',
@@ -2586,19 +2587,19 @@ export default function Dashboard() {
                     Swipe to Find Your Perfect Widget
                   </h3>
                   <p style={{
-                    fontSize: '16px',
+                    fontSize: '14px',
                     color: '#6B7280',
-                    marginBottom: '40px',
+                    marginBottom: '20px',
                     textAlign: 'center',
-                    maxWidth: '500px'
+                    maxWidth: '400px'
                   }}>
                     Swipe right to like a widget, or swipe left to see the next option
                   </p>
 
                   {/* Widget Counter */}
                   <div style={{
-                    marginBottom: '30px',
-                    fontSize: '14px',
+                    marginBottom: '20px',
+                    fontSize: '12px',
                     color: '#6B7280',
                     textAlign: 'center'
                   }}>
@@ -2608,9 +2609,9 @@ export default function Dashboard() {
                   {/* Tinder Card Stack */}
                   <div style={{
                     position: 'relative',
-                    width: '400px',
-                    height: '500px',
-                    marginBottom: '40px'
+                    width: '320px',
+                    height: '380px',
+                    marginBottom: '30px'
                   }}>
                     {abTestIdeas.map((idea, index) => {
                       const isCurrent = index === currentWidgetIndex;
@@ -2629,11 +2630,11 @@ export default function Dashboard() {
                             width: '100%',
                             height: '100%',
                             background: '#FFFFFF',
-                            borderRadius: '20px',
+                            borderRadius: '16px',
                             boxShadow: isCurrent 
-                              ? '0 20px 40px rgba(0, 0, 0, 0.15)' 
-                              : '0 10px 20px rgba(0, 0, 0, 0.1)',
-                            padding: '30px',
+                              ? '0 15px 30px rgba(0, 0, 0, 0.15)' 
+                              : '0 8px 16px rgba(0, 0, 0, 0.1)',
+                            padding: '20px',
                             cursor: 'pointer',
                             transform: isNext ? 'scale(0.95) translateY(10px)' : 'scale(1) translateY(0)',
                             zIndex: isCurrent ? 2 : 1,
@@ -2650,9 +2651,9 @@ export default function Dashboard() {
                         >
                           {/* Widget Icon */}
                           <div style={{
-                            fontSize: '60px',
+                            fontSize: '40px',
                             textAlign: 'center',
-                            marginBottom: '20px'
+                            marginBottom: '12px'
                           }}>
                             {idea.utility === 'Social Proof' && '👥'}
                             {idea.utility === 'Urgency Scarcity' && '⚡'}
@@ -2662,10 +2663,10 @@ export default function Dashboard() {
 
                           {/* Widget Title */}
                           <h4 style={{
-                            fontSize: '24px',
+                            fontSize: '18px',
                             fontWeight: '700',
                             color: '#1F2937',
-                            margin: '0 0 10px 0',
+                            margin: '0 0 8px 0',
                             textAlign: 'center'
                           }}>
                             {idea.utility}
@@ -2675,12 +2676,12 @@ export default function Dashboard() {
                           <div style={{
                             background: '#F0F9FF',
                             color: '#1E40AF',
-                            padding: '6px 12px',
-                            borderRadius: '20px',
-                            fontSize: '12px',
+                            padding: '4px 8px',
+                            borderRadius: '12px',
+                            fontSize: '10px',
                             fontWeight: '500',
                             textAlign: 'center',
-                            margin: '0 auto 20px auto',
+                            margin: '0 auto 12px auto',
                             width: 'fit-content'
                           }}>
                             {idea.style} Style
@@ -2688,10 +2689,10 @@ export default function Dashboard() {
 
                           {/* Description */}
                           <p style={{
-                            fontSize: '16px',
+                            fontSize: '13px',
                             color: '#374151',
-                            margin: '0 0 20px 0',
-                            lineHeight: '1.5',
+                            margin: '0 0 12px 0',
+                            lineHeight: '1.4',
                             textAlign: 'center'
                           }}>
                             {idea.rationale}
@@ -2701,9 +2702,9 @@ export default function Dashboard() {
                           <div style={{
                             background: '#F8FAFC',
                             border: '1px solid #E5E7EB',
-                            padding: '16px',
-                            borderRadius: '12px',
-                            fontSize: '14px',
+                            padding: '10px',
+                            borderRadius: '8px',
+                            fontSize: '12px',
                             color: '#6B7280',
                             fontStyle: 'italic',
                             textAlign: 'center'
@@ -2718,15 +2719,16 @@ export default function Dashboard() {
                   {/* Action Buttons */}
                   <div style={{
                     display: 'flex',
-                    gap: '20px',
-                    alignItems: 'center'
+                    gap: '15px',
+                    alignItems: 'center',
+                    justifyContent: 'center'
                   }}>
                     <button
                       onClick={() => handleSwipe('dislike')}
                       disabled={isAnimating}
                       style={{
-                        width: '60px',
-                        height: '60px',
+                        width: '50px',
+                        height: '50px',
                         borderRadius: '50%',
                         background: '#FEE2E2',
                         border: 'none',
@@ -2734,9 +2736,9 @@ export default function Dashboard() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '24px',
+                        fontSize: '20px',
                         color: '#DC2626',
-                        boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                        boxShadow: '0 3px 8px rgba(220, 38, 38, 0.3)',
                         transition: 'all 0.2s ease',
                         opacity: isAnimating ? 0.5 : 1
                       }}
@@ -2745,19 +2747,21 @@ export default function Dashboard() {
                     </button>
                     
                     <div style={{
-                      fontSize: '14px',
+                      fontSize: '12px',
                       color: '#6B7280',
-                      fontWeight: '500'
+                      fontWeight: '500',
+                      minWidth: '80px',
+                      textAlign: 'center'
                     }}>
-                      Swipe or click buttons
+                      Swipe or click
                     </div>
                     
                     <button
                       onClick={() => handleSwipe('like')}
                       disabled={isAnimating}
                       style={{
-                        width: '60px',
-                        height: '60px',
+                        width: '50px',
+                        height: '50px',
                         borderRadius: '50%',
                         background: '#DCFCE7',
                         border: 'none',
@@ -2765,9 +2769,9 @@ export default function Dashboard() {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
-                        fontSize: '24px',
+                        fontSize: '20px',
                         color: '#16A34A',
-                        boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)',
+                        boxShadow: '0 3px 8px rgba(22, 163, 74, 0.3)',
                         transition: 'all 0.2s ease',
                         opacity: isAnimating ? 0.5 : 1
                       }}
@@ -2778,12 +2782,12 @@ export default function Dashboard() {
 
                   {/* Instructions */}
                   <div style={{
-                    marginTop: '30px',
+                    marginTop: '20px',
                     textAlign: 'center',
-                    fontSize: '12px',
+                    fontSize: '11px',
                     color: '#9CA3AF'
                   }}>
-                    <p style={{ margin: '0 0 5px 0' }}>💡 Tip: Like a widget to proceed to the next step</p>
+                    <p style={{ margin: '0 0 3px 0' }}>💡 Tip: Like a widget to proceed to the next step</p>
                     <p style={{ margin: 0 }}>You can always go back and change your selection</p>
                   </div>
                 </div>
