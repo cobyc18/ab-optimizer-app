@@ -489,6 +489,19 @@ export default function Dashboard() {
   const [testResult, setTestResult] = useState('');
   const [storePassword, setStorePassword] = useState('');
 
+  // Wizard state variables
+  const [wizardOpen, setWizardOpen] = useState(false);
+  const [currentStep, setCurrentStep] = useState(1);
+  const [selectedIdea, setSelectedIdea] = useState(null);
+  const [placementGuideOpen, setPlacementGuideOpen] = useState(false);
+  const [themePreviewMode, setThemePreviewMode] = useState(false);
+  const [widgetPosition, setWidgetPosition] = useState({ x: 100, y: 100 });
+  const [draggedElement, setDraggedElement] = useState(null);
+  const [themePreviewData, setThemePreviewData] = useState(null);
+  const [productSearchTerm, setProductSearchTerm] = useState('');
+  const [productPreviewOpen, setProductPreviewOpen] = useState(false);
+  const [previewProduct, setPreviewProduct] = useState(null);
+
   // Figma design colors
   const figmaColors = {
     primaryBlue: '#0038ff',
@@ -516,6 +529,38 @@ export default function Dashboard() {
     arrowLeft: "http://localhost:3845/assets/37f6433eecfe4bba5b55652b996eea8eaa31c272.svg",
     arrowRight: "http://localhost:3845/assets/aefdaaf09d8161efbb1ad9e2e4ead3a58332e535.svg"
   };
+
+  // A/B Test Ideas
+  const abTestIdeas = [
+    {
+      id: 1,
+      utility: 'Social Proof',
+      rationale: 'Shows recent purchases, increases trust by 12-15%',
+      style: 'Elegant',
+      preview: '👥 127 people bought this in the last 24 hours'
+    },
+    {
+      id: 2,
+      utility: 'Urgency Scarcity',
+      rationale: 'Creates FOMO, boosts conversion by 8-10%',
+      style: 'Bold',
+      preview: '⚡ Only 3 left in stock!'
+    },
+    {
+      id: 3,
+      utility: 'Countdown Timer',
+      rationale: 'Creates urgency, boosts checkout by 5-7%',
+      style: 'Energetic',
+      preview: '⏰ Limited time offer!'
+    },
+    {
+      id: 4,
+      utility: 'Product Reviews',
+      rationale: 'Builds credibility, increases sales by 18-22%',
+      style: 'Trustworthy',
+      preview: '⭐ 4.8/5 from 1,247 reviews'
+    }
+  ];
 
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
@@ -621,6 +666,16 @@ export default function Dashboard() {
           0% { transform: rotate(0deg); }
           100% { transform: rotate(360deg); }
         }
+        @keyframes slideInFromRight {
+          0% {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          100% {
+            transform: translateX(0);
+            opacity: 1;
+          }
+        }
       `}</style>
       <div style={{ 
         padding: '40px 60px', 
@@ -653,13 +708,16 @@ export default function Dashboard() {
         </div>
         
         {/* New Experiment Button */}
-        <button style={{
-          backgroundColor: '#3e3bf3',
-          border: 'none',
-          borderRadius: '5px',
-          padding: '12px 24px',
-          cursor: 'pointer'
-        }}>
+        <button 
+          onClick={() => setWizardOpen(true)}
+          style={{
+            backgroundColor: '#3e3bf3',
+            border: 'none',
+            borderRadius: '5px',
+            padding: '12px 24px',
+            cursor: 'pointer'
+          }}
+        >
           <p style={{
             fontFamily: 'Poppins, sans-serif',
             fontWeight: 500,
@@ -2321,6 +2379,688 @@ export default function Dashboard() {
         </div>
       </div>
       </div>
+
+      {/* A/B Test Wizard Dialog */}
+      {wizardOpen && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          padding: '20px'
+        }}>
+          <div style={{
+            background: '#FFFFFF',
+            borderRadius: '16px',
+            width: '95vw',
+            height: '90vh',
+            maxWidth: '1200px',
+            overflow: 'hidden',
+            display: 'flex',
+            flexDirection: 'column',
+            boxShadow: '0 25px 50px rgba(0, 0, 0, 0.5)'
+          }}>
+            {/* Wizard Header */}
+            <div style={{
+              background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
+              color: '#FFFFFF',
+              padding: '32px',
+              textAlign: 'center'
+            }}>
+              <h1 style={{
+                fontSize: '32px',
+                fontWeight: '700',
+                margin: '0 0 8px 0',
+                background: 'linear-gradient(135deg, #FFFFFF 0%, #E0E7FF 100%)',
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text'
+              }}>
+                🚀 A/B Test Optimizer
+              </h1>
+              <p style={{
+                fontSize: '16px',
+                margin: 0,
+                opacity: 0.9
+              }}>
+                Boost your conversion rates with data-driven widget experiments
+              </p>
+            </div>
+
+            {/* Progress Bar */}
+            <div style={{
+              background: '#F8FAFC',
+              padding: '24px 32px',
+              borderBottom: '1px solid #E5E5E5'
+            }}>
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                marginBottom: '16px'
+              }}>
+                {[1, 2, 3, 4, 5].map((step) => (
+                  <div key={step} style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      borderRadius: '50%',
+                      background: currentStep >= step ? '#4F46E5' : '#E5E5E5',
+                      color: currentStep >= step ? '#FFFFFF' : '#9CA3AF',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}>
+                      {step}
+                    </div>
+                    {step < 5 && (
+                      <div style={{
+                        width: '60px',
+                        height: '2px',
+                        background: currentStep > step ? '#4F46E5' : '#E5E5E5',
+                        margin: '0 8px'
+                      }} />
+                    )}
+                  </div>
+                ))}
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#6B7280',
+                textAlign: 'center'
+              }}>
+                Step {currentStep} of 5
+              </div>
+            </div>
+
+            {/* Main Content */}
+            <div style={{
+              padding: '32px',
+              flex: 1,
+              overflow: 'auto'
+            }}>
+              {/* Step 1: Choose A/B Test Idea */}
+              {currentStep === 1 && (
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Choose Your A/B Test Idea
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    Select a widget type that will help boost your conversion rates
+                  </p>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gap: '16px'
+                  }}>
+                    {abTestIdeas.map((idea) => (
+                      <div
+                        key={idea.id}
+                        onClick={() => setSelectedIdea(idea)}
+                        style={{
+                          background: selectedIdea?.id === idea.id ? '#F0F9FF' : '#FFFFFF',
+                          border: selectedIdea?.id === idea.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                          borderRadius: '12px',
+                          padding: '20px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          transform: selectedIdea?.id === idea.id ? 'scale(1.02)' : 'scale(1)'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px',
+                          marginBottom: '12px'
+                        }}>
+                          <div style={{
+                            fontSize: '24px'
+                          }}>
+                            {idea.utility === 'Social Proof' && '👥'}
+                            {idea.utility === 'Urgency Scarcity' && '⚡'}
+                            {idea.utility === 'Countdown Timer' && '⏰'}
+                            {idea.utility === 'Product Reviews' && '⭐'}
+                          </div>
+                          <div>
+                            <h4 style={{
+                              fontSize: '16px',
+                              fontWeight: '600',
+                              color: '#1F2937',
+                              margin: '0 0 4px 0'
+                            }}>
+                              {idea.utility}
+                            </h4>
+                            <p style={{
+                              fontSize: '12px',
+                              color: '#6B7280',
+                              margin: 0
+                            }}>
+                              {idea.style} Style
+                            </p>
+                          </div>
+                        </div>
+                        <p style={{
+                          fontSize: '14px',
+                          color: '#374151',
+                          margin: '0 0 12px 0',
+                          lineHeight: '1.5'
+                        }}>
+                          {idea.rationale}
+                        </p>
+                        <div style={{
+                          background: '#F3F4F6',
+                          padding: '12px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: '#6B7280',
+                          fontStyle: 'italic'
+                        }}>
+                          "{idea.preview}"
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 2: Choose Product */}
+              {currentStep === 2 && (
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Choose Product to Test
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    Select which product will display your A/B test widget
+                  </p>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gap: '16px'
+                  }}>
+                    {products.slice(0, 6).map((product) => (
+                      <div
+                        key={product.id}
+                        onClick={() => setSelectedProduct(product)}
+                        style={{
+                          background: selectedProduct?.id === product.id ? '#F0F9FF' : '#FFFFFF',
+                          border: selectedProduct?.id === product.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                          borderRadius: '12px',
+                          padding: '20px',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease',
+                          transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)'
+                        }}
+                      >
+                        <div style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px'
+                        }}>
+                          {product.featuredImage && (
+                            <img
+                              src={product.featuredImage.url}
+                              alt={product.title}
+                              style={{
+                                width: '60px',
+                                height: '60px',
+                                objectFit: 'cover',
+                                borderRadius: '8px'
+                              }}
+                            />
+                          )}
+                          <div style={{ flex: 1 }}>
+                            <h4 style={{
+                              fontSize: '16px',
+                              fontWeight: '600',
+                              color: '#1F2937',
+                              margin: '0 0 4px 0'
+                            }}>
+                              {product.title}
+                            </h4>
+                            <p style={{
+                              fontSize: '14px',
+                              color: '#6B7280',
+                              margin: 0
+                            }}>
+                              {product.vendor}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 3: Configure Test */}
+              {currentStep === 3 && (
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Configure Your Test
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    Set up your A/B test parameters
+                  </p>
+
+                  <div style={{
+                    background: '#F8FAFC',
+                    padding: '24px',
+                    borderRadius: '12px',
+                    marginBottom: '24px'
+                  }}>
+                    <h4 style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      margin: '0 0 16px 0'
+                    }}>
+                      Test Summary
+                    </h4>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                      gap: '16px'
+                    }}>
+                      <div>
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '0 0 4px 0'
+                        }}>
+                          Widget Type
+                        </p>
+                        <p style={{
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          {selectedIdea?.utility || 'Not selected'}
+                        </p>
+                      </div>
+                      <div>
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '0 0 4px 0'
+                        }}>
+                          Product
+                        </p>
+                        <p style={{
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          {selectedProduct?.title || 'Not selected'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                    gap: '16px'
+                  }}>
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#374151',
+                        marginBottom: '8px'
+                      }}>
+                        Test Name
+                      </label>
+                      <input
+                        type="text"
+                        placeholder="e.g., Social Proof Widget Test"
+                        style={{
+                          width: '100%',
+                          padding: '12px',
+                          border: '1px solid #D1D5DB',
+                          borderRadius: '8px',
+                          fontSize: '14px'
+                        }}
+                      />
+                    </div>
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#374151',
+                        marginBottom: '8px'
+                      }}>
+                        Traffic Split
+                      </label>
+                      <select style={{
+                        width: '100%',
+                        padding: '12px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '8px',
+                        fontSize: '14px'
+                      }}>
+                        <option value="50-50">50% - 50%</option>
+                        <option value="70-30">70% - 30%</option>
+                        <option value="80-20">80% - 20%</option>
+                      </select>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 4: Preview */}
+              {currentStep === 4 && (
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Preview Your Test
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    See how your A/B test will look on your store
+                  </p>
+
+                  <div style={{
+                    background: '#F8FAFC',
+                    padding: '24px',
+                    borderRadius: '12px',
+                    textAlign: 'center'
+                  }}>
+                    <div style={{
+                      fontSize: '48px',
+                      marginBottom: '16px'
+                    }}>
+                      🎨
+                    </div>
+                    <h4 style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      margin: '0 0 8px 0'
+                    }}>
+                      Preview Coming Soon
+                    </h4>
+                    <p style={{
+                      fontSize: '14px',
+                      color: '#6B7280',
+                      margin: 0
+                    }}>
+                      Widget preview will be available in the next step
+                    </p>
+                  </div>
+                </div>
+              )}
+
+              {/* Step 5: Launch */}
+              {currentStep === 5 && (
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Launch Your A/B Test
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    Review your test configuration and launch when ready
+                  </p>
+
+                  <div style={{
+                    background: '#F0F9FF',
+                    border: '1px solid #3B82F6',
+                    borderRadius: '12px',
+                    padding: '24px',
+                    marginBottom: '24px'
+                  }}>
+                    <h4 style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      margin: '0 0 16px 0'
+                    }}>
+                      Test Configuration
+                    </h4>
+                    <div style={{
+                      display: 'grid',
+                      gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                      gap: '16px'
+                    }}>
+                      <div>
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '0 0 4px 0'
+                        }}>
+                          Widget Type
+                        </p>
+                        <p style={{
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          {selectedIdea?.utility || 'Not selected'}
+                        </p>
+                      </div>
+                      <div>
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '0 0 4px 0'
+                        }}>
+                          Product
+                        </p>
+                        <p style={{
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          {selectedProduct?.title || 'Not selected'}
+                        </p>
+                      </div>
+                      <div>
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '0 0 4px 0'
+                        }}>
+                          Traffic Split
+                        </p>
+                        <p style={{
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          50% - 50%
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div style={{
+                    background: '#FEF3C7',
+                    border: '1px solid #F59E0B',
+                    borderRadius: '12px',
+                    padding: '16px',
+                    marginBottom: '24px'
+                  }}>
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px',
+                      marginBottom: '8px'
+                    }}>
+                      <span style={{ fontSize: '16px' }}>⚠️</span>
+                      <h4 style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#92400E',
+                        margin: 0
+                      }}>
+                        Important
+                      </h4>
+                    </div>
+                    <p style={{
+                      fontSize: '14px',
+                      color: '#92400E',
+                      margin: 0,
+                      lineHeight: '1.5'
+                    }}>
+                      Make sure you have the necessary permissions to modify your theme. 
+                      This will create a duplicate template for testing.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Wizard Footer */}
+            <div style={{
+              background: '#F8FAFC',
+              padding: '24px 32px',
+              borderTop: '1px solid #E5E5E5',
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <button
+                onClick={() => setWizardOpen(false)}
+                style={{
+                  background: 'transparent',
+                  border: '1px solid #D1D5DB',
+                  borderRadius: '8px',
+                  padding: '12px 24px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#374151'
+                }}
+              >
+                Cancel
+              </button>
+              <div style={{ display: 'flex', gap: '12px' }}>
+                <button
+                  onClick={() => setCurrentStep(Math.max(1, currentStep - 1))}
+                  disabled={currentStep === 1}
+                  style={{
+                    background: currentStep === 1 ? '#F3F4F6' : '#FFFFFF',
+                    border: '1px solid #D1D5DB',
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    cursor: currentStep === 1 ? 'not-allowed' : 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: currentStep === 1 ? '#9CA3AF' : '#374151'
+                  }}
+                >
+                  Previous
+                </button>
+                <button
+                  onClick={() => {
+                    if (currentStep < 5) {
+                      setCurrentStep(currentStep + 1);
+                    } else {
+                      // Launch the test
+                      console.log('Launching A/B test...');
+                      setWizardOpen(false);
+                    }
+                  }}
+                  style={{
+                    background: '#4F46E5',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '12px 24px',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '500',
+                    color: '#FFFFFF'
+                  }}
+                >
+                  {currentStep === 5 ? 'Launch Test' : 'Next'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }
