@@ -2609,15 +2609,15 @@ export default function Dashboard() {
                   {/* Tinder Card Stack */}
                   <div style={{
                     position: 'relative',
-                    width: '300px',
-                    height: '320px',
+                    width: '400px',
+                    height: '450px',
                     margin: '0 auto',
                     overflow: 'hidden'
                   }}>
                     {/* Current Card */}
                     {abTestIdeas[currentWidgetIndex] && (
                       <div
-                        key={`current-${abTestIdeas[currentWidgetIndex].id}`}
+                        key={`current-${currentWidgetIndex}`}
                         style={{
                           position: 'absolute',
                           top: 0,
@@ -2627,10 +2627,11 @@ export default function Dashboard() {
                           background: '#FFFFFF',
                           borderRadius: '16px',
                           boxShadow: '0 15px 30px rgba(0, 0, 0, 0.15)',
-                          padding: '20px',
+                          padding: '30px',
                           cursor: 'pointer',
                           zIndex: 2,
                           opacity: 1,
+                          transform: 'scale(1) translateY(0)',
                           animation: !isAnimating ? 'cardEnter 0.5s ease-out' : 'none',
                           transition: 'all 0.3s ease',
                           ...(isAnimating && swipeDirection === 'like' && {
@@ -2643,9 +2644,9 @@ export default function Dashboard() {
                       >
                         {/* Widget Icon */}
                         <div style={{
-                          fontSize: '32px',
+                          fontSize: '48px',
                           textAlign: 'center',
-                          marginBottom: '8px'
+                          marginBottom: '16px'
                         }}>
                           {abTestIdeas[currentWidgetIndex].utility === 'Social Proof' && '👥'}
                           {abTestIdeas[currentWidgetIndex].utility === 'Urgency Scarcity' && '⚡'}
@@ -2655,10 +2656,10 @@ export default function Dashboard() {
 
                         {/* Widget Title */}
                         <h4 style={{
-                          fontSize: '16px',
+                          fontSize: '24px',
                           fontWeight: '700',
                           color: '#1F2937',
-                          margin: '0 0 6px 0',
+                          margin: '0 0 12px 0',
                           textAlign: 'center'
                         }}>
                           {abTestIdeas[currentWidgetIndex].utility}
@@ -2668,12 +2669,12 @@ export default function Dashboard() {
                         <div style={{
                           background: '#F0F9FF',
                           color: '#1E40AF',
-                          padding: '3px 6px',
-                          borderRadius: '10px',
-                          fontSize: '9px',
+                          padding: '6px 12px',
+                          borderRadius: '16px',
+                          fontSize: '12px',
                           fontWeight: '500',
                           textAlign: 'center',
-                          margin: '0 auto 8px auto',
+                          margin: '0 auto 16px auto',
                           width: 'fit-content'
                         }}>
                           {abTestIdeas[currentWidgetIndex].style} Style
@@ -2681,10 +2682,10 @@ export default function Dashboard() {
 
                         {/* Description */}
                         <p style={{
-                          fontSize: '11px',
+                          fontSize: '16px',
                           color: '#374151',
-                          margin: '0 0 8px 0',
-                          lineHeight: '1.3',
+                          margin: '0 0 20px 0',
+                          lineHeight: '1.5',
                           textAlign: 'center'
                         }}>
                           {abTestIdeas[currentWidgetIndex].rationale}
@@ -2694,9 +2695,9 @@ export default function Dashboard() {
                         <div style={{
                           background: '#F8FAFC',
                           border: '1px solid #E5E7EB',
-                          padding: '8px',
-                          borderRadius: '6px',
-                          fontSize: '10px',
+                          padding: '16px',
+                          borderRadius: '12px',
+                          fontSize: '14px',
                           color: '#6B7280',
                           fontStyle: 'italic',
                           textAlign: 'center'
@@ -2709,7 +2710,7 @@ export default function Dashboard() {
                     {/* Next Card (only if there is one) */}
                     {abTestIdeas[currentWidgetIndex + 1] && (
                       <div
-                        key={`next-${abTestIdeas[currentWidgetIndex + 1].id}`}
+                        key={`next-${currentWidgetIndex + 1}`}
                         style={{
                           position: 'absolute',
                           top: 0,
@@ -2719,19 +2720,24 @@ export default function Dashboard() {
                           background: '#FFFFFF',
                           borderRadius: '16px',
                           boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
-                          padding: '20px',
+                          padding: '30px',
                           cursor: 'pointer',
-                          transform: 'scale(0.95) translateY(10px)',
+                          transform: 'scale(0.95) translateY(15px)',
                           zIndex: 1,
-                          opacity: 0.7,
-                          transition: 'all 0.3s ease'
+                          opacity: 0.6,
+                          transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                          ...(isAnimating && swipeDirection === 'dislike' && {
+                            transform: 'scale(1) translateY(0)',
+                            opacity: 1,
+                            zIndex: 2
+                          })
                         }}
                       >
                         {/* Widget Icon */}
                         <div style={{
-                          fontSize: '32px',
+                          fontSize: '48px',
                           textAlign: 'center',
-                          marginBottom: '8px'
+                          marginBottom: '16px'
                         }}>
                           {abTestIdeas[currentWidgetIndex + 1].utility === 'Social Proof' && '👥'}
                           {abTestIdeas[currentWidgetIndex + 1].utility === 'Urgency Scarcity' && '⚡'}
@@ -2741,10 +2747,10 @@ export default function Dashboard() {
 
                         {/* Widget Title */}
                         <h4 style={{
-                          fontSize: '16px',
+                          fontSize: '24px',
                           fontWeight: '700',
                           color: '#1F2937',
-                          margin: '0 0 6px 0',
+                          margin: '0 0 12px 0',
                           textAlign: 'center'
                         }}>
                           {abTestIdeas[currentWidgetIndex + 1].utility}
@@ -2754,12 +2760,12 @@ export default function Dashboard() {
                         <div style={{
                           background: '#F0F9FF',
                           color: '#1E40AF',
-                          padding: '3px 6px',
-                          borderRadius: '10px',
-                          fontSize: '9px',
+                          padding: '6px 12px',
+                          borderRadius: '16px',
+                          fontSize: '12px',
                           fontWeight: '500',
                           textAlign: 'center',
-                          margin: '0 auto 8px auto',
+                          margin: '0 auto 16px auto',
                           width: 'fit-content'
                         }}>
                           {abTestIdeas[currentWidgetIndex + 1].style} Style
@@ -2767,10 +2773,10 @@ export default function Dashboard() {
 
                         {/* Description */}
                         <p style={{
-                          fontSize: '11px',
+                          fontSize: '16px',
                           color: '#374151',
-                          margin: '0 0 8px 0',
-                          lineHeight: '1.3',
+                          margin: '0 0 20px 0',
+                          lineHeight: '1.5',
                           textAlign: 'center'
                         }}>
                           {abTestIdeas[currentWidgetIndex + 1].rationale}
@@ -2780,9 +2786,9 @@ export default function Dashboard() {
                         <div style={{
                           background: '#F8FAFC',
                           border: '1px solid #E5E7EB',
-                          padding: '8px',
-                          borderRadius: '6px',
-                          fontSize: '10px',
+                          padding: '16px',
+                          borderRadius: '12px',
+                          fontSize: '14px',
                           color: '#6B7280',
                           fontStyle: 'italic',
                           textAlign: 'center'
@@ -2811,18 +2817,18 @@ export default function Dashboard() {
                         onClick={() => handleSwipe('dislike')}
                         disabled={isAnimating}
                         style={{
-                          width: '60px',
-                          height: '60px',
+                          width: '70px',
+                          height: '70px',
                           borderRadius: '50%',
                           background: '#FEE2E2',
-                          border: '2px solid #FCA5A5',
+                          border: '3px solid #FCA5A5',
                           cursor: isAnimating ? 'not-allowed' : 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '24px',
+                          fontSize: '28px',
                           color: '#DC2626',
-                          boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
+                          boxShadow: '0 6px 16px rgba(220, 38, 38, 0.4)',
                           transition: 'all 0.2s ease',
                           opacity: isAnimating ? 0.5 : 1,
                           transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
@@ -2835,18 +2841,18 @@ export default function Dashboard() {
                         onClick={() => handleSwipe('like')}
                         disabled={isAnimating}
                         style={{
-                          width: '60px',
-                          height: '60px',
+                          width: '70px',
+                          height: '70px',
                           borderRadius: '50%',
                           background: '#DCFCE7',
-                          border: '2px solid #86EFAC',
+                          border: '3px solid #86EFAC',
                           cursor: isAnimating ? 'not-allowed' : 'pointer',
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '24px',
+                          fontSize: '28px',
                           color: '#16A34A',
-                          boxShadow: '0 4px 12px rgba(22, 163, 74, 0.4)',
+                          boxShadow: '0 6px 16px rgba(22, 163, 74, 0.4)',
                           transition: 'all 0.2s ease',
                           opacity: isAnimating ? 0.5 : 1,
                           transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
