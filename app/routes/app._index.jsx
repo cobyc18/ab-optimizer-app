@@ -489,6 +489,34 @@ export default function Dashboard() {
   const [testResult, setTestResult] = useState('');
   const [storePassword, setStorePassword] = useState('');
 
+  // Figma design colors
+  const figmaColors = {
+    primaryBlue: '#0038ff',
+    lightBlue: '#97cdff',
+    orange: '#ef9362',
+    darkGray: '#151515',
+    lightGray: '#84818a',
+    white: '#ffffff',
+    gray: '#e6e6e6',
+    basicFill: '#C5CEE0',
+    black: '#202226',
+    themeDark: '#464255',
+    green: '#29ad00',
+    yellow: '#f4b207'
+  };
+
+  // Figma icons
+  const icons = {
+    home: "http://localhost:3845/assets/b5c9a49a2261b2416025a79cd7d9dd6cbfc9658c.svg",
+    cultureTube: "http://localhost:3845/assets/cf28cd19afe656dc8b46f5937016390d82168068.svg",
+    award: "http://localhost:3845/assets/ba2a64095bc32a278cda21c35ac6bfc74c380c27.svg",
+    chart: "http://localhost:3845/assets/baf7e28d166b5b283321a852774ef1bdd14f27a6.svg",
+    graph: "http://localhost:3845/assets/9b9af956aa583e2a99412e20df5a9e75bf80fdde.svg",
+    ideasIcon: "http://localhost:3845/assets/452785d63818a5c8e8198f86e2110ab26729a23a.svg",
+    arrowLeft: "http://localhost:3845/assets/37f6433eecfe4bba5b55652b996eea8eaa31c272.svg",
+    arrowRight: "http://localhost:3845/assets/aefdaaf09d8161efbb1ad9e2e4ead3a58332e535.svg"
+  };
+
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
     if (newExpanded.has(testName)) {
@@ -654,7 +682,7 @@ export default function Dashboard() {
           border: '2px solid #1a7f1a'
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
-            <img alt="Award" src={imgAward} style={{ width: '32px', height: '32px' }} />
+            <img alt="Award" src={icons.award} style={{ width: '32px', height: '32px' }} />
             <h2 style={{
               fontFamily: 'Poppins, sans-serif',
               fontWeight: 600,
@@ -742,7 +770,7 @@ export default function Dashboard() {
             fontFamily: 'Geist, sans-serif',
             fontWeight: 500,
             fontSize: '24px',
-            color: figmaColors.blue,
+            color: figmaColors.primaryBlue,
             margin: '0 0 15px 0',
             lineHeight: '32px'
           }}>
@@ -771,15 +799,25 @@ export default function Dashboard() {
         </div>
 
         {/* Chart Area with X/Y Axes */}
-        <div style={{ marginBottom: '30px', position: 'relative' }}>
+        <div style={{ marginBottom: '30px', position: 'relative', height: '300px' }}>
           {/* Chart Image */}
-          <img alt="Chart" src={imgChart} style={{ width: '100%', maxWidth: '800px' }} />
+          <div style={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: '100%',
+            maxWidth: '800px',
+            height: '262px'
+          }}>
+            <img alt="Chart" src={icons.chart} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          </div>
           
           {/* Y-Axis Labels */}
           <div style={{
             position: 'absolute',
-            left: '0px',
-            top: '0px',
+            left: '20px',
+            top: '20px',
             display: 'flex',
             flexDirection: 'column',
             gap: '55px',
@@ -787,7 +825,9 @@ export default function Dashboard() {
             fontSize: '18px',
             color: 'rgba(21,21,21,0.7)',
             fontFamily: 'Inter, sans-serif',
-            fontWeight: 400
+            fontWeight: 400,
+            height: '240px',
+            justifyContent: 'space-between'
           }}>
             <p style={{ margin: 0 }}>5</p>
             <p style={{ margin: 0 }}>4</p>
@@ -800,7 +840,7 @@ export default function Dashboard() {
           {/* X-Axis Labels */}
           <div style={{
             position: 'absolute',
-            bottom: '0px',
+            bottom: '20px',
             left: '50%',
             transform: 'translateX(-50%)',
             display: 'flex',
@@ -842,7 +882,7 @@ export default function Dashboard() {
           {/* Progress Line */}
           <div style={{ marginBottom: '20px' }}>
             <div style={{ width: '100%', height: '4px', backgroundColor: figmaColors.white, borderRadius: '2px', marginBottom: '10px' }}>
-              <div style={{ width: '80%', height: '100%', backgroundColor: figmaColors.blue, borderRadius: '2px' }} />
+              <div style={{ width: '80%', height: '100%', backgroundColor: figmaColors.primaryBlue, borderRadius: '2px' }} />
             </div>
             <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: figmaColors.darkGray }}>
               <span>Goal: 80%</span>
@@ -879,7 +919,7 @@ export default function Dashboard() {
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 400,
                 fontSize: '16px',
-                color: figmaColors.blue,
+                color: figmaColors.primaryBlue,
                 margin: 0
               }}>
                 Total Run Time
@@ -899,7 +939,7 @@ export default function Dashboard() {
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 400,
                 fontSize: '16px',
-                color: figmaColors.blue,
+                color: figmaColors.primaryBlue,
                 margin: 0
               }}>
                 Variant A
@@ -919,7 +959,7 @@ export default function Dashboard() {
                 fontFamily: 'Inter, sans-serif',
                 fontWeight: 400,
                 fontSize: '16px',
-                color: figmaColors.blue,
+                color: figmaColors.primaryBlue,
                 margin: 0
               }}>
                 Variant B
@@ -936,7 +976,7 @@ export default function Dashboard() {
             height: '105px'
           }}>
             <button style={{
-              backgroundColor: figmaColors.blue,
+              backgroundColor: figmaColors.primaryBlue,
               borderRadius: '5px',
               border: 'none',
               padding: '12px 24px',
@@ -956,7 +996,7 @@ export default function Dashboard() {
             </button>
             <button style={{
               backgroundColor: figmaColors.lightBlue,
-              border: `1px solid ${figmaColors.blue}`,
+              border: `1px solid ${figmaColors.primaryBlue}`,
               borderRadius: '5px',
               padding: '12px 24px',
               cursor: 'pointer',
@@ -967,7 +1007,7 @@ export default function Dashboard() {
                 fontFamily: 'Poppins, sans-serif',
                 fontWeight: 500,
                 fontSize: '14px',
-                color: figmaColors.blue,
+                color: figmaColors.primaryBlue,
                 margin: 0
               }}>
                 View Story
@@ -995,17 +1035,20 @@ export default function Dashboard() {
         {/* AutoPilot */}
         <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
           <div style={{ width: '28px', height: '28px' }}>
-            <img alt="Graph" src={imgGraph} style={{ width: '100%', height: '100%' }} />
+            <img alt="Graph" src={icons.graph} style={{ width: '100%', height: '100%' }} />
           </div>
           <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-            <div style={{ width: '16px', height: '16px' }}>
-              <img alt="Vector" src={imgVector} style={{ width: '100%', height: '100%' }} />
-            </div>
+            <div style={{ 
+              width: '16px', 
+              height: '16px',
+              backgroundColor: figmaColors.primaryBlue,
+              borderRadius: '50%'
+            }}></div>
             <p style={{
               fontFamily: 'Inter, sans-serif',
               fontWeight: 500,
               fontSize: '16px',
-              color: figmaColors.blue,
+              color: figmaColors.primaryBlue,
               margin: 0
             }}>
               AutoPilot On
@@ -1018,7 +1061,7 @@ export default function Dashboard() {
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
         <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
           <div style={{ width: '40px', height: '40px' }}>
-            <img alt="Frame" src={imgFrame2147224435} style={{ width: '100%', height: '100%' }} />
+            <img alt="Ideas Icon" src={icons.ideasIcon} style={{ width: '100%', height: '100%' }} />
           </div>
           <p style={{
             fontFamily: 'Geist, sans-serif',
@@ -1044,11 +1087,11 @@ export default function Dashboard() {
             cursor: 'pointer'
           }}>
             <div style={{ width: '22.857px', height: '22.857px' }}>
-              <img alt="Arrow Left" src={img1} style={{ width: '100%', height: '100%' }} />
+              <img alt="Arrow Left" src={icons.arrowLeft} style={{ width: '100%', height: '100%' }} />
             </div>
           </div>
           <div style={{
-            border: '0.714px solid ' + figmaColors.blue,
+            border: '0.714px solid ' + figmaColors.primaryBlue,
             borderRadius: '25px',
             width: '50px',
             height: '50px',
@@ -1058,7 +1101,7 @@ export default function Dashboard() {
             cursor: 'pointer'
           }}>
             <div style={{ width: '22.857px', height: '22.857px' }}>
-              <img alt="Arrow Right" src={img2} style={{ width: '100%', height: '100%' }} />
+              <img alt="Arrow Right" src={icons.arrowRight} style={{ width: '100%', height: '100%' }} />
             </div>
           </div>
         </div>
@@ -1071,7 +1114,7 @@ export default function Dashboard() {
             key={card.id}
             style={{
               backgroundColor: figmaColors.gray,
-              border: `1px solid ${figmaColors.blue}`,
+              border: `1px solid ${figmaColors.primaryBlue}`,
               borderRadius: '24px',
               padding: '40px',
               minWidth: '280px',
@@ -1180,7 +1223,7 @@ export default function Dashboard() {
               fontFamily: 'SF Pro, sans-serif',
               fontWeight: 400,
               fontSize: '16px',
-              color: figmaColors.blue,
+              color: figmaColors.primaryBlue,
               margin: 0,
               lineHeight: '24px'
             }}>
@@ -1229,7 +1272,7 @@ export default function Dashboard() {
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 600,
                   fontSize: '16px',
-                  color: figmaColors.blue,
+                  color: figmaColors.primaryBlue,
                   margin: '0 0 5px 0'
                 }}>
                   + 23%
@@ -1283,7 +1326,7 @@ export default function Dashboard() {
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 600,
                   fontSize: '16px',
-                  color: figmaColors.blue,
+                  color: figmaColors.primaryBlue,
                   margin: '0 0 5px 0'
                 }}>
                   - 253%
@@ -1337,7 +1380,7 @@ export default function Dashboard() {
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 600,
                   fontSize: '16px',
-                  color: figmaColors.blue,
+                  color: figmaColors.primaryBlue,
                   margin: '0 0 5px 0'
                 }}>
                   + 250%
@@ -1360,7 +1403,7 @@ export default function Dashboard() {
           
           {/* Progress Card */}
           <div style={{
-            backgroundColor: figmaColors.blue,
+            backgroundColor: figmaColors.primaryBlue,
             borderRadius: '20px',
             padding: '40px',
             position: 'relative'
@@ -1597,7 +1640,7 @@ export default function Dashboard() {
                       padding: '20px',
                       backgroundColor: 'rgba(0, 56, 255, 0.05)',
                       borderRadius: '12px',
-                      border: `1px solid ${figmaColors.blue}`
+                      border: `1px solid ${figmaColors.primaryBlue}`
                     }}>
                       <p style={{
                         fontFamily: 'Inter, sans-serif',
@@ -1811,7 +1854,7 @@ export default function Dashboard() {
                 <button
                   onClick={openPreviewInNewTab}
                   style={{
-                    backgroundColor: figmaColors.blue,
+                    backgroundColor: figmaColors.primaryBlue,
                     border: 'none',
                     borderRadius: '8px',
                     padding: '12px 24px',
@@ -1909,7 +1952,7 @@ export default function Dashboard() {
                       width: '20px',
                       height: '20px',
                       border: `2px solid ${figmaColors.basicFill}`,
-                      borderTop: `2px solid ${figmaColors.blue}`,
+                      borderTop: `2px solid ${figmaColors.primaryBlue}`,
                       borderRadius: '50%',
                       animation: 'spin 1s linear infinite'
                     }} />
@@ -1994,7 +2037,7 @@ export default function Dashboard() {
                         width: '40px',
                         height: '40px',
                         border: `4px solid ${figmaColors.basicFill}`,
-                        borderTop: `4px solid ${figmaColors.blue}`,
+                        borderTop: `4px solid ${figmaColors.primaryBlue}`,
                         borderRadius: '50%',
                         animation: 'spin 1s linear infinite'
                       }} />
@@ -2170,7 +2213,7 @@ export default function Dashboard() {
                     onClick={() => window.open(previewUrl, '_blank')}
                     style={{
                       backgroundColor: 'transparent',
-                      border: `1px solid ${figmaColors.blue}`,
+                      border: `1px solid ${figmaColors.primaryBlue}`,
                       borderRadius: '6px',
                       padding: '6px 12px',
                       cursor: 'pointer'
@@ -2180,7 +2223,7 @@ export default function Dashboard() {
                       fontFamily: 'Inter, sans-serif',
                       fontWeight: 500,
                       fontSize: '12px',
-                      color: figmaColors.blue,
+                      color: figmaColors.primaryBlue,
                       margin: 0
                     }}>
                       Open Live Page
@@ -2196,13 +2239,13 @@ export default function Dashboard() {
             backgroundColor: figmaColors.lightBlue,
             borderRadius: '12px',
             padding: '20px',
-            border: `1px solid ${figmaColors.blue}`
+            border: `1px solid ${figmaColors.primaryBlue}`
           }}>
             <div style={{ display: 'flex', gap: '15px', alignItems: 'flex-start' }}>
               <div style={{
                 width: '24px',
                 height: '24px',
-                backgroundColor: figmaColors.blue,
+                backgroundColor: figmaColors.primaryBlue,
                 borderRadius: '50%',
                 display: 'flex',
                 alignItems: 'center',
@@ -2225,7 +2268,7 @@ export default function Dashboard() {
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 600,
                   fontSize: '16px',
-                  color: figmaColors.blue,
+                  color: figmaColors.primaryBlue,
                   margin: '0 0 10px 0'
                 }}>
                   How Theme Preview Works
