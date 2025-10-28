@@ -502,6 +502,11 @@ export default function Dashboard() {
   const [productPreviewOpen, setProductPreviewOpen] = useState(false);
   const [previewProduct, setPreviewProduct] = useState(null);
 
+  // Tinder swiper state
+  const [currentWidgetIndex, setCurrentWidgetIndex] = useState(0);
+  const [swipeDirection, setSwipeDirection] = useState(null);
+  const [isAnimating, setIsAnimating] = useState(false);
+
   // Figma design colors
   const figmaColors = {
     primaryBlue: '#0038ff',
@@ -561,6 +566,41 @@ export default function Dashboard() {
       preview: '⭐ 4.8/5 from 1,247 reviews'
     }
   ];
+
+  // Tinder swiper functions
+  const handleSwipe = (direction) => {
+    if (isAnimating) return;
+    
+    setIsAnimating(true);
+    setSwipeDirection(direction);
+    
+    if (direction === 'like') {
+      setSelectedIdea(abTestIdeas[currentWidgetIndex]);
+      setTimeout(() => {
+        setCurrentStep(2);
+        setIsAnimating(false);
+        setSwipeDirection(null);
+      }, 300);
+    } else {
+      setTimeout(() => {
+        if (currentWidgetIndex < abTestIdeas.length - 1) {
+          setCurrentWidgetIndex(currentWidgetIndex + 1);
+        } else {
+          // No more widgets, go back to step 1 or show message
+          setCurrentWidgetIndex(0);
+        }
+        setIsAnimating(false);
+        setSwipeDirection(null);
+      }, 300);
+    }
+  };
+
+  const resetSwiper = () => {
+    setCurrentWidgetIndex(0);
+    setSelectedIdea(null);
+    setSwipeDirection(null);
+    setIsAnimating(false);
+  };
 
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
@@ -676,6 +716,36 @@ export default function Dashboard() {
             opacity: 1;
           }
         }
+        @keyframes swipeLeft {
+          0% {
+            transform: translateX(0) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(-100vw) rotate(-30deg);
+            opacity: 0;
+          }
+        }
+        @keyframes swipeRight {
+          0% {
+            transform: translateX(0) rotate(0deg);
+            opacity: 1;
+          }
+          100% {
+            transform: translateX(100vw) rotate(30deg);
+            opacity: 0;
+          }
+        }
+        @keyframes cardEnter {
+          0% {
+            transform: translateY(100px) scale(0.8);
+            opacity: 0;
+          }
+          100% {
+            transform: translateY(0) scale(1);
+            opacity: 1;
+          }
+        }
       `}</style>
       <div style={{ 
         padding: '40px 60px', 
@@ -709,7 +779,10 @@ export default function Dashboard() {
         
         {/* New Experiment Button */}
         <button 
-          onClick={() => setWizardOpen(true)}
+          onClick={() => {
+            setWizardOpen(true);
+            resetSwiper();
+          }}
           style={{
             backgroundColor: '#3e3bf3',
             border: 'none',
@@ -2491,100 +2564,227 @@ export default function Dashboard() {
               flex: 1,
               overflow: 'auto'
             }}>
-              {/* Step 1: Choose A/B Test Idea */}
+              {/* Step 1: Tinder Swiper for A/B Test Ideas */}
               {currentStep === 1 && (
                 <div style={{
                   animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: 'translateX(0)',
-                  opacity: 1
+                  opacity: 1,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'center'
                 }}>
                   <h3 style={{
-                    fontSize: '18px',
+                    fontSize: '24px',
                     fontWeight: '600',
                     color: '#1F2937',
-                    marginBottom: '8px'
+                    marginBottom: '8px',
+                    textAlign: 'center'
                   }}>
-                    Choose Your A/B Test Idea
+                    Swipe to Find Your Perfect Widget
                   </h3>
                   <p style={{
-                    fontSize: '14px',
+                    fontSize: '16px',
                     color: '#6B7280',
-                    marginBottom: '24px'
+                    marginBottom: '40px',
+                    textAlign: 'center',
+                    maxWidth: '500px'
                   }}>
-                    Select a widget type that will help boost your conversion rates
+                    Swipe right to like a widget, or swipe left to see the next option
                   </p>
 
+                  {/* Widget Counter */}
                   <div style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '16px'
+                    marginBottom: '30px',
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    textAlign: 'center'
                   }}>
-                    {abTestIdeas.map((idea) => (
-                      <div
-                        key={idea.id}
-                        onClick={() => setSelectedIdea(idea)}
-                        style={{
-                          background: selectedIdea?.id === idea.id ? '#F0F9FF' : '#FFFFFF',
-                          border: selectedIdea?.id === idea.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                          borderRadius: '12px',
-                          padding: '20px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          transform: selectedIdea?.id === idea.id ? 'scale(1.02)' : 'scale(1)'
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          marginBottom: '12px'
-                        }}>
+                    {currentWidgetIndex + 1} of {abTestIdeas.length}
+                  </div>
+
+                  {/* Tinder Card Stack */}
+                  <div style={{
+                    position: 'relative',
+                    width: '400px',
+                    height: '500px',
+                    marginBottom: '40px'
+                  }}>
+                    {abTestIdeas.map((idea, index) => {
+                      const isCurrent = index === currentWidgetIndex;
+                      const isNext = index === currentWidgetIndex + 1;
+                      const isVisible = isCurrent || isNext;
+                      
+                      if (!isVisible) return null;
+
+                      return (
+                        <div
+                          key={idea.id}
+                          style={{
+                            position: 'absolute',
+                            top: 0,
+                            left: 0,
+                            width: '100%',
+                            height: '100%',
+                            background: '#FFFFFF',
+                            borderRadius: '20px',
+                            boxShadow: isCurrent 
+                              ? '0 20px 40px rgba(0, 0, 0, 0.15)' 
+                              : '0 10px 20px rgba(0, 0, 0, 0.1)',
+                            padding: '30px',
+                            cursor: 'pointer',
+                            transform: isNext ? 'scale(0.95) translateY(10px)' : 'scale(1) translateY(0)',
+                            zIndex: isCurrent ? 2 : 1,
+                            opacity: isCurrent ? 1 : 0.7,
+                            animation: isCurrent && !isAnimating ? 'cardEnter 0.5s ease-out' : 'none',
+                            transition: 'all 0.3s ease',
+                            ...(isAnimating && swipeDirection === 'like' && isCurrent && {
+                              animation: 'swipeRight 0.3s ease-out forwards'
+                            }),
+                            ...(isAnimating && swipeDirection === 'dislike' && isCurrent && {
+                              animation: 'swipeLeft 0.3s ease-out forwards'
+                            })
+                          }}
+                        >
+                          {/* Widget Icon */}
                           <div style={{
-                            fontSize: '24px'
+                            fontSize: '60px',
+                            textAlign: 'center',
+                            marginBottom: '20px'
                           }}>
                             {idea.utility === 'Social Proof' && '👥'}
                             {idea.utility === 'Urgency Scarcity' && '⚡'}
                             {idea.utility === 'Countdown Timer' && '⏰'}
                             {idea.utility === 'Product Reviews' && '⭐'}
                           </div>
-                          <div>
-                            <h4 style={{
-                              fontSize: '16px',
-                              fontWeight: '600',
-                              color: '#1F2937',
-                              margin: '0 0 4px 0'
-                            }}>
-                              {idea.utility}
-                            </h4>
-                            <p style={{
-                              fontSize: '12px',
-                              color: '#6B7280',
-                              margin: 0
-                            }}>
-                              {idea.style} Style
-                            </p>
+
+                          {/* Widget Title */}
+                          <h4 style={{
+                            fontSize: '24px',
+                            fontWeight: '700',
+                            color: '#1F2937',
+                            margin: '0 0 10px 0',
+                            textAlign: 'center'
+                          }}>
+                            {idea.utility}
+                          </h4>
+
+                          {/* Style Badge */}
+                          <div style={{
+                            background: '#F0F9FF',
+                            color: '#1E40AF',
+                            padding: '6px 12px',
+                            borderRadius: '20px',
+                            fontSize: '12px',
+                            fontWeight: '500',
+                            textAlign: 'center',
+                            margin: '0 auto 20px auto',
+                            width: 'fit-content'
+                          }}>
+                            {idea.style} Style
+                          </div>
+
+                          {/* Description */}
+                          <p style={{
+                            fontSize: '16px',
+                            color: '#374151',
+                            margin: '0 0 20px 0',
+                            lineHeight: '1.5',
+                            textAlign: 'center'
+                          }}>
+                            {idea.rationale}
+                          </p>
+
+                          {/* Preview */}
+                          <div style={{
+                            background: '#F8FAFC',
+                            border: '1px solid #E5E7EB',
+                            padding: '16px',
+                            borderRadius: '12px',
+                            fontSize: '14px',
+                            color: '#6B7280',
+                            fontStyle: 'italic',
+                            textAlign: 'center'
+                          }}>
+                            "{idea.preview}"
                           </div>
                         </div>
-                        <p style={{
-                          fontSize: '14px',
-                          color: '#374151',
-                          margin: '0 0 12px 0',
-                          lineHeight: '1.5'
-                        }}>
-                          {idea.rationale}
-                        </p>
-                        <div style={{
-                          background: '#F3F4F6',
-                          padding: '12px',
-                          borderRadius: '8px',
-                          fontSize: '14px',
-                          color: '#6B7280',
-                          fontStyle: 'italic'
-                        }}>
-                          "{idea.preview}"
-                        </div>
-                      </div>
-                    ))}
+                      );
+                    })}
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '20px',
+                    alignItems: 'center'
+                  }}>
+                    <button
+                      onClick={() => handleSwipe('dislike')}
+                      disabled={isAnimating}
+                      style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
+                        background: '#FEE2E2',
+                        border: 'none',
+                        cursor: isAnimating ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '24px',
+                        color: '#DC2626',
+                        boxShadow: '0 4px 12px rgba(220, 38, 38, 0.3)',
+                        transition: 'all 0.2s ease',
+                        opacity: isAnimating ? 0.5 : 1
+                      }}
+                    >
+                      ✕
+                    </button>
+                    
+                    <div style={{
+                      fontSize: '14px',
+                      color: '#6B7280',
+                      fontWeight: '500'
+                    }}>
+                      Swipe or click buttons
+                    </div>
+                    
+                    <button
+                      onClick={() => handleSwipe('like')}
+                      disabled={isAnimating}
+                      style={{
+                        width: '60px',
+                        height: '60px',
+                        borderRadius: '50%',
+                        background: '#DCFCE7',
+                        border: 'none',
+                        cursor: isAnimating ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '24px',
+                        color: '#16A34A',
+                        boxShadow: '0 4px 12px rgba(22, 163, 74, 0.3)',
+                        transition: 'all 0.2s ease',
+                        opacity: isAnimating ? 0.5 : 1
+                      }}
+                    >
+                      ♥
+                    </button>
+                  </div>
+
+                  {/* Instructions */}
+                  <div style={{
+                    marginTop: '30px',
+                    textAlign: 'center',
+                    fontSize: '12px',
+                    color: '#9CA3AF'
+                  }}>
+                    <p style={{ margin: '0 0 5px 0' }}>💡 Tip: Like a widget to proceed to the next step</p>
+                    <p style={{ margin: 0 }}>You can always go back and change your selection</p>
                   </div>
                 </div>
               )}
@@ -2615,9 +2815,12 @@ export default function Dashboard() {
                   <div style={{
                     display: 'grid',
                     gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '16px'
+                    gap: '16px',
+                    maxHeight: '400px',
+                    overflowY: 'auto',
+                    padding: '10px'
                   }}>
-                    {products.slice(0, 6).map((product) => (
+                    {products.map((product) => (
                       <div
                         key={product.id}
                         onClick={() => setSelectedProduct(product)}
