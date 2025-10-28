@@ -2591,24 +2591,13 @@ export default function Dashboard() {
                       fontSize: '18px',
                       fontWeight: '600',
                       color: '#1F2937',
-                      marginBottom: '6px',
+                      marginBottom: '8px',
                       textAlign: 'center'
                     }}>
-                      Swipe to Find Your Perfect Widget
+                      Choose Your Widget
                     </h3>
-                    <p style={{
-                      fontSize: '13px',
-                      color: '#6B7280',
-                      marginBottom: '15px',
-                      textAlign: 'center',
-                      maxWidth: '350px'
-                    }}>
-                      Swipe right to like a widget, or swipe left to see the next option
-                    </p>
-
-                    {/* Widget Counter */}
                     <div style={{
-                      marginBottom: '15px',
+                      marginBottom: '10px',
                       fontSize: '11px',
                       color: '#6B7280',
                       textAlign: 'center'
@@ -2622,109 +2611,186 @@ export default function Dashboard() {
                     position: 'relative',
                     width: '300px',
                     height: '320px',
-                    margin: '0 auto'
+                    margin: '0 auto',
+                    overflow: 'hidden'
                   }}>
-                    {abTestIdeas.map((idea, index) => {
-                      const isCurrent = index === currentWidgetIndex;
-                      const isNext = index === currentWidgetIndex + 1;
-                      const isVisible = isCurrent || isNext;
-                      
-                      if (!isVisible) return null;
-
-                      return (
-                        <div
-                          key={idea.id}
-                          style={{
-                            position: 'absolute',
-                            top: 0,
-                            left: 0,
-                            width: '100%',
-                            height: '100%',
-                            background: '#FFFFFF',
-                            borderRadius: '16px',
-                            boxShadow: isCurrent 
-                              ? '0 15px 30px rgba(0, 0, 0, 0.15)' 
-                              : '0 8px 16px rgba(0, 0, 0, 0.1)',
-                            padding: '20px',
-                            cursor: 'pointer',
-                            transform: isNext ? 'scale(0.95) translateY(10px)' : 'scale(1) translateY(0)',
-                            zIndex: isCurrent ? 2 : 1,
-                            opacity: isCurrent ? 1 : 0.7,
-                            animation: isCurrent && !isAnimating ? 'cardEnter 0.5s ease-out' : 'none',
-                            transition: 'all 0.3s ease',
-                            ...(isAnimating && swipeDirection === 'like' && isCurrent && {
-                              animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
-                            }),
-                            ...(isAnimating && swipeDirection === 'dislike' && isCurrent && {
-                              animation: 'swipeLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
-                            })
-                          }}
-                        >
-                          {/* Widget Icon */}
-                          <div style={{
-                            fontSize: '32px',
-                            textAlign: 'center',
-                            marginBottom: '8px'
-                          }}>
-                            {idea.utility === 'Social Proof' && '👥'}
-                            {idea.utility === 'Urgency Scarcity' && '⚡'}
-                            {idea.utility === 'Countdown Timer' && '⏰'}
-                            {idea.utility === 'Product Reviews' && '⭐'}
-                          </div>
-
-                          {/* Widget Title */}
-                          <h4 style={{
-                            fontSize: '16px',
-                            fontWeight: '700',
-                            color: '#1F2937',
-                            margin: '0 0 6px 0',
-                            textAlign: 'center'
-                          }}>
-                            {idea.utility}
-                          </h4>
-
-                          {/* Style Badge */}
-                          <div style={{
-                            background: '#F0F9FF',
-                            color: '#1E40AF',
-                            padding: '3px 6px',
-                            borderRadius: '10px',
-                            fontSize: '9px',
-                            fontWeight: '500',
-                            textAlign: 'center',
-                            margin: '0 auto 8px auto',
-                            width: 'fit-content'
-                          }}>
-                            {idea.style} Style
-                          </div>
-
-                          {/* Description */}
-                          <p style={{
-                            fontSize: '11px',
-                            color: '#374151',
-                            margin: '0 0 8px 0',
-                            lineHeight: '1.3',
-                            textAlign: 'center'
-                          }}>
-                            {idea.rationale}
-                          </p>
-
-                          {/* Preview */}
-                          <div style={{
-                            background: '#F8FAFC',
-                            border: '1px solid #E5E7EB',
-                            padding: '8px',
-                            borderRadius: '6px',
-                            fontSize: '10px',
-                            color: '#6B7280',
-                            fontStyle: 'italic',
-                            textAlign: 'center'
-                          }}>
-                            "{idea.preview}"
-                          </div>
+                    {/* Current Card */}
+                    {abTestIdeas[currentWidgetIndex] && (
+                      <div
+                        key={`current-${abTestIdeas[currentWidgetIndex].id}`}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          background: '#FFFFFF',
+                          borderRadius: '16px',
+                          boxShadow: '0 15px 30px rgba(0, 0, 0, 0.15)',
+                          padding: '20px',
+                          cursor: 'pointer',
+                          zIndex: 2,
+                          opacity: 1,
+                          animation: !isAnimating ? 'cardEnter 0.5s ease-out' : 'none',
+                          transition: 'all 0.3s ease',
+                          ...(isAnimating && swipeDirection === 'like' && {
+                            animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+                          }),
+                          ...(isAnimating && swipeDirection === 'dislike' && {
+                            animation: 'swipeLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+                          })
+                        }}
+                      >
+                        {/* Widget Icon */}
+                        <div style={{
+                          fontSize: '32px',
+                          textAlign: 'center',
+                          marginBottom: '8px'
+                        }}>
+                          {abTestIdeas[currentWidgetIndex].utility === 'Social Proof' && '👥'}
+                          {abTestIdeas[currentWidgetIndex].utility === 'Urgency Scarcity' && '⚡'}
+                          {abTestIdeas[currentWidgetIndex].utility === 'Countdown Timer' && '⏰'}
+                          {abTestIdeas[currentWidgetIndex].utility === 'Product Reviews' && '⭐'}
                         </div>
-                      );
-                    })}
+
+                        {/* Widget Title */}
+                        <h4 style={{
+                          fontSize: '16px',
+                          fontWeight: '700',
+                          color: '#1F2937',
+                          margin: '0 0 6px 0',
+                          textAlign: 'center'
+                        }}>
+                          {abTestIdeas[currentWidgetIndex].utility}
+                        </h4>
+
+                        {/* Style Badge */}
+                        <div style={{
+                          background: '#F0F9FF',
+                          color: '#1E40AF',
+                          padding: '3px 6px',
+                          borderRadius: '10px',
+                          fontSize: '9px',
+                          fontWeight: '500',
+                          textAlign: 'center',
+                          margin: '0 auto 8px auto',
+                          width: 'fit-content'
+                        }}>
+                          {abTestIdeas[currentWidgetIndex].style} Style
+                        </div>
+
+                        {/* Description */}
+                        <p style={{
+                          fontSize: '11px',
+                          color: '#374151',
+                          margin: '0 0 8px 0',
+                          lineHeight: '1.3',
+                          textAlign: 'center'
+                        }}>
+                          {abTestIdeas[currentWidgetIndex].rationale}
+                        </p>
+
+                        {/* Preview */}
+                        <div style={{
+                          background: '#F8FAFC',
+                          border: '1px solid #E5E7EB',
+                          padding: '8px',
+                          borderRadius: '6px',
+                          fontSize: '10px',
+                          color: '#6B7280',
+                          fontStyle: 'italic',
+                          textAlign: 'center'
+                        }}>
+                          "{abTestIdeas[currentWidgetIndex].preview}"
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Next Card (only if there is one) */}
+                    {abTestIdeas[currentWidgetIndex + 1] && (
+                      <div
+                        key={`next-${abTestIdeas[currentWidgetIndex + 1].id}`}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          width: '100%',
+                          height: '100%',
+                          background: '#FFFFFF',
+                          borderRadius: '16px',
+                          boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+                          padding: '20px',
+                          cursor: 'pointer',
+                          transform: 'scale(0.95) translateY(10px)',
+                          zIndex: 1,
+                          opacity: 0.7,
+                          transition: 'all 0.3s ease'
+                        }}
+                      >
+                        {/* Widget Icon */}
+                        <div style={{
+                          fontSize: '32px',
+                          textAlign: 'center',
+                          marginBottom: '8px'
+                        }}>
+                          {abTestIdeas[currentWidgetIndex + 1].utility === 'Social Proof' && '👥'}
+                          {abTestIdeas[currentWidgetIndex + 1].utility === 'Urgency Scarcity' && '⚡'}
+                          {abTestIdeas[currentWidgetIndex + 1].utility === 'Countdown Timer' && '⏰'}
+                          {abTestIdeas[currentWidgetIndex + 1].utility === 'Product Reviews' && '⭐'}
+                        </div>
+
+                        {/* Widget Title */}
+                        <h4 style={{
+                          fontSize: '16px',
+                          fontWeight: '700',
+                          color: '#1F2937',
+                          margin: '0 0 6px 0',
+                          textAlign: 'center'
+                        }}>
+                          {abTestIdeas[currentWidgetIndex + 1].utility}
+                        </h4>
+
+                        {/* Style Badge */}
+                        <div style={{
+                          background: '#F0F9FF',
+                          color: '#1E40AF',
+                          padding: '3px 6px',
+                          borderRadius: '10px',
+                          fontSize: '9px',
+                          fontWeight: '500',
+                          textAlign: 'center',
+                          margin: '0 auto 8px auto',
+                          width: 'fit-content'
+                        }}>
+                          {abTestIdeas[currentWidgetIndex + 1].style} Style
+                        </div>
+
+                        {/* Description */}
+                        <p style={{
+                          fontSize: '11px',
+                          color: '#374151',
+                          margin: '0 0 8px 0',
+                          lineHeight: '1.3',
+                          textAlign: 'center'
+                        }}>
+                          {abTestIdeas[currentWidgetIndex + 1].rationale}
+                        </p>
+
+                        {/* Preview */}
+                        <div style={{
+                          background: '#F8FAFC',
+                          border: '1px solid #E5E7EB',
+                          padding: '8px',
+                          borderRadius: '6px',
+                          fontSize: '10px',
+                          color: '#6B7280',
+                          fontStyle: 'italic',
+                          textAlign: 'center'
+                        }}>
+                          "{abTestIdeas[currentWidgetIndex + 1].preview}"
+                        </div>
+                      </div>
+                    )}
                   </div>
 
                   {/* Action Buttons */}
@@ -2732,12 +2798,12 @@ export default function Dashboard() {
                     display: 'flex',
                     flexDirection: 'column',
                     alignItems: 'center',
-                    gap: '15px',
-                    marginTop: '10px'
+                    gap: '12px',
+                    marginTop: '5px'
                   }}>
                     <div style={{
                       display: 'flex',
-                      gap: '20px',
+                      gap: '25px',
                       alignItems: 'center',
                       justifyContent: 'center'
                     }}>
@@ -2745,8 +2811,8 @@ export default function Dashboard() {
                         onClick={() => handleSwipe('dislike')}
                         disabled={isAnimating}
                         style={{
-                          width: '55px',
-                          height: '55px',
+                          width: '60px',
+                          height: '60px',
                           borderRadius: '50%',
                           background: '#FEE2E2',
                           border: '2px solid #FCA5A5',
@@ -2754,7 +2820,7 @@ export default function Dashboard() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '22px',
+                          fontSize: '24px',
                           color: '#DC2626',
                           boxShadow: '0 4px 12px rgba(220, 38, 38, 0.4)',
                           transition: 'all 0.2s ease',
@@ -2769,8 +2835,8 @@ export default function Dashboard() {
                         onClick={() => handleSwipe('like')}
                         disabled={isAnimating}
                         style={{
-                          width: '55px',
-                          height: '55px',
+                          width: '60px',
+                          height: '60px',
                           borderRadius: '50%',
                           background: '#DCFCE7',
                           border: '2px solid #86EFAC',
@@ -2778,7 +2844,7 @@ export default function Dashboard() {
                           display: 'flex',
                           alignItems: 'center',
                           justifyContent: 'center',
-                          fontSize: '22px',
+                          fontSize: '24px',
                           color: '#16A34A',
                           boxShadow: '0 4px 12px rgba(22, 163, 74, 0.4)',
                           transition: 'all 0.2s ease',
@@ -2788,26 +2854,6 @@ export default function Dashboard() {
                       >
                         ♥
                       </button>
-                    </div>
-                    
-                    <div style={{
-                      fontSize: '11px',
-                      color: '#6B7280',
-                      fontWeight: '500',
-                      textAlign: 'center'
-                    }}>
-                      Swipe or click buttons
-                    </div>
-
-                    {/* Instructions */}
-                    <div style={{
-                      textAlign: 'center',
-                      fontSize: '10px',
-                      color: '#9CA3AF',
-                      maxWidth: '250px'
-                    }}>
-                      <p style={{ margin: '0 0 2px 0' }}>💡 Like a widget to proceed to the next step</p>
-                      <p style={{ margin: 0 }}>You can always go back and change your selection</p>
                     </div>
                   </div>
                 </div>
