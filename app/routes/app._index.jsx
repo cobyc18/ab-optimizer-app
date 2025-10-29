@@ -511,6 +511,11 @@ export default function Dashboard() {
   const [wizardScreenshot, setWizardScreenshot] = useState(null);
   const [wizardScreenshotLoading, setWizardScreenshotLoading] = useState(false);
   const [wizardStorePassword, setWizardStorePassword] = useState('');
+  
+  // Wizard variant state
+  const [wizardVariantScreenshot, setWizardVariantScreenshot] = useState(null);
+  const [wizardVariantScreenshotLoading, setWizardVariantScreenshotLoading] = useState(false);
+  const [wizardVariantName, setWizardVariantName] = useState('');
 
   // Figma design colors
   const figmaColors = {
@@ -608,6 +613,9 @@ export default function Dashboard() {
     setWizardScreenshot(null);
     setWizardScreenshotLoading(false);
     setWizardStorePassword('');
+    setWizardVariantScreenshot(null);
+    setWizardVariantScreenshotLoading(false);
+    setWizardVariantName('');
   };
 
   // Generate screenshot for wizard
@@ -670,6 +678,79 @@ export default function Dashboard() {
     }
   };
 
+  // Create variant template
+  const createVariantTemplate = async () => {
+    if (!selectedProduct) return;
+    
+    setWizardVariantScreenshotLoading(true);
+    try {
+      // Generate random 4-digit name
+      const randomDigits = Math.floor(1000 + Math.random() * 9000);
+      const variantName = `trylabs-variant-${randomDigits}`;
+      setWizardVariantName(variantName);
+      
+      console.log('🔧 Creating variant template:', variantName);
+      
+      // Determine the base template from the selected product
+      const baseTemplate = selectedProduct.templateSuffix 
+        ? `templates/product.${selectedProduct.templateSuffix}.liquid`
+        : 'templates/product.liquid';
+      
+      console.log('📄 Base template:', baseTemplate);
+      
+      // Get the main theme ID
+      const mainTheme = themes.find(t => t.role === 'MAIN');
+      if (!mainTheme) {
+        throw new Error('No main theme found');
+      }
+      
+      // Create the variant template using the duplication logic
+      const response = await fetch('/api/duplicate-template', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          template: baseTemplate,
+          newName: variantName,
+          themeId: mainTheme.id,
+          productHandle: selectedProduct.handle
+        })
+      });
+      
+      const result = await response.json();
+      if (result.success) {
+        console.log('✅ Variant template created:', result.newFilename);
+        
+        // Generate screenshot of the variant
+        const variantPreviewUrl = generateWizardPreviewUrl(selectedProduct.handle, mainTheme.id) + `&view=${variantName}`;
+        console.log('🔗 Variant preview URL:', variantPreviewUrl);
+        
+        const screenshotResponse = await fetch('/api/screenshot-selenium', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            previewUrl: variantPreviewUrl,
+            productHandle: selectedProduct.handle,
+            themeId: mainTheme.id,
+            storePassword: wizardStorePassword || storePassword
+          })
+        });
+        
+        const screenshotResult = await screenshotResponse.json();
+        if (screenshotResult.success) {
+          setWizardVariantScreenshot(screenshotResult.screenshotUrl);
+          console.log('✅ Variant screenshot generated');
+        } else {
+          console.error('❌ Variant screenshot failed:', screenshotResult.error);
+        }
+      } else {
+        console.error('❌ Variant template creation failed:', result.error);
+      }
+    } catch (error) {
+      console.error('❌ Variant creation failed:', error);
+    } finally {
+      setWizardVariantScreenshotLoading(false);
+    }
+  };
 
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
@@ -2642,7 +2723,7 @@ export default function Dashboard() {
                 color: '#6B7280',
                 textAlign: 'center'
               }}>
-                Step {currentStep} of 4
+                Step {currentStep} of 5
               </div>
             </div>
 
@@ -3203,8 +3284,117 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Step 3: Configure Test */}
+              {/* Step 3: Variant Preview */}
               {currentStep === 3 && (
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Variant Preview
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    Your variant template has been created. Here's how it looks:
+                  </p>
+
+                  {wizardVariantScreenshotLoading ? (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '60px 20px',
+                      background: '#F8FAFC',
+                      borderRadius: '12px',
+                      border: '1px solid #E5E7EB'
+                    }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '4px solid #E5E7EB',
+                        borderTop: '4px solid #3B82F6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        marginBottom: '16px'
+                      }}></div>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#6B7280',
+                        margin: 0
+                      }}>
+                        Creating variant and generating preview...
+                      </p>
+                    </div>
+                  ) : wizardVariantScreenshot ? (
+                    <div style={{
+                      background: '#FFFFFF',
+                      borderRadius: '12px',
+                      border: '1px solid #E5E7EB',
+                      padding: '20px',
+                      textAlign: 'center'
+                    }}>
+                      <h4 style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        margin: '0 0 16px 0'
+                      }}>
+                        {selectedProduct?.title} - Variant Preview
+                      </h4>
+                      <img
+                        src={wizardVariantScreenshot}
+                        alt="Variant preview"
+                        style={{
+                          maxWidth: '100%',
+                          height: 'auto',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                        }}
+                      />
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        margin: '16px 0 0 0'
+                      }}>
+                        Variant template: {wizardVariantName}
+                      </p>
+                    </div>
+                  ) : (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '60px 20px',
+                      background: '#F8FAFC',
+                      borderRadius: '12px',
+                      border: '1px solid #E5E7EB'
+                    }}>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#6B7280',
+                        margin: 0,
+                        textAlign: 'center'
+                      }}>
+                        Variant template created successfully
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Step 4: Configure Test */}
+              {currentStep === 4 && (
                 <div style={{
                   animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: 'translateX(0)',
@@ -3389,8 +3579,8 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Step 4: Launch */}
-              {currentStep === 4 && (
+              {/* Step 5: Launch */}
+              {currentStep === 5 && (
                 <div style={{
                   animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: 'translateX(0)',
@@ -3566,7 +3756,11 @@ export default function Dashboard() {
                 </button>
                 <button
                   onClick={() => {
-                    if (currentStep < 4) {
+                    if (currentStep < 5) {
+                      // Auto-create variant when moving from step 2 to step 3
+                      if (currentStep === 2 && selectedProduct) {
+                        createVariantTemplate();
+                      }
                       setCurrentStep(currentStep + 1);
                     } else {
                       // Launch the test
@@ -3585,7 +3779,7 @@ export default function Dashboard() {
                     color: '#FFFFFF'
                   }}
                 >
-                  {currentStep === 4 ? 'Launch Test' : 'Next'}
+                  {currentStep === 5 ? 'Launch Test' : 'Next'}
                 </button>
               </div>
             </div>
