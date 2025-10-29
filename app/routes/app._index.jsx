@@ -641,6 +641,13 @@ export default function Dashboard() {
     }
   };
 
+  // Auto-generate screenshot when entering step 3
+  useEffect(() => {
+    if (currentStep === 3 && selectedProduct && selectedTheme && !wizardScreenshot && !wizardScreenshotLoading) {
+      generateWizardScreenshot();
+    }
+  }, [currentStep, selectedProduct, selectedTheme, wizardScreenshot, wizardScreenshotLoading]);
+
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
     if (newExpanded.has(testName)) {
@@ -3118,29 +3125,22 @@ export default function Dashboard() {
                       borderRadius: '12px',
                       border: '1px solid #E5E7EB'
                     }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '4px solid #E5E7EB',
+                        borderTop: '4px solid #3B82F6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        marginBottom: '16px'
+                      }}></div>
                       <p style={{
                         fontSize: '16px',
                         color: '#6B7280',
-                        margin: '0 0 16px 0'
+                        margin: 0
                       }}>
-                        Ready to generate screenshot
+                        Generating screenshot...
                       </p>
-                      <button
-                        onClick={generateWizardScreenshot}
-                        style={{
-                          background: '#3B82F6',
-                          color: '#FFFFFF',
-                          border: 'none',
-                          borderRadius: '8px',
-                          padding: '12px 24px',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease'
-                        }}
-                      >
-                        Generate Screenshot
-                      </button>
                     </div>
                   )}
                 </div>
@@ -3510,10 +3510,6 @@ export default function Dashboard() {
                 <button
                   onClick={() => {
                     if (currentStep < 5) {
-                      // Auto-generate screenshot when moving to step 3
-                      if (currentStep === 2 && selectedProduct && selectedTheme) {
-                        generateWizardScreenshot();
-                      }
                       setCurrentStep(currentStep + 1);
                     } else {
                       // Launch the test
