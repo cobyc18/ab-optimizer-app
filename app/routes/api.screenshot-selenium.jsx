@@ -16,12 +16,21 @@ export const action = async ({ request }) => {
     
     // Ensure screenshots directory exists
     const screenshotsDir = path.join(process.cwd(), 'public', 'screenshots');
+    console.log('📁 Screenshots directory:', screenshotsDir);
+    
     if (!fs.existsSync(screenshotsDir)) {
+      console.log('📁 Creating screenshots directory...');
       fs.mkdirSync(screenshotsDir, { recursive: true });
+      console.log('✅ Screenshots directory created');
+    } else {
+      console.log('✅ Screenshots directory already exists');
     }
     
-    const filename = `selenium-preview-${productHandle}-${themeId}-${Date.now()}.png`;
+    // Clean theme ID for filename (remove colons and slashes)
+    const cleanThemeId = themeId.replace(/[:\/]/g, '-');
+    const filename = `selenium-preview-${productHandle}-${cleanThemeId}-${Date.now()}.png`;
     const outputPath = path.join(screenshotsDir, filename);
+    console.log('📄 Output path:', outputPath);
     
       let driver;
 
@@ -220,8 +229,13 @@ export const action = async ({ request }) => {
       
       // Save screenshot to file
       console.log('💾 Saving screenshot to file...');
-      fs.writeFileSync(outputPath, screenshot, 'base64');
-      console.log('💾 Screenshot saved to:', outputPath);
+      try {
+        fs.writeFileSync(outputPath, screenshot, 'base64');
+        console.log('💾 Screenshot saved to:', outputPath);
+      } catch (writeError) {
+        console.error('❌ Failed to save screenshot:', writeError);
+        throw new Error(`Failed to save screenshot: ${writeError.message}`);
+      }
       
       const screenshotUrl = `/screenshots/${filename}`;
       
