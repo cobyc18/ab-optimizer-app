@@ -699,10 +699,10 @@ export default function Dashboard() {
       
       // Use the same logic as ab-tests.jsx - get product templates from the loader data
       // The productTemplates are already available from the loader
-      console.log('📄 Available product templates from loader:', productTemplates);
+      console.log('📄 Available product templates from loader:', loaderData.productTemplates);
       
       // Use the first available template (same as ab-tests.jsx)
-      const baseTemplate = productTemplates[0] || 'templates/product.liquid';
+      const baseTemplate = loaderData.productTemplates[0] || 'templates/product.liquid';
       console.log('📄 Using base template:', baseTemplate);
       
       // Create the variant template using the exact same duplication logic as ab-tests.jsx
