@@ -285,12 +285,18 @@ export const loader = async ({ request }) => {
       
       const restJson = await restRes.json();
       const assets = restJson.assets || [];
+      
+      // Debug: Log all assets to see what's available
+      console.log('🔍 All theme assets:', assets.map(a => a.key));
+      
       productTemplates = assets
         .map(a => a.key)
         .filter(key =>
           (key.startsWith("templates/product") && (key.endsWith(".liquid") || key.endsWith(".json"))) ||
           (key === "templates/product.liquid" || key === "templates/product.json")
         );
+      
+      console.log('📄 Filtered product templates:', productTemplates);
     }
 
     // Fetch all A/B tests (both active and completed with winners)
@@ -740,19 +746,57 @@ export default function Dashboard() {
         baseTemplate = `templates/product.${selectedProduct.templateSuffix}.liquid`;
         console.log('📄 Using product-specific template:', baseTemplate);
       } else {
-        // Use the default product template
-        baseTemplate = productTemplates[0] || 'templates/product.liquid';
-        console.log('📄 Using default template:', baseTemplate);
+        // Product uses default template - need to find the actual default template
+        console.log('📄 Product uses default template, finding the correct one...');
+        console.log('📄 Available templates to choose from:', productTemplates);
+        
+        // Strategy 1: Look for exact default template names
+        const exactDefaults = [
+          'templates/product.liquid',
+          'templates/product.json'
+        ];
+        
+        baseTemplate = exactDefaults.find(template => productTemplates.includes(template));
+        
+        if (baseTemplate) {
+          console.log('📄 Found exact default template:', baseTemplate);
+        } else {
+          // Strategy 2: Look for any product template that doesn't have a suffix
+          const productTemplatesWithoutSuffix = productTemplates.filter(template => {
+            const name = template.replace('templates/', '').replace('.liquid', '').replace('.json', '');
+            return name === 'product';
+          });
+          
+          if (productTemplatesWithoutSuffix.length > 0) {
+            baseTemplate = productTemplatesWithoutSuffix[0];
+            console.log('📄 Found product template without suffix:', baseTemplate);
+          } else {
+            // Strategy 3: Use the first available product template
+            baseTemplate = productTemplates.find(template => 
+              template.includes('product') && 
+              (template.endsWith('.liquid') || template.endsWith('.json'))
+            );
+            
+            if (baseTemplate) {
+              console.log('📄 Using first available product template:', baseTemplate);
+            } else {
+              // Strategy 4: Final fallback
+              baseTemplate = productTemplates[0] || 'templates/product.liquid';
+              console.log('📄 Using fallback template:', baseTemplate);
+            }
+          }
+        }
       }
       
       // Verify the template exists in available templates
       const templateExists = productTemplates.includes(baseTemplate);
       if (!templateExists) {
-        console.log('⚠️ Template not found in available templates, falling back to default');
+        console.log('⚠️ Template not found in available templates, falling back to first available');
         baseTemplate = productTemplates[0] || 'templates/product.liquid';
       }
       
       console.log('📄 Final template to duplicate:', baseTemplate);
+      console.log('✅ Template exists in available templates:', templateExists);
       
       // Create the variant template using the exact same duplication logic as ab-tests.jsx
       const response = await fetch('/api/duplicate-template', {
@@ -3130,6 +3174,8 @@ export default function Dashboard() {
                        console.log('🔍 Product ID:', product.id);
                        console.log('🔍 Product template suffix:', product.templateSuffix);
                        console.log('🔍 Product template:', product.template);
+                       console.log('📄 Available product templates:', productTemplates);
+                       console.log('📄 Total templates found:', productTemplates.length);
                        
                        // Generate screenshot if password is entered
                        if (wizardStorePassword || storePassword) {
