@@ -506,6 +506,11 @@ export default function Dashboard() {
   const [currentWidgetIndex, setCurrentWidgetIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  
+  // Wizard screenshot state
+  const [wizardScreenshot, setWizardScreenshot] = useState(null);
+  const [wizardScreenshotLoading, setWizardScreenshotLoading] = useState(false);
+  const [wizardStorePassword, setWizardStorePassword] = useState('');
 
   // Figma design colors
   const figmaColors = {
@@ -600,6 +605,40 @@ export default function Dashboard() {
     setSelectedIdea(null);
     setSwipeDirection(null);
     setIsAnimating(false);
+    setWizardScreenshot(null);
+    setWizardScreenshotLoading(false);
+    setWizardStorePassword('');
+  };
+
+  // Generate screenshot for wizard
+  const generateWizardScreenshot = async () => {
+    if (!selectedProduct || !selectedTheme) return;
+    
+    setWizardScreenshotLoading(true);
+    try {
+      const previewUrl = generatePreviewUrl(selectedProduct.handle, selectedTheme.id);
+      const response = await fetch('/api/screenshot-selenium', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          previewUrl,
+          productHandle: selectedProduct.handle,
+          themeId: selectedTheme.id,
+          storePassword: wizardStorePassword || storePassword
+        })
+      });
+      
+      const result = await response.json();
+      if (result.success) {
+        setWizardScreenshot(result.screenshotUrl);
+      } else {
+        console.error('Screenshot generation failed:', result.error);
+      }
+    } catch (error) {
+      console.error('Screenshot generation failed:', error);
+    } finally {
+      setWizardScreenshotLoading(false);
+    }
   };
 
   const toggleTestExpansion = (testName) => {
@@ -2948,11 +2987,167 @@ export default function Dashboard() {
                       </div>
                     ))}
                   </div>
+
+                  {/* Store Password Input */}
+                  <div style={{
+                    marginTop: '24px',
+                    padding: '20px',
+                    background: '#F8FAFC',
+                    borderRadius: '12px',
+                    border: '1px solid #E5E7EB'
+                  }}>
+                    <h4 style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      margin: '0 0 8px 0'
+                    }}>
+                      Store Password (Required for Screenshot)
+                    </h4>
+                    <p style={{
+                      fontSize: '14px',
+                      color: '#6B7280',
+                      margin: '0 0 16px 0'
+                    }}>
+                      Enter your store password to generate a preview screenshot
+                    </p>
+                    <input
+                      type="password"
+                      value={wizardStorePassword}
+                      onChange={(e) => setWizardStorePassword(e.target.value)}
+                      placeholder="Enter store password..."
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        background: '#FFFFFF'
+                      }}
+                    />
+                  </div>
                 </div>
               )}
 
-              {/* Step 3: Configure Test */}
+              {/* Step 3: Screenshot Preview */}
               {currentStep === 3 && (
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px'
+                  }}>
+                    Product Preview
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    marginBottom: '24px'
+                  }}>
+                    Generating a screenshot of your selected product with the chosen theme
+                  </p>
+
+                  {wizardScreenshotLoading ? (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '60px 20px',
+                      background: '#F8FAFC',
+                      borderRadius: '12px',
+                      border: '1px solid #E5E7EB'
+                    }}>
+                      <div style={{
+                        width: '40px',
+                        height: '40px',
+                        border: '4px solid #E5E7EB',
+                        borderTop: '4px solid #3B82F6',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite',
+                        marginBottom: '16px'
+                      }}></div>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#6B7280',
+                        margin: 0
+                      }}>
+                        Generating screenshot...
+                      </p>
+                    </div>
+                  ) : wizardScreenshot ? (
+                    <div style={{
+                      background: '#FFFFFF',
+                      borderRadius: '12px',
+                      border: '1px solid #E5E7EB',
+                      padding: '20px',
+                      textAlign: 'center'
+                    }}>
+                      <h4 style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        margin: '0 0 16px 0'
+                      }}>
+                        {selectedProduct?.title} Preview
+                      </h4>
+                      <img
+                        src={wizardScreenshot}
+                        alt="Product preview"
+                        style={{
+                          maxWidth: '100%',
+                          height: 'auto',
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                        }}
+                      />
+                    </div>
+                  ) : (
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      padding: '60px 20px',
+                      background: '#F8FAFC',
+                      borderRadius: '12px',
+                      border: '1px solid #E5E7EB'
+                    }}>
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#6B7280',
+                        margin: '0 0 16px 0'
+                      }}>
+                        Ready to generate screenshot
+                      </p>
+                      <button
+                        onClick={generateWizardScreenshot}
+                        style={{
+                          background: '#3B82F6',
+                          color: '#FFFFFF',
+                          border: 'none',
+                          borderRadius: '8px',
+                          padding: '12px 24px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          cursor: 'pointer',
+                          transition: 'all 0.2s ease'
+                        }}
+                      >
+                        Generate Screenshot
+                      </button>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* Step 4: Configure Test */}
+              {currentStep === 4 && (
                 <div style={{
                   animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: 'translateX(0)',
@@ -3315,6 +3510,10 @@ export default function Dashboard() {
                 <button
                   onClick={() => {
                     if (currentStep < 5) {
+                      // Auto-generate screenshot when moving to step 3
+                      if (currentStep === 2 && selectedProduct && selectedTheme) {
+                        generateWizardScreenshot();
+                      }
                       setCurrentStep(currentStep + 1);
                     } else {
                       // Launch the test
