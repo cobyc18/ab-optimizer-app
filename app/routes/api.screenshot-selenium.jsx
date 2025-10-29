@@ -23,9 +23,21 @@ export const action = async ({ request }) => {
     const filename = `selenium-preview-${productHandle}-${themeId}-${Date.now()}.png`;
     const outputPath = path.join(screenshotsDir, filename);
     
-    let driver;
-    
-    try {
+      let driver;
+
+      // Set a timeout for the entire screenshot process
+      const screenshotTimeout = setTimeout(async () => {
+        console.log('⏰ Screenshot generation timeout reached, closing browser...');
+        if (driver) {
+          try {
+            await driver.quit();
+          } catch (e) {
+            console.log('Error closing browser on timeout:', e.message);
+          }
+        }
+      }, 120000); // 2 minute timeout
+
+      try {
       // Configure Chrome options for fast headless mode
       const chromeOptions = new chrome.Options();
       chromeOptions.addArguments('--headless=new');
@@ -128,6 +140,7 @@ export const action = async ({ request }) => {
       }
       
       // Wait for the page to load and verify we're on the right page (optimized)
+      console.log('⏳ Waiting for page to load...');
       await driver.wait(until.titleContains(''), 5000);
       await driver.sleep(1000); // Reduced wait for content to load
       
@@ -145,12 +158,14 @@ export const action = async ({ request }) => {
       }
       
       // Wait for product page content to load (optimized with images)
+      console.log('⏳ Waiting for product page elements...');
       try {
         // Wait for common product page elements with shorter timeout
-        await driver.wait(until.elementLocated(By.css('main, .product, [data-product], .product-page')), 3000);
+        await driver.wait(until.elementLocated(By.css('main, .product, [data-product], .product-page, body')), 5000);
         console.log('✅ Product page content loaded');
         
         // Wait for images to load (but with timeout)
+        console.log('⏳ Waiting for images to load...');
         await driver.executeScript(`
           return Promise.all(
             Array.from(document.images).map(img => {
@@ -166,13 +181,15 @@ export const action = async ({ request }) => {
         console.log('✅ Images loaded');
         
       } catch (waitError) {
-        console.log('⚠️ Could not find product page elements, proceeding anyway');
+        console.log('⚠️ Could not find product page elements, proceeding anyway:', waitError.message);
       }
       
       // Minimal wait for final content
+      console.log('⏳ Final content wait...');
       await driver.sleep(500);
       
       // Get the full page dimensions
+      console.log('📏 Getting page dimensions...');
       const fullPageHeight = await driver.executeScript('return Math.max(document.body.scrollHeight, document.body.offsetHeight, document.documentElement.clientHeight, document.documentElement.scrollHeight, document.documentElement.offsetHeight);');
       const viewportHeight = await driver.executeScript('return window.innerHeight;');
       const viewportWidth = await driver.executeScript('return window.innerWidth;');
@@ -184,6 +201,7 @@ export const action = async ({ request }) => {
       });
       
       // Set the browser window to capture the full page height
+      console.log('🖼️ Resizing browser window...');
       await driver.manage().window().setRect({
         width: viewportWidth,
         height: fullPageHeight
@@ -192,17 +210,23 @@ export const action = async ({ request }) => {
       console.log('🖼️ Resized browser window to full page height');
       
       // Wait a moment for the resize to take effect (optimized)
+      console.log('⏳ Waiting for resize to take effect...');
       await driver.sleep(300);
       
       // Take full page screenshot
+      console.log('📸 Taking screenshot...');
       const screenshot = await driver.takeScreenshot();
       console.log('📸 Full page screenshot captured');
       
       // Save screenshot to file
+      console.log('💾 Saving screenshot to file...');
       fs.writeFileSync(outputPath, screenshot, 'base64');
       console.log('💾 Screenshot saved to:', outputPath);
       
       const screenshotUrl = `/screenshots/${filename}`;
+      
+      // Clear the timeout since we completed successfully
+      clearTimeout(screenshotTimeout);
       
       return json({
         success: true,
@@ -215,6 +239,9 @@ export const action = async ({ request }) => {
       
     } catch (seleniumError) {
       console.error('❌ Selenium screenshot failed:', seleniumError);
+      
+      // Clear the timeout
+      clearTimeout(screenshotTimeout);
       
       // Fallback: Create a placeholder with the actual URL
       const placeholderUrl = `https://via.placeholder.com/800x600/4A90E2/FFFFFF?text=${encodeURIComponent(`Preview: ${productHandle}\\n\\nTheme ID: ${themeId}\\n\\nClick to view live`)}`;
@@ -230,6 +257,9 @@ export const action = async ({ request }) => {
       });
       
     } finally {
+      // Clear the timeout
+      clearTimeout(screenshotTimeout);
+      
       // Always close the driver
       if (driver) {
         try {
