@@ -563,7 +563,7 @@ export default function Dashboard() {
     },
     {
       id: 3,
-      utility: 'Countdown Timer',
+      utility: 'Countdown Timer!',
       rationale: 'Creates urgency, boosts checkout by 5-7%',
       style: 'Energetic',
       preview: '⏰ Limited time offer!'
