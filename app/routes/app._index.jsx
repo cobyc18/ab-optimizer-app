@@ -420,12 +420,12 @@ export const loader = async ({ request }) => {
     });
 
     return json({
-      user: {
-        name: "Zac",
-        level: "Legend Scientist", 
-        xp: 2100,
-        maxXp: 3000
-      },
+    user: {
+      name: "Zac",
+      level: "Legend Scientist",
+      xp: 2100,
+      maxXp: 3000
+    },
       experiments: experimentsWithAnalysis,
       testCards: [
         { id: 1, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
@@ -451,21 +451,21 @@ export const loader = async ({ request }) => {
     return json({
       user: { name: "Zac", level: "Legend Scientist", xp: 2100, maxXp: 3000 },
       experiments: [],
-      testCards: [
-        { id: 1, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-        { id: 2, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-        { id: 3, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-        { id: 4, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" }
-      ],
-      queuedTests: [
-        { name: "Shipping badge Design Test" },
-        { name: "Feature Bullet Points Test" },
+    testCards: [
+      { id: 1, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+      { id: 2, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+      { id: 3, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
+      { id: 4, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" }
+    ],
+    queuedTests: [
+      { name: "Shipping badge Design Test" },
+      { name: "Feature Bullet Points Test" },
         { name: "Fomo Badge Test!" },
-        { name: "Scarcity signals Test" },
-        { name: "Shipping badge Design Test" },
-        { name: "Shipping badge Design Test" }
-      ],
-      recentActivities: [
+      { name: "Scarcity signals Test" },
+      { name: "Shipping badge Design Test" },
+      { name: "Shipping badge Design Test" }
+    ],
+    recentActivities: [
         { action: "Welcome to A/B Optimizer!", date: new Date().toLocaleDateString() },
         { action: "Ready to start your first test", date: new Date().toLocaleDateString() }
       ],
@@ -691,20 +691,21 @@ export default function Dashboard() {
       
       console.log('🔧 Creating variant template:', variantName);
       
-      // Determine the base template from the selected product
-      const baseTemplate = selectedProduct.templateSuffix 
-        ? `templates/product.${selectedProduct.templateSuffix}.liquid`
-        : 'templates/product.liquid';
-      
-      console.log('📄 Base template:', baseTemplate);
-      
       // Get the main theme ID
       const mainTheme = themes.find(t => t.role === 'MAIN');
       if (!mainTheme) {
         throw new Error('No main theme found');
       }
       
-      // Create the variant template using the duplication logic
+      // Use the same logic as ab-tests.jsx - get product templates from the loader data
+      // The productTemplates are already available from the loader
+      console.log('📄 Available product templates from loader:', productTemplates);
+      
+      // Use the first available template (same as ab-tests.jsx)
+      const baseTemplate = productTemplates[0] || 'templates/product.liquid';
+      console.log('📄 Using base template:', baseTemplate);
+      
+      // Create the variant template using the exact same duplication logic as ab-tests.jsx
       const response = await fetch('/api/duplicate-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -916,14 +917,14 @@ export default function Dashboard() {
           }
         }
       `}</style>
-      <div style={{ 
-        padding: '40px 60px', 
-        fontFamily: 'Inter, sans-serif', 
-        backgroundColor: figmaColors.gray, 
-        minHeight: 'calc(100vh - 80px)',
-        maxWidth: '1400px',
-        marginLeft: '60px'
-      }}>
+    <div style={{ 
+      padding: '40px 60px', 
+      fontFamily: 'Inter, sans-serif', 
+      backgroundColor: figmaColors.gray, 
+      minHeight: 'calc(100vh - 80px)',
+      maxWidth: '1400px',
+      marginLeft: '60px'
+    }}>
       {/* Header */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '40px' }}>
         <div>
@@ -953,11 +954,11 @@ export default function Dashboard() {
             resetSwiper();
           }}
           style={{
-            backgroundColor: '#3e3bf3',
-            border: 'none',
-            borderRadius: '5px',
-            padding: '12px 24px',
-            cursor: 'pointer'
+          backgroundColor: '#3e3bf3',
+          border: 'none',
+          borderRadius: '5px',
+          padding: '12px 24px',
+          cursor: 'pointer'
           }}
         >
           <p style={{
@@ -1992,7 +1993,7 @@ export default function Dashboard() {
           }}>
             Preview how your products look under different themes. Perfect for testing A/B variants before launching.
           </p>
-        </div>
+    </div>
 
         <div style={{
           backgroundColor: figmaColors.white,

@@ -43,6 +43,14 @@ export const action = async ({ request }) => {
     const fileNode = fileJson.data.theme.files.nodes[0];
     const content = fileNode?.body?.content;
     
+    if (!fileNode) {
+      console.error('No file node found for template:', template);
+      console.error('Available files in theme:', fileJson.data.theme.files.nodes);
+      return json({ 
+        error: `Template file '${template}' not found in theme. Available files: ${JSON.stringify(fileJson.data.theme.files.nodes.map(n => n.filename))}` 
+      }, { status: 400 });
+    }
+    
     if (!content) {
       console.error('No content found in file node:', fileNode);
       return json({ error: "Could not read template content" }, { status: 400 });
