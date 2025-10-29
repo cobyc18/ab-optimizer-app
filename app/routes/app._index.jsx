@@ -612,30 +612,59 @@ export default function Dashboard() {
 
   // Generate screenshot for wizard
   const generateWizardScreenshot = async () => {
-    if (!selectedProduct || !selectedTheme) return;
+    console.log('🔍 Wizard Screenshot Debug:', {
+      selectedProduct: selectedProduct?.title,
+      selectedProductHandle: selectedProduct?.handle,
+      selectedTheme: selectedTheme?.name,
+      selectedThemeId: selectedTheme?.id,
+      mainTheme: themes.find(t => t.role === 'MAIN')?.name,
+      mainThemeId: themes.find(t => t.role === 'MAIN')?.id,
+      wizardStorePassword: wizardStorePassword ? '***' : 'empty',
+      storePassword: storePassword ? '***' : 'empty'
+    });
+
+    if (!selectedProduct) {
+      console.error('❌ No product selected for screenshot');
+      setWizardScreenshotLoading(false);
+      return;
+    }
+
+    // Use main theme if no theme is selected
+    const themeToUse = selectedTheme || themes.find(t => t.role === 'MAIN');
+    if (!themeToUse) {
+      console.error('❌ No theme available for screenshot');
+      setWizardScreenshotLoading(false);
+      return;
+    }
     
     setWizardScreenshotLoading(true);
     try {
-      const previewUrl = generatePreviewUrl(selectedProduct.handle, selectedTheme.id);
+      const previewUrl = generateWizardPreviewUrl(selectedProduct.handle, themeToUse.id);
+      console.log('🔗 Generated preview URL:', previewUrl);
+      
       const response = await fetch('/api/screenshot-selenium', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           previewUrl,
           productHandle: selectedProduct.handle,
-          themeId: selectedTheme.id,
+          themeId: themeToUse.id,
           storePassword: wizardStorePassword || storePassword
         })
       });
       
+      console.log('📡 Screenshot API response status:', response.status);
       const result = await response.json();
+      console.log('📸 Screenshot API result:', result);
+      
       if (result.success) {
         setWizardScreenshot(result.screenshotUrl);
+        console.log('✅ Screenshot generated successfully');
       } else {
-        console.error('Screenshot generation failed:', result.error);
+        console.error('❌ Screenshot generation failed:', result.error);
       }
     } catch (error) {
-      console.error('Screenshot generation failed:', error);
+      console.error('❌ Screenshot generation failed:', error);
     } finally {
       setWizardScreenshotLoading(false);
     }
@@ -643,10 +672,11 @@ export default function Dashboard() {
 
   // Auto-generate screenshot when entering step 3
   useEffect(() => {
-    if (currentStep === 3 && selectedProduct && selectedTheme && !wizardScreenshot && !wizardScreenshotLoading) {
+    if (currentStep === 3 && selectedProduct && !wizardScreenshot && !wizardScreenshotLoading) {
+      console.log('🚀 Auto-triggering screenshot generation for step 3');
       generateWizardScreenshot();
     }
-  }, [currentStep, selectedProduct, selectedTheme, wizardScreenshot, wizardScreenshotLoading]);
+  }, [currentStep, selectedProduct, wizardScreenshot, wizardScreenshotLoading]);
 
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
@@ -669,6 +699,17 @@ export default function Dashboard() {
       console.log('🎨 Theme ID:', themeId);
       setPreviewUrl(previewUrl);
     }
+  };
+
+  // Generate preview URL for wizard (with parameters)
+  const generateWizardPreviewUrl = (productHandle, themeId) => {
+    const cleanThemeId = themeId.replace('gid://shopify/OnlineStoreTheme/', '');
+    const baseUrl = `https://${shop}`;
+    const previewUrl = `${baseUrl}/products/${productHandle}?preview_theme_id=${cleanThemeId}`;
+    console.log('🔗 Generated wizard preview URL:', previewUrl);
+    console.log('📦 Wizard product handle:', productHandle);
+    console.log('🎨 Wizard theme ID:', cleanThemeId);
+    return previewUrl;
   };
 
   const openPreviewInNewTab = () => {
