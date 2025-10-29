@@ -251,6 +251,7 @@ export const loader = async ({ request }) => {
               id
               title
               handle
+              templateSuffix
               featuredImage {
                 url
                 altText
@@ -730,10 +731,28 @@ export default function Dashboard() {
       // Use the same logic as ab-tests.jsx - get product templates from the loader data
       // The productTemplates are already available from the loader
       console.log('📄 Available product templates from loader:', productTemplates);
+      console.log('🔍 Selected product template suffix:', selectedProduct.templateSuffix);
       
-      // Use the first available template (same as ab-tests.jsx)
-      const baseTemplate = productTemplates[0] || 'templates/product.liquid';
-      console.log('📄 Using base template:', baseTemplate);
+      // Determine the specific template for this product
+      let baseTemplate;
+      if (selectedProduct.templateSuffix) {
+        // Product has a custom template suffix
+        baseTemplate = `templates/product.${selectedProduct.templateSuffix}.liquid`;
+        console.log('📄 Using product-specific template:', baseTemplate);
+      } else {
+        // Use the default product template
+        baseTemplate = productTemplates[0] || 'templates/product.liquid';
+        console.log('📄 Using default template:', baseTemplate);
+      }
+      
+      // Verify the template exists in available templates
+      const templateExists = productTemplates.includes(baseTemplate);
+      if (!templateExists) {
+        console.log('⚠️ Template not found in available templates, falling back to default');
+        baseTemplate = productTemplates[0] || 'templates/product.liquid';
+      }
+      
+      console.log('📄 Final template to duplicate:', baseTemplate);
       
       // Create the variant template using the exact same duplication logic as ab-tests.jsx
       const response = await fetch('/api/duplicate-template', {
@@ -3100,16 +3119,23 @@ export default function Dashboard() {
                         border: '1px solid #E5E7EB',
                         borderRadius: '12px'
                       }}>
-                        {products.map((product) => (
-                          <div
-                            key={product.id}
-                            onClick={() => {
-                              setSelectedProduct(product);
-                              // Generate screenshot if password is entered
-                              if (wizardStorePassword || storePassword) {
-                                generateWizardScreenshot();
-                              }
-                            }}
+                 {products.map((product) => (
+                   <div
+                     key={product.id}
+                     onClick={() => {
+                       setSelectedProduct(product);
+                       // Debug: Log product template information
+                       console.log('🔍 Selected product:', product.title);
+                       console.log('🔍 Product handle:', product.handle);
+                       console.log('🔍 Product ID:', product.id);
+                       console.log('🔍 Product template suffix:', product.templateSuffix);
+                       console.log('🔍 Product template:', product.template);
+                       
+                       // Generate screenshot if password is entered
+                       if (wizardStorePassword || storePassword) {
+                         generateWizardScreenshot();
+                       }
+                     }}
                             style={{
                               background: selectedProduct?.id === product.id ? '#F0F9FF' : '#FFFFFF',
                               border: selectedProduct?.id === product.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
@@ -3147,13 +3173,23 @@ export default function Dashboard() {
                                 }}>
                                   {product.title}
                                 </h4>
-                                <p style={{
-                                  fontSize: '14px',
-                                  color: '#6B7280',
-                                  margin: 0
-                                }}>
-                                  {product.vendor}
-                                </p>
+                         <p style={{
+                           fontSize: '14px',
+                           color: '#6B7280',
+                           margin: 0
+                         }}>
+                           {product.vendor}
+                         </p>
+                         {product.templateSuffix && (
+                           <p style={{
+                             fontSize: '12px',
+                             color: '#10B981',
+                             margin: '4px 0 0 0',
+                             fontWeight: '500'
+                           }}>
+                             Template: product.{product.templateSuffix}.liquid
+                           </p>
+                         )}
                               </div>
                             </div>
                           </div>
@@ -3333,10 +3369,25 @@ export default function Dashboard() {
                   <p style={{
                     fontSize: '14px',
                     color: '#6B7280',
-                    marginBottom: '24px'
+                    marginBottom: '16px'
                   }}>
                     Your variant template has been created. Here's how it looks:
                   </p>
+
+                  {/* Debug Info */}
+                  <div style={{
+                    background: '#F3F4F6',
+                    padding: '12px',
+                    borderRadius: '8px',
+                    marginBottom: '16px',
+                    fontSize: '12px',
+                    color: '#374151'
+                  }}>
+                    <strong>Debug Info:</strong><br/>
+                    Product: {selectedProduct?.title}<br/>
+                    Template Suffix: {selectedProduct?.templateSuffix || 'None (using default)'}<br/>
+                    Expected Template: {selectedProduct?.templateSuffix ? `product.${selectedProduct.templateSuffix}.liquid` : 'product.liquid'}
+                  </div>
 
                   {wizardVariantScreenshotLoading ? (
                     <div style={{
