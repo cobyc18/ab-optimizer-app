@@ -750,10 +750,10 @@ export default function Dashboard() {
         console.log('📄 Product uses default template, finding the correct one...');
         console.log('📄 Available templates to choose from:', productTemplates);
         
-        // Strategy 1: Look for exact default template names
+        // Strategy 1: Prefer OS 2.0 default explicitly
         const exactDefaults = [
-          'templates/product.liquid',
-          'templates/product.json'
+          'templates/product.json',
+          'templates/product.liquid'
         ];
         
         baseTemplate = exactDefaults.find(template => productTemplates.includes(template));
@@ -3432,7 +3432,7 @@ export default function Dashboard() {
                     <strong>Debug Info:</strong><br/>
                     Product: {selectedProduct?.title}<br/>
                     Template Suffix: {selectedProduct?.templateSuffix || 'None (using default)'}<br/>
-                    Expected Template: {selectedProduct?.templateSuffix ? `product.${selectedProduct.templateSuffix}.liquid` : 'product.liquid'}
+                    Expected Template: {selectedProduct?.templateSuffix ? `product.${selectedProduct.templateSuffix}.liquid` : (productTemplates?.includes('templates/product.json') ? 'product.json' : 'product.liquid')}
                   </div>
 
                   {wizardVariantScreenshotLoading ? (
