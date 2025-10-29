@@ -264,6 +264,34 @@ export const loader = async ({ request }) => {
     const productsData = await productsResponse.json();
     const products = productsData.data?.products?.edges?.map(edge => edge.node) || [];
 
+    // Fetch product templates (same logic as ab-tests.jsx)
+    const mainTheme = themes.find(t => t.role === 'MAIN');
+    let productTemplates = [];
+    if (mainTheme) {
+      const themeId = mainTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
+      const shopDomain = session.shop.replace('.myshopify.com', '');
+      
+      const restRes = await fetch(
+        `https://${shopDomain}.myshopify.com/admin/api/2024-01/themes/${themeId}/assets.json`,
+        {
+          headers: {
+            "X-Shopify-Access-Token": session.accessToken,
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+          },
+        }
+      );
+      
+      const restJson = await restRes.json();
+      const assets = restJson.assets || [];
+      productTemplates = assets
+        .map(a => a.key)
+        .filter(key =>
+          (key.startsWith("templates/product") && (key.endsWith(".liquid") || key.endsWith(".json"))) ||
+          (key === "templates/product.liquid" || key === "templates/product.json")
+        );
+    }
+
     // Fetch all A/B tests (both active and completed with winners)
     const allTests = await prisma.aBTest.findMany({
       where: { 
@@ -444,6 +472,7 @@ export const loader = async ({ request }) => {
       recentActivities: recentActivities,
       themes: themes,
       products: products,
+      productTemplates: productTemplates,
       shop: session.shop
     });
   } catch (error) {
@@ -451,6 +480,7 @@ export const loader = async ({ request }) => {
     return json({
       user: { name: "Zac", level: "Legend Scientist", xp: 2100, maxXp: 3000 },
       experiments: [],
+      productTemplates: [],
     testCards: [
       { id: 1, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
       { id: 2, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
@@ -478,7 +508,7 @@ export const loader = async ({ request }) => {
 };
 
 export default function Dashboard() {
-  const { user, experiments, testCards, queuedTests, recentActivities, themes, products, shop } = useLoaderData();
+  const { user, experiments, testCards, queuedTests, recentActivities, themes, products, productTemplates, shop } = useLoaderData();
   const [expandedTests, setExpandedTests] = useState(new Set());
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -563,7 +593,7 @@ export default function Dashboard() {
     },
     {
       id: 3,
-      utility: 'Countdown Timer!',
+      utility: 'Countdown Timer',
       rationale: 'Creates urgency, boosts checkout by 5-7%',
       style: 'Energetic',
       preview: '⏰ Limited time offer!'
@@ -699,10 +729,10 @@ export default function Dashboard() {
       
       // Use the same logic as ab-tests.jsx - get product templates from the loader data
       // The productTemplates are already available from the loader
-      console.log('📄 Available product templates from loader:', loaderData.productTemplates);
+      console.log('📄 Available product templates from loader:', productTemplates);
       
       // Use the first available template (same as ab-tests.jsx)
-      const baseTemplate = loaderData.productTemplates[0] || 'templates/product.liquid';
+      const baseTemplate = productTemplates[0] || 'templates/product.liquid';
       console.log('📄 Using base template:', baseTemplate);
       
       // Create the variant template using the exact same duplication logic as ab-tests.jsx
