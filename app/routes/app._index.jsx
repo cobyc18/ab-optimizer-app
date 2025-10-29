@@ -670,13 +670,6 @@ export default function Dashboard() {
     }
   };
 
-  // Auto-generate screenshot when entering step 3
-  useEffect(() => {
-    if (currentStep === 3 && selectedProduct && !wizardScreenshot && !wizardScreenshotLoading) {
-      console.log('🚀 Auto-triggering screenshot generation for step 3');
-      generateWizardScreenshot();
-    }
-  }, [currentStep, selectedProduct, wizardScreenshot, wizardScreenshotLoading]);
 
   const toggleTestExpansion = (testName) => {
     const newExpanded = new Set(expandedTests);
@@ -2649,7 +2642,7 @@ export default function Dashboard() {
                 color: '#6B7280',
                 textAlign: 'center'
               }}>
-                Step {currentStep} of 5
+                Step {currentStep} of 4
               </div>
             </div>
 
@@ -2952,7 +2945,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Step 2: Choose Product */}
+              {/* Step 2: Choose Product & Preview */}
               {currentStep === 2 && (
                 <div style={{
                   animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -2972,223 +2965,246 @@ export default function Dashboard() {
                     color: '#6B7280',
                     marginBottom: '24px'
                   }}>
-                    Select which product will display your A/B test widget
+                    Select a product and enter your store password to see a preview
                   </p>
 
+                  {/* Two Column Layout */}
                   <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '16px',
-                    maxHeight: '400px',
-                    overflowY: 'auto',
-                    padding: '10px'
+                    gridTemplateColumns: '1fr 1fr',
+                    gap: '24px',
+                    minHeight: '500px'
                   }}>
-                    {products.map((product) => (
-                      <div
-                        key={product.id}
-                        onClick={() => setSelectedProduct(product)}
-                        style={{
-                          background: selectedProduct?.id === product.id ? '#F0F9FF' : '#FFFFFF',
-                          border: selectedProduct?.id === product.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                          borderRadius: '12px',
-                          padding: '20px',
-                          cursor: 'pointer',
-                          transition: 'all 0.2s ease',
-                          transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)'
-                        }}
-                      >
-                        <div style={{
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px'
+                    {/* Left Column: Product List */}
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '16px'
+                    }}>
+                      <div style={{
+                        maxHeight: '450px',
+                        overflowY: 'auto',
+                        padding: '10px',
+                        border: '1px solid #E5E7EB',
+                        borderRadius: '12px'
+                      }}>
+                        {products.map((product) => (
+                          <div
+                            key={product.id}
+                            onClick={() => {
+                              setSelectedProduct(product);
+                              // Generate screenshot if password is entered
+                              if (wizardStorePassword || storePassword) {
+                                generateWizardScreenshot();
+                              }
+                            }}
+                            style={{
+                              background: selectedProduct?.id === product.id ? '#F0F9FF' : '#FFFFFF',
+                              border: selectedProduct?.id === product.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
+                              borderRadius: '12px',
+                              padding: '16px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s ease',
+                              marginBottom: '12px',
+                              transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)'
+                            }}
+                          >
+                            <div style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              gap: '12px'
+                            }}>
+                              {product.featuredImage && (
+                                <img
+                                  src={product.featuredImage.url}
+                                  alt={product.title}
+                                  style={{
+                                    width: '60px',
+                                    height: '60px',
+                                    objectFit: 'cover',
+                                    borderRadius: '8px'
+                                  }}
+                                />
+                              )}
+                              <div style={{ flex: 1 }}>
+                                <h4 style={{
+                                  fontSize: '16px',
+                                  fontWeight: '600',
+                                  color: '#1F2937',
+                                  margin: '0 0 4px 0'
+                                }}>
+                                  {product.title}
+                                </h4>
+                                <p style={{
+                                  fontSize: '14px',
+                                  color: '#6B7280',
+                                  margin: 0
+                                }}>
+                                  {product.vendor}
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Right Column: Password & Preview */}
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '20px'
+                    }}>
+                      {/* Store Password Input */}
+                      <div style={{
+                        padding: '20px',
+                        background: '#F8FAFC',
+                        borderRadius: '12px',
+                        border: '1px solid #E5E7EB'
+                      }}>
+                        <h4 style={{
+                          fontSize: '16px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          margin: '0 0 8px 0'
                         }}>
-                          {product.featuredImage && (
-                            <img
-                              src={product.featuredImage.url}
-                              alt={product.title}
-                              style={{
-                                width: '60px',
-                                height: '60px',
-                                objectFit: 'cover',
-                                borderRadius: '8px'
-                              }}
-                            />
-                          )}
-                          <div style={{ flex: 1 }}>
+                          Store Password
+                        </h4>
+                        <p style={{
+                          fontSize: '14px',
+                          color: '#6B7280',
+                          margin: '0 0 16px 0'
+                        }}>
+                          Enter your store password to generate a preview
+                        </p>
+                        <input
+                          type="password"
+                          value={wizardStorePassword}
+                          onChange={(e) => setWizardStorePassword(e.target.value)}
+                          onKeyDown={(e) => {
+                            // Generate screenshot when Enter is pressed
+                            if (e.key === 'Enter' && selectedProduct && wizardStorePassword && !wizardScreenshotLoading) {
+                              generateWizardScreenshot();
+                            }
+                          }}
+                          onBlur={() => {
+                            // Generate screenshot when password field loses focus if product is selected
+                            if (selectedProduct && wizardStorePassword && !wizardScreenshotLoading) {
+                              generateWizardScreenshot();
+                            }
+                          }}
+                          placeholder="Enter store password..."
+                          style={{
+                            width: '100%',
+                            padding: '12px 16px',
+                            border: '1px solid #D1D5DB',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            background: '#FFFFFF'
+                          }}
+                        />
+                      </div>
+
+                      {/* Screenshot Preview */}
+                      <div style={{
+                        flex: 1,
+                        display: 'flex',
+                        flexDirection: 'column'
+                      }}>
+                        {wizardScreenshotLoading ? (
+                          <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '60px 20px',
+                            background: '#F8FAFC',
+                            borderRadius: '12px',
+                            border: '1px solid #E5E7EB',
+                            flex: 1
+                          }}>
+                            <div style={{
+                              width: '40px',
+                              height: '40px',
+                              border: '4px solid #E5E7EB',
+                              borderTop: '4px solid #3B82F6',
+                              borderRadius: '50%',
+                              animation: 'spin 1s linear infinite',
+                              marginBottom: '16px'
+                            }}></div>
+                            <p style={{
+                              fontSize: '16px',
+                              color: '#6B7280',
+                              margin: 0
+                            }}>
+                              Generating screenshot...
+                            </p>
+                          </div>
+                        ) : wizardScreenshot ? (
+                          <div style={{
+                            background: '#FFFFFF',
+                            borderRadius: '12px',
+                            border: '1px solid #E5E7EB',
+                            padding: '20px',
+                            flex: 1,
+                            display: 'flex',
+                            flexDirection: 'column'
+                          }}>
                             <h4 style={{
                               fontSize: '16px',
                               fontWeight: '600',
                               color: '#1F2937',
-                              margin: '0 0 4px 0'
+                              margin: '0 0 16px 0'
                             }}>
-                              {product.title}
+                              {selectedProduct?.title} Preview
                             </h4>
-                            <p style={{
-                              fontSize: '14px',
-                              color: '#6B7280',
-                              margin: 0
+                            <div style={{
+                              flex: 1,
+                              overflow: 'auto',
+                              textAlign: 'center'
                             }}>
-                              {product.vendor}
+                              <img
+                                src={wizardScreenshot}
+                                alt="Product preview"
+                                style={{
+                                  maxWidth: '100%',
+                                  height: 'auto',
+                                  borderRadius: '8px',
+                                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                                }}
+                              />
+                            </div>
+                          </div>
+                        ) : (
+                          <div style={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            padding: '60px 20px',
+                            background: '#F8FAFC',
+                            borderRadius: '12px',
+                            border: '1px solid #E5E7EB',
+                            flex: 1
+                          }}>
+                            <p style={{
+                              fontSize: '16px',
+                              color: '#6B7280',
+                              margin: 0,
+                              textAlign: 'center'
+                            }}>
+                              {selectedProduct ? 'Enter password and select a product to see preview' : 'Select a product and enter password to see preview'}
                             </p>
                           </div>
-                        </div>
+                        )}
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Store Password Input */}
-                  <div style={{
-                    marginTop: '24px',
-                    padding: '20px',
-                    background: '#F8FAFC',
-                    borderRadius: '12px',
-                    border: '1px solid #E5E7EB'
-                  }}>
-                    <h4 style={{
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      margin: '0 0 8px 0'
-                    }}>
-                      Store Password (Required for Screenshot)
-                    </h4>
-                    <p style={{
-                      fontSize: '14px',
-                      color: '#6B7280',
-                      margin: '0 0 16px 0'
-                    }}>
-                      Enter your store password to generate a preview screenshot
-                    </p>
-                    <input
-                      type="password"
-                      value={wizardStorePassword}
-                      onChange={(e) => setWizardStorePassword(e.target.value)}
-                      placeholder="Enter store password..."
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        border: '1px solid #D1D5DB',
-                        borderRadius: '8px',
-                        fontSize: '14px',
-                        background: '#FFFFFF'
-                      }}
-                    />
+                    </div>
                   </div>
                 </div>
               )}
 
-              {/* Step 3: Screenshot Preview */}
+              {/* Step 3: Configure Test */}
               {currentStep === 3 && (
-                <div style={{
-                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                  transform: 'translateX(0)',
-                  opacity: 1
-                }}>
-                  <h3 style={{
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    marginBottom: '8px'
-                  }}>
-                    Product Preview
-                  </h3>
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#6B7280',
-                    marginBottom: '24px'
-                  }}>
-                    Generating a screenshot of your selected product with the chosen theme
-                  </p>
-
-                  {wizardScreenshotLoading ? (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '60px 20px',
-                      background: '#F8FAFC',
-                      borderRadius: '12px',
-                      border: '1px solid #E5E7EB'
-                    }}>
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        border: '4px solid #E5E7EB',
-                        borderTop: '4px solid #3B82F6',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                        marginBottom: '16px'
-                      }}></div>
-                      <p style={{
-                        fontSize: '16px',
-                        color: '#6B7280',
-                        margin: 0
-                      }}>
-                        Generating screenshot...
-                      </p>
-                    </div>
-                  ) : wizardScreenshot ? (
-                    <div style={{
-                      background: '#FFFFFF',
-                      borderRadius: '12px',
-                      border: '1px solid #E5E7EB',
-                      padding: '20px',
-                      textAlign: 'center'
-                    }}>
-                      <h4 style={{
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        margin: '0 0 16px 0'
-                      }}>
-                        {selectedProduct?.title} Preview
-                      </h4>
-                      <img
-                        src={wizardScreenshot}
-                        alt="Product preview"
-                        style={{
-                          maxWidth: '100%',
-                          height: 'auto',
-                          borderRadius: '8px',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                        }}
-                      />
-                    </div>
-                  ) : (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '60px 20px',
-                      background: '#F8FAFC',
-                      borderRadius: '12px',
-                      border: '1px solid #E5E7EB'
-                    }}>
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        border: '4px solid #E5E7EB',
-                        borderTop: '4px solid #3B82F6',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                        marginBottom: '16px'
-                      }}></div>
-                      <p style={{
-                        fontSize: '16px',
-                        color: '#6B7280',
-                        margin: 0
-                      }}>
-                        Generating screenshot...
-                      </p>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* Step 4: Configure Test */}
-              {currentStep === 4 && (
                 <div style={{
                   animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: 'translateX(0)',
@@ -3373,8 +3389,8 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Step 5: Launch */}
-              {currentStep === 5 && (
+              {/* Step 4: Launch */}
+              {currentStep === 4 && (
                 <div style={{
                   animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                   transform: 'translateX(0)',
@@ -3550,7 +3566,7 @@ export default function Dashboard() {
                 </button>
                 <button
                   onClick={() => {
-                    if (currentStep < 5) {
+                    if (currentStep < 4) {
                       setCurrentStep(currentStep + 1);
                     } else {
                       // Launch the test
@@ -3569,7 +3585,7 @@ export default function Dashboard() {
                     color: '#FFFFFF'
                   }}
                 >
-                  {currentStep === 5 ? 'Launch Test' : 'Next'}
+                  {currentStep === 4 ? 'Launch Test' : 'Next'}
                 </button>
               </div>
             </div>
