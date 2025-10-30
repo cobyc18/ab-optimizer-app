@@ -553,6 +553,7 @@ export default function Dashboard() {
   const [wizardVariantScreenshot, setWizardVariantScreenshot] = useState(null);
   const [wizardVariantScreenshotLoading, setWizardVariantScreenshotLoading] = useState(false);
   const [wizardVariantName, setWizardVariantName] = useState('');
+  const [isVariantRequestInFlight, setIsVariantRequestInFlight] = useState(false);
   // Debug: Open the created variant directly in the Theme Editor with previewPath
   const openVariantInThemeEditor = () => {
     try {
@@ -753,7 +754,12 @@ export default function Dashboard() {
   // Create variant template
   const createVariantTemplate = async () => {
     if (!selectedProduct) return;
-    
+    if (isVariantRequestInFlight) {
+      console.log('⏳ Variant creation already in progress, skipping duplicate call');
+      return;
+    }
+
+    setIsVariantRequestInFlight(true);
     setWizardVariantScreenshotLoading(true);
     try {
       // Generate random 4-digit name
@@ -853,7 +859,15 @@ export default function Dashboard() {
         const variantPreviewUrl = generateWizardPreviewUrl(selectedProduct.handle, mainTheme.id) + `&view=${variantName}`;
         console.log('🔗 Variant preview URL:', variantPreviewUrl);
         
-        const screenshotResponse = await fetch('/api/screenshot-selenium', {
+      console.log('🧪 Variant screenshot request debug:', {
+        previewUrl: variantPreviewUrl,
+        productHandle: selectedProduct.handle,
+        themeId: mainTheme.id,
+        passwordProvided: Boolean(wizardStorePassword || storePassword),
+        passwordLength: (wizardStorePassword || storePassword)?.length || 0
+      });
+
+      const screenshotResponse = await fetch('/api/screenshot-selenium', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({
@@ -878,6 +892,7 @@ export default function Dashboard() {
       console.error('❌ Variant creation failed:', error);
     } finally {
       setWizardVariantScreenshotLoading(false);
+      setIsVariantRequestInFlight(false);
     }
   };
 
@@ -3497,6 +3512,26 @@ export default function Dashboard() {
                       }}>
                         Creating variant and generating preview...
                       </p>
+                      {/* Provide Theme Editor Debug access even while loading */}
+                      <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={openVariantInThemeEditor}
+                          style={{
+                            padding: '10px 14px',
+                            background: '#111827',
+                            color: '#FFFFFF',
+                            borderRadius: '8px',
+                            border: '1px solid #111827',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Open in Theme Editor (Debug)
+                        </button>
+                        <span style={{ fontSize: '12px', color: '#6B7280' }}>
+                          Will open with template: <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
+                          {selectedProduct?.handle ? `, previewing: /products/${selectedProduct.handle}` : ''}
+                        </span>
+                      </div>
                     </div>
                   ) : wizardVariantScreenshot ? (
                     <div style={{

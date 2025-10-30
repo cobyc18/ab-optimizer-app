@@ -10,6 +10,13 @@ export const action = async ({ request }) => {
   
   try {
     const { previewUrl, productHandle, themeId, storePassword } = await request.json();
+    console.log('🧾 Screenshot API received:', {
+      previewUrl,
+      productHandle,
+      themeId,
+      passwordProvided: Boolean(storePassword || process.env.SHOPIFY_STORE_PASSWORD),
+      passwordLength: (storePassword || process.env.SHOPIFY_STORE_PASSWORD || '').length
+    });
     
     console.log('📸 Generating screenshot using Selenium...');
     console.log('🔗 Preview URL:', previewUrl);
@@ -117,7 +124,7 @@ export const action = async ({ request }) => {
         try {
           // Look for password input field
           const passwordField = await driver.findElement(By.name('password'));
-          const password = storePassword || process.env.SHOPIFY_STORE_PASSWORD || 'your-store-password';
+          const password = storePassword || process.env.SHOPIFY_STORE_PASSWORD || '';
           
           console.log('🔑 Entering store password...');
           await passwordField.sendKeys(password);
