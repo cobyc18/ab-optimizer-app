@@ -553,6 +553,41 @@ export default function Dashboard() {
   const [wizardVariantScreenshot, setWizardVariantScreenshot] = useState(null);
   const [wizardVariantScreenshotLoading, setWizardVariantScreenshotLoading] = useState(false);
   const [wizardVariantName, setWizardVariantName] = useState('');
+  // Debug: Open the created variant directly in the Theme Editor with previewPath
+  const openVariantInThemeEditor = () => {
+    try {
+      const mainTheme = themes.find(t => t.role === 'MAIN');
+      if (!mainTheme) {
+        console.warn('⚠️ No MAIN theme found for editor open');
+        return;
+      }
+      const numericThemeId = mainTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
+      const storeSubdomain = (shop || '').replace('.myshopify.com', '');
+
+      // For OS 2.0 JSON templates, the template param is product.<suffix>
+      const templateParam = wizardVariantName ? `product.${wizardVariantName}` : 'product';
+      const previewPath = selectedProduct?.handle ? `/products/${selectedProduct.handle}` : '/products';
+
+      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodeURIComponent(previewPath)}`;
+
+      console.log('🧭 Theme Editor Debug Params:', {
+        shop,
+        storeSubdomain,
+        themeGid: mainTheme.id,
+        numericThemeId,
+        templateParam,
+        previewPath,
+        wizardVariantName,
+        selectedProductHandle: selectedProduct?.handle,
+        editorUrl
+      });
+
+      window.open(editorUrl, '_blank', 'noopener');
+    } catch (err) {
+      console.error('❌ Failed to open Theme Editor (debug):', err);
+    }
+  };
+
 
   // Figma design colors
   const figmaColors = {
@@ -3489,6 +3524,25 @@ export default function Dashboard() {
                           boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
                         }}
                       />
+                      <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={openVariantInThemeEditor}
+                          style={{
+                            padding: '10px 14px',
+                            background: '#111827',
+                            color: '#FFFFFF',
+                            borderRadius: '8px',
+                            border: '1px solid #111827',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Open in Theme Editor (Debug)
+                        </button>
+                        <span style={{ fontSize: '12px', color: '#6B7280' }}>
+                          Will open with template: <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
+                          {selectedProduct?.handle ? `, previewing: /products/${selectedProduct.handle}` : ''}
+                        </span>
+                      </div>
                       <p style={{
                         fontSize: '14px',
                         color: '#6B7280',
