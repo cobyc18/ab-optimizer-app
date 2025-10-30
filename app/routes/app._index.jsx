@@ -3605,6 +3605,25 @@ export default function Dashboard() {
                       }}>
                         Variant template created successfully
                       </p>
+                      <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                        <button
+                          onClick={openVariantInThemeEditor}
+                          style={{
+                            padding: '10px 14px',
+                            background: '#111827',
+                            color: '#FFFFFF',
+                            borderRadius: '8px',
+                            border: '1px solid #111827',
+                            cursor: 'pointer'
+                          }}
+                        >
+                          Open in Theme Editor (Debug)
+                        </button>
+                        <span style={{ fontSize: '12px', color: '#6B7280' }}>
+                          Will open with template: <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
+                          {selectedProduct?.handle ? `, previewing: /products/${selectedProduct.handle}` : ''}
+                        </span>
+                      </div>
                     </div>
                   )}
                 </div>
