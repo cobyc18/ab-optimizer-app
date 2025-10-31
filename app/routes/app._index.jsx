@@ -672,7 +672,16 @@ export default function Dashboard() {
     setSwipeDirection(direction);
     
     if (direction === 'like') {
-      setSelectedIdea(abTestIdeas[currentWidgetIndex]);
+      const selectedWidget = abTestIdeas[currentWidgetIndex];
+      console.log('🎯 Widget selected:', {
+        widget: selectedWidget,
+        currentIndex: currentWidgetIndex,
+        hasBlockId: !!selectedWidget?.blockId,
+        hasAppExtensionId: !!selectedWidget?.appExtensionId,
+        blockId: selectedWidget?.blockId,
+        appExtensionId: selectedWidget?.appExtensionId
+      });
+      setSelectedIdea(selectedWidget);
       setTimeout(() => {
         setCurrentStep(2);
         setIsAnimating(false);
@@ -869,15 +878,34 @@ export default function Dashboard() {
       if (result.success) {
         console.log('✅ Variant template created:', result.newFilename);
         
+        // Debug: Check selectedIdea state
+        console.log('🔍 Widget Addition Debug - Checking selectedIdea:', {
+          selectedIdea,
+          hasSelectedIdea: !!selectedIdea,
+          selectedIdeaBlockId: selectedIdea?.blockId,
+          selectedIdeaAppExtensionId: selectedIdea?.appExtensionId,
+          selectedIdeaUtility: selectedIdea?.utility,
+          conditionMet: !!(selectedIdea?.blockId && selectedIdea?.appExtensionId)
+        });
+        
         // If a widget was selected and it has blockId (live-visitor-count), add it to the template
         if (selectedIdea?.blockId && selectedIdea?.appExtensionId) {
           console.log('🔧 Adding widget block to duplicated template:', {
             blockId: selectedIdea.blockId,
             appExtensionId: selectedIdea.appExtensionId,
-            templateFilename: result.newFilename
+            templateFilename: result.newFilename,
+            themeId: mainTheme.id,
+            fullSelectedIdea: selectedIdea
           });
           
           try {
+            console.log('📡 Calling /api/add-widget-block with:', {
+              templateFilename: result.newFilename,
+              themeId: mainTheme.id,
+              blockId: selectedIdea.blockId,
+              appExtensionId: selectedIdea.appExtensionId
+            });
+            
             const addBlockResponse = await fetch('/api/add-widget-block', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -889,19 +917,34 @@ export default function Dashboard() {
               })
             });
             
+            console.log('📡 Add widget block response status:', addBlockResponse.status);
+            
             const addBlockResult = await addBlockResponse.json();
+            console.log('📡 Add widget block response:', addBlockResult);
+            
             if (addBlockResult.success) {
               console.log('✅ Widget block added to template:', addBlockResult.message);
             } else {
-              console.error('❌ Failed to add widget block:', addBlockResult.error);
+              console.error('❌ Failed to add widget block:', {
+                error: addBlockResult.error,
+                fullResponse: addBlockResult
+              });
               // Don't fail the entire process if block addition fails
             }
           } catch (blockError) {
-            console.error('❌ Error adding widget block:', blockError);
+            console.error('❌ Error adding widget block:', {
+              error: blockError,
+              message: blockError.message,
+              stack: blockError.stack
+            });
             // Don't fail the entire process if block addition fails
           }
         } else {
-          console.log('ℹ️ No widget selected or widget does not have block implementation');
+          console.log('ℹ️ No widget selected or widget does not have block implementation', {
+            selectedIdea,
+            hasBlockId: !!selectedIdea?.blockId,
+            hasAppExtensionId: !!selectedIdea?.appExtensionId
+          });
         }
         
         // Generate screenshot of the variant
