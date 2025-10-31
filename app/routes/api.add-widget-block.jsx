@@ -128,96 +128,107 @@ export const action = async ({ request }) => {
             column: parseError.message.match(/column (\d+)/)?.[1]
           });
           
-          // Fix unescaped control characters in string literals
-          // We need to escape control characters that appear inside string values
-          let fixedContent = cleanedContent;
+          // Extract error position for debugging
+          const errorPos = parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0');
+          const errorLine = parseInt(parseError.message.match(/line (\d+)/)?.[1] || '0');
+          const errorCol = parseInt(parseError.message.match(/column (\d+)/)?.[1] || '0');
           
-          // Find and fix unescaped control characters inside string literals
-          // This is tricky because we need to distinguish between control chars inside strings vs outside
-          // Strategy: Process the JSON character by character, tracking when we're inside a string
-          let result = '';
+          console.log('🔍 Error details:', {
+            position: errorPos,
+            line: errorLine,
+            column: errorCol,
+            contentAroundError: cleanedContent.substring(Math.max(0, errorPos - 100), Math.min(cleanedContent.length, errorPos + 100))
+          });
+          
+          // Strategy: Process character by character, properly handling string literals
+          // This is more reliable than regex replacement
+          let fixedContent = '';
           let inString = false;
           let escapeNext = false;
           
-          for (let i = 0; i < fixedContent.length; i++) {
-            const char = fixedContent[i];
+          for (let i = 0; i < cleanedContent.length; i++) {
+            const char = cleanedContent[i];
             const code = char.charCodeAt(0);
             
             if (escapeNext) {
-              // We're escaping this character
-              result += char;
+              // We're in an escape sequence - just copy it
+              fixedContent += char;
               escapeNext = false;
               continue;
             }
             
             if (char === '\\') {
-              // Escape sequence
-              result += char;
+              // Start of escape sequence
+              fixedContent += char;
               escapeNext = true;
               continue;
             }
             
-            if (char === '"' && !escapeNext) {
-              // Toggle string state
-              inString = !inString;
-              result += char;
+            if (char === '"' && !inString) {
+              // Opening quote - enter string
+              inString = true;
+              fixedContent += char;
+              continue;
+            } else if (char === '"' && inString) {
+              // Closing quote - exit string
+              inString = false;
+              fixedContent += char;
               continue;
             }
             
             if (inString) {
-              // We're inside a string literal
-              // Check if this is an unescaped control character
-              if (code >= 0x00 && code <= 0x1F && code !== 0x09 && code !== 0x0A && code !== 0x0D) {
-                // Unescaped control character (except tab, newline, carriage return)
-                // These should be escaped as \uXXXX
+              // We're inside a string literal - need to escape control characters
+              if (code >= 0x00 && code <= 0x1F) {
+                // Control character - escape it
+                if (code === 0x09) {
+                  // Tab
+                  fixedContent += '\\t';
+                } else if (code === 0x0A) {
+                  // Newline
+                  fixedContent += '\\n';
+                } else if (code === 0x0D) {
+                  // Carriage return
+                  fixedContent += '\\r';
+                } else {
+                  // Other control character - escape as \uXXXX
+                  const hex = code.toString(16).padStart(4, '0');
+                  fixedContent += `\\u${hex}`;
+                }
+              } else if (code === 0x7F || (code >= 0x80 && code <= 0x9F)) {
+                // Extended control characters - escape as \uXXXX
                 const hex = code.toString(16).padStart(4, '0');
-                result += `\\u${hex}`;
-                continue;
-              } else if (code === 0x09 || code === 0x0A || code === 0x0D) {
-                // Tab, newline, or carriage return - these should be escaped as \t, \n, \r
-                if (code === 0x09) result += '\\t';
-                else if (code === 0x0A) result += '\\n';
-                else if (code === 0x0D) result += '\\r';
-                continue;
+                fixedContent += `\\u${hex}`;
+              } else {
+                // Regular character - copy as is
+                fixedContent += char;
               }
+            } else {
+              // Outside string literal - copy as is (shouldn't have control chars here)
+              fixedContent += char;
             }
-            
-            result += char;
           }
           
-          fixedContent = result;
-          
-          console.log('📄 Fixed control characters, attempting to parse again...');
+          console.log('📄 Fixed control characters character-by-character, attempting to parse again...');
+          console.log('📄 Fixed content preview (first 500 chars):', fixedContent.substring(0, 500));
+          console.log('📄 Fixed content length:', fixedContent.length, 'vs original:', cleanedContent.length);
           
           try {
             templateJson = JSON.parse(fixedContent);
             console.log('✅ Successfully parsed JSON after fixing control characters');
           } catch (secondError) {
-            console.error('❌ Second parse attempt failed:', secondError.message);
-            
-            // Last resort: try using a more lenient approach
-            // Remove all control characters (this might break some content but should at least parse)
-            let lenientContent = fixedContent.replace(/[\x00-\x1F\x7F-\x9F]/g, (char) => {
-              const code = char.charCodeAt(0);
-              // Convert to \uXXXX format
-              return `\\u${code.toString(16).padStart(4, '0')}`;
+            console.error('❌ Second parse attempt failed:', {
+              error: secondError.message,
+              position: secondError.message.match(/position (\d+)/)?.[1],
+              line: secondError.message.match(/line (\d+)/)?.[1],
+              column: secondError.message.match(/column (\d+)/)?.[1],
+              fixedContentStart: fixedContent.substring(0, 200),
+              fixedContentAroundError: fixedContent.substring(
+                Math.max(0, parseInt(secondError.message.match(/position (\d+)/)?.[1] || '0') - 100),
+                Math.min(fixedContent.length, parseInt(secondError.message.match(/position (\d+)/)?.[1] || '0') + 100)
+              )
             });
             
-            try {
-              templateJson = JSON.parse(lenientContent);
-              console.log('✅ Successfully parsed JSON using lenient control character handling');
-            } catch (finalError) {
-              console.error('❌ All parse attempts failed:', {
-                original: parseError.message,
-                second: secondError.message,
-                final: finalError.message,
-                previewAroundOriginalError: cleanedContent.substring(
-                  Math.max(0, parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0') - 100),
-                  Math.min(cleanedContent.length, parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0') + 100)
-                )
-              });
-              throw new Error(`Failed to parse JSON template: ${finalError.message}. Original error: ${parseError.message}`);
-            }
+            throw new Error(`Failed to parse JSON template after fixing control characters: ${secondError.message}. Original error: ${parseError.message}`);
           }
         }
         
@@ -475,4 +486,5 @@ export const action = async ({ request }) => {
     return json({ error: `Server error: ${error.message}` }, { status: 500 });
   }
 };
+
 
