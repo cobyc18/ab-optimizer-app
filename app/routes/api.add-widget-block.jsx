@@ -91,28 +91,135 @@ export const action = async ({ request }) => {
         // Need to be careful not to remove // or /* inside strings
         let cleanedContent = content;
         
-        // Remove single-line comments (//) - but not inside strings
-        // This regex matches // followed by anything except newline, but only outside quotes
+        // Remove single-line comments (//) - matches // to end of line
         cleanedContent = cleanedContent.replace(/\/\/[^\n\r]*/g, '');
         
-        // Remove multi-line comments (/* */) - but not inside strings
-        // This regex matches /* ... */ across multiple lines
+        // Remove multi-line comments (/* */) - matches across multiple lines
         cleanedContent = cleanedContent.replace(/\/\*[\s\S]*?\*\//g, '');
         
-        // Trim whitespace that might be left
-        cleanedContent = cleanedContent.trim();
+        // Remove control characters (except newlines which JSON needs for strings)
+        // But we need to be careful - control characters inside strings should be escaped
+        // This is tricky, so let's use a more robust approach:
+        // 1. Try to parse after comment removal
+        // 2. If that fails, use a JSON5 parser or manually handle edge cases
         
-        // Clean up any trailing commas that might be left after comment removal
+        // Clean up trailing commas that might be left after comment removal
         cleanedContent = cleanedContent.replace(/,\s*}/g, '}');
         cleanedContent = cleanedContent.replace(/,\s*]/g, ']');
+        
+        // Trim whitespace
+        cleanedContent = cleanedContent.trim();
         
         console.log('📄 Cleaned JSON content (removed comments):', {
           originalLength: content.length,
           cleanedLength: cleanedContent.length,
-          preview: cleanedContent.substring(0, 200)
+          preview: cleanedContent.substring(0, 300)
         });
         
-        const templateJson = JSON.parse(cleanedContent);
+        // Try to parse the JSON
+        let templateJson;
+        try {
+          templateJson = JSON.parse(cleanedContent);
+        } catch (parseError) {
+          console.error('❌ JSON parse error after comment removal:', {
+            error: parseError.message,
+            position: parseError.message.match(/position (\d+)/)?.[1],
+            line: parseError.message.match(/line (\d+)/)?.[1],
+            column: parseError.message.match(/column (\d+)/)?.[1]
+          });
+          
+          // Fix unescaped control characters in string literals
+          // We need to escape control characters that appear inside string values
+          let fixedContent = cleanedContent;
+          
+          // Find and fix unescaped control characters inside string literals
+          // This is tricky because we need to distinguish between control chars inside strings vs outside
+          // Strategy: Process the JSON character by character, tracking when we're inside a string
+          let result = '';
+          let inString = false;
+          let escapeNext = false;
+          
+          for (let i = 0; i < fixedContent.length; i++) {
+            const char = fixedContent[i];
+            const code = char.charCodeAt(0);
+            
+            if (escapeNext) {
+              // We're escaping this character
+              result += char;
+              escapeNext = false;
+              continue;
+            }
+            
+            if (char === '\\') {
+              // Escape sequence
+              result += char;
+              escapeNext = true;
+              continue;
+            }
+            
+            if (char === '"' && !escapeNext) {
+              // Toggle string state
+              inString = !inString;
+              result += char;
+              continue;
+            }
+            
+            if (inString) {
+              // We're inside a string literal
+              // Check if this is an unescaped control character
+              if (code >= 0x00 && code <= 0x1F && code !== 0x09 && code !== 0x0A && code !== 0x0D) {
+                // Unescaped control character (except tab, newline, carriage return)
+                // These should be escaped as \uXXXX
+                const hex = code.toString(16).padStart(4, '0');
+                result += `\\u${hex}`;
+                continue;
+              } else if (code === 0x09 || code === 0x0A || code === 0x0D) {
+                // Tab, newline, or carriage return - these should be escaped as \t, \n, \r
+                if (code === 0x09) result += '\\t';
+                else if (code === 0x0A) result += '\\n';
+                else if (code === 0x0D) result += '\\r';
+                continue;
+              }
+            }
+            
+            result += char;
+          }
+          
+          fixedContent = result;
+          
+          console.log('📄 Fixed control characters, attempting to parse again...');
+          
+          try {
+            templateJson = JSON.parse(fixedContent);
+            console.log('✅ Successfully parsed JSON after fixing control characters');
+          } catch (secondError) {
+            console.error('❌ Second parse attempt failed:', secondError.message);
+            
+            // Last resort: try using a more lenient approach
+            // Remove all control characters (this might break some content but should at least parse)
+            let lenientContent = fixedContent.replace(/[\x00-\x1F\x7F-\x9F]/g, (char) => {
+              const code = char.charCodeAt(0);
+              // Convert to \uXXXX format
+              return `\\u${code.toString(16).padStart(4, '0')}`;
+            });
+            
+            try {
+              templateJson = JSON.parse(lenientContent);
+              console.log('✅ Successfully parsed JSON using lenient control character handling');
+            } catch (finalError) {
+              console.error('❌ All parse attempts failed:', {
+                original: parseError.message,
+                second: secondError.message,
+                final: finalError.message,
+                previewAroundOriginalError: cleanedContent.substring(
+                  Math.max(0, parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0') - 100),
+                  Math.min(cleanedContent.length, parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0') + 100)
+                )
+              });
+              throw new Error(`Failed to parse JSON template: ${finalError.message}. Original error: ${parseError.message}`);
+            }
+          }
+        }
         
         // Find the main product section
         const sections = templateJson.sections || {};

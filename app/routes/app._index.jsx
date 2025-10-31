@@ -603,7 +603,6 @@ export default function Dashboard() {
         numericThemeId,
         templateParam,
         previewPath,
-        productPath,
         wizardVariantName,
         selectedProductHandle: selectedProduct.handle,
         selectedProductTitle: selectedProduct.title,
