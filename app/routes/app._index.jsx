@@ -3615,7 +3615,7 @@ export default function Dashboard() {
                             cursor: 'pointer'
                           }}
                         >
-                          Open in Theme Editor (Debug)
+                          Open in Theme Editor! (Debug)
                         </button>
                         <span style={{ fontSize: '12px', color: '#6B7280' }}>
                           Will open with template: <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
