@@ -87,7 +87,32 @@ export const action = async ({ request }) => {
     if (templateFilename.endsWith('.json')) {
       // Handle JSON templates (OS 2.0)
       try {
-        const templateJson = JSON.parse(content);
+        // Strip comments from JSON (Shopify allows comments in JSON templates)
+        // Need to be careful not to remove // or /* inside strings
+        let cleanedContent = content;
+        
+        // Remove single-line comments (//) - but not inside strings
+        // This regex matches // followed by anything except newline, but only outside quotes
+        cleanedContent = cleanedContent.replace(/\/\/[^\n\r]*/g, '');
+        
+        // Remove multi-line comments (/* */) - but not inside strings
+        // This regex matches /* ... */ across multiple lines
+        cleanedContent = cleanedContent.replace(/\/\*[\s\S]*?\*\//g, '');
+        
+        // Trim whitespace that might be left
+        cleanedContent = cleanedContent.trim();
+        
+        // Clean up any trailing commas that might be left after comment removal
+        cleanedContent = cleanedContent.replace(/,\s*}/g, '}');
+        cleanedContent = cleanedContent.replace(/,\s*]/g, ']');
+        
+        console.log('📄 Cleaned JSON content (removed comments):', {
+          originalLength: content.length,
+          cleanedLength: cleanedContent.length,
+          preview: cleanedContent.substring(0, 200)
+        });
+        
+        const templateJson = JSON.parse(cleanedContent);
         
         // Find the main product section
         const sections = templateJson.sections || {};

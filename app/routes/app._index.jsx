@@ -565,15 +565,35 @@ export default function Dashboard() {
       const numericThemeId = mainTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
       const storeSubdomain = (shop || '').replace('.myshopify.com', '');
 
+      // Debug: Log full selectedProduct object
+      console.log('🔍 Theme Editor Debug - Full selectedProduct:', {
+        selectedProduct,
+        selectedProductHandle: selectedProduct?.handle,
+        selectedProductTitle: selectedProduct?.title,
+        selectedProductId: selectedProduct?.id,
+        wizardVariantName
+      });
+
+      // Verify we have a product handle
+      if (!selectedProduct?.handle) {
+        console.error('❌ No product selected - cannot open Theme Editor');
+        alert('No product selected. Please select a product first.');
+        return;
+      }
+
       // For OS 2.0 JSON templates, the template param is product.<suffix>
       const templateParam = wizardVariantName ? `product.${wizardVariantName}` : 'product';
       
-      // Include the view query parameter in previewPath to specify the variant template
-      let previewPath = selectedProduct?.handle ? `/products/${selectedProduct.handle}` : '/products';
-      if (wizardVariantName) {
-        previewPath += `?view=${wizardVariantName}`;
-      }
+      // Construct previewPath - ONLY the product path, not with view parameter
+      // The template parameter already specifies which template to use
+      // The previewPath should ONLY specify the product to preview
+      const previewPath = `/products/${selectedProduct.handle}`;
 
+      // Construct the Theme Editor URL
+      // - template: specifies which template file to use (product.{variantName})
+      // - previewPath: specifies which product to preview (ONLY the product path)
+      // Note: Do NOT include ?view= in previewPath when using template parameter
+      // Shopify will use the template parameter to determine the template
       const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodeURIComponent(previewPath)}`;
 
       console.log('🧭 Theme Editor Debug Params:', {
@@ -583,14 +603,17 @@ export default function Dashboard() {
         numericThemeId,
         templateParam,
         previewPath,
+        productPath,
         wizardVariantName,
-        selectedProductHandle: selectedProduct?.handle,
+        selectedProductHandle: selectedProduct.handle,
+        selectedProductTitle: selectedProduct.title,
         editorUrl
       });
 
       window.open(editorUrl, '_blank', 'noopener');
     } catch (err) {
       console.error('❌ Failed to open Theme Editor (debug):', err);
+      alert(`Failed to open Theme Editor: ${err.message}`);
     }
   };
 
@@ -919,6 +942,16 @@ export default function Dashboard() {
             
             console.log('📡 Add widget block response status:', addBlockResponse.status);
             
+            if (!addBlockResponse.ok) {
+              const errorText = await addBlockResponse.text();
+              console.error('❌ Add widget block HTTP error:', {
+                status: addBlockResponse.status,
+                statusText: addBlockResponse.statusText,
+                errorText
+              });
+              throw new Error(`HTTP ${addBlockResponse.status}: ${errorText}`);
+            }
+            
             const addBlockResult = await addBlockResponse.json();
             console.log('📡 Add widget block response:', addBlockResult);
             
@@ -937,7 +970,8 @@ export default function Dashboard() {
               message: blockError.message,
               stack: blockError.stack
             });
-            // Don't fail the entire process if block addition fails
+            // Don't fail the entire process if block addition fails, but log the error
+            alert(`Warning: Widget could not be added to template: ${blockError.message}`);
           }
         } else {
           console.log('ℹ️ No widget selected or widget does not have block implementation', {
