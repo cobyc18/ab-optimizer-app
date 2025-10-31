@@ -647,6 +647,15 @@ export default function Dashboard() {
       rationale: 'Builds credibility, increases sales by 18-22%',
       style: 'Trustworthy',
       preview: '⭐ 4.8/5 from 1,247 reviews'
+    },
+    {
+      id: 5,
+      utility: 'Live Visitor Count',
+      rationale: 'Shows real-time visitor activity, creates urgency and social proof',
+      style: 'Dynamic',
+      preview: '👁️ 76 people viewing this page',
+      blockId: 'live-visitor-count',
+      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
     }
   ];
 
@@ -854,6 +863,41 @@ export default function Dashboard() {
       const result = await response.json();
       if (result.success) {
         console.log('✅ Variant template created:', result.newFilename);
+        
+        // If a widget was selected and it has blockId (live-visitor-count), add it to the template
+        if (selectedIdea?.blockId && selectedIdea?.appExtensionId) {
+          console.log('🔧 Adding widget block to duplicated template:', {
+            blockId: selectedIdea.blockId,
+            appExtensionId: selectedIdea.appExtensionId,
+            templateFilename: result.newFilename
+          });
+          
+          try {
+            const addBlockResponse = await fetch('/api/add-widget-block', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                templateFilename: result.newFilename,
+                themeId: mainTheme.id,
+                blockId: selectedIdea.blockId,
+                appExtensionId: selectedIdea.appExtensionId
+              })
+            });
+            
+            const addBlockResult = await addBlockResponse.json();
+            if (addBlockResult.success) {
+              console.log('✅ Widget block added to template:', addBlockResult.message);
+            } else {
+              console.error('❌ Failed to add widget block:', addBlockResult.error);
+              // Don't fail the entire process if block addition fails
+            }
+          } catch (blockError) {
+            console.error('❌ Error adding widget block:', blockError);
+            // Don't fail the entire process if block addition fails
+          }
+        } else {
+          console.log('ℹ️ No widget selected or widget does not have block implementation');
+        }
         
         // Generate screenshot of the variant
         const variantPreviewUrl = generateWizardPreviewUrl(selectedProduct.handle, mainTheme.id) + `&view=${variantName}`;
