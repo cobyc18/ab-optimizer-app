@@ -567,7 +567,12 @@ export default function Dashboard() {
 
       // For OS 2.0 JSON templates, the template param is product.<suffix>
       const templateParam = wizardVariantName ? `product.${wizardVariantName}` : 'product';
-      const previewPath = selectedProduct?.handle ? `/products/${selectedProduct.handle}` : '/products';
+      
+      // Include the view query parameter in previewPath to specify the variant template
+      let previewPath = selectedProduct?.handle ? `/products/${selectedProduct.handle}` : '/products';
+      if (wizardVariantName) {
+        previewPath += `?view=${wizardVariantName}`;
+      }
 
       const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodeURIComponent(previewPath)}`;
 
