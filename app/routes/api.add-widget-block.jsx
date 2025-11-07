@@ -225,12 +225,11 @@ export const action = async ({ request }) => {
           const errorPos = parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0');
           const errorLine = parseInt(parseError.message.match(/line (\d+)/)?.[1] || '0');
           const errorCol = parseInt(parseError.message.match(/column (\d+)/)?.[1] || '0');
-          
-          const errorPos = parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0');
+
           console.log('🔍 Error details:', {
             position: errorPos,
-            line: parseError.message.match(/line (\d+)/)?.[1],
-            column: parseError.message.match(/column (\d+)/)?.[1]
+            line: errorLine,
+            column: errorCol
           });
 
           const fixedContent = escapeControlCharacters(cleanedContent);

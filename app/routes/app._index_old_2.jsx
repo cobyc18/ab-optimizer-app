@@ -332,15 +332,15 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
       descriptionColor: '#6d28d9',
       arrowColor: '#8b5cf6'
     },
-    purple: { 
-      background: 'rgba(251, 146, 199, 0.2)',
-      backdropFilter: 'blur(15px)',
-      WebkitBackdropFilter: 'blur(15px)',
-      border: '1px solid rgba(251, 146, 199, 0.3)',
-      textColor: '#5b21b6',
-      descriptionColor: '#6d28d9',
-      arrowColor: '#8b5cf6'
-    },
+    //purple: { 
+      //background: 'rgba(251, 146, 199, 0.2)',
+      //backdropFilter: 'blur(15px)',
+      // WebkitBackdropFilter: 'blur(15px)',
+        border: '1px solid rgba(251, 146, 199, 0.3)',
+        //textColor: '#5b21b6',
+      //descriptionColor: '#6d28d9',
+      //arrowColor: '#8b5cf6'
+    //},
     orange: { 
       background: 'linear-gradient(135deg, #fff7ed 0%, #fed7aa 100%)',
       border: '1px solid #fed7aa',
