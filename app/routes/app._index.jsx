@@ -681,8 +681,11 @@ export default function Dashboard() {
       rationale: 'Shows real-time visitor activity, creates urgency and social proof',
       style: 'Dynamic',
       preview: '👁️ 76 people viewing this page',
-      blockId: 'live-visitor-count',
-      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
+      blockId: 'widget',
+      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4',
+      blockSettings: {
+        widget_type: 'live-visitor-count'
+      }
     }
   ];
 
@@ -935,7 +938,8 @@ export default function Dashboard() {
                 templateFilename: result.newFilename,
                 themeId: mainTheme.id,
                 blockId: selectedIdea.blockId,
-                appExtensionId: selectedIdea.appExtensionId
+                appExtensionId: selectedIdea.appExtensionId,
+                blockSettings: selectedIdea.blockSettings || {}
               })
             });
             

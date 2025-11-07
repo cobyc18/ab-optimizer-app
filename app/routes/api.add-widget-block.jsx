@@ -6,13 +6,14 @@ export const action = async ({ request }) => {
     console.log('🔧 Add widget block API called');
     const { admin } = await authenticate.admin(request);
     const requestBody = await request.json();
-    const { templateFilename, themeId, blockId, appExtensionId } = requestBody;
+    const { templateFilename, themeId, blockId, appExtensionId, blockSettings } = requestBody;
 
     console.log('🔧 Add widget block request details:', { 
       templateFilename, 
       themeId, 
       blockId, 
       appExtensionId,
+      blockSettings,
       fullRequestBody: requestBody,
       hasAllParams: !!(templateFilename && themeId && blockId && appExtensionId)
     });
@@ -83,6 +84,7 @@ export const action = async ({ request }) => {
     let updatedContent;
     const appBlockType = `@shopify/theme-app-extension/${blockId}`;
     const appBlockId = `${appExtensionId}/${blockId}`;
+    const appliedBlockSettings = blockSettings && typeof blockSettings === 'object' ? blockSettings : {};
 
     if (templateFilename.endsWith('.json')) {
       // Handle JSON templates (OS 2.0)
@@ -274,7 +276,7 @@ export const action = async ({ request }) => {
         // Add the app block
         mainSection.blocks[blockInstanceId] = {
           type: appBlockType,
-          settings: {}
+          settings: appliedBlockSettings
         };
 
         // Add to block_order if not already there
@@ -378,7 +380,7 @@ export const action = async ({ request }) => {
           // Add the app block
           mainSection.blocks[blockInstanceId] = {
             type: appBlockType,
-            settings: {}
+            settings: appliedBlockSettings
           };
 
           // Add to block_order if not already there

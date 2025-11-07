@@ -1,0 +1,383 @@
+/* Unified Widget CSS - Styles for all widget types */
+
+/* ============================================
+   Live Visitor Count Widget Styles
+   ============================================ */
+.live-visitor-widget {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #000000;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  /* Desktop default values */
+  padding: var(--desktop-padding) var(--desktop-padding-h);
+  margin: var(--desktop-padding-outside);
+  border-radius: var(--desktop-border-radius);
+  font-size: var(--desktop-font-size);
+  width: var(--desktop-width);
+  justify-content: var(--desktop-alignment);
+}
+
+.live-visitor-widget[data-desktop-height] {
+  height: var(--desktop-height);
+  min-height: var(--desktop-height);
+}
+
+/* Font family handling */
+.live-visitor-widget[data-desktop-font="arial"] { font-family: Arial, sans-serif; }
+.live-visitor-widget[data-desktop-font="helvetica"] { font-family: Helvetica, Arial, sans-serif; }
+.live-visitor-widget[data-desktop-font="georgia"] { font-family: Georgia, serif; }
+.live-visitor-widget[data-desktop-font="times"] { font-family: 'Times New Roman', Times, serif; }
+.live-visitor-widget[data-desktop-font="courier"] { font-family: 'Courier New', Courier, monospace; }
+
+.live-visitor-widget .eye-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.live-visitor-widget .visitor-count {
+  font-weight: 600;
+  color: #000000;
+  min-width: 28px;
+  text-align: center;
+}
+
+.live-visitor-widget .visitor-text {
+  color: #000000;
+  font-weight: 400;
+}
+
+.live-visitor-widget .mobile-text {
+  display: none;
+}
+
+/* Mobile styles for Live Visitor Count */
+@media (max-width: 768px) {
+  .live-visitor-widget {
+    padding: var(--mobile-padding) var(--mobile-padding-h);
+    margin: var(--mobile-padding-outside);
+    border-radius: var(--mobile-border-radius);
+    font-size: var(--mobile-font-size);
+    width: var(--mobile-width);
+    justify-content: var(--mobile-alignment);
+  }
+
+  .live-visitor-widget[data-mobile-height] {
+    height: var(--mobile-height);
+    min-height: var(--mobile-height);
+  }
+
+  .live-visitor-widget[data-mobile-font="arial"] { font-family: Arial, sans-serif; }
+  .live-visitor-widget[data-mobile-font="helvetica"] { font-family: Helvetica, Arial, sans-serif; }
+  .live-visitor-widget[data-mobile-font="georgia"] { font-family: Georgia, serif; }
+  .live-visitor-widget[data-mobile-font="times"] { font-family: 'Times New Roman', Times, serif; }
+  .live-visitor-widget[data-mobile-font="courier"] { font-family: 'Courier New', Courier, monospace; }
+
+  .live-visitor-widget .desktop-text {
+    display: none;
+  }
+
+  .live-visitor-widget .mobile-text {
+    display: inline;
+  }
+}
+
+.live-visitor-widget .visitor-count.updating {
+  animation: pulse 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
+/* ============================================
+   Product Carousel Widget Styles
+   ============================================ */
+.product-carousel-widget {
+  margin: 24px 0;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+  background: #f5f5f5;
+  border-radius: 8px;
+  padding: 40px 20px;
+  width: 100vw;
+  max-width: none;
+  margin-left: calc(-50vw + 50%);
+  margin-right: calc(-50vw + 50%);
+}
+
+.product-carousel-widget .carousel-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.product-carousel-widget .carousel-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin: 0;
+  color: #333;
+}
+
+.product-carousel-widget .carousel-navigation {
+  display: flex;
+  gap: 8px;
+}
+
+.product-carousel-widget .nav-arrow {
+  width: 40px;
+  height: 40px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  color: #666;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.product-carousel-widget .nav-arrow:hover {
+  background: #f8f9fa;
+  border-color: #999;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.product-carousel-widget .carousel-container {
+  overflow: hidden;
+  position: relative;
+}
+
+.product-carousel-widget .carousel-track {
+  display: flex;
+  transition: transform 0.3s ease;
+}
+
+.product-carousel-widget .carousel-slide {
+  flex: 0 0 100%;
+  margin-right: 0;
+}
+
+.product-carousel-widget .product-card {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.product-carousel-widget .product-image {
+  width: 100%;
+  height: 160px;
+  object-fit: cover;
+  border-radius: 6px;
+  margin-bottom: 16px;
+  background: #f8f9fa;
+}
+
+.product-carousel-widget .product-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.product-carousel-widget .product-header {
+  margin-bottom: 12px;
+  padding: 8px 0;
+}
+
+.product-carousel-widget .product-title {
+  font-size: 14px;
+  font-weight: 500;
+  margin: 0;
+  color: #333;
+  text-align: center;
+}
+
+.product-carousel-widget .price-original {
+  text-decoration: line-through;
+  color: #999;
+  font-size: 12px;
+  margin-right: 8px;
+}
+
+.product-carousel-widget .price-sale,
+.product-carousel-widget .price-regular {
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e3a8a;
+}
+
+.product-carousel-widget .sale-badge {
+  display: inline-block;
+  background: #10b981;
+  color: white;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 8px;
+  text-transform: uppercase;
+  letter-spacing: 0.025em;
+}
+
+.product-carousel-widget .product-content {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 0;
+}
+
+.product-carousel-widget .product-options {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+}
+
+.product-carousel-widget .variant-option {
+  padding: 4px 8px;
+  border: 1px solid #ddd;
+  background: white;
+  border-radius: 4px;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #007bff;
+}
+
+.product-carousel-widget .variant-option:hover,
+.product-carousel-widget .variant-option.selected {
+  border-color: #007bff;
+  background: #f0f8ff;
+  color: #007bff;
+}
+
+.product-carousel-widget .product-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  margin-top: auto;
+}
+
+.product-carousel-widget .product-price {
+  text-align: left;
+}
+
+.product-carousel-widget .add-to-cart-btn {
+  background: #1e3a8a;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 20px;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.2s ease;
+  min-width: 70px;
+}
+
+.product-carousel-widget .add-to-cart-btn:hover {
+  background: #1e40af;
+}
+
+.product-carousel-widget .add-to-cart-btn.plus {
+  background: #1e3a8a;
+  font-size: 14px;
+  border-radius: 20px;
+}
+
+.product-carousel-widget .add-to-cart-btn.plus:hover {
+  background: #1e40af;
+}
+
+.product-carousel-widget .add-to-cart-btn:disabled,
+.product-carousel-widget .add-to-cart-btn.disabled {
+  background: #9ca3af !important;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.product-carousel-widget .add-to-cart-btn:disabled:hover,
+.product-carousel-widget .add-to-cart-btn.disabled:hover {
+  background: #9ca3af !important;
+}
+
+.product-carousel-widget .carousel-pagination {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+  align-items: center;
+}
+
+.product-carousel-widget .pagination-dot {
+  width: 24px;
+  height: 4px;
+  border-radius: 2px;
+  border: none;
+  background: #ddd;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.product-carousel-widget .pagination-dot.active {
+  background: #1e3a8a;
+  transform: scaleX(1.2);
+}
+
+.product-carousel-widget .pagination-dot:hover {
+  background: #9ca3af;
+}
+
+/* Mobile styles for Product Carousel */
+@media (max-width: 768px) {
+  .product-carousel-widget .carousel-title {
+    font-size: 16px;
+  }
+  
+  .product-carousel-widget {
+    padding: 16px;
+  }
+  
+  .product-carousel-widget .product-card {
+    max-width: 260px;
+    padding: 16px;
+  }
+  
+  .product-carousel-widget .product-image {
+    height: 140px;
+  }
+  
+  .product-carousel-widget .nav-arrow {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+}
+

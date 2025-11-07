@@ -1,0 +1,100 @@
+.live-visitor-widget {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: white;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  color: #000000;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  position: relative;
+  overflow: hidden;
+  /* Desktop default values */
+  padding: var(--desktop-padding) var(--desktop-padding-h);
+  margin: var(--desktop-padding-outside);
+  border-radius: var(--desktop-border-radius);
+  font-size: var(--desktop-font-size);
+  width: var(--desktop-width);
+  justify-content: var(--desktop-alignment);
+}
+
+.live-visitor-widget[data-desktop-height] {
+  height: var(--desktop-height);
+  min-height: var(--desktop-height);
+}
+
+/* Font family handling */
+.live-visitor-widget[data-desktop-font="arial"] { font-family: Arial, sans-serif; }
+.live-visitor-widget[data-desktop-font="helvetica"] { font-family: Helvetica, Arial, sans-serif; }
+.live-visitor-widget[data-desktop-font="georgia"] { font-family: Georgia, serif; }
+.live-visitor-widget[data-desktop-font="times"] { font-family: 'Times New Roman', Times, serif; }
+.live-visitor-widget[data-desktop-font="courier"] { font-family: 'Courier New', Courier, monospace; }
+
+.eye-icon {
+  flex-shrink: 0;
+  width: 20px;
+  height: 20px;
+}
+
+.visitor-count {
+  font-weight: 600;
+  color: #000000;
+  min-width: 28px;
+  text-align: center;
+}
+
+.visitor-text {
+  color: #000000;
+  font-weight: 400;
+}
+
+.mobile-text {
+  display: none;
+}
+
+/* Mobile styles */
+@media (max-width: 768px) {
+  .live-visitor-widget {
+    padding: var(--mobile-padding) var(--mobile-padding-h);
+    margin: var(--mobile-padding-outside);
+    border-radius: var(--mobile-border-radius);
+    font-size: var(--mobile-font-size);
+    width: var(--mobile-width);
+    justify-content: var(--mobile-alignment);
+  }
+
+  .live-visitor-widget[data-mobile-height] {
+    height: var(--mobile-height);
+    min-height: var(--mobile-height);
+  }
+
+  .live-visitor-widget[data-mobile-font="arial"] { font-family: Arial, sans-serif; }
+  .live-visitor-widget[data-mobile-font="helvetica"] { font-family: Helvetica, Arial, sans-serif; }
+  .live-visitor-widget[data-mobile-font="georgia"] { font-family: Georgia, serif; }
+  .live-visitor-widget[data-mobile-font="times"] { font-family: 'Times New Roman', Times, serif; }
+  .live-visitor-widget[data-mobile-font="courier"] { font-family: 'Courier New', Courier, monospace; }
+
+  .desktop-text {
+    display: none;
+  }
+
+  .mobile-text {
+    display: inline;
+  }
+}
+
+.visitor-count.updating {
+  animation: pulse 0.3s ease-in-out;
+}
+
+@keyframes pulse {
+  0%, 100% { 
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% { 
+    opacity: 0.7;
+    transform: scale(1.05);
+  }
+}
+
