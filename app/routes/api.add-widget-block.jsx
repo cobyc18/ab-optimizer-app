@@ -1,6 +1,121 @@
 import { json } from "@remix-run/node";
 import { authenticate } from "../shopify.server.js";
 
+function stripJsonComments(input) {
+  let result = '';
+  let inString = false;
+  let stringChar = '';
+  let escapeNext = false;
+
+  for (let i = 0; i < input.length; i++) {
+    const char = input[i];
+    const nextChar = input[i + 1];
+
+    if (escapeNext) {
+      result += char;
+      escapeNext = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      result += char;
+      escapeNext = true;
+      continue;
+    }
+
+    if (inString) {
+      if (char === stringChar) {
+        inString = false;
+        stringChar = '';
+      }
+      result += char;
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      inString = true;
+      stringChar = char;
+      result += char;
+      continue;
+    }
+
+    if (char === '/' && nextChar === '/') {
+      i += 1;
+      while (i + 1 < input.length && input[i + 1] !== '\n' && input[i + 1] !== '\r') {
+        i += 1;
+      }
+      continue;
+    }
+
+    if (char === '/' && nextChar === '*') {
+      i += 1;
+      while (i + 1 < input.length) {
+        if (input[i + 1] === '*' && input[i + 2] === '/') {
+          i += 2;
+          break;
+        }
+        i += 1;
+      }
+      i -= 1;
+      continue;
+    }
+
+    result += char;
+  }
+
+  return result;
+}
+
+function escapeControlCharacters(input) {
+  let result = '';
+  let inString = false;
+  let escapeNext = false;
+
+  for (let i = 0; i < input.length; i++) {
+    const char = input[i];
+    const code = char.charCodeAt(0);
+
+    if (escapeNext) {
+      result += char;
+      escapeNext = false;
+      continue;
+    }
+
+    if (char === '\\') {
+      result += char;
+      escapeNext = true;
+      continue;
+    }
+
+    if (char === '"' || char === "'") {
+      inString = !inString;
+      result += char;
+      continue;
+    }
+
+    if (inString) {
+      if (code >= 0 && code <= 31) {
+        if (code === 0x09) {
+          result += '\\t';
+        } else if (code === 0x0A) {
+          result += '\\n';
+        } else if (code === 0x0D) {
+          result += '\\r';
+        } else {
+          const hex = code.toString(16).padStart(4, '0');
+          result += `\\u${hex}`;
+        }
+      } else {
+        result += char;
+      }
+    } else {
+      result += char;
+    }
+  }
+
+  return result;
+}
+
 export const action = async ({ request }) => {
   try {
     console.log('🔧 Add widget block API called');
@@ -89,36 +204,12 @@ export const action = async ({ request }) => {
     if (templateFilename.endsWith('.json')) {
       // Handle JSON templates (OS 2.0)
       try {
-        // Strip comments from JSON (Shopify allows comments in JSON templates)
-        // Need to be careful not to remove // or /* inside strings
-        let cleanedContent = content;
-        
-        // Remove single-line comments (//) - matches // to end of line
-        cleanedContent = cleanedContent.replace(/\/\/[^\n\r]*/g, '');
-        
-        // Remove multi-line comments (/* */) - matches across multiple lines
-        cleanedContent = cleanedContent.replace(/\/\*[\s\S]*?\*\//g, '');
-        
-        // Remove control characters (except newlines which JSON needs for strings)
-        // But we need to be careful - control characters inside strings should be escaped
-        // This is tricky, so let's use a more robust approach:
-        // 1. Try to parse after comment removal
-        // 2. If that fails, use a JSON5 parser or manually handle edge cases
-        
-        // Clean up trailing commas that might be left after comment removal
-        cleanedContent = cleanedContent.replace(/,\s*}/g, '}');
-        cleanedContent = cleanedContent.replace(/,\s*]/g, ']');
-        
-        // Trim whitespace
-        cleanedContent = cleanedContent.trim();
-        
-        console.log('📄 Cleaned JSON content (removed comments):', {
+        let cleanedContent = stripJsonComments(content).trim();
+        console.log('📄 Cleaned JSON content (removed comments safely):', {
           originalLength: content.length,
-          cleanedLength: cleanedContent.length,
-          preview: cleanedContent.substring(0, 300)
+          cleanedLength: cleanedContent.length
         });
-        
-        // Try to parse the JSON
+
         let templateJson;
         try {
           templateJson = JSON.parse(cleanedContent);
@@ -135,85 +226,16 @@ export const action = async ({ request }) => {
           const errorLine = parseInt(parseError.message.match(/line (\d+)/)?.[1] || '0');
           const errorCol = parseInt(parseError.message.match(/column (\d+)/)?.[1] || '0');
           
+          const errorPos = parseInt(parseError.message.match(/position (\d+)/)?.[1] || '0');
           console.log('🔍 Error details:', {
             position: errorPos,
-            line: errorLine,
-            column: errorCol,
-            contentAroundError: cleanedContent.substring(Math.max(0, errorPos - 100), Math.min(cleanedContent.length, errorPos + 100))
+            line: parseError.message.match(/line (\d+)/)?.[1],
+            column: parseError.message.match(/column (\d+)/)?.[1]
           });
-          
-          // Strategy: Process character by character, properly handling string literals
-          // This is more reliable than regex replacement
-          let fixedContent = '';
-          let inString = false;
-          let escapeNext = false;
-          
-          for (let i = 0; i < cleanedContent.length; i++) {
-            const char = cleanedContent[i];
-            const code = char.charCodeAt(0);
-            
-            if (escapeNext) {
-              // We're in an escape sequence - just copy it
-              fixedContent += char;
-              escapeNext = false;
-              continue;
-            }
-            
-            if (char === '\\') {
-              // Start of escape sequence
-              fixedContent += char;
-              escapeNext = true;
-              continue;
-            }
-            
-            if (char === '"' && !inString) {
-              // Opening quote - enter string
-              inString = true;
-              fixedContent += char;
-              continue;
-            } else if (char === '"' && inString) {
-              // Closing quote - exit string
-              inString = false;
-              fixedContent += char;
-              continue;
-            }
-            
-            if (inString) {
-              // We're inside a string literal - need to escape control characters
-              if (code >= 0x00 && code <= 0x1F) {
-                // Control character - escape it
-                if (code === 0x09) {
-                  // Tab
-                  fixedContent += '\\t';
-                } else if (code === 0x0A) {
-                  // Newline
-                  fixedContent += '\\n';
-                } else if (code === 0x0D) {
-                  // Carriage return
-                  fixedContent += '\\r';
-                } else {
-                  // Other control character - escape as \uXXXX
-                  const hex = code.toString(16).padStart(4, '0');
-                  fixedContent += `\\u${hex}`;
-                }
-              } else if (code === 0x7F || (code >= 0x80 && code <= 0x9F)) {
-                // Extended control characters - escape as \uXXXX
-                const hex = code.toString(16).padStart(4, '0');
-                fixedContent += `\\u${hex}`;
-              } else {
-                // Regular character - copy as is
-                fixedContent += char;
-              }
-            } else {
-              // Outside string literal - copy as is (shouldn't have control chars here)
-              fixedContent += char;
-            }
-          }
-          
-          console.log('📄 Fixed control characters character-by-character, attempting to parse again...');
-          console.log('📄 Fixed content preview (first 500 chars):', fixedContent.substring(0, 500));
-          console.log('📄 Fixed content length:', fixedContent.length, 'vs original:', cleanedContent.length);
-          
+
+          const fixedContent = escapeControlCharacters(cleanedContent);
+          console.log('📄 Escaped control characters within strings, retrying parse...');
+
           try {
             templateJson = JSON.parse(fixedContent);
             console.log('✅ Successfully parsed JSON after fixing control characters');
