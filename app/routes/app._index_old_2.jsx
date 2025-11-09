@@ -336,7 +336,7 @@ const QuickActionCard = ({ title, description, color = "green", to, icon }) => {
       //background: 'rgba(251, 146, 199, 0.2)',
       //backdropFilter: 'blur(15px)',
       // WebkitBackdropFilter: 'blur(15px)',
-        border: '1px solid rgba(251, 146, 199, 0.3)',
+        //border: '1px solid rgba(251, 146, 199, 0.3)',
         //textColor: '#5b21b6',
       //descriptionColor: '#6d28d9',
       //arrowColor: '#8b5cf6'

@@ -594,7 +594,13 @@ export default function Dashboard() {
       // - previewPath: specifies which product to preview (ONLY the product path)
       // Note: Do NOT include ?view= in previewPath when using template parameter
       // Shopify will use the template parameter to determine the template
-      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodeURIComponent(previewPath)}`;
+      const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
+      const widgetHandle = selectedIdea?.blockId || null;
+      const addBlockParams = widgetHandle
+        ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
+        : '';
+
+      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodeURIComponent(previewPath)}${addBlockParams}`;
 
       console.log('🧭 Theme Editor Debug Params:', {
         shop,
@@ -606,6 +612,7 @@ export default function Dashboard() {
         wizardVariantName,
         selectedProductHandle: selectedProduct.handle,
         selectedProductTitle: selectedProduct.title,
+        selectedIdea,
         editorUrl
       });
 
@@ -914,76 +921,6 @@ export default function Dashboard() {
         });
         
         // If a widget was selected and it has blockId (live-visitor-count), add it to the template
-        if (selectedIdea?.blockId && selectedIdea?.appExtensionId) {
-          console.log('🔧 Adding widget block to duplicated template:', {
-            blockId: selectedIdea.blockId,
-            appExtensionId: selectedIdea.appExtensionId,
-            templateFilename: result.newFilename,
-            themeId: mainTheme.id,
-            fullSelectedIdea: selectedIdea
-          });
-          
-          try {
-            console.log('📡 Calling /api/add-widget-block with:', {
-              templateFilename: result.newFilename,
-              themeId: mainTheme.id,
-              blockId: selectedIdea.blockId,
-              appExtensionId: selectedIdea.appExtensionId
-            });
-            
-            const addBlockResponse = await fetch('/api/add-widget-block', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                templateFilename: result.newFilename,
-                themeId: mainTheme.id,
-                blockId: selectedIdea.blockId,
-                appExtensionId: selectedIdea.appExtensionId,
-                blockSettings: selectedIdea.blockSettings || {}
-              })
-            });
-            
-            console.log('📡 Add widget block response status:', addBlockResponse.status);
-            
-            if (!addBlockResponse.ok) {
-              const errorText = await addBlockResponse.text();
-              console.error('❌ Add widget block HTTP error:', {
-                status: addBlockResponse.status,
-                statusText: addBlockResponse.statusText,
-                errorText
-              });
-              throw new Error(`HTTP ${addBlockResponse.status}: ${errorText}`);
-            }
-            
-            const addBlockResult = await addBlockResponse.json();
-            console.log('📡 Add widget block response:', addBlockResult);
-            
-            if (addBlockResult.success) {
-              console.log('✅ Widget block added to template:', addBlockResult.message);
-            } else {
-              console.error('❌ Failed to add widget block:', {
-                error: addBlockResult.error,
-                fullResponse: addBlockResult
-              });
-              // Don't fail the entire process if block addition fails
-            }
-          } catch (blockError) {
-            console.error('❌ Error adding widget block:', {
-              error: blockError,
-              message: blockError.message,
-              stack: blockError.stack
-            });
-            // Don't fail the entire process if block addition fails, but log the error
-            alert(`Warning: Widget could not be added to template: ${blockError.message}`);
-          }
-        } else {
-          console.log('ℹ️ No widget selected or widget does not have block implementation', {
-            selectedIdea,
-            hasBlockId: !!selectedIdea?.blockId,
-            hasAppExtensionId: !!selectedIdea?.appExtensionId
-          });
-        }
-        
         // Generate screenshot of the variant
         const variantPreviewUrl = generateWizardPreviewUrl(selectedProduct.handle, mainTheme.id) + `&view=${variantName}`;
         console.log('🔗 Variant preview URL:', variantPreviewUrl);
