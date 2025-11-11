@@ -556,7 +556,13 @@ export default function Dashboard() {
   const [wizardVariantProductHandle, setWizardVariantProductHandle] = useState(null);
   const [wizardVariantProductTitle, setWizardVariantProductTitle] = useState('');
   const [wizardVariantTemplateFilename, setWizardVariantTemplateFilename] = useState('');
+  const [wizardControlTemplateFilename, setWizardControlTemplateFilename] = useState('');
   const [wizardVariantOriginalTemplateSuffix, setWizardVariantOriginalTemplateSuffix] = useState(null);
+  const [wizardTestName, setWizardTestName] = useState('');
+  const [wizardTrafficSplit, setWizardTrafficSplit] = useState('50');
+  const [isLaunchingTest, setIsLaunchingTest] = useState(false);
+  const [wizardLaunchError, setWizardLaunchError] = useState(null);
+  const [wizardLaunchSuccess, setWizardLaunchSuccess] = useState(null);
   const [isVariantTemplateReady, setIsVariantTemplateReady] = useState(false);
   const [isVariantRequestInFlight, setIsVariantRequestInFlight] = useState(false);
   // Debug: Open the created variant directly in the Theme Editor with previewPath
@@ -761,6 +767,7 @@ export default function Dashboard() {
   };
 
   const resetSwiper = () => {
+    setCurrentStep(1);
     setCurrentWidgetIndex(0);
     setSelectedIdea(null);
     setSwipeDirection(null);
@@ -776,6 +783,12 @@ export default function Dashboard() {
     setIsVariantTemplateReady(false);
     setWizardSelectedProductSnapshot(null);
     setWizardVariantOriginalTemplateSuffix(null);
+    setWizardControlTemplateFilename('');
+    setWizardTestName('');
+    setWizardTrafficSplit('50');
+    setIsLaunchingTest(false);
+    setWizardLaunchError(null);
+    setWizardLaunchSuccess(null);
   };
 
   // Generate screenshot for wizard
@@ -954,6 +967,7 @@ export default function Dashboard() {
 
       console.log('📄 Final template to duplicate:', baseTemplate);
       console.log('✅ Template exists in available templates:', templateExists);
+      setWizardControlTemplateFilename(baseTemplate);
 
       const response = await fetch('/api/duplicate-template', {
         method: 'POST',
@@ -1079,6 +1093,106 @@ export default function Dashboard() {
     if (product) {
       setWizardSelectedProductSnapshot(product);
     }
+    setWizardLaunchError(null);
+    setWizardLaunchSuccess(null);
+  };
+
+  const handleLaunchTest = async () => {
+    if (isLaunchingTest) return;
+
+    const productGid =
+      wizardVariantProductId ||
+      wizardSelectedProductSnapshot?.id ||
+      selectedProduct?.id;
+
+    if (!wizardSelectedProductSnapshot || !productGid) {
+      alert('Please select a product before launching the test.');
+      return;
+    }
+
+    if (!wizardVariantName || !wizardVariantTemplateFilename) {
+      alert('The variant template is not ready yet. Please go back and complete the template setup.');
+      return;
+    }
+
+    if (!wizardControlTemplateFilename) {
+      alert('Unable to detect the control template. Please restart the wizard.');
+      return;
+    }
+
+    const finalTestName = (wizardTestName && wizardTestName.trim().length > 0)
+      ? wizardTestName.trim()
+      : `${selectedIdea?.utility || 'Widget'} Test - ${wizardSelectedProductSnapshot.title || 'Product'} (${new Date().toLocaleDateString()})`;
+
+    const payload = {
+      shop,
+      testName: finalTestName,
+      productId: productGid,
+      controlTemplateFilename: wizardControlTemplateFilename,
+      variantTemplateFilename: wizardVariantTemplateFilename,
+      controlTemplateSuffix: wizardVariantOriginalTemplateSuffix,
+      variantTemplateSuffix: wizardVariantName,
+      trafficSplit: wizardTrafficSplit
+    };
+
+    setIsLaunchingTest(true);
+    setWizardLaunchError(null);
+    setWizardLaunchSuccess(null);
+
+    try {
+      const response = await fetch('/api/launch-ab-test', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const data = await response.json();
+
+      if (!response.ok || !data.success) {
+        throw new Error(data.error || 'Failed to launch test.');
+      }
+
+      setWizardLaunchSuccess(`Test "${data.abTest?.name || finalTestName}" launched successfully!`);
+
+      // Reset product template back to control/default after launch
+      try {
+        await fetch('/api/assign-product-template', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            productId: productGid,
+            templateSuffix: wizardVariantOriginalTemplateSuffix ?? null
+          })
+        });
+
+        setWizardSelectedProductSnapshot(prev => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            templateSuffix: wizardVariantOriginalTemplateSuffix || null
+          };
+        });
+        setSelectedProduct(prev => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            templateSuffix: wizardVariantOriginalTemplateSuffix || null
+          };
+        });
+      } catch (revertError) {
+        console.error('⚠️ Failed to revert product template after launching test:', revertError);
+      }
+
+      setTimeout(() => {
+        setWizardOpen(false);
+        resetSwiper();
+      }, 1500);
+    } catch (error) {
+      console.error('❌ Failed to launch A/B test:', error);
+      setWizardLaunchError(error.message || 'Failed to launch A/B test. Please try again.');
+    } finally {
+      setIsLaunchingTest(false);
+    }
   };
 
   const openPreviewInNewTab = () => {
@@ -1155,10 +1269,29 @@ export default function Dashboard() {
     setScreenshotUrl('');
   }, [selectedTheme, selectedProduct]);
 
+  useEffect(() => {
+    if (wizardSelectedProductSnapshot && selectedIdea && !wizardTestName) {
+      const ideaLabel = selectedIdea.utility || 'Widget';
+      const productLabel = wizardSelectedProductSnapshot.title || 'Product';
+      setWizardTestName(`${ideaLabel} - ${productLabel}`);
+    }
+  }, [wizardSelectedProductSnapshot, selectedIdea, wizardTestName]);
+
   const previewProductTitle = wizardVariantProductTitle || wizardSelectedProductSnapshot?.title || selectedProduct?.title || '';
   const previewProductHandle = wizardVariantProductHandle || wizardSelectedProductSnapshot?.handle || selectedProduct?.handle || '';
   const previewProductId = wizardVariantProductId || wizardSelectedProductSnapshot?.id || '';
+  const trafficSplitDisplay = `${wizardTrafficSplit}% - ${100 - Number(wizardTrafficSplit || '50')}%`;
+  const controlTemplateLabel = wizardVariantOriginalTemplateSuffix
+    ? `product.${wizardVariantOriginalTemplateSuffix}`
+    : 'product (default)';
+  const variantTemplateLabel = wizardVariantName ? `product.${wizardVariantName}` : 'Not ready';
   const canOpenThemeEditor = Boolean(wizardVariantName && wizardVariantProductHandle && isVariantTemplateReady && !isVariantRequestInFlight);
+  const canLaunchTest = Boolean(
+    wizardVariantProductId &&
+    wizardVariantName &&
+    wizardControlTemplateFilename &&
+    wizardSelectedProductSnapshot
+  );
 
   return (
     <>
@@ -3790,6 +3923,8 @@ export default function Dashboard() {
                       <input
                         type="text"
                         placeholder="e.g., Social Proof Widget Test"
+                        value={wizardTestName}
+                        onChange={(e) => setWizardTestName(e.target.value)}
                         style={{
                           width: '100%',
                           padding: '12px',
@@ -3815,10 +3950,14 @@ export default function Dashboard() {
                         border: '1px solid #D1D5DB',
                         borderRadius: '8px',
                         fontSize: '14px'
-                      }}>
-                        <option value="50-50">50% - 50%</option>
-                        <option value="70-30">70% - 30%</option>
-                        <option value="80-20">80% - 20%</option>
+                      }}
+                        value={wizardTrafficSplit}
+                        onChange={(e) => setWizardTrafficSplit(e.target.value)}
+                      >
+                        <option value="50">50% - 50%</option>
+                        <option value="60">60% - 40%</option>
+                        <option value="70">70% - 30%</option>
+                        <option value="80">80% - 20%</option>
                       </select>
                     </div>
                   </div>
@@ -3928,6 +4067,23 @@ export default function Dashboard() {
                           color: '#6B7280',
                           margin: '0 0 4px 0'
                         }}>
+                          Test Name
+                        </p>
+                        <p style={{
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          {wizardTestName || 'Auto-generated when launching'}
+                        </p>
+                      </div>
+                      <div>
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '0 0 4px 0'
+                        }}>
                           Widget Type
                         </p>
                         <p style={{
@@ -3970,7 +4126,41 @@ export default function Dashboard() {
                           color: '#1F2937',
                           margin: 0
                         }}>
-                          50% - 50%
+                          {trafficSplitDisplay}
+                        </p>
+                      </div>
+                      <div>
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '0 0 4px 0'
+                        }}>
+                          Control Template
+                        </p>
+                        <p style={{
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          {controlTemplateLabel}
+                        </p>
+                      </div>
+                      <div>
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '0 0 4px 0'
+                        }}>
+                          Variant Template
+                        </p>
+                        <p style={{
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#1F2937',
+                          margin: 0
+                        }}>
+                          {variantTemplateLabel}
                         </p>
                       </div>
                     </div>
@@ -4009,6 +4199,32 @@ export default function Dashboard() {
                       This will create a duplicate template for testing.
                     </p>
                   </div>
+
+                  {wizardLaunchError && (
+                    <div style={{
+                      background: '#FEE2E2',
+                      border: '1px solid #EF4444',
+                      color: '#B91C1C',
+                      borderRadius: '8px',
+                      padding: '12px 16px',
+                      marginBottom: '16px'
+                    }}>
+                      {wizardLaunchError}
+                    </div>
+                  )}
+
+                  {wizardLaunchSuccess && (
+                    <div style={{
+                      background: '#ECFDF5',
+                      border: '1px solid #10B981',
+                      color: '#065F46',
+                      borderRadius: '8px',
+                      padding: '12px 16px',
+                      marginBottom: '16px'
+                    }}>
+                      {wizardLaunchSuccess}
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -4055,7 +4271,10 @@ export default function Dashboard() {
                   Previous
                 </button>
                 <button
-                  disabled={currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)}
+                  disabled={
+                    (currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)) ||
+                    (currentStep === 5 && (isLaunchingTest || !canLaunchTest))
+                  }
                   onClick={async () => {
                     if (currentStep === 2) {
                       if (!wizardSelectedProductSnapshot) {
@@ -4082,26 +4301,43 @@ export default function Dashboard() {
                     }
 
                     if (currentStep < 5) {
+                      setWizardLaunchError(null);
+                      setWizardLaunchSuccess(null);
                       setCurrentStep(prev => Math.min(prev + 1, 5));
                     } else {
-                      console.log('Launching A/B test...');
-                      setWizardOpen(false);
+                      await handleLaunchTest();
                     }
                   }}
                   style={{
-                    background: currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot) ? '#818CF8' : '#4F46E5',
+                    background:
+                      currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)
+                        ? '#818CF8'
+                        : currentStep === 5 && (isLaunchingTest || !canLaunchTest)
+                          ? '#818CF8'
+                          : '#4F46E5',
                     border: 'none',
                     borderRadius: '8px',
                     padding: '12px 24px',
-                    cursor: currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot) ? 'not-allowed' : 'pointer',
+                    cursor:
+                      currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)
+                        ? 'not-allowed'
+                        : currentStep === 5 && (isLaunchingTest || !canLaunchTest)
+                          ? 'not-allowed'
+                          : 'pointer',
                     fontSize: '14px',
                     fontWeight: '500',
                     color: '#FFFFFF',
-                    opacity: currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot) ? 0.8 : 1
+                    opacity:
+                      (currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)) ||
+                      (currentStep === 5 && (isLaunchingTest || !canLaunchTest))
+                        ? 0.8
+                        : 1
                   }}
                 >
                   {currentStep === 2 && isVariantRequestInFlight
                     ? 'Duplicating...'
+                    : currentStep === 5 && isLaunchingTest
+                      ? 'Launching...'
                     : currentStep === 5
                       ? 'Launch Test'
                       : 'Next'}

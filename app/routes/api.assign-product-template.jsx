@@ -6,7 +6,7 @@ export const action = async ({ request }) => {
     const { admin } = await authenticate.admin(request);
     const { productId, templateSuffix } = await request.json();
 
-    if (!productId || typeof templateSuffix !== "string") {
+    if (!productId || (templateSuffix !== null && typeof templateSuffix !== "string")) {
       return json(
         {
           success: false,
@@ -34,7 +34,7 @@ export const action = async ({ request }) => {
     const variables = {
       input: {
         id: productId,
-        templateSuffix,
+        templateSuffix: templateSuffix === null ? null : templateSuffix,
       },
     };
 
