@@ -551,10 +551,26 @@ export default function Dashboard() {
   
   // Wizard variant state
   const [wizardVariantName, setWizardVariantName] = useState('');
+  const [wizardVariantProductHandle, setWizardVariantProductHandle] = useState(null);
+  const [wizardVariantProductTitle, setWizardVariantProductTitle] = useState('');
+  const [wizardVariantTemplateFilename, setWizardVariantTemplateFilename] = useState('');
+  const [isVariantTemplateReady, setIsVariantTemplateReady] = useState(false);
   const [isVariantRequestInFlight, setIsVariantRequestInFlight] = useState(false);
   // Debug: Open the created variant directly in the Theme Editor with previewPath
   const openVariantInThemeEditor = () => {
     try {
+      if (!wizardVariantName) {
+        console.error('❌ Variant template name is missing - cannot open Theme Editor');
+        alert('Variant template has not been created yet. Please duplicate the template first.');
+        return;
+      }
+
+      if (!isVariantTemplateReady) {
+        console.warn('⏳ Variant template is still being prepared - delaying Theme Editor open');
+        alert('We are still preparing the duplicated template. Please wait a moment and try again.');
+        return;
+      }
+
       const mainTheme = themes.find(t => t.role === 'MAIN');
       if (!mainTheme) {
         console.warn('⚠️ No MAIN theme found for editor open');
@@ -563,42 +579,40 @@ export default function Dashboard() {
       const numericThemeId = mainTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
       const storeSubdomain = (shop || '').replace('.myshopify.com', '');
 
-      // Debug: Log full selectedProduct object
-      console.log('🔍 Theme Editor Debug - Full selectedProduct:', {
+      const productHandleForPreview = wizardVariantProductHandle || selectedProduct?.handle;
+      const productTitleForPreview = wizardVariantProductTitle || selectedProduct?.title;
+
+      // Debug: Log current product context
+      console.log('🔍 Theme Editor Debug - Product context:', {
         selectedProduct,
-        selectedProductHandle: selectedProduct?.handle,
-        selectedProductTitle: selectedProduct?.title,
-        selectedProductId: selectedProduct?.id,
-        wizardVariantName
+        productHandleForPreview,
+        productTitleForPreview,
+        wizardVariantProductHandle,
+        wizardVariantProductTitle,
+        wizardVariantName,
+        wizardVariantTemplateFilename
       });
 
-      // Verify we have a product handle
-      if (!selectedProduct?.handle) {
-        console.error('❌ No product selected - cannot open Theme Editor');
-        alert('No product selected. Please select a product first.');
+      if (!productHandleForPreview) {
+        console.error('❌ No product handle available - cannot open Theme Editor');
+        alert('No product is available for the preview. Please select a product and try again.');
         return;
       }
 
       // For OS 2.0 JSON templates, the template param is product.<suffix>
-      const templateParam = wizardVariantName ? `product.${wizardVariantName}` : 'product';
-      
-      // Construct previewPath - ONLY the product path, not with view parameter
-      // The template parameter already specifies which template to use
-      // The previewPath should ONLY specify the product to preview
-      const previewPath = `/products/${selectedProduct.handle}`;
+      const templateParam = `product.${wizardVariantName}`;
 
-      // Construct the Theme Editor URL
-      // - template: specifies which template file to use (product.{variantName})
-      // - previewPath: specifies which product to preview (ONLY the product path)
-      // Note: Do NOT include ?view= in previewPath when using template parameter
-      // Shopify will use the template parameter to determine the template
+      // Ensure the preview path matches the duplicated template via ?view=<suffix>
+      const previewPath = `/products/${productHandleForPreview}${wizardVariantName ? `?view=${wizardVariantName}` : ''}`;
+      const encodedPreviewPath = encodeURIComponent(previewPath);
+
       const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
       const widgetHandle = selectedIdea?.blockId || null;
       const addBlockParams = widgetHandle
         ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
         : '';
 
-      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodeURIComponent(previewPath)}${addBlockParams}`;
+      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}`;
 
       console.log('🧭 Theme Editor Debug Params:', {
         shop,
@@ -607,10 +621,14 @@ export default function Dashboard() {
         numericThemeId,
         templateParam,
         previewPath,
+        encodedPreviewPath,
         wizardVariantName,
-        selectedProductHandle: selectedProduct.handle,
-        selectedProductTitle: selectedProduct.title,
+        wizardVariantTemplateFilename,
+        isVariantTemplateReady,
         selectedIdea,
+        productHandleForPreview,
+        productTitleForPreview,
+        addBlockParams,
         editorUrl
       });
 
@@ -740,6 +758,10 @@ export default function Dashboard() {
     setWizardScreenshotLoading(false);
     setWizardStorePassword('');
     setWizardVariantName('');
+    setWizardVariantProductHandle(null);
+    setWizardVariantProductTitle('');
+    setWizardVariantTemplateFilename('');
+    setIsVariantTemplateReady(false);
   };
 
   // Generate screenshot for wizard
@@ -804,92 +826,99 @@ export default function Dashboard() {
 
   // Create variant template
   const createVariantTemplate = async () => {
-    if (!selectedProduct) return;
+    if (!selectedProduct) {
+      console.error('❌ No product selected for variant template creation');
+      alert('Please select a product before creating a variant template.');
+      return { success: false, error: 'no_product_selected' };
+    }
+
     if (isVariantRequestInFlight) {
       console.log('⏳ Variant creation already in progress, skipping duplicate call');
-      return;
+      return { success: false, error: 'request_in_flight' };
     }
 
     setIsVariantRequestInFlight(true);
+    setIsVariantTemplateReady(false);
+    setWizardVariantTemplateFilename('');
+    setWizardVariantProductHandle(null);
+    setWizardVariantProductTitle('');
+
+    // Generate random 4-digit name for the duplicated template
+    const randomDigits = Math.floor(1000 + Math.random() * 9000);
+    const variantName = `trylabs-variant-${randomDigits}`;
+
+    console.log('🔧 Creating variant template:', {
+      variantName,
+      product: {
+        title: selectedProduct.title,
+        handle: selectedProduct.handle,
+        templateSuffix: selectedProduct.templateSuffix
+      }
+    });
+
+    let creationResult = { success: false };
+
     try {
-      // Generate random 4-digit name
-      const randomDigits = Math.floor(1000 + Math.random() * 9000);
-      const variantName = `trylabs-variant-${randomDigits}`;
-      setWizardVariantName(variantName);
-      
-      console.log('🔧 Creating variant template:', variantName);
-      
       // Get the main theme ID
       const mainTheme = themes.find(t => t.role === 'MAIN');
       if (!mainTheme) {
         throw new Error('No main theme found');
       }
-      
-      // Use the same logic as ab-tests.jsx - get product templates from the loader data
-      // The productTemplates are already available from the loader
+
+      // Determine the specific template for this product
       console.log('📄 Available product templates from loader:', productTemplates);
       console.log('🔍 Selected product template suffix:', selectedProduct.templateSuffix);
-      
-      // Determine the specific template for this product
+
       let baseTemplate;
       if (selectedProduct.templateSuffix) {
-        // Product has a custom template suffix
         baseTemplate = `templates/product.${selectedProduct.templateSuffix}.liquid`;
         console.log('📄 Using product-specific template:', baseTemplate);
       } else {
-        // Product uses default template - need to find the actual default template
         console.log('📄 Product uses default template, finding the correct one...');
-        console.log('📄 Available templates to choose from:', productTemplates);
-        
-        // Strategy 1: Prefer OS 2.0 default explicitly
+
         const exactDefaults = [
           'templates/product.json',
           'templates/product.liquid'
         ];
-        
+
         baseTemplate = exactDefaults.find(template => productTemplates.includes(template));
-        
+
         if (baseTemplate) {
           console.log('📄 Found exact default template:', baseTemplate);
         } else {
-          // Strategy 2: Look for any product template that doesn't have a suffix
           const productTemplatesWithoutSuffix = productTemplates.filter(template => {
             const name = template.replace('templates/', '').replace('.liquid', '').replace('.json', '');
             return name === 'product';
           });
-          
+
           if (productTemplatesWithoutSuffix.length > 0) {
             baseTemplate = productTemplatesWithoutSuffix[0];
             console.log('📄 Found product template without suffix:', baseTemplate);
           } else {
-            // Strategy 3: Use the first available product template
-            baseTemplate = productTemplates.find(template => 
-              template.includes('product') && 
+            baseTemplate = productTemplates.find(template =>
+              template.includes('product') &&
               (template.endsWith('.liquid') || template.endsWith('.json'))
             );
-            
+
             if (baseTemplate) {
               console.log('📄 Using first available product template:', baseTemplate);
             } else {
-              // Strategy 4: Final fallback
               baseTemplate = productTemplates[0] || 'templates/product.liquid';
               console.log('📄 Using fallback template:', baseTemplate);
             }
           }
         }
       }
-      
-      // Verify the template exists in available templates
+
       const templateExists = productTemplates.includes(baseTemplate);
       if (!templateExists) {
         console.log('⚠️ Template not found in available templates, falling back to first available');
         baseTemplate = productTemplates[0] || 'templates/product.liquid';
       }
-      
+
       console.log('📄 Final template to duplicate:', baseTemplate);
       console.log('✅ Template exists in available templates:', templateExists);
-      
-      // Create the variant template using the exact same duplication logic as ab-tests.jsx
+
       const response = await fetch('/api/duplicate-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -900,12 +929,17 @@ export default function Dashboard() {
           productHandle: selectedProduct.handle
         })
       });
-      
+
       const result = await response.json();
       if (result.success) {
         console.log('✅ Variant template created:', result.newFilename);
-        
-        // Debug: Check selectedIdea state
+
+        setWizardVariantName(variantName);
+        setWizardVariantProductHandle(selectedProduct.handle);
+        setWizardVariantProductTitle(selectedProduct.title || '');
+        setWizardVariantTemplateFilename(result.newFilename);
+        setIsVariantTemplateReady(true);
+
         console.log('🔍 Widget Addition Debug - Checking selectedIdea:', {
           selectedIdea,
           hasSelectedIdea: !!selectedIdea,
@@ -914,16 +948,24 @@ export default function Dashboard() {
           selectedIdeaUtility: selectedIdea?.utility,
           conditionMet: !!(selectedIdea?.blockId && selectedIdea?.appExtensionId)
         });
-        
-        // If a widget was selected and it has blockId (live-visitor-count), add it to the template
+
+        creationResult = { success: true, variantName, newFilename: result.newFilename };
       } else {
         console.error('❌ Variant template creation failed:', result.error);
+        creationResult = { success: false, error: result.error || 'variant_template_creation_failed' };
       }
     } catch (error) {
       console.error('❌ Variant creation failed:', error);
+      creationResult = { success: false, error: error.message };
     } finally {
       setIsVariantRequestInFlight(false);
+      if (!creationResult.success) {
+        setWizardVariantName('');
+        setIsVariantTemplateReady(false);
+      }
     }
+
+    return creationResult;
   };
 
   const toggleTestExpansion = (testName) => {
@@ -1033,6 +1075,10 @@ export default function Dashboard() {
     setShowScreenshotPreview(false);
     setScreenshotUrl('');
   }, [selectedTheme, selectedProduct]);
+
+  const previewProductTitle = wizardVariantProductTitle || selectedProduct?.title || '';
+  const previewProductHandle = wizardVariantProductHandle || selectedProduct?.handle || '';
+  const canOpenThemeEditor = Boolean(wizardVariantName && isVariantTemplateReady && !isVariantRequestInFlight);
 
   return (
     <>
@@ -3509,9 +3555,12 @@ export default function Dashboard() {
                     color: '#374151'
                   }}>
                     <strong>Debug Info:</strong><br/>
-                    Product: {selectedProduct?.title}<br/>
+                    Product: {previewProductTitle || 'Not selected'}<br/>
+                    Product handle: {previewProductHandle || 'N/A'}<br/>
                     Template suffix: {selectedProduct?.templateSuffix || 'None (using default)'}<br/>
-                    Variant template: {wizardVariantName ? `product.${wizardVariantName}` : 'product'}
+                    Variant template: {wizardVariantName ? `product.${wizardVariantName}` : 'product'}<br/>
+                    Template file: {wizardVariantTemplateFilename || 'Creating...'}<br/>
+                    Status: {isVariantRequestInFlight ? 'Creating duplicate…' : (isVariantTemplateReady ? 'Ready' : 'Pending')}
                   </div>
 
                   <div style={{
@@ -3530,27 +3579,31 @@ export default function Dashboard() {
                       margin: 0,
                       textAlign: 'center'
                     }}>
-                      {wizardVariantName
-                        ? `Variant template ${wizardVariantName} is ready.`
-                        : 'Variant template created successfully.'}
+                      {isVariantRequestInFlight
+                        ? 'Hang tight, we’re duplicating your product template…'
+                        : canOpenThemeEditor
+                          ? `Variant template ${wizardVariantName} is ready.`
+                          : 'Variant template created. You can open the Theme Editor once it finishes preparing.'}
                     </p>
                     <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
                       <button
                         onClick={openVariantInThemeEditor}
+                        disabled={!canOpenThemeEditor}
                         style={{
                           padding: '10px 14px',
-                          background: '#111827',
+                          background: canOpenThemeEditor ? '#111827' : '#9CA3AF',
                           color: '#FFFFFF',
                           borderRadius: '8px',
-                          border: '1px solid #111827',
-                          cursor: 'pointer'
+                          border: `1px solid ${canOpenThemeEditor ? '#111827' : '#9CA3AF'}`,
+                          cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
+                          opacity: canOpenThemeEditor ? 1 : 0.7
                         }}
                       >
-                        Open in Theme Editor
+                        {isVariantRequestInFlight && !isVariantTemplateReady ? 'Preparing Theme Editor…' : 'Open in Theme Editor'}
                       </button>
                       <span style={{ fontSize: '12px', color: '#6B7280', textAlign: 'center' }}>
                         Opens template <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
-                        {selectedProduct?.handle ? `, previewing /products/${selectedProduct.handle}` : ''}
+                        {previewProductHandle ? `, previewing /products/${previewProductHandle}${wizardVariantName ? `?view=${wizardVariantName}` : ''}` : ''}
                       </span>
                     </div>
                   </div>
@@ -3919,31 +3972,56 @@ export default function Dashboard() {
                   Previous
                 </button>
                 <button
-                  onClick={() => {
-                    if (currentStep < 5) {
-                      // Auto-create variant when moving from step 2 to step 3
-                      if (currentStep === 2 && selectedProduct) {
-                        createVariantTemplate();
+                  disabled={currentStep === 2 && isVariantRequestInFlight}
+                  onClick={async () => {
+                    if (currentStep === 2) {
+                      if (!selectedProduct) {
+                        alert('Please select a product before continuing.');
+                        return;
                       }
-                      setCurrentStep(currentStep + 1);
+                      const result = await createVariantTemplate();
+                      if (!result?.success) {
+                        if (result?.error && result.error !== 'request_in_flight') {
+                          const errorCopy = typeof result.error === 'string' ? result.error : '';
+                          const friendlyErrorMap = {
+                            no_product_selected: 'Please select a product before continuing.',
+                            request_in_flight: 'We are still working on the previous request.',
+                            variant_template_creation_failed: 'Shopify did not allow us to duplicate the template. Please try again in a few seconds.',
+                            no_product_selected_for_variant_template: 'Please select a product before continuing.'
+                          };
+                          const friendlyMessage = friendlyErrorMap[errorCopy] || errorCopy || 'Please try again in a few seconds.';
+                          alert(`We couldn't duplicate the template yet. ${friendlyMessage}`);
+                        }
+                        return;
+                      }
+                      setCurrentStep(3);
+                      return;
+                    }
+
+                    if (currentStep < 5) {
+                      setCurrentStep(prev => Math.min(prev + 1, 5));
                     } else {
-                      // Launch the test
                       console.log('Launching A/B test...');
                       setWizardOpen(false);
                     }
                   }}
                   style={{
-                    background: '#4F46E5',
+                    background: currentStep === 2 && isVariantRequestInFlight ? '#818CF8' : '#4F46E5',
                     border: 'none',
                     borderRadius: '8px',
                     padding: '12px 24px',
-                    cursor: 'pointer',
+                    cursor: currentStep === 2 && isVariantRequestInFlight ? 'not-allowed' : 'pointer',
                     fontSize: '14px',
                     fontWeight: '500',
-                    color: '#FFFFFF'
+                    color: '#FFFFFF',
+                    opacity: currentStep === 2 && isVariantRequestInFlight ? 0.8 : 1
                   }}
                 >
-                  {currentStep === 5 ? 'Launch Test' : 'Next'}
+                  {currentStep === 2 && isVariantRequestInFlight
+                    ? 'Duplicating...'
+                    : currentStep === 5
+                      ? 'Launch Test'
+                      : 'Next'}
                 </button>
               </div>
             </div>
