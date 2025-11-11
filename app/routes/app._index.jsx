@@ -551,6 +551,7 @@ export default function Dashboard() {
   
   // Wizard variant state
   const [wizardVariantName, setWizardVariantName] = useState('');
+  const [wizardVariantProductId, setWizardVariantProductId] = useState(null);
   const [wizardVariantProductHandle, setWizardVariantProductHandle] = useState(null);
   const [wizardVariantProductTitle, setWizardVariantProductTitle] = useState('');
   const [wizardVariantTemplateFilename, setWizardVariantTemplateFilename] = useState('');
@@ -579,13 +580,20 @@ export default function Dashboard() {
       const numericThemeId = mainTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
       const storeSubdomain = (shop || '').replace('.myshopify.com', '');
 
-      const productHandleForPreview = wizardVariantProductHandle || selectedProduct?.handle;
+      if (!wizardVariantProductHandle) {
+        console.error('❌ No stored product handle for this variant template');
+        alert('We could not determine which product to preview. Please go back, re-select your product, and duplicate the template again.');
+        return;
+      }
+
+      const productHandleForPreview = wizardVariantProductHandle;
       const productTitleForPreview = wizardVariantProductTitle || selectedProduct?.title;
 
       // Debug: Log current product context
       console.log('🔍 Theme Editor Debug - Product context:', {
         selectedProduct,
         productHandleForPreview,
+        wizardVariantProductId,
         productTitleForPreview,
         wizardVariantProductHandle,
         wizardVariantProductTitle,
@@ -758,6 +766,7 @@ export default function Dashboard() {
     setWizardScreenshotLoading(false);
     setWizardStorePassword('');
     setWizardVariantName('');
+    setWizardVariantProductId(null);
     setWizardVariantProductHandle(null);
     setWizardVariantProductTitle('');
     setWizardVariantTemplateFilename('');
@@ -840,6 +849,7 @@ export default function Dashboard() {
     setIsVariantRequestInFlight(true);
     setIsVariantTemplateReady(false);
     setWizardVariantTemplateFilename('');
+    setWizardVariantProductId(null);
     setWizardVariantProductHandle(null);
     setWizardVariantProductTitle('');
 
@@ -863,6 +873,24 @@ export default function Dashboard() {
       const mainTheme = themes.find(t => t.role === 'MAIN');
       if (!mainTheme) {
         throw new Error('No main theme found');
+      }
+
+      const productId = selectedProduct.id;
+      let productHandle = selectedProduct.handle;
+      let productTitle = selectedProduct.title || '';
+
+      if (!productHandle && productId) {
+        const fallbackProduct = products?.find(p => p.id === productId);
+        if (fallbackProduct?.handle) {
+          productHandle = fallbackProduct.handle;
+          if (!productTitle) {
+            productTitle = fallbackProduct.title || '';
+          }
+        }
+      }
+
+      if (!productHandle) {
+        throw new Error('Selected product is missing a handle. Please re-select the product and try again.');
       }
 
       // Determine the specific template for this product
@@ -926,7 +954,7 @@ export default function Dashboard() {
           template: baseTemplate,
           newName: variantName,
           themeId: mainTheme.id,
-          productHandle: selectedProduct.handle
+          productHandle: productHandle
         })
       });
 
@@ -935,8 +963,9 @@ export default function Dashboard() {
         console.log('✅ Variant template created:', result.newFilename);
 
         setWizardVariantName(variantName);
-        setWizardVariantProductHandle(selectedProduct.handle);
-        setWizardVariantProductTitle(selectedProduct.title || '');
+        setWizardVariantProductId(productId || null);
+        setWizardVariantProductHandle(productHandle);
+        setWizardVariantProductTitle(productTitle);
         setWizardVariantTemplateFilename(result.newFilename);
         setIsVariantTemplateReady(true);
 
@@ -1077,8 +1106,9 @@ export default function Dashboard() {
   }, [selectedTheme, selectedProduct]);
 
   const previewProductTitle = wizardVariantProductTitle || selectedProduct?.title || '';
-  const previewProductHandle = wizardVariantProductHandle || selectedProduct?.handle || '';
-  const canOpenThemeEditor = Boolean(wizardVariantName && isVariantTemplateReady && !isVariantRequestInFlight);
+  const previewProductHandle = wizardVariantProductHandle || '';
+  const previewProductId = wizardVariantProductId || '';
+  const canOpenThemeEditor = Boolean(wizardVariantName && wizardVariantProductHandle && isVariantTemplateReady && !isVariantRequestInFlight);
 
   return (
     <>
@@ -3556,7 +3586,8 @@ export default function Dashboard() {
                   }}>
                     <strong>Debug Info:</strong><br/>
                     Product: {previewProductTitle || 'Not selected'}<br/>
-                    Product handle: {previewProductHandle || 'N/A'}<br/>
+                    Product ID: {previewProductId || 'N/A'}<br/>
+                    Product handle: {previewProductHandle || 'Not set'}<br/>
                     Template suffix: {selectedProduct?.templateSuffix || 'None (using default)'}<br/>
                     Variant template: {wizardVariantName ? `product.${wizardVariantName}` : 'product'}<br/>
                     Template file: {wizardVariantTemplateFilename || 'Creating...'}<br/>
@@ -3603,7 +3634,7 @@ export default function Dashboard() {
                       </button>
                       <span style={{ fontSize: '12px', color: '#6B7280', textAlign: 'center' }}>
                         Opens template <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
-                        {previewProductHandle ? `, previewing /products/${previewProductHandle}${wizardVariantName ? `?view=${wizardVariantName}` : ''}` : ''}
+                        {wizardVariantProductHandle ? `, previewing /products/${wizardVariantProductHandle}${wizardVariantName ? `?view=${wizardVariantName}` : ''}` : ''}
                       </span>
                     </div>
                   </div>
