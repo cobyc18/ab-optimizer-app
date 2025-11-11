@@ -550,8 +550,6 @@ export default function Dashboard() {
   const [wizardStorePassword, setWizardStorePassword] = useState('');
   
   // Wizard variant state
-  const [wizardVariantScreenshot, setWizardVariantScreenshot] = useState(null);
-  const [wizardVariantScreenshotLoading, setWizardVariantScreenshotLoading] = useState(false);
   const [wizardVariantName, setWizardVariantName] = useState('');
   const [isVariantRequestInFlight, setIsVariantRequestInFlight] = useState(false);
   // Debug: Open the created variant directly in the Theme Editor with previewPath
@@ -741,8 +739,6 @@ export default function Dashboard() {
     setWizardScreenshot(null);
     setWizardScreenshotLoading(false);
     setWizardStorePassword('');
-    setWizardVariantScreenshot(null);
-    setWizardVariantScreenshotLoading(false);
     setWizardVariantName('');
   };
 
@@ -815,7 +811,6 @@ export default function Dashboard() {
     }
 
     setIsVariantRequestInFlight(true);
-    setWizardVariantScreenshotLoading(true);
     try {
       // Generate random 4-digit name
       const randomDigits = Math.floor(1000 + Math.random() * 9000);
@@ -921,43 +916,12 @@ export default function Dashboard() {
         });
         
         // If a widget was selected and it has blockId (live-visitor-count), add it to the template
-        // Generate screenshot of the variant
-        const variantPreviewUrl = generateWizardPreviewUrl(selectedProduct.handle, mainTheme.id) + `&view=${variantName}`;
-        console.log('🔗 Variant preview URL:', variantPreviewUrl);
-        
-      console.log('🧪 Variant screenshot request debug:', {
-        previewUrl: variantPreviewUrl,
-        productHandle: selectedProduct.handle,
-        themeId: mainTheme.id,
-        passwordProvided: Boolean(wizardStorePassword || storePassword),
-        passwordLength: (wizardStorePassword || storePassword)?.length || 0
-      });
-
-      const screenshotResponse = await fetch('/api/screenshot-selenium', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            previewUrl: variantPreviewUrl,
-            productHandle: selectedProduct.handle,
-            themeId: mainTheme.id,
-            storePassword: wizardStorePassword || storePassword
-          })
-        });
-        
-        const screenshotResult = await screenshotResponse.json();
-        if (screenshotResult.success) {
-          setWizardVariantScreenshot(screenshotResult.screenshotUrl);
-          console.log('✅ Variant screenshot generated');
-        } else {
-          console.error('❌ Variant screenshot failed:', screenshotResult.error);
-        }
       } else {
         console.error('❌ Variant template creation failed:', result.error);
       }
     } catch (error) {
       console.error('❌ Variant creation failed:', error);
     } finally {
-      setWizardVariantScreenshotLoading(false);
       setIsVariantRequestInFlight(false);
     }
   };
@@ -3526,17 +3490,16 @@ export default function Dashboard() {
                     color: '#1F2937',
                     marginBottom: '8px'
                   }}>
-                    Variant Preview
+                    Open Variant in Theme Editor
                   </h3>
                   <p style={{
                     fontSize: '14px',
                     color: '#6B7280',
                     marginBottom: '16px'
                   }}>
-                    Your variant template has been created. Here's how it looks:
+                    We duplicated the template and attached your widget. Open the theme editor to adjust placement or styling directly on the product page.
                   </p>
 
-                  {/* Debug Info */}
                   <div style={{
                     background: '#F3F4F6',
                     padding: '12px',
@@ -3547,151 +3510,50 @@ export default function Dashboard() {
                   }}>
                     <strong>Debug Info:</strong><br/>
                     Product: {selectedProduct?.title}<br/>
-                    Template Suffix: {selectedProduct?.templateSuffix || 'None (using default)'}<br/>
-                    Expected Template: {selectedProduct?.templateSuffix ? `product.${selectedProduct.templateSuffix}.liquid` : (productTemplates?.includes('templates/product.json') ? 'product.json' : 'product.liquid')}
+                    Template suffix: {selectedProduct?.templateSuffix || 'None (using default)'}<br/>
+                    Variant template: {wizardVariantName ? `product.${wizardVariantName}` : 'product'}
                   </div>
 
-                  {wizardVariantScreenshotLoading ? (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '60px 20px',
-                      background: '#F8FAFC',
-                      borderRadius: '12px',
-                      border: '1px solid #E5E7EB'
-                    }}>
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        border: '4px solid #E5E7EB',
-                        borderTop: '4px solid #3B82F6',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                        marginBottom: '16px'
-                      }}></div>
-                      <p style={{
-                        fontSize: '16px',
-                        color: '#6B7280',
-                        margin: 0
-                      }}>
-                        Creating variant and generating preview...
-                      </p>
-                      {/* Provide Theme Editor Debug access even while loading */}
-                      <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-                        <button
-                          onClick={openVariantInThemeEditor}
-                          style={{
-                            padding: '10px 14px',
-                            background: '#111827',
-                            color: '#FFFFFF',
-                            borderRadius: '8px',
-                            border: '1px solid #111827',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Open in Theme Editor (Debug)
-                        </button>
-                        <span style={{ fontSize: '12px', color: '#6B7280' }}>
-                          Will open with template: <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
-                          {selectedProduct?.handle ? `, previewing: /products/${selectedProduct.handle}` : ''}
-                        </span>
-                      </div>
-                    </div>
-                  ) : wizardVariantScreenshot ? (
-                    <div style={{
-                      background: '#FFFFFF',
-                      borderRadius: '12px',
-                      border: '1px solid #E5E7EB',
-                      padding: '20px',
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '40px 20px',
+                    background: '#F8FAFC',
+                    borderRadius: '12px',
+                    border: '1px solid #E5E7EB'
+                  }}>
+                    <p style={{
+                      fontSize: '16px',
+                      color: '#6B7280',
+                      margin: 0,
                       textAlign: 'center'
                     }}>
-                      <h4 style={{
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        margin: '0 0 16px 0'
-                      }}>
-                        {selectedProduct?.title} - Variant Preview
-                      </h4>
-                      <img
-                        src={wizardVariantScreenshot}
-                        alt="Variant preview"
+                      {wizardVariantName
+                        ? `Variant template ${wizardVariantName} is ready.`
+                        : 'Variant template created successfully.'}
+                    </p>
+                    <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                      <button
+                        onClick={openVariantInThemeEditor}
                         style={{
-                          maxWidth: '100%',
-                          height: 'auto',
+                          padding: '10px 14px',
+                          background: '#111827',
+                          color: '#FFFFFF',
                           borderRadius: '8px',
-                          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
+                          border: '1px solid #111827',
+                          cursor: 'pointer'
                         }}
-                      />
-                      <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-                        <button
-                          onClick={openVariantInThemeEditor}
-                          style={{
-                            padding: '10px 14px',
-                            background: '#111827',
-                            color: '#FFFFFF',
-                            borderRadius: '8px',
-                            border: '1px solid #111827',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Open in Theme Editor! (Debug)
-                        </button>
-                        <span style={{ fontSize: '12px', color: '#6B7280' }}>
-                          Will open with template: <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
-                          {selectedProduct?.handle ? `, previewing: /products/${selectedProduct.handle}` : ''}
-                        </span>
-                      </div>
-                      <p style={{
-                        fontSize: '14px',
-                        color: '#6B7280',
-                        margin: '16px 0 0 0'
-                      }}>
-                        Variant template: {wizardVariantName}
-                      </p>
+                      >
+                        Open in Theme Editor
+                      </button>
+                      <span style={{ fontSize: '12px', color: '#6B7280', textAlign: 'center' }}>
+                        Opens template <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
+                        {selectedProduct?.handle ? `, previewing /products/${selectedProduct.handle}` : ''}
+                      </span>
                     </div>
-                  ) : (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '60px 20px',
-                      background: '#F8FAFC',
-                      borderRadius: '12px',
-                      border: '1px solid #E5E7EB'
-                    }}>
-                      <p style={{
-                        fontSize: '16px',
-                        color: '#6B7280',
-                        margin: 0,
-                        textAlign: 'center'
-                      }}>
-                        Variant template created successfully
-                      </p>
-                      <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
-                        <button
-                          onClick={openVariantInThemeEditor}
-                          style={{
-                            padding: '10px 14px',
-                            background: '#111827',
-                            color: '#FFFFFF',
-                            borderRadius: '8px',
-                            border: '1px solid #111827',
-                            cursor: 'pointer'
-                          }}
-                        >
-                          Open in Theme Editor (Debug)
-                        </button>
-                        <span style={{ fontSize: '12px', color: '#6B7280' }}>
-                          Will open with template: <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
-                          {selectedProduct?.handle ? `, previewing: /products/${selectedProduct.handle}` : ''}
-                        </span>
-                      </div>
-                    </div>
-                  )}
+                  </div>
                 </div>
               )}
 
