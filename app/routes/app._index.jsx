@@ -556,6 +556,7 @@ export default function Dashboard() {
   const [wizardVariantProductHandle, setWizardVariantProductHandle] = useState(null);
   const [wizardVariantProductTitle, setWizardVariantProductTitle] = useState('');
   const [wizardVariantTemplateFilename, setWizardVariantTemplateFilename] = useState('');
+  const [wizardVariantOriginalTemplateSuffix, setWizardVariantOriginalTemplateSuffix] = useState(null);
   const [isVariantTemplateReady, setIsVariantTemplateReady] = useState(false);
   const [isVariantRequestInFlight, setIsVariantRequestInFlight] = useState(false);
   // Debug: Open the created variant directly in the Theme Editor with previewPath
@@ -774,6 +775,7 @@ export default function Dashboard() {
     setWizardVariantTemplateFilename('');
     setIsVariantTemplateReady(false);
     setWizardSelectedProductSnapshot(null);
+    setWizardVariantOriginalTemplateSuffix(null);
   };
 
   // Generate screenshot for wizard
@@ -857,6 +859,7 @@ export default function Dashboard() {
     setWizardVariantProductId(null);
     setWizardVariantProductHandle(null);
     setWizardVariantProductTitle('');
+    setWizardVariantOriginalTemplateSuffix(activeProduct.templateSuffix || null);
 
     // Generate random 4-digit name for the duplicated template
     const randomDigits = Math.floor(1000 + Math.random() * 9000);
@@ -973,6 +976,41 @@ export default function Dashboard() {
         setWizardVariantProductTitle(productTitle);
         setWizardVariantTemplateFilename(result.newFilename);
         setIsVariantTemplateReady(true);
+
+        let assignTemplateResult = null;
+        try {
+          const assignResponse = await fetch('/api/assign-product-template', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              productId,
+              templateSuffix: variantName
+            })
+          });
+          assignTemplateResult = await assignResponse.json();
+          if (!assignResponse.ok) {
+            throw new Error(assignTemplateResult.error || 'Failed to assign template.');
+          }
+          if (!assignTemplateResult.success) {
+            console.error('⚠️ Failed to assign template to product:', assignTemplateResult.error);
+            alert(`We created the template but couldn't assign it to the product automatically. ${assignTemplateResult.error || ''}`);
+          } else {
+            console.log('✅ Assigned template to product:', {
+              productId,
+              templateSuffix: variantName
+            });
+            setWizardSelectedProductSnapshot(prev => {
+              if (!prev) return prev;
+              return {
+                ...prev,
+                templateSuffix: variantName
+              };
+            });
+          }
+        } catch (assignError) {
+          console.error('⚠️ Error assigning template to product:', assignError);
+          alert(`We created the template but couldn't assign it to the product automatically. ${assignError.message || ''}`);
+        }
 
         console.log('🔍 Widget Addition Debug - Checking selectedIdea:', {
           selectedIdea,
@@ -3601,6 +3639,7 @@ export default function Dashboard() {
                     Product ID (snapshot): {previewProductId || 'N/A'}<br/>
                     Product handle (snapshot): {wizardVariantProductHandle || 'Not set'}<br/>
                     Current selection handle: {selectedProduct?.handle || 'N/A'}<br/>
+                    Original template suffix: {wizardVariantOriginalTemplateSuffix || 'None (using default)'}<br/>
                     Template suffix: {selectedProduct?.templateSuffix || 'None (using default)'}<br/>
                     Variant template: {wizardVariantName ? `product.${wizardVariantName}` : 'product'}<br/>
                     Template file: {wizardVariantTemplateFilename || 'Creating...'}<br/>
