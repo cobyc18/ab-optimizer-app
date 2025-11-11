@@ -519,6 +519,7 @@ export default function Dashboard() {
   const [expandedTests, setExpandedTests] = useState(new Set());
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [wizardSelectedProductSnapshot, setWizardSelectedProductSnapshot] = useState(null);
   const [previewUrl, setPreviewUrl] = useState('');
   const [showScreenshotPreview, setShowScreenshotPreview] = useState(false);
   const [isLoadingScreenshot, setIsLoadingScreenshot] = useState(false);
@@ -587,11 +588,12 @@ export default function Dashboard() {
       }
 
       const productHandleForPreview = wizardVariantProductHandle;
-      const productTitleForPreview = wizardVariantProductTitle || selectedProduct?.title;
+      const productTitleForPreview = wizardVariantProductTitle || wizardSelectedProductSnapshot?.title || selectedProduct?.title;
 
       // Debug: Log current product context
       console.log('🔍 Theme Editor Debug - Product context:', {
         selectedProduct,
+        wizardSelectedProductSnapshot,
         productHandleForPreview,
         wizardVariantProductId,
         productTitleForPreview,
@@ -771,6 +773,7 @@ export default function Dashboard() {
     setWizardVariantProductTitle('');
     setWizardVariantTemplateFilename('');
     setIsVariantTemplateReady(false);
+    setWizardSelectedProductSnapshot(null);
   };
 
   // Generate screenshot for wizard
@@ -835,7 +838,9 @@ export default function Dashboard() {
 
   // Create variant template
   const createVariantTemplate = async () => {
-    if (!selectedProduct) {
+    const activeProduct = wizardSelectedProductSnapshot || selectedProduct;
+
+    if (!activeProduct) {
       console.error('❌ No product selected for variant template creation');
       alert('Please select a product before creating a variant template.');
       return { success: false, error: 'no_product_selected' };
@@ -860,9 +865,9 @@ export default function Dashboard() {
     console.log('🔧 Creating variant template:', {
       variantName,
       product: {
-        title: selectedProduct.title,
-        handle: selectedProduct.handle,
-        templateSuffix: selectedProduct.templateSuffix
+        title: activeProduct.title,
+        handle: activeProduct.handle,
+        templateSuffix: activeProduct.templateSuffix
       }
     });
 
@@ -875,9 +880,9 @@ export default function Dashboard() {
         throw new Error('No main theme found');
       }
 
-      const productId = selectedProduct.id;
-      let productHandle = selectedProduct.handle;
-      let productTitle = selectedProduct.title || '';
+      const productId = activeProduct.id;
+      let productHandle = activeProduct.handle;
+      let productTitle = activeProduct.title || '';
 
       if (!productHandle && productId) {
         const fallbackProduct = products?.find(p => p.id === productId);
@@ -895,11 +900,11 @@ export default function Dashboard() {
 
       // Determine the specific template for this product
       console.log('📄 Available product templates from loader:', productTemplates);
-      console.log('🔍 Selected product template suffix:', selectedProduct.templateSuffix);
+      console.log('🔍 Selected product template suffix:', activeProduct.templateSuffix);
 
       let baseTemplate;
-      if (selectedProduct.templateSuffix) {
-        baseTemplate = `templates/product.${selectedProduct.templateSuffix}.liquid`;
+      if (activeProduct.templateSuffix) {
+        baseTemplate = `templates/product.${activeProduct.templateSuffix}.liquid`;
         console.log('📄 Using product-specific template:', baseTemplate);
       } else {
         console.log('📄 Product uses default template, finding the correct one...');
@@ -1031,6 +1036,13 @@ export default function Dashboard() {
     return previewUrl;
   };
 
+  const handleProductSelection = (product) => {
+    setSelectedProduct(product);
+    if (product) {
+      setWizardSelectedProductSnapshot(product);
+    }
+  };
+
   const openPreviewInNewTab = () => {
     if (previewUrl) {
       window.open(previewUrl, '_blank');
@@ -1105,9 +1117,9 @@ export default function Dashboard() {
     setScreenshotUrl('');
   }, [selectedTheme, selectedProduct]);
 
-  const previewProductTitle = wizardVariantProductTitle || selectedProduct?.title || '';
-  const previewProductHandle = wizardVariantProductHandle || '';
-  const previewProductId = wizardVariantProductId || '';
+  const previewProductTitle = wizardVariantProductTitle || wizardSelectedProductSnapshot?.title || selectedProduct?.title || '';
+  const previewProductHandle = wizardVariantProductHandle || wizardSelectedProductSnapshot?.handle || selectedProduct?.handle || '';
+  const previewProductId = wizardVariantProductId || wizardSelectedProductSnapshot?.id || '';
   const canOpenThemeEditor = Boolean(wizardVariantName && wizardVariantProductHandle && isVariantTemplateReady && !isVariantRequestInFlight);
 
   return (
@@ -2305,7 +2317,7 @@ export default function Dashboard() {
                 value={selectedProduct?.id || ''}
                 onChange={(e) => {
                   const product = products.find(p => p.id === e.target.value);
-                  setSelectedProduct(product);
+                  handleProductSelection(product);
                 }}
                 style={{
                   width: '100%',
@@ -3322,8 +3334,8 @@ export default function Dashboard() {
                  {products.map((product) => (
                    <div
                      key={product.id}
-                     onClick={() => {
-                       setSelectedProduct(product);
+                   onClick={() => {
+                       handleProductSelection(product);
                        // Debug: Log product template information
                        console.log('🔍 Selected product:', product.title);
                        console.log('🔍 Product handle:', product.handle);
@@ -3586,8 +3598,9 @@ export default function Dashboard() {
                   }}>
                     <strong>Debug Info:</strong><br/>
                     Product: {previewProductTitle || 'Not selected'}<br/>
-                    Product ID: {previewProductId || 'N/A'}<br/>
-                    Product handle: {previewProductHandle || 'Not set'}<br/>
+                    Product ID (snapshot): {previewProductId || 'N/A'}<br/>
+                    Product handle (snapshot): {wizardVariantProductHandle || 'Not set'}<br/>
+                    Current selection handle: {selectedProduct?.handle || 'N/A'}<br/>
                     Template suffix: {selectedProduct?.templateSuffix || 'None (using default)'}<br/>
                     Variant template: {wizardVariantName ? `product.${wizardVariantName}` : 'product'}<br/>
                     Template file: {wizardVariantTemplateFilename || 'Creating...'}<br/>
@@ -4003,10 +4016,10 @@ export default function Dashboard() {
                   Previous
                 </button>
                 <button
-                  disabled={currentStep === 2 && isVariantRequestInFlight}
+                  disabled={currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)}
                   onClick={async () => {
                     if (currentStep === 2) {
-                      if (!selectedProduct) {
+                      if (!wizardSelectedProductSnapshot) {
                         alert('Please select a product before continuing.');
                         return;
                       }
@@ -4037,15 +4050,15 @@ export default function Dashboard() {
                     }
                   }}
                   style={{
-                    background: currentStep === 2 && isVariantRequestInFlight ? '#818CF8' : '#4F46E5',
+                    background: currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot) ? '#818CF8' : '#4F46E5',
                     border: 'none',
                     borderRadius: '8px',
                     padding: '12px 24px',
-                    cursor: currentStep === 2 && isVariantRequestInFlight ? 'not-allowed' : 'pointer',
+                    cursor: currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot) ? 'not-allowed' : 'pointer',
                     fontSize: '14px',
                     fontWeight: '500',
                     color: '#FFFFFF',
-                    opacity: currentStep === 2 && isVariantRequestInFlight ? 0.8 : 1
+                    opacity: currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot) ? 0.8 : 1
                   }}
                 >
                   {currentStep === 2 && isVariantRequestInFlight
