@@ -296,7 +296,7 @@ export const loader = async ({ request }) => {
           (key === "templates/product.liquid" || key === "templates/product.json")
         );
       
-      console.log('📄 Filtered product templates:', productTemplates);
+      console.log('📄 Filtered product templates!:', productTemplates);
     }
 
     // Fetch all A/B tests (both active and completed with winners)
