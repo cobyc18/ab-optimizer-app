@@ -1503,19 +1503,6 @@ export default function Dashboard() {
 
         {/* Chart Area with X/Y Axes */}
         <div style={{ marginBottom: '30px', position: 'relative', height: '300px' }}>
-          {/* Chart Image */}
-          <div style={{
-            position: 'absolute',
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            width: '100%',
-            maxWidth: '800px',
-            height: '262px'
-          }}>
-            <img alt="Chart" src={icons.chart} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          </div>
-          
           {/* Y-Axis Labels */}
           <div style={{
             position: 'absolute',

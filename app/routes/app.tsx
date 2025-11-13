@@ -1,17 +1,17 @@
 import { Outlet, useLocation, Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
 
-// Figma Design Assets - Sidebar specific assets
-const imgOption11 = "http://localhost:3845/assets/d48cc262e275c8268a268985b2afdfac992cf82a.png";
-const imgTryLab = "http://localhost:3845/assets/ef6b13f0fd5212ac876c7e1fd3199ccecc56dad9.svg";
-const img = "http://localhost:3845/assets/b5c9a49a2261b2416025a79cd7d9dd6cbfc9658c.svg";
-const imgCultureTube = "http://localhost:3845/assets/cf28cd19afe656dc8b46f5937016390d82168068.svg";
-const imgFrame2147224424 = "http://localhost:3845/assets/efa39d32573b3a5b358191daec34021e25764ff5.svg";
-const imgLibrary = "http://localhost:3845/assets/b0c7cc936ce4033e4a3be1dd05c8652a4ac4a208.svg";
-const imgSetting = "http://localhost:3845/assets/3a6f557c50a8c28dd7c0eaa9f9af18d5d423db40.svg";
-const imgVideo = "http://localhost:3845/assets/e06f33da30f1b2eaf1af76aa79a12b922a7ae7a5.svg";
-const imgLogout = "http://localhost:3845/assets/f1bc06ff26e0c1ce023694aa2bbc6d1baeb98698.svg";
-const imgGroup1000003393 = "http://localhost:3845/assets/9cdfedb15f38de1d7549dce3b40da36973a9c05c.svg";
+// Figma Design Assets - Sidebar specific assets (using inline SVG data URIs)
+const imgOption11 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='109' height='109'%3E%3Ccircle cx='54.5' cy='54.5' r='54.5' fill='%23C5CEE0'/%3E%3Ccircle cx='54.5' cy='54.5' r='40' fill='%2397cdff'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%230038ff' font-family='Arial' font-size='24' font-weight='bold'%3EZ%3C/text%3E%3C/svg%3E";
+const imgTryLab = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='45'%3E%3Ctext x='0' y='35' fill='%23151515' font-family='Poppins, sans-serif' font-size='32' font-weight='600'%3ETryLab%3C/text%3E%3C/svg%3E";
+const img = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' stroke='%23151515' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
+const imgCultureTube = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Crect x='6' y='4' width='12' height='16' rx='2' stroke='%23151515' stroke-width='2'/%3E%3Cpath d='M9 8h6M9 12h6M9 16h6' stroke='%23151515' stroke-width='2'/%3E%3C/svg%3E";
+const imgFrame2147224424 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M3 3v8h8M21 21v-8h-8M21 3l-8 8M3 21l8-8' stroke='%23151515' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E";
+const imgLibrary = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M4 19.5A2.5 2.5 0 016.5 17H20' stroke='%23151515' stroke-width='2' stroke-linecap='round'/%3E%3Cpath d='M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z' stroke='%23151515' stroke-width='2'/%3E%3C/svg%3E";
+const imgSetting = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M12 15a3 3 0 100-6 3 3 0 000 6z' stroke='%23151515' stroke-width='2'/%3E%3Cpath d='M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06a1.65 1.65 0 001.82.33H9a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06a1.65 1.65 0 00-.33 1.82V9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z' stroke='%23151515' stroke-width='2'/%3E%3C/svg%3E";
+const imgVideo = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z' stroke='%23151515' stroke-width='2'/%3E%3C/svg%3E";
+const imgLogout = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9' stroke='%23151515' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
+const imgGroup1000003393 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='4'%3E%3Crect x='0' y='0' width='180' height='4' rx='2' fill='%23e6e6e6'/%3E%3Crect x='0' y='0' width='144' height='4' rx='2' fill='%230038ff'/%3E%3C/svg%3E";
 
 // Figma Design Variables
 const figmaColors = {
@@ -121,7 +121,15 @@ export default function AppLayout() {
               }}
             >
               <div style={{ width: '28px', height: '28px', flexShrink: 0 }}>
-                <img alt={item.label} src={item.icon} style={{ width: '100%', height: '100%' }} />
+                <img 
+                  alt={item.label} 
+                  src={item.icon} 
+                  style={{ 
+                    width: '100%', 
+                    height: '100%',
+                    filter: selectedNavItem === item.id ? 'brightness(0) invert(1)' : 'none'
+                  }} 
+                />
               </div>
               <p style={{
                 fontFamily: 'Poppins, sans-serif',
