@@ -1460,46 +1460,96 @@ export default function Dashboard() {
       </div>
 
       {/* Experiment Overview Section */}
-      <div style={{
-        backgroundColor: figmaColors.lightBlue,
-        borderRadius: '20px',
-        padding: '40px',
-        marginBottom: '40px',
-        position: 'relative'
-      }}>
-        {/* Experiment Overview Text */}
-        <div style={{ marginBottom: '30px' }}>
-          <p style={{
-            fontFamily: 'Geist, sans-serif',
-            fontWeight: 500,
-            fontSize: '24px',
-            color: figmaColors.primaryBlue,
-            margin: '0 0 15px 0',
-            lineHeight: '32px'
+      {(() => {
+        // Find the currently running test
+        const runningTest = experiments.find(exp => exp.status === 'running' || exp.status === 'active' || exp.status === 'live');
+        
+        if (!runningTest) {
+          return null; // Don't show the section if there's no running test
+        }
+
+        // Calculate hours from runtime (runtime is in format "Xd")
+        const runtimeMatch = runningTest.runtime?.match(/(\d+)d/);
+        const days = runtimeMatch ? parseInt(runtimeMatch[1], 10) : 0;
+        const hours = days * 24;
+        const runtimeDisplay = hours >= 24 ? `${days} d` : `${hours} h`;
+
+        // Format numbers with commas
+        const formatNumber = (num) => {
+          if (num === null || num === undefined) return '0';
+          return num.toLocaleString('en-US');
+        };
+
+        // Get analysis data for description
+        const atcLift = runningTest.analysis?.atc?.expectedRelLift 
+          ? (runningTest.analysis.atc.expectedRelLift * 100).toFixed(1)
+          : null;
+        const certainty = runningTest.analysis?.atc?.probB 
+          ? (runningTest.analysis.atc.probB * 100).toFixed(0)
+          : runningTest.analysis?.purchases?.probB
+          ? (runningTest.analysis.purchases.probB * 100).toFixed(0)
+          : null;
+
+        // Generate description text
+        let descriptionText = '';
+        if (atcLift && certainty) {
+          const isVariantLeading = runningTest.analysis?.atc?.probB > 0.5;
+          const liftText = isVariantLeading ? `leading ${Math.abs(atcLift)}%` : `trailing ${Math.abs(atcLift)}%`;
+          descriptionText = `Variant is ${liftText} ATC with ${certainty}% certainty.`;
+        } else {
+          descriptionText = 'Test is running. Collecting data to determine results.';
+        }
+
+        // Parse test name to get widget name (format: "Widget Test - Product (Date)")
+        const testNameParts = runningTest.name?.split(' VS ') || [runningTest.name || 'Experiment'];
+        const experimentTitle = testNameParts[0] || runningTest.name || 'Experiment';
+
+        // Calculate goal percentage (based on analysis or default)
+        const goalPercentage = runningTest.analysis?.atc?.probB 
+          ? Math.min(95, Math.max(50, Math.round(runningTest.analysis.atc.probB * 100)))
+          : 80;
+
+        return (
+          <div style={{
+            backgroundColor: figmaColors.lightBlue,
+            borderRadius: '20px',
+            padding: '40px',
+            marginBottom: '40px',
+            position: 'relative'
           }}>
-            Experiment Overview
-          </p>
-          <div>
-            <span style={{
-              fontFamily: 'Geist, sans-serif',
-              fontWeight: 500,
-              fontSize: '20px',
-              color: figmaColors.darkGray,
-              lineHeight: '28px'
-            }}>
-              Returns badge is leading 7.4% ATC with 70% certainty.
-            </span>
-            <span style={{
-              fontFamily: 'Geist, sans-serif',
-              fontWeight: 300,
-              fontSize: '18px',
-              color: figmaColors.darkGray,
-              lineHeight: '24px'
-            }}>
-              We suggest keeping the test active for a few more days to reach a more certain conclusion
-            </span>
-          </div>
-        </div>
+            {/* Experiment Overview Text */}
+            <div style={{ marginBottom: '30px' }}>
+              <p style={{
+                fontFamily: 'Geist, sans-serif',
+                fontWeight: 500,
+                fontSize: '24px',
+                color: figmaColors.primaryBlue,
+                margin: '0 0 15px 0',
+                lineHeight: '32px'
+              }}>
+                Experiment Overview
+              </p>
+              <div>
+                <span style={{
+                  fontFamily: 'Geist, sans-serif',
+                  fontWeight: 500,
+                  fontSize: '32px',
+                  color: figmaColors.darkGray,
+                  lineHeight: '40px'
+                }}>
+                  {descriptionText}
+                </span>
+                <span style={{
+                  fontFamily: 'Geist, sans-serif',
+                  fontWeight: 300,
+                  fontSize: '24px',
+                  color: figmaColors.darkGray,
+                  lineHeight: '32px'
+                }}>
+                  {' '}We suggest keeping the test active for a few more days to reach a more certain conclusion
+                </span>
+              </div>
+            </div>
 
         {/* Chart Area with X/Y Axes */}
         <div style={{ marginBottom: '30px', position: 'relative', height: '300px' }}>
@@ -1556,30 +1606,38 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* Experiment Title */}
-        <div style={{ marginBottom: '30px' }}>
-          <p style={{
-            fontFamily: 'Geist, sans-serif',
-            fontWeight: 500,
-            fontSize: '24px',
-            color: figmaColors.darkGray,
-            margin: '0 0 20px 0',
-            lineHeight: '32px'
-          }}>
-            Returns Badge VS Without
-          </p>
-          
-          {/* Progress Line */}
-          <div style={{ marginBottom: '20px' }}>
-            <div style={{ width: '100%', height: '4px', backgroundColor: figmaColors.white, borderRadius: '2px', marginBottom: '10px' }}>
-              <div style={{ width: '80%', height: '100%', backgroundColor: figmaColors.primaryBlue, borderRadius: '2px' }} />
+            {/* Experiment Title */}
+            <div style={{ marginBottom: '30px' }}>
+              <p style={{
+                fontFamily: 'Geist, sans-serif',
+                fontWeight: 500,
+                fontSize: '24px',
+                color: figmaColors.darkGray,
+                margin: '0 0 20px 0',
+                lineHeight: '32px'
+              }}>
+                {experimentTitle}
+              </p>
+              
+              {/* Progress Line */}
+              <div style={{ marginBottom: '20px' }}>
+                <div style={{ width: '100%', height: '4px', backgroundColor: figmaColors.white, borderRadius: '2px', marginBottom: '10px', position: 'relative' }}>
+                  <div style={{ 
+                    width: `${goalPercentage}%`, 
+                    height: '100%', 
+                    backgroundColor: figmaColors.primaryBlue, 
+                    borderRadius: '2px',
+                    position: 'absolute',
+                    left: 0,
+                    top: 0
+                  }} />
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: figmaColors.darkGray, fontFamily: 'Inter, sans-serif' }}>
+                  <span>Goal: {goalPercentage}%</span>
+                  <span>{goalPercentage}%</span>
+                </div>
+              </div>
             </div>
-            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: figmaColors.darkGray }}>
-              <span>Goal: 80%</span>
-              <span>80%</span>
-            </div>
-          </div>
-        </div>
 
         {/* Stats and Action Buttons Row */}
         <div style={{ 
@@ -1601,9 +1659,10 @@ export default function Dashboard() {
                 fontSize: '24px',
                 color: figmaColors.darkGray,
                 margin: 0,
-                lineHeight: '38.704px'
+                lineHeight: '38.704px',
+                letterSpacing: '0.344px'
               }}>
-                48 h
+                {runtimeDisplay}
               </p>
               <p style={{
                 fontFamily: 'Inter, sans-serif',
@@ -1621,9 +1680,10 @@ export default function Dashboard() {
                 fontWeight: 600,
                 fontSize: '24px',
                 color: figmaColors.darkGray,
-                margin: 0
+                margin: 0,
+                letterSpacing: '0.344px'
               }}>
-                2,100
+                {formatNumber(runningTest.variantA || 0)}
               </p>
               <p style={{
                 fontFamily: 'Inter, sans-serif',
@@ -1641,9 +1701,10 @@ export default function Dashboard() {
                 fontWeight: 600,
                 fontSize: '24px',
                 color: figmaColors.darkGray,
-                margin: 0
+                margin: 0,
+                letterSpacing: '0.344px'
               }}>
-                2,160
+                {formatNumber(runningTest.variantB || 0)}
               </p>
               <p style={{
                 fontFamily: 'Inter, sans-serif',
@@ -1745,7 +1806,9 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
-      </div>
+          </div>
+        );
+      })()}
 
       {/* Ideas To Try Section */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
