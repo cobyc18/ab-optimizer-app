@@ -176,33 +176,33 @@ function analyzeABDualMetric(input) {
   };
 }
 
-// Figma Design Assets - Dashboard specific assets
-const imgPlaceholder = "http://localhost:3845/assets/c9fc7d6b793322789590ccef37f7182244140e0c.png";
-const imgLine59 = "http://localhost:3845/assets/e6acbfb8fe84220030b4f382c623d290af131b73.svg";
-const imgLine60 = "http://localhost:3845/assets/6fdefdaad07bd3176f051dff8664b72fd8565c7f.svg";
-const imgChart = "http://localhost:3845/assets/baf7e28d166b5b283321a852774ef1bdd14f27a6.svg";
-const imgGraph = "http://localhost:3845/assets/9b9af956aa583e2a99412e20df5a9e75bf80fdde.svg";
-const imgVector = "http://localhost:3845/assets/da7df0a45c49be40bfd8767d7103c37efb03f0d6.svg";
-const imgVector1 = "http://localhost:3845/assets/7fe5008c9a6b1cdaf9549ca56f945723f1c85e3e.svg";
-const imgVector2 = "http://localhost:3845/assets/5d87a99546af2943d8d4e590bffe963d4ba1d7d5.svg";
-const imgVector3 = "http://localhost:3845/assets/8aeda563b5d07bb246e3269201982a2bf0695893.svg";
-const imgVector4 = "http://localhost:3845/assets/2ae20abf3ffb8c7432949e47b2eddc72bfe88a95.svg";
-const imgVector5 = "http://localhost:3845/assets/c2fb7636bba790f8abc5759046d31f9ff97d4089.svg";
-const imgVector6 = "http://localhost:3845/assets/e31598c7df06d3cb5a36f62a3bdd510d4b822902.svg";
-const imgFrame2147224432 = "http://localhost:3845/assets/ca4a9b03e163123f65241c5ace3845bafc2a1c4e.svg";
-const imgLayer2 = "http://localhost:3845/assets/a9d2b4484df880300053ddc291d4b1508de9f48f.svg";
-const imgFrame2147224435 = "http://localhost:3845/assets/452785d63818a5c8e8198f86e2110ab26729a23a.svg";
-const img1 = "http://localhost:3845/assets/37f6433eecfe4bba5b55652b996eea8eaa31c272.svg";
-const img2 = "http://localhost:3845/assets/aefdaaf09d8161efbb1ad9e2e4ead3a58332e535.svg";
-const imgVector7 = "http://localhost:3845/assets/b1a8dd9dcb2f9bc57c5aee95b80168b4fe14075d.svg";
-const imgVector8 = "http://localhost:3845/assets/df7e41cc4bc8037fa1f6aaf47c08634a8d8a9f77.svg";
-const imgVector9 = "http://localhost:3845/assets/6b645facef47ae73e16a70930d235fb4da42ee2d.svg";
-const imgAward = "http://localhost:3845/assets/ba2a64095bc32a278cda21c35ac6bfc74c380c27.svg";
-const imgArrowDown2 = "http://localhost:3845/assets/7b59df041cbdc8736eebfca56f0496ca2e5e0b89.svg";
-const imgLine62 = "http://localhost:3845/assets/bf7975f6f2b4c3943998210f73b65bf83b77b6df.svg";
-const imgLine63 = "http://localhost:3845/assets/276e1036c5497ca9ab217e45810a262790fc3fbd.svg";
-const img01IconsLineArrowCircleDownCopy = "http://localhost:3845/assets/70f910ecaf96baffa20bd5afa6db3cbfe4bbe132.svg";
-const img01IconsLineArrowCircleDownCopy2 = "http://localhost:3845/assets/a937be020ad68012fc33358c50294cd0b9cca41c.svg";
+// Figma Design Assets - Dashboard specific assets (using inline SVG data URIs)
+const imgPlaceholder = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='150'%3E%3Crect width='200' height='150' fill='%23e6e6e6'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%2384818a' font-family='Arial' font-size='14'%3EPlaceholder%3C/text%3E%3C/svg%3E";
+const imgLine59 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M3 12h18M12 3l9 9-9 9' stroke='%23151515' stroke-width='2' fill='none'/%3E%3C/svg%3E";
+const imgLine60 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M21 12H3M12 21l-9-9 9-9' stroke='%23151515' stroke-width='2' fill='none'/%3E%3C/svg%3E";
+const imgChart = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='300'%3E%3Crect width='800' height='300' fill='%23ffffff'/%3E%3Cline x1='50' y1='250' x2='750' y2='250' stroke='%23e6e6e6' stroke-width='2'/%3E%3Cline x1='50' y1='250' x2='50' y2='50' stroke='%23e6e6e6' stroke-width='2'/%3E%3Cpolyline points='100,200 200,180 300,150 400,120 500,100 600,90 700,80' fill='none' stroke='%230038ff' stroke-width='3'/%3E%3C/svg%3E";
+const imgGraph = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='300'%3E%3Crect width='800' height='300' fill='%23ffffff'/%3E%3Cline x1='50' y1='250' x2='750' y2='250' stroke='%23e6e6e6' stroke-width='2'/%3E%3Cline x1='50' y1='250' x2='50' y2='50' stroke='%23e6e6e6' stroke-width='2'/%3E%3Cpolyline points='100,200 200,180 300,150 400,120 500,100 600,90 700,80' fill='none' stroke='%230038ff' stroke-width='3'/%3E%3C/svg%3E";
+const imgVector = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Cpath d='M20 40 L40 20 L60 40' stroke='%230038ff' stroke-width='2' fill='none'/%3E%3C/svg%3E";
+const imgVector1 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Cpath d='M20 20 L40 40 L60 20' stroke='%230038ff' stroke-width='2' fill='none'/%3E%3C/svg%3E";
+const imgVector2 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Ccircle cx='40' cy='30' r='15' fill='%230038ff' opacity='0.3'/%3E%3Ccircle cx='40' cy='30' r='8' fill='%230038ff'/%3E%3C/svg%3E";
+const imgVector3 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Crect x='20' y='15' width='40' height='30' rx='5' fill='%230038ff' opacity='0.3'/%3E%3Crect x='30' y='20' width='20' height='20' rx='3' fill='%230038ff'/%3E%3C/svg%3E";
+const imgVector4 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Cpath d='M40 10 L50 30 L30 30 Z' fill='%230038ff'/%3E%3Crect x='35' y='30' width='10' height='20' fill='%230038ff'/%3E%3C/svg%3E";
+const imgVector5 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Cpath d='M20 30 Q40 10 60 30' stroke='%230038ff' stroke-width='2' fill='none'/%3E%3C/svg%3E";
+const imgVector6 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Cpath d='M20 20 L40 40 L60 20' stroke='%230038ff' stroke-width='2' fill='none'/%3E%3C/svg%3E";
+const imgFrame2147224432 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect x='4' y='4' width='16' height='16' rx='2' fill='%23f4b207'/%3E%3Cpath d='M8 12h8M12 8v8' stroke='%23ffffff' stroke-width='2'/%3E%3C/svg%3E";
+const imgLayer2 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect x='4' y='4' width='16' height='16' rx='2' fill='%2329ad00'/%3E%3Cpath d='M8 12h8M12 8v8' stroke='%23ffffff' stroke-width='2'/%3E%3C/svg%3E";
+const imgFrame2147224435 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%230038ff'/%3E%3Cpath d='M8 12h8M12 8v8' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E";
+const img1 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M15 18l-6-6 6-6' stroke='%23151515' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E";
+const img2 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M9 18l6-6-6-6' stroke='%23151515' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E";
+const imgVector7 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Cpath d='M20 40 L40 20 L60 40' stroke='%230038ff' stroke-width='3' fill='none'/%3E%3Ccircle cx='40' cy='30' r='3' fill='%230038ff'/%3E%3C/svg%3E";
+const imgVector8 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Cpath d='M20 20 L40 40 L60 20' stroke='%230038ff' stroke-width='3' fill='none'/%3E%3Ccircle cx='40' cy='30' r='3' fill='%230038ff'/%3E%3C/svg%3E";
+const imgVector9 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='80' height='60'%3E%3Cpath d='M20 30 L40 10 L60 30' stroke='%230038ff' stroke-width='3' fill='none'/%3E%3Ccircle cx='40' cy='20' r='3' fill='%230038ff'/%3E%3C/svg%3E";
+const imgAward = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M12 2L15 9L22 10L17 15L18 22L12 19L6 22L7 15L2 10L9 9Z' fill='%23f4b207'/%3E%3C/svg%3E";
+const imgArrowDown2 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16'%3E%3Cpath d='M4 6l4 4 4-4' stroke='%23ffffff' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E";
+const imgLine62 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='2'%3E%3Cline x1='0' y1='1' x2='100' y2='1' stroke='%23e6e6e6' stroke-width='2'/%3E%3C/svg%3E";
+const imgLine63 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='100' height='2'%3E%3Cline x1='0' y1='1' x2='100' y2='1' stroke='%23e6e6e6' stroke-width='2'/%3E%3C/svg%3E";
+const img01IconsLineArrowCircleDownCopy = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='10' fill='none' stroke='%23151515' stroke-width='2'/%3E%3Cpath d='M8 10l4 4 4-4' stroke='%23151515' stroke-width='2' fill='none'/%3E%3C/svg%3E";
+const img01IconsLineArrowCircleDownCopy2 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='10' fill='none' stroke='%23151515' stroke-width='2'/%3E%3Cpath d='M8 10l4 4 4-4' stroke='%23151515' stroke-width='2' fill='none'/%3E%3C/svg%3E";
 
 // Figma Design Variables
 const figmaColors = {
@@ -727,16 +727,16 @@ export default function Dashboard() {
     yellow: '#f4b207'
   };
 
-  // Figma icons
+  // Figma icons (using inline SVG data URIs)
   const icons = {
-    home: "http://localhost:3845/assets/b5c9a49a2261b2416025a79cd7d9dd6cbfc9658c.svg",
-    cultureTube: "http://localhost:3845/assets/cf28cd19afe656dc8b46f5937016390d82168068.svg",
-    award: "http://localhost:3845/assets/ba2a64095bc32a278cda21c35ac6bfc74c380c27.svg",
-    chart: "http://localhost:3845/assets/baf7e28d166b5b283321a852774ef1bdd14f27a6.svg",
-    graph: "http://localhost:3845/assets/9b9af956aa583e2a99412e20df5a9e75bf80fdde.svg",
-    ideasIcon: "http://localhost:3845/assets/452785d63818a5c8e8198f86e2110ab26729a23a.svg",
-    arrowLeft: "http://localhost:3845/assets/37f6433eecfe4bba5b55652b996eea8eaa31c272.svg",
-    arrowRight: "http://localhost:3845/assets/aefdaaf09d8161efbb1ad9e2e4ead3a58332e535.svg"
+    home: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6' stroke='%23151515' stroke-width='2' fill='none'/%3E%3C/svg%3E",
+    cultureTube: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Crect x='6' y='4' width='12' height='16' rx='2' fill='none' stroke='%23151515' stroke-width='2'/%3E%3Cpath d='M9 8h6M9 12h6M9 16h6' stroke='%23151515' stroke-width='2'/%3E%3C/svg%3E",
+    award: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M12 2L15 9L22 10L17 15L18 22L12 19L6 22L7 15L2 10L9 9Z' fill='%23f4b207'/%3E%3C/svg%3E",
+    chart: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='300'%3E%3Crect width='800' height='300' fill='%23ffffff'/%3E%3Cline x1='50' y1='250' x2='750' y2='250' stroke='%23e6e6e6' stroke-width='2'/%3E%3Cline x1='50' y1='250' x2='50' y2='50' stroke='%23e6e6e6' stroke-width='2'/%3E%3Cpolyline points='100,200 200,180 300,150 400,120 500,100 600,90 700,80' fill='none' stroke='%230038ff' stroke-width='3'/%3E%3C/svg%3E",
+    graph: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='800' height='300'%3E%3Crect width='800' height='300' fill='%23ffffff'/%3E%3Cline x1='50' y1='250' x2='750' y2='250' stroke='%23e6e6e6' stroke-width='2'/%3E%3Cline x1='50' y1='250' x2='50' y2='50' stroke='%23e6e6e6' stroke-width='2'/%3E%3Cpolyline points='100,200 200,180 300,150 400,120 500,100 600,90 700,80' fill='none' stroke='%230038ff' stroke-width='3'/%3E%3C/svg%3E",
+    ideasIcon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%230038ff'/%3E%3Cpath d='M8 12h8M12 8v8' stroke='%23ffffff' stroke-width='1.5'/%3E%3C/svg%3E",
+    arrowLeft: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M15 18l-6-6 6-6' stroke='%23151515' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E",
+    arrowRight: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M9 18l6-6-6-6' stroke='%23151515' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"
   };
 
   // A/B Test Ideas
