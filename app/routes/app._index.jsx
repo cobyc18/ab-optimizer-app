@@ -86,9 +86,9 @@ function analyzeABDualMetric(input) {
 
   // thresholds and minima per your notes
   const MODE = {
-    fast: { threshold: 0.70, minN: 1, minDays: 0 }, // Lowered for testing
-    standard: { threshold: 0.75, minN: 1, minDays: 0 }, // Lowered for testing
-    careful: { threshold: 0.80, minN: 1, minDays: 0 } // Lowered for testing
+    fast: { threshold: 0.55, minN: 1, minDays: 0 },
+    standard: { threshold: 0.58, minN: 1, minDays: 0 },
+    careful: { threshold: 0.65, minN: 1, minDays: 0 }
   }[mode];
 
   // Build posteriors for both metrics: Beta(success+1, failures+1)
@@ -370,6 +370,22 @@ export const loader = async ({ request }) => {
               expectedLift: test.winner === 'B' ? 0.10 : -0.10
             }
           };
+        } else if (test.status === 'completed' && test.winner === null) {
+          // Test is already completed with no clear winner
+          console.log(`✅ Test ${test.id} already completed with no clear winner`);
+          
+          // Create a mock analysis for display purposes showing no clear winner
+          analysis = {
+            decision: 'no_clear_winner',
+            purchases: {
+              probB: 0.50,
+              expectedLift: 0.0
+            },
+            atc: {
+              probB: 0.50,
+              expectedLift: 0.0
+            }
+          };
         } else if (controlVisits >= 1 && variantVisits >= 1) { // Lowered threshold for testing
           const testData = {
             control: {
@@ -393,23 +409,61 @@ export const loader = async ({ request }) => {
           console.log(`  Decision: ${analysis.decision}`);
           console.log(`  Purchase prob B: ${(analysis.purchases.probB * 100).toFixed(1)}%`);
           console.log(`  ATC prob B: ${(analysis.atc.probB * 100).toFixed(1)}%`);
+          console.log(`  Days running: ${daysRunning}`);
           
-          // Check if we have a clear winner
-          if (analysis.decision !== 'no_clear_winner') {
-            winnerDeclared = true;
-            console.log(`🎉 WINNER DECLARED for test ${test.id}: ${analysis.decision}`);
-            
-            // Update test status to completed with winner
-            await prisma.aBTest.update({
-              where: { id: test.id },
-              data: { 
-                status: 'completed',
-                winner: analysis.decision.includes('variant') ? 'B' : 'A',
-                endDate: new Date()
-              }
-            });
-          } else {
-            console.log(`⏳ No clear winner yet for test ${test.id}`);
+          // Day-based winner declaration logic:
+          // - Days 0-9: Wait, don't declare winner even if probabilities are met
+          // - Days 10-21: If probabilities meet thresholds, declare winner immediately
+          // - After day 21: If no winner, mark as completed with 'no clear winner'
+          
+          if (daysRunning < 10) {
+            // Wait 10 days minimum before declaring a winner
+            console.log(`⏳ Test ${test.id} is only ${daysRunning} days old. Waiting until day 10 before declaring winner.`);
+          } else if (daysRunning >= 10 && daysRunning < 21) {
+            // Days 10-21: Declare winner if probabilities are met
+            if (analysis.decision !== 'no_clear_winner') {
+              winnerDeclared = true;
+              console.log(`🎉 WINNER DECLARED for test ${test.id} (day ${daysRunning}): ${analysis.decision}`);
+              
+              // Update test status to completed with winner
+              await prisma.aBTest.update({
+                where: { id: test.id },
+                data: { 
+                  status: 'completed',
+                  winner: analysis.decision.includes('variant') ? 'B' : 'A',
+                  endDate: new Date()
+                }
+              });
+            } else {
+              console.log(`⏳ No clear winner yet for test ${test.id} (day ${daysRunning}). Waiting until day 21.`);
+            }
+          } else if (daysRunning >= 21) {
+            // After 21 days: If no winner, mark as completed with 'no clear winner'
+            if (analysis.decision !== 'no_clear_winner') {
+              winnerDeclared = true;
+              console.log(`🎉 WINNER DECLARED for test ${test.id} (day ${daysRunning}): ${analysis.decision}`);
+              
+              // Update test status to completed with winner
+              await prisma.aBTest.update({
+                where: { id: test.id },
+                data: { 
+                  status: 'completed',
+                  winner: analysis.decision.includes('variant') ? 'B' : 'A',
+                  endDate: new Date()
+                }
+              });
+            } else {
+              // No winner after 21 days - mark as completed with no clear winner
+              console.log(`⏸️ Test ${test.id} reached 21 days with no clear winner. Marking as completed.`);
+              await prisma.aBTest.update({
+                where: { id: test.id },
+                data: { 
+                  status: 'completed',
+                  winner: null,
+                  endDate: new Date()
+                }
+              });
+            }
           }
         }
 
@@ -1404,90 +1458,6 @@ export default function Dashboard() {
           </p>
         </button>
       </div>
-
-      {/* Winner Declaration Section - Only show when winners are declared */}
-      {experiments.some(exp => exp.winnerDeclared) && (
-        <div style={{
-          backgroundColor: figmaColors.green,
-          borderRadius: '20px',
-          padding: '30px',
-          marginBottom: '40px',
-          border: '2px solid #1a7f1a'
-        }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '20px' }}>
-            <img alt="Award" src={icons.award} style={{ width: '32px', height: '32px' }} />
-            <h2 style={{
-              fontFamily: 'Poppins, sans-serif',
-              fontWeight: 600,
-              fontSize: '24px',
-              color: figmaColors.white,
-              margin: 0
-            }}>
-              🎉 Winners Declared!
-            </h2>
-          </div>
-          
-          {experiments.filter(exp => exp.winnerDeclared).map((experiment, index) => (
-            <div key={index} style={{
-              backgroundColor: 'rgba(255, 255, 255, 0.1)',
-              borderRadius: '12px',
-              padding: '20px',
-              marginBottom: index < experiments.filter(exp => exp.winnerDeclared).length - 1 ? '15px' : '0'
-            }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                <h3 style={{
-                  fontFamily: 'Poppins, sans-serif',
-                  fontWeight: 500,
-                  fontSize: '18px',
-                  color: figmaColors.white,
-                  margin: 0
-                }}>
-                  {experiment.name}
-                </h3>
-                <div style={{
-                  backgroundColor: figmaColors.white,
-                  color: figmaColors.green,
-                  padding: '6px 12px',
-                  borderRadius: '20px',
-                  fontSize: '14px',
-                  fontWeight: 600
-                }}>
-                  Winner: Variant {experiment.winner}
-                </div>
-              </div>
-              
-              {experiment.analysis && (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '15px' }}>
-                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
-                    <p style={{ color: figmaColors.white, margin: '0 0 5px 0', fontSize: '12px', opacity: 0.8 }}>Purchase Win Probability</p>
-                    <p style={{ color: figmaColors.white, margin: 0, fontSize: '16px', fontWeight: 600 }}>
-                      {(experiment.analysis.purchases.probB * 100).toFixed(1)}%
-                    </p>
-                  </div>
-                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
-                    <p style={{ color: figmaColors.white, margin: '0 0 5px 0', fontSize: '12px', opacity: 0.8 }}>Expected Lift</p>
-                    <p style={{ color: figmaColors.white, margin: 0, fontSize: '16px', fontWeight: 600 }}>
-                      +{(experiment.analysis.purchases.expectedRelLift * 100).toFixed(1)}%
-                    </p>
-                  </div>
-                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
-                    <p style={{ color: figmaColors.white, margin: '0 0 5px 0', fontSize: '12px', opacity: 0.8 }}>Total Visitors</p>
-                    <p style={{ color: figmaColors.white, margin: 0, fontSize: '16px', fontWeight: 600 }}>
-                      {experiment.variantA + experiment.variantB}
-                    </p>
-                  </div>
-                  <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.1)', padding: '12px', borderRadius: '8px' }}>
-                    <p style={{ color: figmaColors.white, margin: '0 0 5px 0', fontSize: '12px', opacity: 0.8 }}>Decision</p>
-                    <p style={{ color: figmaColors.white, margin: 0, fontSize: '14px', fontWeight: 500 }}>
-                      {experiment.analysis.decision.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-                    </p>
-                  </div>
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Experiment Overview Section */}
       <div style={{
