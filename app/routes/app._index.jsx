@@ -1464,7 +1464,7 @@ export default function Dashboard() {
         resetSwiper();
       }, 1500);
     } catch (error) {
-      console.error('❌ Failed to launch A/B test:', error);
+      console.error('❌ Failed to launch A/B test!:', error);
       setWizardLaunchError(error.message || 'Failed to launch A/B test. Please try again.');
     } finally {
       setIsLaunchingTest(false);
