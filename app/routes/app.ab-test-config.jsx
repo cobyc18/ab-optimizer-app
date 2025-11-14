@@ -86,7 +86,9 @@ export const loader = async ({ request }) => {
       templateA: test.templateA,
       templateB: test.templateB,
       trafficSplit: test.trafficSplit,
-      status: test.status
+      status: test.status,
+      widgetType: test.widgetType || null,
+      widgetSettings: test.widgetSettings || null
     };
 
     console.log("📊 Returning A/B test config:", config);

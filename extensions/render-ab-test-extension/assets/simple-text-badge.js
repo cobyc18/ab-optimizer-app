@@ -2,15 +2,30 @@
 (function() {
   'use strict';
 
+  var CONFIG_PARAM = 'ab_widget_config';
+  var WIDGET_TYPE = 'simple-text-badge';
+
   function init() {
+    refreshBadges();
+    registerConfigListener();
+  }
+
+  function refreshBadges() {
     const containers = document.querySelectorAll('.simple-text-badge-widget');
     containers.forEach(function(container) {
       renderBadge(container);
     });
   }
 
+  function registerConfigListener() {
+    if (window.__simpleTextBadgeConfigListenerAdded) return;
+    window.addEventListener('abTestWidgetConfigUpdate', refreshBadges);
+    window.__simpleTextBadgeConfigListenerAdded = true;
+  }
+
   function renderBadge(container) {
-    const settings = getSettings(container);
+    const overrides = getWidgetOverride();
+    const settings = getSettings(container, overrides);
     
     // Set CSS variables for colors
     container.style.setProperty('--badge-text-color', settings.textColor);
@@ -111,9 +126,9 @@
     return div.innerHTML;
   }
 
-  function getSettings(container) {
+  function getSettings(container, overrides) {
     const dataset = container.dataset;
-    return {
+    const baseSettings = {
       text: dataset.text || 'Up to 25% Off Everything: Our biggest savings of the year are here. Learn More',
       textColor: dataset.textColor || '#1a5f5f',
       backgroundColor: dataset.backgroundColor || '#f5f5f0',
@@ -121,6 +136,48 @@
       iconUrl: dataset.iconUrl || '',
       iconAlt: dataset.iconAlt || 'Badge icon'
     };
+
+    if (!overrides) {
+      return baseSettings;
+    }
+
+    return Object.assign({}, baseSettings, Object.keys(overrides).reduce(function(acc, key) {
+      if (overrides[key] !== undefined && overrides[key] !== null) {
+        acc[key] = overrides[key];
+      }
+      return acc;
+    }, {}));
+  }
+
+  function decodeConfigValue(value) {
+    try {
+      const json = decodeURIComponent(escape(window.atob(value)));
+      return JSON.parse(json);
+    } catch (error) {
+      console.warn('Simple Text Badge: Failed to decode widget config', error);
+      return null;
+    }
+  }
+
+  function getWidgetOverride() {
+    try {
+      const params = new URLSearchParams(window.location.search || '');
+      if (params.has(CONFIG_PARAM)) {
+        const payload = decodeConfigValue(params.get(CONFIG_PARAM));
+        if (payload && payload.widgetType === WIDGET_TYPE) {
+          return payload.settings || null;
+        }
+      }
+    } catch (error) {
+      console.warn('Simple Text Badge: Unable to read preview config', error);
+    }
+
+    const hasVariantMatch = !window.ABTestVariantTemplate || !window.currentVariant || window.currentVariant === window.ABTestVariantTemplate;
+    if (window.ABTestWidgetConfig && window.ABTestWidgetConfig.widgetType === WIDGET_TYPE && hasVariantMatch) {
+      return window.ABTestWidgetConfig.settings || null;
+    }
+
+    return null;
   }
 
   // Initialize when DOM is ready

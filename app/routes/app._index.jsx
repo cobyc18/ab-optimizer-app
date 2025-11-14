@@ -477,7 +477,9 @@ export const loader = async ({ request }) => {
           goal: "95%",
           analysis: analysis,
           winnerDeclared: winnerDeclared,
-          winner: test.winner || (winnerDeclared ? (analysis.decision.includes('variant') ? 'B' : 'A') : null)
+          winner: test.winner || (winnerDeclared ? (analysis.decision.includes('variant') ? 'B' : 'A') : null),
+          widgetType: test.widgetType || null,
+          widgetSettings: test.widgetSettings || null
         };
       })
     );
@@ -585,6 +587,8 @@ export default function Dashboard() {
   const [wizardOpen, setWizardOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedIdea, setSelectedIdea] = useState(null);
+  const [selectedWidgetConfig, setSelectedWidgetConfig] = useState(null);
+  const [selectedWidgetTweakId, setSelectedWidgetTweakId] = useState(null);
   const [placementGuideOpen, setPlacementGuideOpen] = useState(false);
   const [themePreviewMode, setThemePreviewMode] = useState(false);
   const [widgetPosition, setWidgetPosition] = useState({ x: 100, y: 100 });
@@ -619,6 +623,17 @@ export default function Dashboard() {
   const [wizardLaunchSuccess, setWizardLaunchSuccess] = useState(null);
   const [isVariantTemplateReady, setIsVariantTemplateReady] = useState(false);
   const [isVariantRequestInFlight, setIsVariantRequestInFlight] = useState(false);
+  const encodeWidgetConfigPayload = (payload) => {
+    if (!payload) return null;
+    try {
+      const json = JSON.stringify(payload);
+      return btoa(unescape(encodeURIComponent(json)));
+    } catch (error) {
+      console.error('⚠️ Failed to encode widget config payload:', error);
+      return null;
+    }
+  };
+
   // Debug: Open the created variant directly in the Theme Editor with previewPath
   const openVariantInThemeEditor = () => {
     try {
@@ -674,7 +689,22 @@ export default function Dashboard() {
       const templateParam = `product.${wizardVariantName}`;
 
       // Ensure the preview path matches the duplicated template via ?view=<suffix>
-      const previewPath = `/products/${productHandleForPreview}${wizardVariantName ? `?view=${wizardVariantName}` : ''}`;
+      const previewParams = new URLSearchParams();
+      if (wizardVariantName) {
+        previewParams.set('view', wizardVariantName);
+      }
+      if (selectedIdea?.blockId && selectedWidgetConfig) {
+        const encodedConfig = encodeWidgetConfigPayload({
+          widgetType: selectedIdea.blockId,
+          settings: selectedWidgetConfig
+        });
+        if (encodedConfig) {
+          previewParams.set('ab_widget_config', encodedConfig);
+        }
+      }
+      const previewPath = previewParams.toString()
+        ? `/products/${productHandleForPreview}?${previewParams.toString()}`
+        : `/products/${productHandleForPreview}`;
       const encodedPreviewPath = encodeURIComponent(previewPath);
 
       const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
@@ -761,6 +791,193 @@ export default function Dashboard() {
     }
   ];
 
+  const widgetTweaksCatalog = {
+    'simple-text-badge': [
+      {
+        id: 'simple-text-badge-bold-sale',
+        title: 'Bold Sale Banner',
+        description: 'High-contrast banner for flash or limited-time promotions.',
+        badgeText: 'FLASH DEAL • 30% OFF ENDS TONIGHT',
+        previewColors: {
+          background: '#fff1f2',
+          text: '#be123c',
+          ribbon: '#be123c'
+        },
+        settings: {
+          text: 'FLASH DEAL • 30% OFF ENDS TONIGHT',
+          textColor: '#be123c',
+          backgroundColor: '#fff1f2',
+          ribbonColor: '#be123c'
+        }
+      },
+      {
+        id: 'simple-text-badge-luxury',
+        title: 'Luxury Ribbon Message',
+        description: 'Muted palette with serif tone for premium drops.',
+        badgeText: 'Limited Atelier Drop • Complimentary gift wrapping today',
+        previewColors: {
+          background: '#f5f5f0',
+          text: '#1a5f5f',
+          ribbon: '#8b5cf6'
+        },
+        settings: {
+          text: 'Limited Atelier Drop • Complimentary gift wrapping today',
+          textColor: '#1a5f5f',
+          backgroundColor: '#f5f5f0',
+          ribbonColor: '#8b5cf6'
+        }
+      },
+      {
+        id: 'simple-text-badge-eco',
+        title: 'Eco Friendly Highlight',
+        description: 'Earthy tones to promote sustainability messaging.',
+        badgeText: 'Earth Conscious • Ships in recycled packaging',
+        previewColors: {
+          background: '#ecfccb',
+          text: '#14532d',
+          ribbon: '#65a30d'
+        },
+        settings: {
+          text: 'Earth Conscious • Ships in recycled packaging',
+          textColor: '#14532d',
+          backgroundColor: '#ecfccb',
+          ribbonColor: '#65a30d'
+        }
+      },
+      {
+        id: 'simple-text-badge-loyalty',
+        title: 'Loyalty Boost',
+        description: 'Spotlight perks for logged-in or VIP customers.',
+        badgeText: 'Members unlock free 2-day shipping + double points',
+        previewColors: {
+          background: '#e0f2fe',
+          text: '#0c4a6e',
+          ribbon: '#0369a1'
+        },
+        settings: {
+          text: 'Members unlock free 2-day shipping + double points',
+          textColor: '#0c4a6e',
+          backgroundColor: '#e0f2fe',
+          ribbonColor: '#0369a1'
+        }
+      }
+    ],
+    'live-visitor-count': [
+      {
+        id: 'live-visitor-count-urgency',
+        title: 'Urgency Pulse',
+        description: 'Higher range and bold copy to push scarcity.',
+        previewText: '87 people just viewed this item — almost gone!',
+        settings: {
+          countMin: 72,
+          countMax: 98,
+          desktopText: 'people just viewed this item — almost gone!',
+          mobileText: 'viewing now — selling fast!',
+          desktopBorderShape: 'rectangular',
+          mobileBorderShape: 'rectangular',
+          desktopAlignment: 'center',
+          mobileAlignment: 'center',
+          desktopFont: 'helvetica',
+          desktopFontSize: 16,
+          mobileFontSize: 14
+        }
+      },
+      {
+        id: 'live-visitor-count-social',
+        title: 'Social Proof',
+        description: 'Highlights how many shoppers have this in cart.',
+        previewText: '54 shoppers have this in their cart right now',
+        settings: {
+          countMin: 40,
+          countMax: 62,
+          desktopText: 'shoppers have this in their cart right now',
+          mobileText: 'carted right now ⚡',
+          desktopBorderShape: 'rounded',
+          mobileBorderShape: 'rounded',
+          desktopAlignment: 'left',
+          desktopFont: 'georgia',
+          desktopFontSize: 15
+        }
+      },
+      {
+        id: 'live-visitor-count-minimal',
+        title: 'Minimal Meter',
+        description: 'Clean layout aligned right for luxe brands.',
+        previewText: '32 people considering this piece today',
+        settings: {
+          countMin: 26,
+          countMax: 42,
+          desktopText: 'people considering this piece today',
+          mobileText: 'considering today',
+          desktopBorderShape: 'rectangular',
+          mobileBorderShape: 'rectangular',
+          desktopAlignment: 'right',
+          desktopFont: 'helvetica',
+          desktopFontSize: 14
+        }
+      },
+      {
+        id: 'live-visitor-count-socialproof',
+        title: 'Drop Countdown',
+        description: 'Short text and tight padding for hero sections.',
+        previewText: '46 others viewing this drop in the last hour',
+        settings: {
+          countMin: 38,
+          countMax: 56,
+          desktopText: 'others viewing this drop in the last hour',
+          mobileText: 'live this hour',
+          desktopPaddingInside: 10,
+          mobilePaddingInside: 8,
+          desktopAlignment: 'center',
+          desktopFontSize: 15,
+          mobileFontSize: 13
+        }
+      }
+    ]
+  };
+
+  const cloneConfig = (config) => (config ? JSON.parse(JSON.stringify(config)) : null);
+  const getWidgetTweaks = (widgetType) => widgetTweaksCatalog[widgetType] || [];
+  const getWidgetIdeaByType = (widgetType) => abTestIdeas.find(idea => idea.blockId === widgetType);
+  const getTweakLabel = (widgetType, tweakId) => {
+    if (!widgetType || !tweakId) return null;
+    const tweaks = getWidgetTweaks(widgetType);
+    const tweak = tweaks.find(t => t.id === tweakId);
+    return tweak ? tweak.title : null;
+  };
+
+  const applyWidgetIdeaSelection = (idea, configOverride = null, tweakId = null) => {
+    if (!idea) return;
+    setSelectedIdea(idea);
+    setSelectedWidgetConfig(cloneConfig(configOverride));
+    setSelectedWidgetTweakId(tweakId || null);
+    const ideaIndex = abTestIdeas.findIndex(entry => entry.id === idea.id);
+    if (ideaIndex >= 0) {
+      setCurrentWidgetIndex(ideaIndex);
+    }
+  };
+
+  const startWizardForIdea = (idea, configOverride = null, tweakId = null) => {
+    if (!idea) return;
+    resetSwiper();
+    applyWidgetIdeaSelection(idea, configOverride, tweakId);
+    setWizardOpen(true);
+    setCurrentStep(2);
+  };
+
+  const handleTweakSelection = (widgetType, tweak) => {
+    const idea = getWidgetIdeaByType(widgetType);
+    if (!idea) {
+      alert('We could not pre-select that widget. Please choose one manually.');
+      return;
+    }
+    const configOverride = tweak?.settings ? cloneConfig(tweak.settings) : null;
+    startWizardForIdea(idea, configOverride, tweak?.id || null);
+    setWizardTestName('');
+    setWizardLaunchError(null);
+    setWizardLaunchSuccess(null);
+  };
+
   // Tinder swiper functions
   const handleSwipe = (direction) => {
     if (isAnimating) return;
@@ -778,7 +995,7 @@ export default function Dashboard() {
         blockId: selectedWidget?.blockId,
         appExtensionId: selectedWidget?.appExtensionId
       });
-      setSelectedIdea(selectedWidget);
+      applyWidgetIdeaSelection(selectedWidget);
       setTimeout(() => {
         setCurrentStep(2);
         setIsAnimating(false);
@@ -802,6 +1019,8 @@ export default function Dashboard() {
     setCurrentStep(1);
     setCurrentWidgetIndex(0);
     setSelectedIdea(null);
+    setSelectedWidgetConfig(null);
+    setSelectedWidgetTweakId(null);
     setSwipeDirection(null);
     setIsAnimating(false);
     setWizardScreenshot(null);
@@ -1164,7 +1383,9 @@ export default function Dashboard() {
       variantTemplateFilename: wizardVariantTemplateFilename,
       controlTemplateSuffix: wizardVariantOriginalTemplateSuffix,
       variantTemplateSuffix: wizardVariantName,
-      trafficSplit: wizardTrafficSplit
+      trafficSplit: wizardTrafficSplit,
+      widgetType: selectedIdea?.blockId || null,
+      widgetSettings: selectedWidgetConfig || null
     };
 
     setIsLaunchingTest(true);
@@ -1304,10 +1525,12 @@ export default function Dashboard() {
   useEffect(() => {
     if (wizardSelectedProductSnapshot && selectedIdea && !wizardTestName) {
       const ideaLabel = selectedIdea.utility || 'Widget';
+      const tweakLabel = getTweakLabel(selectedIdea.blockId, selectedWidgetTweakId);
       const productLabel = wizardSelectedProductSnapshot.title || 'Product';
-      setWizardTestName(`${ideaLabel} - ${productLabel}`);
+      const composedLabel = tweakLabel ? `${ideaLabel} (${tweakLabel})` : ideaLabel;
+      setWizardTestName(`${composedLabel} - ${productLabel}`);
     }
-  }, [wizardSelectedProductSnapshot, selectedIdea, wizardTestName]);
+  }, [wizardSelectedProductSnapshot, selectedIdea, wizardTestName, selectedWidgetTweakId]);
 
   const previewProductTitle = wizardVariantProductTitle || wizardSelectedProductSnapshot?.title || selectedProduct?.title || '';
   const previewProductHandle = wizardVariantProductHandle || wizardSelectedProductSnapshot?.handle || selectedProduct?.handle || '';
@@ -1439,53 +1662,62 @@ export default function Dashboard() {
 
       {/* Experiment Overview Section */}
       {(() => {
-        // Find the currently running test
         const runningTest = experiments.find(exp => exp.status === 'running' || exp.status === 'active' || exp.status === 'live');
+        const completedWithWinner = experiments.find(exp => exp.status === 'completed' && exp.winner);
+        const spotlightTest = runningTest || completedWithWinner;
         
-        if (!runningTest) {
-          return null; // Don't show the section if there's no running test
+        if (!spotlightTest) {
+          return null;
         }
 
-        // Calculate hours from runtime (runtime is in format "Xd")
-        const runtimeMatch = runningTest.runtime?.match(/(\d+)d/);
+        const runtimeMatch = spotlightTest.runtime?.match(/(\d+)d/);
         const days = runtimeMatch ? parseInt(runtimeMatch[1], 10) : 0;
         const hours = days * 24;
         const runtimeDisplay = hours >= 24 ? `${days} d` : `${hours} h`;
 
-        // Format numbers with commas
         const formatNumber = (num) => {
           if (num === null || num === undefined) return '0';
           return num.toLocaleString('en-US');
         };
 
-        // Get analysis data for description
-        const atcLift = runningTest.analysis?.atc?.expectedRelLift 
-          ? (runningTest.analysis.atc.expectedRelLift * 100).toFixed(1)
+        const atcLift = spotlightTest.analysis?.atc?.expectedRelLift 
+          ? (spotlightTest.analysis.atc.expectedRelLift * 100).toFixed(1)
           : null;
-        const certainty = runningTest.analysis?.atc?.probB 
-          ? (runningTest.analysis.atc.probB * 100).toFixed(0)
-          : runningTest.analysis?.purchases?.probB
-          ? (runningTest.analysis.purchases.probB * 100).toFixed(0)
+        const certainty = spotlightTest.analysis?.atc?.probB 
+          ? (spotlightTest.analysis.atc.probB * 100).toFixed(0)
+          : spotlightTest.analysis?.purchases?.probB
+          ? (spotlightTest.analysis.purchases.probB * 100).toFixed(0)
           : null;
 
-        // Generate description text
         let descriptionText = '';
-        if (atcLift && certainty) {
-          const isVariantLeading = runningTest.analysis?.atc?.probB > 0.5;
+        const winnerDeclared = spotlightTest.status === 'completed' && Boolean(spotlightTest.winner);
+        if (winnerDeclared && atcLift && certainty) {
+          const winningLabel = spotlightTest.winner === 'B' ? 'Variant' : 'Control';
+          descriptionText = `${winningLabel} won with a ${Math.abs(atcLift)}% ATC lift at ${certainty}% certainty.`;
+        } else if (atcLift && certainty) {
+          const isVariantLeading = spotlightTest.analysis?.atc?.probB > 0.5;
           const liftText = isVariantLeading ? `leading ${Math.abs(atcLift)}%` : `trailing ${Math.abs(atcLift)}%`;
           descriptionText = `Variant is ${liftText} ATC with ${certainty}% certainty.`;
         } else {
-          descriptionText = 'Test is running. Collecting data to determine results.';
+          descriptionText = winnerDeclared
+            ? 'Winner locked based on purchase probability.'
+            : 'Test is running. Collecting data to determine results.';
         }
 
-        // Parse test name to get widget name (format: "Widget Test - Product (Date)")
-        const testNameParts = runningTest.name?.split(' VS ') || [runningTest.name || 'Experiment'];
-        const experimentTitle = testNameParts[0] || runningTest.name || 'Experiment';
+        const secondaryDescription = winnerDeclared
+          ? 'Line up a fresh widget tweak to keep conversion momentum.'
+          : 'We suggest keeping the test active for a few more days to reach a more certain conclusion';
 
-        // Calculate goal percentage (based on analysis or default)
-        const goalPercentage = runningTest.analysis?.atc?.probB 
-          ? Math.min(95, Math.max(50, Math.round(runningTest.analysis.atc.probB * 100)))
+        const testNameParts = spotlightTest.name?.split(' VS ') || [spotlightTest.name || 'Experiment'];
+        const experimentTitle = testNameParts[0] || spotlightTest.name || 'Experiment';
+
+        const goalPercentage = spotlightTest.analysis?.atc?.probB 
+          ? Math.min(95, Math.max(50, Math.round(spotlightTest.analysis.atc.probB * 100)))
           : 80;
+
+        const widgetTweaks = winnerDeclared && spotlightTest.widgetType
+          ? getWidgetTweaks(spotlightTest.widgetType)
+          : [];
 
         return (
       <div style={{
@@ -1524,7 +1756,7 @@ export default function Dashboard() {
               color: figmaColors.darkGray,
                   lineHeight: '32px'
             }}>
-                  {' '}We suggest keeping the test active for a few more days to reach a more certain conclusion
+                  {' '}{secondaryDescription}
             </span>
           </div>
         </div>
@@ -1661,7 +1893,7 @@ export default function Dashboard() {
                 margin: 0,
                 letterSpacing: '0.344px'
               }}>
-                {formatNumber(runningTest.variantA || 0)}
+              {formatNumber(spotlightTest.variantA || 0)}
               </p>
               <p style={{
                 fontFamily: 'Inter, sans-serif',
@@ -1682,7 +1914,7 @@ export default function Dashboard() {
                 margin: 0,
                 letterSpacing: '0.344px'
               }}>
-                {formatNumber(runningTest.variantB || 0)}
+              {formatNumber(spotlightTest.variantB || 0)}
               </p>
               <p style={{
                 fontFamily: 'Inter, sans-serif',
@@ -1784,6 +2016,106 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
+
+        {winnerDeclared && widgetTweaks.length > 0 && (
+          <div style={{ marginTop: '35px' }}>
+            <p style={{
+              fontFamily: 'Geist, sans-serif',
+              fontWeight: 500,
+              fontSize: '20px',
+              color: figmaColors.darkGray,
+              margin: '0 0 16px 0'
+            }}>
+              Keep Momentum Going
+            </p>
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+              gap: '16px'
+            }}>
+              {widgetTweaks.map((tweak) => (
+                <div key={tweak.id} style={{
+                  backgroundColor: figmaColors.white,
+                  borderRadius: '16px',
+                  padding: '20px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '12px',
+                  boxShadow: '0 4px 12px rgba(0,0,0,0.08)'
+                }}>
+                  <div>
+                    <p style={{
+                      fontFamily: 'Geist, sans-serif',
+                      fontWeight: 500,
+                      fontSize: '16px',
+                      margin: 0,
+                      color: figmaColors.darkGray
+                    }}>
+                      {tweak.title}
+                    </p>
+                    <p style={{
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: '13px',
+                      margin: '4px 0 0 0',
+                      color: figmaColors.lightGray,
+                      lineHeight: '18px'
+                    }}>
+                      {tweak.description}
+                    </p>
+                  </div>
+                  {spotlightTest.widgetType === 'simple-text-badge' && (
+                    <div style={{
+                      borderRadius: '12px',
+                      padding: '14px',
+                      backgroundColor: tweak.previewColors?.background || '#f5f5f0',
+                      color: tweak.previewColors?.text || '#1a5f5f',
+                      fontFamily: 'Inter, sans-serif',
+                      fontSize: '14px',
+                      minHeight: '72px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      border: `2px solid ${tweak.previewColors?.ribbon || '#dc2626'}`
+                    }}>
+                      {tweak.badgeText}
+                    </div>
+                  )}
+                  {spotlightTest.widgetType === 'live-visitor-count' && (
+                    <div style={{
+                      borderRadius: '12px',
+                      padding: '12px',
+                      backgroundColor: '#f8fafc',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px'
+                    }}>
+                      <span style={{ fontFamily: 'Geist, sans-serif', fontSize: '20px', fontWeight: 600 }}>
+                        {tweak.previewText?.replace(/\D/g, '') || `${tweak.settings?.countMin || 40}`}
+                      </span>
+                      <span style={{ fontFamily: 'Inter, sans-serif', fontSize: '13px', color: figmaColors.lightGray }}>
+                        {tweak.previewText || tweak.settings?.desktopText}
+                      </span>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => handleTweakSelection(spotlightTest.widgetType, tweak)}
+                    style={{
+                      backgroundColor: figmaColors.primaryBlue,
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '10px 16px',
+                      color: figmaColors.white,
+                      fontFamily: 'Poppins, sans-serif',
+                      fontSize: '13px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Launch This Idea
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
         );
       })()}

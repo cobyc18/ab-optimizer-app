@@ -23,6 +23,8 @@ export const action = async ({ request }) => {
       controlTemplateSuffix,
       variantTemplateSuffix,
       trafficSplit = "50",
+      widgetType,
+      widgetSettings
     } = body;
 
     if (!productId) {
@@ -95,6 +97,20 @@ export const action = async ({ request }) => {
       });
     }
 
+    let normalizedWidgetSettings = null;
+    if (widgetSettings) {
+      if (typeof widgetSettings === "string") {
+        try {
+          normalizedWidgetSettings = JSON.parse(widgetSettings);
+        } catch (parseError) {
+          console.error("⚠️ Failed to parse widget settings JSON:", parseError);
+          normalizedWidgetSettings = null;
+        }
+      } else {
+        normalizedWidgetSettings = widgetSettings;
+      }
+    }
+
     const abTest = await prisma.aBTest.create({
       data: {
         shop,
@@ -103,7 +119,9 @@ export const action = async ({ request }) => {
         templateA: controlSuffixForDb,
         templateB: variantSuffix,
         trafficSplit: trafficSplitInt,
-        endResultType: "manual"
+        endResultType: "manual",
+        widgetType: widgetType || null,
+        widgetSettings: normalizedWidgetSettings
       }
     });
 

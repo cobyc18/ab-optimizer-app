@@ -492,6 +492,23 @@ window.ABTestProductTracking = (function() {
       var config = await res.json();
       console.log("Fetched config:", config);
       
+      if (config.widgetType) {
+        window.ABTestWidgetConfig = {
+          widgetType: config.widgetType,
+          settings: config.widgetSettings || null
+        };
+      } else {
+        window.ABTestWidgetConfig = null;
+      }
+      window.ABTestVariantTemplate = config.templateB || null;
+      try {
+        window.dispatchEvent(new CustomEvent('abTestWidgetConfigUpdate', {
+          detail: window.ABTestWidgetConfig
+        }));
+      } catch (configEventError) {
+        console.warn('AB Test Tracking: Unable to dispatch widget config update', configEventError);
+      }
+      
       if (!config.testId) {
         console.log("No testId in config");
         console.log("=== A/B TEST DEBUG END ===");

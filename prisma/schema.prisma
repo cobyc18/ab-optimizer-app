@@ -39,6 +39,8 @@ model ABTest {
   status       String     @default("running") // "running", "completed", "paused", etc.
   startDate    DateTime   @default(now())
   endDate      DateTime?
+  widgetType   String?
+  widgetSettings Json?
   
   // End result configuration
   endResultType String?   // "date", "impressions", "conversions", "manual"

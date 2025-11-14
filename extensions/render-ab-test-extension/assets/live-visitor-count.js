@@ -2,7 +2,15 @@
 (function() {
   'use strict';
 
+  var CONFIG_PARAM = 'ab_widget_config';
+  var WIDGET_TYPE = 'live-visitor-count';
+
   function init() {
+    refreshLiveVisitorWidgets();
+    registerConfigListener();
+  }
+
+  function refreshLiveVisitorWidgets() {
     const containers = document.querySelectorAll('.live-visitor-count-widget');
     containers.forEach(function(container) {
       renderWidget(container);
@@ -10,8 +18,15 @@
     });
   }
 
+  function registerConfigListener() {
+    if (window.__liveVisitorWidgetListenerAdded) return;
+    window.addEventListener('abTestWidgetConfigUpdate', refreshLiveVisitorWidgets);
+    window.__liveVisitorWidgetListenerAdded = true;
+  }
+
   function renderWidget(container) {
-    const settings = getSettings(container);
+    const overrides = getWidgetOverride();
+    const settings = getSettings(container, overrides);
     const widgetId = container.dataset.widgetId;
     
     // Calculate padding horizontal
@@ -112,9 +127,9 @@
     scheduleNextUpdate();
   }
 
-  function getSettings(container) {
+  function getSettings(container, overrides) {
     const dataset = container.dataset;
-    return {
+    const baseSettings = {
       countMin: parseInt(dataset.countMin) || 40,
       countMax: parseInt(dataset.countMax) || 60,
       desktopText: dataset.desktopText || 'people currently looking at this product',
@@ -136,6 +151,49 @@
       desktopAlignment: dataset.desktopAlignment || 'left',
       mobileAlignment: dataset.mobileAlignment || 'left'
     };
+
+    if (!overrides) {
+      return baseSettings;
+    }
+
+    const merged = Object.assign({}, baseSettings);
+    Object.keys(overrides).forEach(function(key) {
+      if (overrides[key] !== undefined && overrides[key] !== null) {
+        merged[key] = overrides[key];
+      }
+    });
+    return merged;
+  }
+
+  function decodeConfigValue(value) {
+    try {
+      const json = decodeURIComponent(escape(window.atob(value)));
+      return JSON.parse(json);
+    } catch (error) {
+      console.warn('Live Visitor Count: Failed to decode widget config', error);
+      return null;
+    }
+  }
+
+  function getWidgetOverride() {
+    try {
+      const params = new URLSearchParams(window.location.search || '');
+      if (params.has(CONFIG_PARAM)) {
+        const payload = decodeConfigValue(params.get(CONFIG_PARAM));
+        if (payload && payload.widgetType === WIDGET_TYPE) {
+          return payload.settings || null;
+        }
+      }
+    } catch (error) {
+      console.warn('Live Visitor Count: Unable to read preview config', error);
+    }
+
+    const hasVariantMatch = !window.ABTestVariantTemplate || !window.currentVariant || window.currentVariant === window.ABTestVariantTemplate;
+    if (window.ABTestWidgetConfig && window.ABTestWidgetConfig.widgetType === WIDGET_TYPE && hasVariantMatch) {
+      return window.ABTestWidgetConfig.settings || null;
+    }
+
+    return null;
   }
 
   // Initialize when DOM is ready
