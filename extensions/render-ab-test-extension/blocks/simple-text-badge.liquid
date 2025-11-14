@@ -9,6 +9,9 @@
      data-text="{{ block.settings.badge_text | default: 'Up to 25% Off Everything' }}"
      data-text-color="{{ block.settings.text_color | default: '#1a5f5f' }}"
      data-background-color="{{ block.settings.background_color | default: '#f5f5f0' }}"
+     data-border-color="{{ block.settings.border_color | default: '#d4d4d4' }}"
+     data-border-shape="{{ block.settings.border_shape | default: 'sharp' }}"
+     data-alignment="{{ block.settings.badge_alignment | default: 'left' }}"
      data-ribbon-color="{{ block.settings.ribbon_color | default: '#dc2626' }}"
      {% if block.settings.icon_image %}
      data-icon-url="{{ block.settings.icon_image | image_url: width: 100 }}"
@@ -48,6 +51,13 @@
       "info": "Choose the background color for the badge"
     },
     {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#d4d4d4",
+      "info": "Choose the border color for the badge"
+    },
+    {
       "type": "image_picker",
       "id": "icon_image",
       "label": "Icon Image",
@@ -59,6 +69,28 @@
       "label": "Ribbon Color",
       "default": "#dc2626",
       "info": "Choose the color for the decorative ribbon on the left side"
+    },
+    {
+      "type": "select",
+      "id": "border_shape",
+      "label": "Border Shape",
+      "options": [
+        { "value": "sharp", "label": "Sharp" },
+        { "value": "rounded", "label": "Rounded" },
+        { "value": "pill", "label": "Pill" }
+      ],
+      "default": "sharp"
+    },
+    {
+      "type": "select",
+      "id": "badge_alignment",
+      "label": "Badge Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
     }
   ]
 }

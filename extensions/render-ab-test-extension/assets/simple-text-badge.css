@@ -10,12 +10,14 @@
 .simple-text-badge {
   display: flex;
   align-items: center;
+  justify-content: var(--badge-alignment, flex-start);
   position: relative;
   width: 100%;
   min-height: 80px;
   padding: 20px 24px 20px 0;
   background-color: var(--badge-background-color, #f5f5f0);
-  border-radius: 0;
+  border: 1px solid var(--badge-border-color, transparent);
+  border-radius: var(--badge-border-radius, 0);
   box-sizing: border-box;
   overflow: hidden;
 }

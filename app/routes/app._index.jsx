@@ -477,7 +477,11 @@ export const loader = async ({ request }) => {
           goal: "95%",
           analysis: analysis,
           winnerDeclared: winnerDeclared,
-          winner: test.winner || (winnerDeclared ? (analysis.decision.includes('variant') ? 'B' : 'A') : null)
+          winner: test.winner || (winnerDeclared ? (analysis.decision.includes('variant') ? 'B' : 'A') : null),
+          widgetType: test.widgetType || null,
+          widgetSettings: test.widgetSettings || null,
+          widgetPresetId: test.widgetPresetId || null,
+          widgetPresetName: test.widgetPresetName || null
         };
       })
     );
@@ -739,27 +743,161 @@ export default function Dashboard() {
     arrowRight: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24'%3E%3Cpath d='M9 18l6-6-6-6' stroke='%23151515' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"
   };
 
-  // A/B Test Ideas
-  const abTestIdeas = [
-    {
-      id: 1,
+  const widgetLibrary = {
+    'live-visitor-count': {
+      widgetKey: 'live-visitor-count',
       utility: 'Live Visitor Count',
       rationale: 'Shows real-time visitor activity, creates urgency and social proof',
       style: 'Dynamic',
       preview: '👁️ 76 people viewing this page',
       blockId: 'live-visitor-count',
-      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
+      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4',
+      blockSettings: null
     },
-    {
-      id: 2,
+    'simple-text-badge': {
+      widgetKey: 'simple-text-badge',
       utility: 'Simple Text Badge',
       rationale: 'Displays promotional badges with customizable text, colors, and icons to highlight special offers',
       style: 'Promotional',
       preview: '🎁 Up to 25% Off Everything: Our biggest savings of the year are here. Learn More',
       blockId: 'simple-text-badge',
-      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
+      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4',
+      blockSettings: null
     }
-  ];
+  };
+
+  const widgetOrder = ['live-visitor-count', 'simple-text-badge'];
+
+  // A/B Test Ideas shown in the Tinder swiper
+  const abTestIdeas = widgetOrder.map((widgetKey, index) => ({
+    id: index + 1,
+    ...widgetLibrary[widgetKey]
+  }));
+
+  const widgetPresetSuggestions = {
+    'live-visitor-count': [
+      {
+        id: 'lvc-urgency-burst',
+        title: 'Urgency Burst',
+        description: 'Centered layout with bold red border and scarcity copy to highlight demand.',
+        preview: '👁️ 34 shoppers ready to checkout — low stock alert',
+        blockSettings: {
+          desktop_text: 'shoppers ready to checkout — low stock alert',
+          mobile_text: 'ready to checkout — low stock alert',
+          desktop_alignment: 'center',
+          mobile_alignment: 'center',
+          desktop_border_shape: 'rounded',
+          mobile_border_shape: 'rounded',
+          text_color: '#111827',
+          border_color: '#ff5f56'
+        }
+      },
+      {
+        id: 'lvc-social-proof',
+        title: 'Social Proof Highlight',
+        description: 'Left-aligned badge with subtle teal border for softer urgency messaging.',
+        preview: '👁️ 61 people browsing this product now',
+        blockSettings: {
+          desktop_text: 'people browsing this product now',
+          mobile_text: 'browsing now',
+          desktop_alignment: 'left',
+          mobile_alignment: 'left',
+          desktop_border_shape: 'rounded',
+          mobile_border_shape: 'rounded',
+          text_color: '#065f46',
+          border_color: '#a7f3d0'
+        }
+      },
+      {
+        id: 'lvc-minimal-pill',
+        title: 'Minimal Pill',
+        description: 'Pill border with monochrome palette for a clean, premium look.',
+        preview: '👁️ 48 active viewers — trending today',
+        blockSettings: {
+          desktop_text: 'active viewers — trending today',
+          mobile_text: 'trending today',
+          desktop_alignment: 'center',
+          mobile_alignment: 'center',
+          desktop_border_shape: 'rounded',
+          mobile_border_shape: 'rounded',
+          text_color: '#1f2937',
+          border_color: '#d1d5db'
+        }
+      }
+    ],
+    'simple-text-badge': [
+      {
+        id: 'stb-flash-sale',
+        title: 'Flash Sale Banner',
+        description: 'Loud flash-sale messaging with pill border and high-contrast colors.',
+        preview: '🎁 FLASH SALE: 30% OFF ends in 2 hours',
+        blockSettings: {
+          badge_text: 'FLASH SALE: 30% OFF ends in 2 hours • Use code SAVE30',
+          text_color: '#ffffff',
+          background_color: '#ef4444',
+          border_color: '#b91c1c',
+          border_shape: 'pill',
+          badge_alignment: 'center'
+        }
+      },
+      {
+        id: 'stb-social-proof',
+        title: 'Social Proof Badge',
+        description: 'Soft green palette with left alignment to highlight real-time shoppers.',
+        preview: '🎁 57 shoppers added this to cart in the last 24h',
+        blockSettings: {
+          badge_text: '57 shoppers added this to cart in the last 24h',
+          text_color: '#065f46',
+          background_color: '#ecfdf5',
+          border_color: '#6ee7b7',
+          border_shape: 'rounded',
+          badge_alignment: 'left'
+        }
+      },
+      {
+        id: 'stb-shipping',
+        title: 'Shipping Assurance',
+        description: 'Calming blue badge focused on express shipping reassurance.',
+        preview: '🎁 FREE Express Shipping today only',
+        blockSettings: {
+          badge_text: 'FREE Express Shipping today only · Upgrade at checkout',
+          text_color: '#0f172a',
+          background_color: '#e0f2fe',
+          border_color: '#38bdf8',
+          border_shape: 'rounded',
+          badge_alignment: 'center'
+        }
+      }
+    ]
+  };
+
+  const inferWidgetKeyFromName = (name = '') => {
+    const lowerName = (name || '').toLowerCase();
+    if (lowerName.includes('live visitor')) return 'live-visitor-count';
+    if (lowerName.includes('text badge') || lowerName.includes('badge')) return 'simple-text-badge';
+    return null;
+  };
+
+  const prepareIdeaSelection = (idea, presetMeta = {}) => {
+    if (!idea) return null;
+
+    const blockSettingsSource = presetMeta.blockSettings ?? idea.blockSettings ?? null;
+    const clonedBlockSettings = blockSettingsSource
+      ? JSON.parse(JSON.stringify(blockSettingsSource))
+      : null;
+
+    return {
+      ...idea,
+      blockSettings: clonedBlockSettings,
+      presetId: presetMeta.presetId || presetMeta.id || null,
+      presetName: presetMeta.presetName || presetMeta.title || null,
+      presetDescription: presetMeta.description || null,
+      preview: presetMeta.preview || idea.preview,
+      rationale: presetMeta.description || idea.rationale,
+      style: presetMeta.style || idea.style,
+      utility: presetMeta.utility || idea.utility
+    };
+  };
 
   // Tinder swiper functions
   const handleSwipe = (direction) => {
@@ -769,7 +907,7 @@ export default function Dashboard() {
     setSwipeDirection(direction);
     
     if (direction === 'like') {
-      const selectedWidget = abTestIdeas[currentWidgetIndex];
+      const selectedWidget = prepareIdeaSelection(abTestIdeas[currentWidgetIndex]);
       console.log('🎯 Widget selected:', {
         widget: selectedWidget,
         currentIndex: currentWidgetIndex,
@@ -821,6 +959,22 @@ export default function Dashboard() {
     setIsLaunchingTest(false);
     setWizardLaunchError(null);
     setWizardLaunchSuccess(null);
+    setWizardTestName('');
+  };
+
+  const handlePresetSelection = (widgetKey, preset) => {
+    const baseIdea = widgetLibrary[widgetKey];
+    if (!baseIdea) return;
+
+    const preparedIdea = prepareIdeaSelection(baseIdea, {
+      ...preset,
+      utility: `${baseIdea.utility} · ${preset.title}`
+    });
+
+    resetSwiper();
+    setSelectedIdea(preparedIdea);
+    setWizardOpen(true);
+    setCurrentStep(2);
   };
 
   // Generate screenshot for wizard
@@ -1058,6 +1212,36 @@ export default function Dashboard() {
           alert(`We created the template but couldn't assign it to the product automatically. ${assignError.message || ''}`);
         }
 
+        if (selectedIdea?.blockId && selectedIdea?.appExtensionId) {
+          try {
+            const widgetResponse = await fetch('/api/add-widget-block', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                templateFilename: result.newFilename,
+                themeId: mainTheme.id,
+                blockId: selectedIdea.blockId,
+                appExtensionId: selectedIdea.appExtensionId,
+                blockSettings: selectedIdea.blockSettings || undefined
+              })
+            });
+
+            const widgetResult = await widgetResponse.json();
+            if (!widgetResponse.ok || widgetResult.error) {
+              console.error('⚠️ Failed to inject widget block into template:', widgetResult.error || widgetResult);
+            } else {
+              console.log('✅ Injected widget block with settings:', {
+                templateFilename: result.newFilename,
+                blockId: selectedIdea.blockId,
+                appExtensionId: selectedIdea.appExtensionId,
+                blockSettings: selectedIdea.blockSettings
+              });
+            }
+          } catch (blockError) {
+            console.error('❌ Error injecting widget block:', blockError);
+          }
+        }
+
         console.log('🔍 Widget Addition Debug - Checking selectedIdea:', {
           selectedIdea,
           hasSelectedIdea: !!selectedIdea,
@@ -1164,7 +1348,11 @@ export default function Dashboard() {
       variantTemplateFilename: wizardVariantTemplateFilename,
       controlTemplateSuffix: wizardVariantOriginalTemplateSuffix,
       variantTemplateSuffix: wizardVariantName,
-      trafficSplit: wizardTrafficSplit
+      trafficSplit: wizardTrafficSplit,
+      widgetType: selectedIdea?.widgetKey || null,
+      widgetSettings: selectedIdea?.blockSettings || null,
+      widgetPresetId: selectedIdea?.presetId || null,
+      widgetPresetName: selectedIdea?.presetName || null
     };
 
     setIsLaunchingTest(true);
@@ -1439,18 +1627,27 @@ export default function Dashboard() {
 
       {/* Experiment Overview Section */}
       {(() => {
-        // Find the currently running test
+        // Prefer currently running test, otherwise fall back to the most recent completed winner
         const runningTest = experiments.find(exp => exp.status === 'running' || exp.status === 'active' || exp.status === 'live');
+        const completedWinnerTest = experiments.find(exp => exp.status === 'completed' && exp.winner);
+        const activeTest = runningTest || completedWinnerTest;
         
-        if (!runningTest) {
-          return null; // Don't show the section if there's no running test
+        if (!activeTest) {
+          return null; // Nothing to display
         }
 
         // Calculate hours from runtime (runtime is in format "Xd")
-        const runtimeMatch = runningTest.runtime?.match(/(\d+)d/);
+        const runtimeMatch = activeTest.runtime?.match(/(\d+)d/);
         const days = runtimeMatch ? parseInt(runtimeMatch[1], 10) : 0;
         const hours = days * 24;
         const runtimeDisplay = hours >= 24 ? `${days} d` : `${hours} h`;
+
+        const hasWinner = activeTest.status === 'completed' && !!activeTest.winner;
+        const widgetKeyForTest = activeTest.widgetType || inferWidgetKeyFromName(activeTest.name || '');
+        const widgetDefinition = widgetKeyForTest ? widgetLibrary[widgetKeyForTest] : null;
+        const tweakSuggestions = hasWinner && widgetKeyForTest
+          ? widgetPresetSuggestions[widgetKeyForTest] || []
+          : [];
 
         // Format numbers with commas
         const formatNumber = (num) => {
@@ -1459,19 +1656,23 @@ export default function Dashboard() {
         };
 
         // Get analysis data for description
-        const atcLift = runningTest.analysis?.atc?.expectedRelLift 
-          ? (runningTest.analysis.atc.expectedRelLift * 100).toFixed(1)
+        const atcLift = activeTest.analysis?.atc?.expectedRelLift 
+          ? (activeTest.analysis.atc.expectedRelLift * 100).toFixed(1)
           : null;
-        const certainty = runningTest.analysis?.atc?.probB 
-          ? (runningTest.analysis.atc.probB * 100).toFixed(0)
-          : runningTest.analysis?.purchases?.probB
-          ? (runningTest.analysis.purchases.probB * 100).toFixed(0)
+        const certainty = activeTest.analysis?.atc?.probB 
+          ? (activeTest.analysis.atc.probB * 100).toFixed(0)
+          : activeTest.analysis?.purchases?.probB
+          ? (activeTest.analysis.purchases.probB * 100).toFixed(0)
           : null;
 
         // Generate description text
         let descriptionText = '';
-        if (atcLift && certainty) {
-          const isVariantLeading = runningTest.analysis?.atc?.probB > 0.5;
+        if (hasWinner && atcLift && certainty) {
+          const winnerLabel = activeTest.winner === 'B' ? 'Variant B' : 'Variant A';
+          const liftText = parseFloat(atcLift) >= 0 ? `leading ${Math.abs(atcLift)}%` : `trailing ${Math.abs(atcLift)}%`;
+          descriptionText = `Winner found! ${winnerLabel} is ${liftText} ATC with ${certainty}% certainty.`;
+        } else if (atcLift && certainty) {
+          const isVariantLeading = activeTest.analysis?.atc?.probB > 0.5;
           const liftText = isVariantLeading ? `leading ${Math.abs(atcLift)}%` : `trailing ${Math.abs(atcLift)}%`;
           descriptionText = `Variant is ${liftText} ATC with ${certainty}% certainty.`;
         } else {
@@ -1479,12 +1680,12 @@ export default function Dashboard() {
         }
 
         // Parse test name to get widget name (format: "Widget Test - Product (Date)")
-        const testNameParts = runningTest.name?.split(' VS ') || [runningTest.name || 'Experiment'];
-        const experimentTitle = testNameParts[0] || runningTest.name || 'Experiment';
+        const testNameParts = activeTest.name?.split(' VS ') || [activeTest.name || 'Experiment'];
+        const experimentTitle = testNameParts[0] || activeTest.name || 'Experiment';
 
         // Calculate goal percentage (based on analysis or default)
-        const goalPercentage = runningTest.analysis?.atc?.probB 
-          ? Math.min(95, Math.max(50, Math.round(runningTest.analysis.atc.probB * 100)))
+        const goalPercentage = activeTest.analysis?.atc?.probB 
+          ? Math.min(95, Math.max(50, Math.round(activeTest.analysis.atc.probB * 100)))
           : 80;
 
         return (
@@ -1661,7 +1862,7 @@ export default function Dashboard() {
                 margin: 0,
                 letterSpacing: '0.344px'
               }}>
-                {formatNumber(runningTest.variantA || 0)}
+                   {formatNumber(activeTest.variantA || 0)}
               </p>
               <p style={{
                 fontFamily: 'Inter, sans-serif',
@@ -1682,7 +1883,7 @@ export default function Dashboard() {
                 margin: 0,
                 letterSpacing: '0.344px'
               }}>
-                {formatNumber(runningTest.variantB || 0)}
+                   {formatNumber(activeTest.variantB || 0)}
               </p>
               <p style={{
                 fontFamily: 'Inter, sans-serif',
@@ -1762,7 +1963,7 @@ export default function Dashboard() {
         </div>
         
         {/* AutoPilot */}
-        <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', gap: '15px', alignItems: 'center', marginBottom: hasWinner && tweakSuggestions.length > 0 ? '20px' : 0 }}>
           <div style={{ width: '28px', height: '28px' }}>
             <img alt="Graph" src={icons.graph} style={{ width: '100%', height: '100%' }} />
           </div>
@@ -1784,6 +1985,79 @@ export default function Dashboard() {
             </p>
           </div>
         </div>
+
+        {hasWinner && widgetDefinition && tweakSuggestions.length > 0 && (
+          <div style={{ marginTop: '10px' }}>
+            <p style={{
+              fontFamily: 'Geist, sans-serif',
+              fontWeight: 500,
+              fontSize: '20px',
+              color: figmaColors.primaryBlue,
+              margin: '0 0 15px 0'
+            }}>
+              Next tweaks for {widgetDefinition.utility}
+            </p>
+            <div style={{
+              display: 'flex',
+              gap: '20px',
+              flexWrap: 'wrap'
+            }}>
+              {tweakSuggestions.map((preset) => (
+                <div
+                  key={preset.id}
+                  style={{
+                    flex: '1 1 240px',
+                    backgroundColor: figmaColors.white,
+                    borderRadius: '16px',
+                    padding: '18px',
+                    border: `1px solid ${figmaColors.primaryBlue}`,
+                    minWidth: '220px'
+                  }}
+                >
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 600,
+                    fontSize: '16px',
+                    color: figmaColors.darkGray,
+                    margin: '0 0 8px 0'
+                  }}>
+                    {preset.title}
+                  </p>
+                  <p style={{
+                    fontSize: '14px',
+                    color: figmaColors.darkGray,
+                    margin: '0 0 12px 0',
+                    lineHeight: '20px'
+                  }}>
+                    {preset.description}
+                  </p>
+                  <div style={{
+                    fontStyle: 'italic',
+                    fontSize: '13px',
+                    color: figmaColors.lightGray,
+                    marginBottom: '12px'
+                  }}>
+                    {preset.preview}
+                  </div>
+                  <button
+                    onClick={() => handlePresetSelection(widgetKeyForTest, preset)}
+                    style={{
+                      width: '100%',
+                      backgroundColor: figmaColors.primaryBlue,
+                      color: figmaColors.white,
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '10px',
+                      cursor: 'pointer'
+                    }}
+                  >
+                    Try this tweak
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
           </div>
         );
       })()}

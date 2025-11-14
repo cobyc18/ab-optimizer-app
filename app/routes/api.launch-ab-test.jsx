@@ -23,6 +23,10 @@ export const action = async ({ request }) => {
       controlTemplateSuffix,
       variantTemplateSuffix,
       trafficSplit = "50",
+      widgetType,
+      widgetSettings,
+      widgetPresetId,
+      widgetPresetName
     } = body;
 
     if (!productId) {
@@ -95,6 +99,10 @@ export const action = async ({ request }) => {
       });
     }
 
+    const normalizedWidgetSettings = widgetSettings && typeof widgetSettings === 'object'
+      ? widgetSettings
+      : null;
+
     const abTest = await prisma.aBTest.create({
       data: {
         shop,
@@ -103,7 +111,11 @@ export const action = async ({ request }) => {
         templateA: controlSuffixForDb,
         templateB: variantSuffix,
         trafficSplit: trafficSplitInt,
-        endResultType: "manual"
+        endResultType: "manual",
+        widgetType: widgetType || null,
+        widgetPresetId: widgetPresetId || null,
+        widgetPresetName: widgetPresetName || null,
+        widgetSettings: normalizedWidgetSettings
       }
     });
 

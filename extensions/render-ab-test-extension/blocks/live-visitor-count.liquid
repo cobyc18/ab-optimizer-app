@@ -24,7 +24,10 @@
      data-mobile-width="{{ block.settings.mobile_width | default: 300 }}"
      data-desktop-height="{{ block.settings.desktop_height | default: 60 }}"
      data-mobile-height="{{ block.settings.mobile_height | default: 48 }}"
-     data-desktop-alignment="{{ block.settings.desktop_alignment | default: 'left' }}">
+     data-desktop-alignment="{{ block.settings.desktop_alignment | default: 'left' }}"
+     data-mobile-alignment="{{ block.settings.mobile_alignment | default: 'left' }}"
+     data-text-color="{{ block.settings.text_color | default: '#151515' }}"
+     data-border-color="{{ block.settings.border_color | default: '#d1d5db' }}">
 </div>
 
 {% schema %}
@@ -61,6 +64,18 @@
       "label": "Text After Count (Mobile)",
       "default": "people currently looking at this product",
       "info": "Text displayed after the visitor count on mobile"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#151515"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border Color",
+      "default": "#d1d5db"
     },
     {
       "type": "select",
