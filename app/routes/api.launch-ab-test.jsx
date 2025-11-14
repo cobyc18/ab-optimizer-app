@@ -111,18 +111,23 @@ export const action = async ({ request }) => {
       }
     }
 
+    const createData = {
+      shop,
+      name: finalTestName,
+      productId: productNumericId,
+      templateA: controlSuffixForDb,
+      templateB: variantSuffix,
+      trafficSplit: trafficSplitInt,
+      endResultType: "manual",
+      widgetType: widgetType || null
+    };
+
+    if (normalizedWidgetSettings && Object.keys(normalizedWidgetSettings).length > 0) {
+      createData.widgetSettings = normalizedWidgetSettings;
+    }
+
     const abTest = await prisma.aBTest.create({
-      data: {
-        shop,
-        name: finalTestName,
-        productId: productNumericId,
-        templateA: controlSuffixForDb,
-        templateB: variantSuffix,
-        trafficSplit: trafficSplitInt,
-        endResultType: "manual",
-        widgetType: widgetType || null,
-        widgetSettings: normalizedWidgetSettings
-      }
+      data: createData
     });
 
     try {

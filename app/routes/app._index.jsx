@@ -386,6 +386,29 @@ export const loader = async ({ request }) => {
               expectedLift: 0.0
             }
           };
+        } else if (variantPurchases > 0) {
+          console.log(`⚡ Immediate winner override: variant purchase detected for test ${test.id}`);
+          winnerDeclared = true;
+          analysis = {
+            decision: 'variant_winner',
+            purchases: {
+              probB: 0.99,
+              expectedLift: 0.25
+            },
+            atc: {
+              probB: 0.95,
+              expectedLift: 0.15
+            }
+          };
+          
+          await prisma.aBTest.update({
+            where: { id: test.id },
+            data: {
+              status: 'completed',
+              winner: 'B',
+              endDate: new Date()
+            }
+          });
         } else if (controlVisits >= 1 && variantVisits >= 1) { // Lowered threshold for testing
           const testData = {
             control: {
