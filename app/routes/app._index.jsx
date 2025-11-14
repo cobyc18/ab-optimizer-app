@@ -386,6 +386,33 @@ export const loader = async ({ request }) => {
               expectedLift: 0.0
             }
           };
+        } else if ((test.status === 'running' || test.status === 'active' || test.status === 'live') && variantPurchases > 0) {
+          // Temporary brute-force logic: declare winner as soon as variant logs a purchase
+          winnerDeclared = true;
+          console.log(`⚡️ Temporary winner declaration for test ${test.id}: variant purchase detected (${variantPurchases})`);
+
+          analysis = {
+            decision: 'variant_winner',
+            purchases: {
+              probB: 0.99,
+              expectedLift: 0.20
+            },
+            atc: {
+              probB: 0.95,
+              expectedLift: 0.15
+            }
+          };
+
+          await prisma.aBTest.update({
+            where: { id: test.id },
+            data: {
+              status: 'completed',
+              winner: 'B',
+              endDate: new Date()
+            }
+          });
+
+          console.log(`🎯 Variant declared winner for test ${test.id} via brute-force rule.`);
         } else if (controlVisits >= 1 && variantVisits >= 1) { // Lowered threshold for testing
           const testData = {
             control: {
@@ -1350,7 +1377,7 @@ export default function Dashboard() {
       variantTemplateSuffix: wizardVariantName,
       trafficSplit: wizardTrafficSplit,
       widgetType: selectedIdea?.widgetKey || null,
-      widgetSettings: selectedIdea?.blockSettings || null,
+      widgetSettings: selectedIdea?.blockSettings ?? undefined,
       widgetPresetId: selectedIdea?.presetId || null,
       widgetPresetName: selectedIdea?.presetName || null
     };

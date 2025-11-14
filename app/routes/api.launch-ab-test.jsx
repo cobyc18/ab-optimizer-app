@@ -101,7 +101,7 @@ export const action = async ({ request }) => {
 
     const normalizedWidgetSettings = widgetSettings && typeof widgetSettings === 'object'
       ? widgetSettings
-      : null;
+      : undefined;
 
     const abTest = await prisma.aBTest.create({
       data: {
