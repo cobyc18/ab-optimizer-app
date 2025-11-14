@@ -8,15 +8,16 @@
 {%- endcomment -%}
 
 {%- comment -%} Pass product data to JavaScript before loading script {%- endcomment -%}
-{% if product %}
 <script>
+  window.abTestAppBaseUrl = "https://{{ shop.permanent_domain }}/apps/ab-optimizer-app";
+  {% if product %}
   window.abTestProductData = {
     id: {{ product.id | json }},
     title: {{ product.title | json }},
     price: {{ product.price | json }}
   };
+  {% endif %}
 </script>
-{% endif %}
 
 {%- comment -%} Load the external JavaScript file {%- endcomment -%}
 <script src="{{ 'ab-test-tracking.js' | asset_url }}" defer></script>

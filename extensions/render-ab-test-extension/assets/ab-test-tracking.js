@@ -1,6 +1,30 @@
 // Global A/B test tracking system that works on all pages
 (function() {
   console.log("=== GLOBAL A/B TEST TRACKING INITIALIZED ===");
+
+  var DEFAULT_REMOTE_BASE = 'https://ab-optimizer-app.onrender.com/app';
+  var proxyBase = (window.abTestAppBaseUrl && typeof window.abTestAppBaseUrl === 'string')
+    ? window.abTestAppBaseUrl.trim()
+    : null;
+  var remoteBase = (window.abTestRemoteBase && typeof window.abTestRemoteBase === 'string')
+    ? window.abTestRemoteBase.trim()
+    : DEFAULT_REMOTE_BASE;
+
+  function normalizeBase(base) {
+    if (!base) return null;
+    return base.replace(/\/+$/, '');
+  }
+
+  proxyBase = normalizeBase(proxyBase);
+  remoteBase = normalizeBase(remoteBase) || DEFAULT_REMOTE_BASE;
+
+  function buildApiUrl(path) {
+    var base = proxyBase || remoteBase;
+    if (!path.startsWith('/')) {
+      path = '/' + path;
+    }
+    return base + path;
+  }
   
   // Function to determine the current A/B test variant (global version)
   function determineCurrentVariantGlobal() {
@@ -77,7 +101,7 @@
     var orderId = orderData.id || orderData.order_id || orderData.orderId || null;
     var currentVariant = determineCurrentVariantGlobal();
     
-    fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
+    fetch(buildApiUrl('/ab-event'), {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ 
@@ -442,11 +466,11 @@ window.ABTestProductTracking = (function() {
     
     if (currentView && currentView !== "") {
       console.log("User is manually viewing template:", currentView, "- no redirect");
-      var res = await fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
+      var res = await fetch(buildApiUrl('/ab-test-config?productId=' + encodeURIComponent(productId)));
       if (res.ok) {
         var config = await res.json();
         if (config.testId) {
-          fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
+          fetch(buildApiUrl('/ab-event'), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ testId: config.testId, variant: currentView, eventType: 'impression', productId: String(productId) })
@@ -479,7 +503,7 @@ window.ABTestProductTracking = (function() {
     
     console.log("Fetching A/B test config...");
     try {
-      var res = await fetch('https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=' + encodeURIComponent(productId));
+      var res = await fetch(buildApiUrl('/ab-test-config?productId=' + encodeURIComponent(productId)));
       console.log("A/B test config response status:", res.status);
       console.log("A/B test config response ok:", res.ok);
       
@@ -557,7 +581,7 @@ window.ABTestProductTracking = (function() {
       if (!sessionStorage.getItem(impressionKey)) {
         sessionStorage.setItem(impressionKey, 'true');
         console.log("Logging impression event...");
-        fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
+        fetch(buildApiUrl('/ab-event'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ testId, variant: bucket, eventType: 'impression', productId: String(productId) })
@@ -741,7 +765,7 @@ window.ABTestProductTracking = (function() {
         }
       }
       
-      fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
+      fetch(buildApiUrl('/ab-event'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -825,7 +849,7 @@ window.ABTestProductTracking = (function() {
           }
         }
         
-        fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
+        fetch(buildApiUrl('/ab-event'), {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ 
@@ -1248,7 +1272,7 @@ window.ABTestProductTracking = (function() {
         console.log("Could not update cart note:", e);
       }
       
-      fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
+      fetch(buildApiUrl('/ab-event'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 
@@ -1303,7 +1327,7 @@ window.ABTestProductTracking = (function() {
       console.log("🔍 Purchase - testId:", testId);
       console.log("🔍 Purchase - variant:", currentVariant);
       
-      fetch('https://ab-optimizer-app.onrender.com/app/ab-event', {
+      fetch(buildApiUrl('/ab-event'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ 

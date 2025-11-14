@@ -448,20 +448,20 @@ export const loader = async ({ request }) => {
             console.log(`⏳ Test ${test.id} is only ${daysRunning} days old. Waiting until day 10 before declaring winner.`);
           } else if (daysRunning >= 10 && daysRunning < 21) {
             // Days 10-21: Declare winner if probabilities are met
-            if (analysis.decision !== 'no_clear_winner') {
-              winnerDeclared = true;
+          if (analysis.decision !== 'no_clear_winner') {
+            winnerDeclared = true;
               console.log(`🎉 WINNER DECLARED for test ${test.id} (day ${daysRunning}): ${analysis.decision}`);
-              
-              // Update test status to completed with winner
-              await prisma.aBTest.update({
-                where: { id: test.id },
-                data: { 
-                  status: 'completed',
-                  winner: analysis.decision.includes('variant') ? 'B' : 'A',
-                  endDate: new Date()
-                }
-              });
-            } else {
+            
+            // Update test status to completed with winner
+            await prisma.aBTest.update({
+              where: { id: test.id },
+              data: { 
+                status: 'completed',
+                winner: analysis.decision.includes('variant') ? 'B' : 'A',
+                endDate: new Date()
+              }
+            });
+          } else {
               console.log(`⏳ No clear winner yet for test ${test.id} (day ${daysRunning}). Waiting until day 21.`);
             }
           } else if (daysRunning >= 21) {
@@ -886,7 +886,7 @@ export default function Dashboard() {
         title: 'Shipping Assurance',
         description: 'Calming blue badge focused on express shipping reassurance.',
         preview: '🎁 FREE Express Shipping today only',
-        blockSettings: {
+      blockSettings: {
           badge_text: 'FREE Express Shipping today only · Upgrade at checkout',
           text_color: '#0f172a',
           background_color: '#e0f2fe',
@@ -1088,8 +1088,8 @@ export default function Dashboard() {
     setWizardVariantOriginalTemplateSuffix(activeProduct.templateSuffix || null);
 
     // Generate random 4-digit name for the duplicated template
-    const randomDigits = Math.floor(1000 + Math.random() * 9000);
-    const variantName = `trylabs-variant-${randomDigits}`;
+      const randomDigits = Math.floor(1000 + Math.random() * 9000);
+      const variantName = `trylabs-variant-${randomDigits}`;
 
     console.log('🔧 Creating variant template:', {
       variantName,
@@ -1108,7 +1108,7 @@ export default function Dashboard() {
       if (!mainTheme) {
         throw new Error('No main theme found');
       }
-
+      
       const productId = activeProduct.id;
       let productHandle = activeProduct.handle;
       let productTitle = activeProduct.title || '';
@@ -1126,7 +1126,7 @@ export default function Dashboard() {
       if (!productHandle) {
         throw new Error('Selected product is missing a handle. Please re-select the product and try again.');
       }
-
+      
       // Determine the specific template for this product
       console.log('📄 Available product templates from loader:', productTemplates);
       console.log('🔍 Selected product template suffix:', activeProduct.templateSuffix);
@@ -1137,14 +1137,14 @@ export default function Dashboard() {
         console.log('📄 Using product-specific template:', baseTemplate);
       } else {
         console.log('📄 Product uses default template, finding the correct one...');
-
+        
         const exactDefaults = [
           'templates/product.json',
           'templates/product.liquid'
         ];
-
+        
         baseTemplate = exactDefaults.find(template => productTemplates.includes(template));
-
+        
         if (baseTemplate) {
           console.log('📄 Found exact default template:', baseTemplate);
         } else {
@@ -1152,16 +1152,16 @@ export default function Dashboard() {
             const name = template.replace('templates/', '').replace('.liquid', '').replace('.json', '');
             return name === 'product';
           });
-
+          
           if (productTemplatesWithoutSuffix.length > 0) {
             baseTemplate = productTemplatesWithoutSuffix[0];
             console.log('📄 Found product template without suffix:', baseTemplate);
           } else {
-            baseTemplate = productTemplates.find(template =>
-              template.includes('product') &&
+            baseTemplate = productTemplates.find(template => 
+              template.includes('product') && 
               (template.endsWith('.liquid') || template.endsWith('.json'))
             );
-
+            
             if (baseTemplate) {
               console.log('📄 Using first available product template:', baseTemplate);
             } else {
@@ -1171,17 +1171,17 @@ export default function Dashboard() {
           }
         }
       }
-
+      
       const templateExists = productTemplates.includes(baseTemplate);
       if (!templateExists) {
         console.log('⚠️ Template not found in available templates, falling back to first available');
         baseTemplate = productTemplates[0] || 'templates/product.liquid';
       }
-
+      
       console.log('📄 Final template to duplicate:', baseTemplate);
       console.log('✅ Template exists in available templates:', templateExists);
       setWizardControlTemplateFilename(baseTemplate);
-
+      
       const response = await fetch('/api/duplicate-template', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1192,11 +1192,11 @@ export default function Dashboard() {
           productHandle: productHandle
         })
       });
-
+      
       const result = await response.json();
       if (result.success) {
         console.log('✅ Variant template created:', result.newFilename);
-
+        
         setWizardVariantName(variantName);
         setWizardVariantProductId(productId || null);
         setWizardVariantProductHandle(productHandle);
@@ -1277,7 +1277,7 @@ export default function Dashboard() {
           selectedIdeaUtility: selectedIdea?.utility,
           conditionMet: !!(selectedIdea?.blockId && selectedIdea?.appExtensionId)
         });
-
+        
         creationResult = { success: true, variantName, newFilename: result.newFilename };
       } else {
         console.error('❌ Variant template creation failed:', result.error);
@@ -1291,7 +1291,7 @@ export default function Dashboard() {
       if (!creationResult.success) {
         setWizardVariantName('');
         setIsVariantTemplateReady(false);
-      }
+    }
     }
 
     return creationResult;
@@ -1716,46 +1716,46 @@ export default function Dashboard() {
           : 80;
 
         return (
-          <div style={{
-            backgroundColor: figmaColors.lightBlue,
-            borderRadius: '20px',
-            padding: '40px',
-            marginBottom: '40px',
-            position: 'relative'
+      <div style={{
+        backgroundColor: figmaColors.lightBlue,
+        borderRadius: '20px',
+        padding: '40px',
+        marginBottom: '40px',
+        position: 'relative'
+      }}>
+        {/* Experiment Overview Text */}
+        <div style={{ marginBottom: '30px' }}>
+          <p style={{
+            fontFamily: 'Geist, sans-serif',
+            fontWeight: 500,
+            fontSize: '24px',
+            color: figmaColors.primaryBlue,
+            margin: '0 0 15px 0',
+            lineHeight: '32px'
           }}>
-            {/* Experiment Overview Text */}
-            <div style={{ marginBottom: '30px' }}>
-              <p style={{
-                fontFamily: 'Geist, sans-serif',
-                fontWeight: 500,
-                fontSize: '24px',
-                color: figmaColors.primaryBlue,
-                margin: '0 0 15px 0',
-                lineHeight: '32px'
-              }}>
-                Experiment Overview
-              </p>
-              <div>
-                <span style={{
-                  fontFamily: 'Geist, sans-serif',
-                  fontWeight: 500,
+            Experiment Overview
+          </p>
+          <div>
+            <span style={{
+              fontFamily: 'Geist, sans-serif',
+              fontWeight: 500,
                   fontSize: '32px',
-                  color: figmaColors.darkGray,
+              color: figmaColors.darkGray,
                   lineHeight: '40px'
-                }}>
+            }}>
                   {descriptionText}
-                </span>
-                <span style={{
-                  fontFamily: 'Geist, sans-serif',
-                  fontWeight: 300,
+            </span>
+            <span style={{
+              fontFamily: 'Geist, sans-serif',
+              fontWeight: 300,
                   fontSize: '24px',
-                  color: figmaColors.darkGray,
+              color: figmaColors.darkGray,
                   lineHeight: '32px'
-                }}>
+            }}>
                   {' '}We suggest keeping the test active for a few more days to reach a more certain conclusion
-                </span>
-              </div>
-            </div>
+            </span>
+          </div>
+        </div>
 
         {/* Chart Area with X/Y Axes */}
         <div style={{ marginBottom: '30px', position: 'relative', height: '300px' }}>
@@ -1812,21 +1812,21 @@ export default function Dashboard() {
           </div>
         </div>
 
-            {/* Experiment Title */}
-            <div style={{ marginBottom: '30px' }}>
-              <p style={{
-                fontFamily: 'Geist, sans-serif',
-                fontWeight: 500,
-                fontSize: '24px',
-                color: figmaColors.darkGray,
-                margin: '0 0 20px 0',
-                lineHeight: '32px'
-              }}>
+        {/* Experiment Title */}
+        <div style={{ marginBottom: '30px' }}>
+          <p style={{
+            fontFamily: 'Geist, sans-serif',
+            fontWeight: 500,
+            fontSize: '24px',
+            color: figmaColors.darkGray,
+            margin: '0 0 20px 0',
+            lineHeight: '32px'
+          }}>
                 {experimentTitle}
-              </p>
-              
-              {/* Progress Line */}
-              <div style={{ marginBottom: '20px' }}>
+          </p>
+          
+          {/* Progress Line */}
+          <div style={{ marginBottom: '20px' }}>
                 <div style={{ width: '100%', height: '4px', backgroundColor: figmaColors.white, borderRadius: '2px', marginBottom: '10px', position: 'relative' }}>
                   <div style={{ 
                     width: `${goalPercentage}%`, 
@@ -1837,13 +1837,13 @@ export default function Dashboard() {
                     left: 0,
                     top: 0
                   }} />
-                </div>
+            </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: figmaColors.darkGray, fontFamily: 'Inter, sans-serif' }}>
                   <span>Goal: {goalPercentage}%</span>
                   <span>{goalPercentage}%</span>
-                </div>
-              </div>
             </div>
+          </div>
+        </div>
 
         {/* Stats and Action Buttons Row */}
         <div style={{ 
@@ -2065,7 +2065,7 @@ export default function Dashboard() {
                     marginBottom: '12px'
                   }}>
                     {preset.preview}
-                  </div>
+      </div>
                   <button
                     onClick={() => handlePresetSelection(widgetKeyForTest, preset)}
                     style={{
@@ -3800,7 +3800,7 @@ export default function Dashboard() {
                  {products.map((product) => (
                    <div
                      key={product.id}
-                   onClick={() => {
+                     onClick={() => {
                        handleProductSelection(product);
                        // Debug: Log product template information
                        console.log('🔍 Selected product:', product.title);
@@ -4093,7 +4093,7 @@ export default function Dashboard() {
                       {isVariantRequestInFlight
                         ? 'Hang tight, we’re duplicating your product template…'
                         : canOpenThemeEditor
-                          ? `Variant template ${wizardVariantName} is ready.`
+                        ? `Variant template ${wizardVariantName} is ready.`
                           : 'Variant template created. You can open the Theme Editor once it finishes preparing.'}
                     </p>
                     <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
