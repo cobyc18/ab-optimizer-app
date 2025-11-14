@@ -287,7 +287,7 @@ export const loader = async ({ request }) => {
       const assets = restJson.assets || [];
       
       // Debug: Log all assets to see what's available
-      console.log('🔍 All theme assets!:', assets.map(a => a.key));
+      console.log('🔍 All theme assets:', assets.map(a => a.key));
       
       productTemplates = assets
         .map(a => a.key)
