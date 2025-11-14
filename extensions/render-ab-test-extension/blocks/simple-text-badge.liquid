@@ -1,0 +1,66 @@
+{%- comment -%}
+  Simple Text Badge Widget Block
+  Displays a promotional badge with icon, text, and customizable colors
+{%- endcomment -%}
+
+<div class="simple-text-badge-widget" 
+     data-badge-id="badge-{{ block.id }}"
+     data-block-id="{{ block.id }}"
+     data-text="{{ block.settings.badge_text | default: 'Up to 25% Off Everything' }}"
+     data-text-color="{{ block.settings.text_color | default: '#1a5f5f' }}"
+     data-background-color="{{ block.settings.background_color | default: '#f5f5f0' }}"
+     data-ribbon-color="{{ block.settings.ribbon_color | default: '#dc2626' }}"
+     {% if block.settings.icon_image %}
+     data-icon-url="{{ block.settings.icon_image | image_url: width: 100 }}"
+     data-icon-alt="{{ block.settings.icon_image.alt | default: 'Badge icon' }}"
+     {% else %}
+     data-icon-url=""
+     data-icon-alt="Badge icon"
+     {% endif %}>
+</div>
+
+{% schema %}
+{
+  "name": "Simple Text Badge",
+  "target": "section",
+  "stylesheet": "simple-text-badge.css",
+  "javascript": "simple-text-badge.js",
+  "settings": [
+    {
+      "type": "text",
+      "id": "badge_text",
+      "label": "Badge Text",
+      "default": "Up to 25% Off Everything: Our biggest savings of the year are here. Learn More",
+      "info": "Enter the text to display in the badge"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#1a5f5f",
+      "info": "Choose the color for the badge text"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#f5f5f0",
+      "info": "Choose the background color for the badge"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_image",
+      "label": "Icon Image",
+      "info": "Upload an image to use as the icon (recommended: 100x100px or larger)"
+    },
+    {
+      "type": "color",
+      "id": "ribbon_color",
+      "label": "Ribbon Color",
+      "default": "#dc2626",
+      "info": "Choose the color for the decorative ribbon on the left side"
+    }
+  ]
+}
+{% endschema %}
+

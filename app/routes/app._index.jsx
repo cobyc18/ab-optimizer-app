@@ -743,39 +743,20 @@ export default function Dashboard() {
   const abTestIdeas = [
     {
       id: 1,
-      utility: 'Social Proof',
-      rationale: 'Shows recent purchases, increases trust by 12-15%',
-      style: 'Elegant',
-      preview: '👥 127 people bought this in the last 24 hours'
-    },
-    {
-      id: 2,
-      utility: 'Urgency Scarcity',
-      rationale: 'Creates FOMO, boosts conversion by 8-10%',
-      style: 'Bold',
-      preview: '⚡ Only 3 left in stock!'
-    },
-    {
-      id: 3,
-      utility: 'Countdown Timer',
-      rationale: 'Creates urgency, boosts checkout by 5-7%',
-      style: 'Energetic',
-      preview: '⏰ Limited time offer!'
-    },
-    {
-      id: 4,
-      utility: 'Product Reviews',
-      rationale: 'Builds credibility, increases sales by 18-22%',
-      style: 'Trustworthy',
-      preview: '⭐ 4.8/5 from 1,247 reviews'
-    },
-    {
-      id: 5,
       utility: 'Live Visitor Count',
       rationale: 'Shows real-time visitor activity, creates urgency and social proof',
       style: 'Dynamic',
       preview: '👁️ 76 people viewing this page',
       blockId: 'live-visitor-count',
+      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
+    },
+    {
+      id: 2,
+      utility: 'Simple Text Badge',
+      rationale: 'Displays promotional badges with customizable text, colors, and icons to highlight special offers',
+      style: 'Promotional',
+      preview: '🎁 Up to 25% Off Everything: Our biggest savings of the year are here. Learn More',
+      blockId: 'simple-text-badge',
       appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
     }
   ];
@@ -3259,10 +3240,8 @@ export default function Dashboard() {
                           textAlign: 'center',
                           marginBottom: '16px'
                         }}>
-                          {abTestIdeas[currentWidgetIndex].utility === 'Social Proof' && '👥'}
-                          {abTestIdeas[currentWidgetIndex].utility === 'Urgency Scarcity' && '⚡'}
-                          {abTestIdeas[currentWidgetIndex].utility === 'Countdown Timer' && '⏰'}
-                          {abTestIdeas[currentWidgetIndex].utility === 'Product Reviews' && '⭐'}
+                          {abTestIdeas[currentWidgetIndex].utility === 'Live Visitor Count' && '👁️'}
+                          {abTestIdeas[currentWidgetIndex].utility === 'Simple Text Badge' && '🎁'}
                         </div>
 
                         {/* Widget Title */}
@@ -3350,10 +3329,8 @@ export default function Dashboard() {
                           textAlign: 'center',
                           marginBottom: '16px'
                         }}>
-                          {abTestIdeas[currentWidgetIndex + 1].utility === 'Social Proof' && '👥'}
-                          {abTestIdeas[currentWidgetIndex + 1].utility === 'Urgency Scarcity' && '⚡'}
-                          {abTestIdeas[currentWidgetIndex + 1].utility === 'Countdown Timer' && '⏰'}
-                          {abTestIdeas[currentWidgetIndex + 1].utility === 'Product Reviews' && '⭐'}
+                          {abTestIdeas[currentWidgetIndex + 1].utility === 'Live Visitor Count' && '👁️'}
+                          {abTestIdeas[currentWidgetIndex + 1].utility === 'Simple Text Badge' && '🎁'}
                         </div>
 
                         {/* Widget Title */}
