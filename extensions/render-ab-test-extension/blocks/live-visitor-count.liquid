@@ -1,0 +1,242 @@
+{%- comment -%}
+  Live Visitor Count Widget Block
+  Displays a dynamic count of visitors viewing the product
+{%- endcomment -%}
+
+<div class="live-visitor-count-widget" 
+     data-widget-id="live-visitor-{{ block.id }}"
+     data-block-id="{{ block.id }}"
+     data-count-min="{{ block.settings.count_min | default: 40 }}"
+     data-count-max="{{ block.settings.count_max | default: 60 }}"
+     data-desktop-text="{{ block.settings.desktop_text | default: 'people currently looking at this product' }}"
+     data-mobile-text="{{ block.settings.mobile_text | default: 'people currently looking at this product' }}"
+     data-desktop-border-shape="{{ block.settings.desktop_border_shape | default: 'rounded' }}"
+     data-mobile-border-shape="{{ block.settings.mobile_border_shape | default: 'rounded' }}"
+     data-desktop-padding-inside="{{ block.settings.desktop_padding_inside | default: 12 }}"
+     data-desktop-padding-outside="{{ block.settings.desktop_padding_outside | default: 0 }}"
+     data-mobile-padding-inside="{{ block.settings.mobile_padding_inside | default: 10 }}"
+     data-mobile-padding-outside="{{ block.settings.mobile_padding_outside | default: 0 }}"
+     data-desktop-font="{{ block.settings.desktop_font | default: 'system' }}"
+     data-mobile-font="{{ block.settings.mobile_font | default: 'system' }}"
+     data-desktop-font-size="{{ block.settings.desktop_font_size | default: 14 }}"
+     data-mobile-font-size="{{ block.settings.mobile_font_size | default: 12 }}"
+     data-desktop-width="{{ block.settings.desktop_width | default: 400 }}"
+     data-mobile-width="{{ block.settings.mobile_width | default: 300 }}"
+     data-desktop-height="{{ block.settings.desktop_height | default: 60 }}"
+     data-mobile-height="{{ block.settings.mobile_height | default: 48 }}"
+     data-desktop-alignment="{{ block.settings.desktop_alignment | default: 'left' }}">
+</div>
+
+{% schema %}
+{
+  "name": "Live Visitor Count",
+  "target": "section",
+  "stylesheet": "live-visitor-count.css",
+  "javascript": "live-visitor-count.js",
+  "settings": [
+    {
+      "type": "number",
+      "id": "count_min",
+      "label": "Minimum Count",
+      "default": 40,
+      "info": "Minimum number of visitors to display"
+    },
+    {
+      "type": "number",
+      "id": "count_max",
+      "label": "Maximum Count",
+      "default": 60,
+      "info": "Maximum number of visitors to display"
+    },
+    {
+      "type": "text",
+      "id": "desktop_text",
+      "label": "Text After Count (Desktop)",
+      "default": "people currently looking at this product",
+      "info": "Text displayed after the visitor count"
+    },
+    {
+      "type": "text",
+      "id": "mobile_text",
+      "label": "Text After Count (Mobile)",
+      "default": "people currently looking at this product",
+      "info": "Text displayed after the visitor count on mobile"
+    },
+    {
+      "type": "select",
+      "id": "desktop_border_shape",
+      "label": "Border Shape (Desktop)",
+      "options": [
+        { "value": "rounded", "label": "Rounded" },
+        { "value": "rectangular", "label": "Rectangular" }
+      ],
+      "default": "rounded"
+    },
+    {
+      "type": "select",
+      "id": "mobile_border_shape",
+      "label": "Border Shape (Mobile)",
+      "options": [
+        { "value": "rounded", "label": "Rounded" },
+        { "value": "rectangular", "label": "Rectangular" }
+      ],
+      "default": "rounded"
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_inside",
+      "label": "Inside Padding (Desktop)",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desktop_padding_outside",
+      "label": "Outside Padding (Desktop)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_inside",
+      "label": "Inside Padding (Mobile)",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "default": 10,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "mobile_padding_outside",
+      "label": "Outside Padding (Mobile)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 0,
+      "unit": "px"
+    },
+    {
+      "type": "select",
+      "id": "desktop_font",
+      "label": "Font Family (Desktop)",
+      "options": [
+        { "value": "system", "label": "System Default" },
+        { "value": "arial", "label": "Arial" },
+        { "value": "helvetica", "label": "Helvetica" },
+        { "value": "georgia", "label": "Georgia" },
+        { "value": "times", "label": "Times New Roman" },
+        { "value": "courier", "label": "Courier New" }
+      ],
+      "default": "system"
+    },
+    {
+      "type": "select",
+      "id": "mobile_font",
+      "label": "Font Family (Mobile)",
+      "options": [
+        { "value": "system", "label": "System Default" },
+        { "value": "arial", "label": "Arial" },
+        { "value": "helvetica", "label": "Helvetica" },
+        { "value": "georgia", "label": "Georgia" },
+        { "value": "times", "label": "Times New Roman" },
+        { "value": "courier", "label": "Courier New" }
+      ],
+      "default": "system"
+    },
+    {
+      "type": "range",
+      "id": "desktop_font_size",
+      "label": "Font Size (Desktop)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "default": 14,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "mobile_font_size",
+      "label": "Font Size (Mobile)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "default": 12,
+      "unit": "px"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width",
+      "label": "Widget Width (Desktop)",
+      "min": 200,
+      "max": 800,
+      "step": 10,
+      "default": 400,
+      "unit": "px",
+      "info": "Set to 0 for auto width"
+    },
+    {
+      "type": "range",
+      "id": "mobile_width",
+      "label": "Widget Width (Mobile)",
+      "min": 150,
+      "max": 600,
+      "step": 10,
+      "default": 300,
+      "unit": "px",
+      "info": "Set to 0 for auto width"
+    },
+    {
+      "type": "range",
+      "id": "desktop_height",
+      "label": "Widget Height (Desktop)",
+      "min": 40,
+      "max": 120,
+      "step": 4,
+      "default": 60,
+      "unit": "px",
+      "info": "Set to 0 for auto height"
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "label": "Widget Height (Mobile)",
+      "min": 40,
+      "max": 120,
+      "step": 4,
+      "default": 48,
+      "unit": "px",
+      "info": "Set to 0 for auto height"
+    },
+    {
+      "type": "select",
+      "id": "desktop_alignment",
+      "label": "Content Alignment (Desktop)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "select",
+      "id": "mobile_alignment",
+      "label": "Content Alignment (Mobile)",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    }
+  ]
+}
+{% endschema %}
+

@@ -1,3 +1,5 @@
+/* Live Visitor Count Widget Styles */
+
 .live-visitor-widget {
   display: inline-flex;
   align-items: center;
@@ -30,25 +32,25 @@
 .live-visitor-widget[data-desktop-font="times"] { font-family: 'Times New Roman', Times, serif; }
 .live-visitor-widget[data-desktop-font="courier"] { font-family: 'Courier New', Courier, monospace; }
 
-.eye-icon {
+.live-visitor-widget .eye-icon {
   flex-shrink: 0;
   width: 20px;
   height: 20px;
 }
 
-.visitor-count {
+.live-visitor-widget .visitor-count {
   font-weight: 600;
   color: #000000;
   min-width: 28px;
   text-align: center;
 }
 
-.visitor-text {
+.live-visitor-widget .visitor-text {
   color: #000000;
   font-weight: 400;
 }
 
-.mobile-text {
+.live-visitor-widget .mobile-text {
   display: none;
 }
 
@@ -74,16 +76,16 @@
   .live-visitor-widget[data-mobile-font="times"] { font-family: 'Times New Roman', Times, serif; }
   .live-visitor-widget[data-mobile-font="courier"] { font-family: 'Courier New', Courier, monospace; }
 
-  .desktop-text {
+  .live-visitor-widget .desktop-text {
     display: none;
   }
 
-  .mobile-text {
+  .live-visitor-widget .mobile-text {
     display: inline;
   }
 }
 
-.visitor-count.updating {
+.live-visitor-widget .visitor-count.updating {
   animation: pulse 0.3s ease-in-out;
 }
 
@@ -97,4 +99,3 @@
     transform: scale(1.05);
   }
 }
-
