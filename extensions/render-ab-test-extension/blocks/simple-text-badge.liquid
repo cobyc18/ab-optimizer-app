@@ -6,13 +6,45 @@
 <div class="simple-text-badge-widget" 
      data-badge-id="badge-{{ block.id }}"
      data-block-id="{{ block.id }}"
-     data-text="{{ block.settings.badge_text | default: 'Up to 25% Off Everything' }}"
+     data-header-text="{{ block.settings.header_text | default: 'Store Announcement' | escape }}"
+     data-body-text="{{ block.settings.body_text | default: 'Describe the promotion or offer details here.' | escape }}"
+     data-header-tag="{{ block.settings.header_tag | default: 'p' }}"
+     data-header-font="{{ block.settings.header_font | default: 'system' }}"
+     data-header-font-size="{{ block.settings.header_font_size | default: 24 }}"
+     data-header-bold="{{ block.settings.header_bold | default: false }}"
+     data-header-italic="{{ block.settings.header_italic | default: false }}"
+     data-header-underline="{{ block.settings.header_underline | default: false }}"
+     data-header-link="{{ block.settings.header_link | default: '' | escape }}"
+     data-body-font="{{ block.settings.body_font | default: 'system' }}"
+     data-body-font-size="{{ block.settings.body_font_size | default: 16 }}"
+     data-body-bold="{{ block.settings.body_bold | default: false }}"
+     data-body-italic="{{ block.settings.body_italic | default: false }}"
+     data-body-underline="{{ block.settings.body_underline | default: false }}"
+     data-body-link="{{ block.settings.body_link | default: '' | escape }}"
+     data-text="{{ block.settings.body_text | default: 'Describe the promotion or offer details here.' | escape }}"
      data-text-color="{{ block.settings.text_color | default: '#1a5f5f' }}"
+     data-header-color="{{ block.settings.header_color | default: '#0f172a' }}"
      data-background-color="{{ block.settings.background_color | default: '#f5f5f0' }}"
-     data-ribbon-color="{{ block.settings.ribbon_color | default: '#dc2626' }}"
-     {% if block.settings.icon_image %}
-     data-icon-url="{{ block.settings.icon_image | image_url: width: 100 }}"
-     data-icon-alt="{{ block.settings.icon_image.alt | default: 'Badge icon' }}"
+     data-border-color="{{ block.settings.border_color | default: '#d4d4d8' }}"
+     data-inner-padding-x="{{ block.settings.inner_padding_horizontal | default: 24 }}"
+     data-inner-padding-y="{{ block.settings.inner_padding_vertical | default: 16 }}"
+     data-inner-padding-x-mobile="{{ block.settings.inner_padding_horizontal_mobile | default: 16 }}"
+     data-inner-padding-y-mobile="{{ block.settings.inner_padding_vertical_mobile | default: 12 }}"
+     data-outer-padding-x="{{ block.settings.outer_padding_horizontal | default: 0 }}"
+     data-outer-padding-y="{{ block.settings.outer_padding_vertical | default: 0 }}"
+     data-outer-padding-x-mobile="{{ block.settings.outer_padding_horizontal_mobile | default: 0 }}"
+     data-outer-padding-y-mobile="{{ block.settings.outer_padding_vertical_mobile | default: 0 }}"
+     data-icon-choice="{{ block.settings.icon_choice | default: 'star' }}"
+     data-icon-blink="{{ block.settings.icon_blink | default: false }}"
+     data-icon-size="{{ block.settings.icon_size | default: 36 }}"
+     data-icon-size-mobile="{{ block.settings.icon_size_mobile | default: 30 }}"
+     data-border-radius="{{ block.settings.border_radius | default: 8 }}"
+     data-border-thickness="{{ block.settings.border_thickness | default: 1 }}"
+     data-hover-effect="{{ block.settings.hover_effect | default: false }}"
+     data-drop-shadow="{{ block.settings.drop_shadow | default: 10 }}"
+     {% if block.settings.icon_custom %}
+     data-icon-url="{{ block.settings.icon_custom | image_url: width: 120 }}"
+     data-icon-alt="{{ block.settings.icon_custom.alt | default: 'Badge icon' }}"
      {% else %}
      data-icon-url=""
      data-icon-alt="Badge icon"
@@ -27,38 +59,317 @@
   "javascript": "simple-text-badge.js",
   "settings": [
     {
+      "type": "header",
+      "content": "Headline"
+    },
+    {
+      "type": "richtext",
+      "id": "header_text",
+      "label": "Header text",
+      "default": "<p>Store Announcement</p>"
+    },
+    {
+      "type": "select",
+      "id": "header_tag",
+      "label": "Header tag",
+      "options": [
+        { "value": "h1", "label": "H1" },
+        { "value": "h2", "label": "H2" },
+        { "value": "h3", "label": "H3" },
+        { "value": "h4", "label": "H4" },
+        { "value": "h5", "label": "H5" },
+        { "value": "h6", "label": "H6" },
+        { "value": "p", "label": "Paragraph" },
+        { "value": "div", "label": "Div" }
+      ],
+      "default": "p"
+    },
+    {
+      "type": "select",
+      "id": "header_font",
+      "label": "Header font",
+      "options": [
+        { "value": "system", "label": "System default" },
+        { "value": "poppins", "label": "Poppins" },
+        { "value": "inter", "label": "Inter" },
+        { "value": "serif", "label": "Serif" }
+      ],
+      "default": "system"
+    },
+    {
+      "type": "range",
+      "id": "header_font_size",
+      "label": "Header size (px)",
+      "min": 12,
+      "max": 64,
+      "step": 1,
+      "default": 24
+    },
+    {
+      "type": "checkbox",
+      "id": "header_bold",
+      "label": "Bold",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "header_italic",
+      "label": "Italicize",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "header_underline",
+      "label": "Underline",
+      "default": false
+    },
+    {
       "type": "text",
-      "id": "badge_text",
-      "label": "Badge Text",
-      "default": "Up to 25% Off Everything: Our biggest savings of the year are here. Learn More",
-      "info": "Enter the text to display in the badge"
+      "id": "header_link",
+      "label": "Header hyperlink URL",
+      "info": "Optional link for the header text"
+    },
+    {
+      "type": "header",
+      "content": "Body text"
+    },
+    {
+      "type": "richtext",
+      "id": "body_text",
+      "label": "Body text",
+      "default": "<p>Describe the promotion or offer details here.</p>"
+    },
+    {
+      "type": "select",
+      "id": "body_font",
+      "label": "Body font",
+      "options": [
+        { "value": "system", "label": "System default" },
+        { "value": "poppins", "label": "Poppins" },
+        { "value": "inter", "label": "Inter" },
+        { "value": "serif", "label": "Serif" }
+      ],
+      "default": "system"
+    },
+    {
+      "type": "range",
+      "id": "body_font_size",
+      "label": "Body size (px)",
+      "min": 10,
+      "max": 36,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "checkbox",
+      "id": "body_bold",
+      "label": "Bold",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "body_italic",
+      "label": "Italicize",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "body_underline",
+      "label": "Underline",
+      "default": false
+    },
+    {
+      "type": "text",
+      "id": "body_link",
+      "label": "Body hyperlink URL",
+      "info": "Optional link for the body text"
+    },
+    {
+      "type": "header",
+      "content": "Inner padding"
+    },
+    {
+      "type": "range",
+      "id": "inner_padding_horizontal",
+      "label": "Horizontal padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "inner_padding_vertical",
+      "label": "Vertical padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "inner_padding_horizontal_mobile",
+      "label": "Mobile horizontal padding (px)",
+      "min": 0,
+      "max": 80,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "inner_padding_vertical_mobile",
+      "label": "Mobile vertical padding (px)",
+      "min": 0,
+      "max": 80,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Outer padding"
+    },
+    {
+      "type": "range",
+      "id": "outer_padding_horizontal",
+      "label": "Horizontal padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "outer_padding_vertical",
+      "label": "Vertical padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "outer_padding_horizontal_mobile",
+      "label": "Mobile horizontal padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "outer_padding_vertical_mobile",
+      "label": "Mobile vertical padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Icon"
+    },
+    {
+      "type": "select",
+      "id": "icon_choice",
+      "label": "Icon selector",
+      "options": [
+        { "value": "star", "label": "Star" },
+        { "value": "trophy", "label": "Trophy" },
+        { "value": "gift", "label": "Gift" },
+        { "value": "custom", "label": "Use uploaded icon" }
+      ],
+      "default": "star",
+      "info": "Choose a built-in icon or switch to custom upload"
+    },
+    {
+      "type": "image_picker",
+      "id": "icon_custom",
+      "label": "Upload custom icon"
+    },
+    {
+      "type": "checkbox",
+      "id": "icon_blink",
+      "label": "Enable icon blink effect",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Icon size (px)",
+      "min": 12,
+      "max": 120,
+      "step": 2,
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "icon_size_mobile",
+      "label": "Mobile icon size (px)",
+      "min": 8,
+      "max": 100,
+      "step": 2,
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius (px)",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "label": "Border outline thickness (px)",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "default": 1
+    },
+    {
+      "type": "checkbox",
+      "id": "hover_effect",
+      "label": "Enable hover lift effect",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "drop_shadow",
+      "label": "Drop shadow amount",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "header_color",
+      "label": "Header color",
+      "default": "#0f172a"
     },
     {
       "type": "color",
       "id": "text_color",
-      "label": "Text Color",
-      "default": "#1a5f5f",
-      "info": "Choose the color for the badge text"
+      "label": "Body text color",
+      "default": "#1a5f5f"
     },
     {
       "type": "color",
       "id": "background_color",
-      "label": "Background Color",
-      "default": "#f5f5f0",
-      "info": "Choose the background color for the badge"
-    },
-    {
-      "type": "image_picker",
-      "id": "icon_image",
-      "label": "Icon Image",
-      "info": "Upload an image to use as the icon (recommended: 100x100px or larger)"
+      "label": "Background color",
+      "default": "#f5f5f0"
     },
     {
       "type": "color",
-      "id": "ribbon_color",
-      "label": "Ribbon Color",
-      "default": "#dc2626",
-      "info": "Choose the color for the decorative ribbon on the left side"
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#d4d4d8"
     }
   ]
 }

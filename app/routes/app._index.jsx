@@ -409,6 +409,9 @@ export const loader = async ({ request }) => {
               endDate: new Date()
             }
           });
+
+          test.status = 'completed';
+          test.winner = 'B';
         } else if (controlVisits >= 1 && variantVisits >= 1) { // Lowered threshold for testing
           const testData = {
             control: {
