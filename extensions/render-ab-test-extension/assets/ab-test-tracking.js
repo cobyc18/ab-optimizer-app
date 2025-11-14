@@ -18,13 +18,15 @@
   proxyBase = normalizeBase(proxyBase);
   remoteBase = normalizeBase(remoteBase) || DEFAULT_REMOTE_BASE;
 
-  function buildApiUrl(path) {
+  var buildApiUrl = function(path) {
     var base = proxyBase || remoteBase;
     if (!path.startsWith('/')) {
       path = '/' + path;
     }
     return base + path;
-  }
+  };
+
+  window.abTestBuildApiUrl = buildApiUrl;
   
   // Function to determine the current A/B test variant (global version)
   function determineCurrentVariantGlobal() {
