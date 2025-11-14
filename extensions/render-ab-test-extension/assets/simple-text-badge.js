@@ -15,9 +15,6 @@
     // Set CSS variables for colors
     container.style.setProperty('--badge-text-color', settings.textColor);
     container.style.setProperty('--badge-background-color', settings.backgroundColor);
-      container.style.setProperty('--badge-border-color', settings.borderColor);
-      container.style.setProperty('--badge-border-radius', getBorderRadiusFromShape(settings.borderShape));
-      container.style.setProperty('--badge-alignment', getAlignmentValue(settings.alignment));
     container.style.setProperty('--badge-ribbon-color', settings.ribbonColor);
     
     // Parse text to identify bold and link portions
@@ -121,24 +118,9 @@
       textColor: dataset.textColor || '#1a5f5f',
       backgroundColor: dataset.backgroundColor || '#f5f5f0',
       ribbonColor: dataset.ribbonColor || '#dc2626',
-      borderColor: dataset.borderColor || '#d4d4d4',
-      borderShape: dataset.borderShape || 'sharp',
-      alignment: dataset.alignment || 'left',
       iconUrl: dataset.iconUrl || '',
       iconAlt: dataset.iconAlt || 'Badge icon'
     };
-  }
-
-  function getBorderRadiusFromShape(shape) {
-    if (shape === 'pill') return '999px';
-    if (shape === 'rounded') return '12px';
-    return '0px';
-  }
-
-  function getAlignmentValue(alignment) {
-    if (alignment === 'center') return 'center';
-    if (alignment === 'right') return 'flex-end';
-    return 'flex-start';
   }
 
   // Initialize when DOM is ready

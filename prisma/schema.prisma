@@ -46,12 +46,6 @@ model ABTest {
   conversionThreshold Int? // Number of conversions to determine winner
   winner       String?    // "A", "B", or null if no winner yet
 
-  // Widget metadata stored when launching the test
-  widgetType       String?
-  widgetPresetId   String?
-  widgetPresetName String?
-  widgetSettings   Json?
-
   events       ABEvent[]  @relation("TestEvents")
   shopData     Shop       @relation(fields: [shop], references: [shop], onDelete: Cascade)
   @@map("ab_tests")

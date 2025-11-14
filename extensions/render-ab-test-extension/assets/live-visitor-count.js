@@ -35,9 +35,7 @@
       '--mobile-font-size': settings.mobileFontSize + 'px',
       '--mobile-width': settings.mobileWidth > 0 ? settings.mobileWidth + 'px' : 'auto',
       '--mobile-height': settings.mobileHeight > 0 ? settings.mobileHeight + 'px' : 'auto',
-      '--mobile-alignment': settings.mobileAlignment,
-      '--widget-text-color': settings.textColor,
-      '--widget-border-color': settings.borderColor
+      '--mobile-alignment': settings.mobileAlignment
     };
     
     // Apply CSS variables
@@ -136,9 +134,7 @@
       desktopHeight: parseInt(dataset.desktopHeight) || 60,
       mobileHeight: parseInt(dataset.mobileHeight) || 48,
       desktopAlignment: dataset.desktopAlignment || 'left',
-      mobileAlignment: dataset.mobileAlignment || 'left',
-      textColor: dataset.textColor || '#151515',
-      borderColor: dataset.borderColor || '#d1d5db'
+      mobileAlignment: dataset.mobileAlignment || 'left'
     };
   }
 
