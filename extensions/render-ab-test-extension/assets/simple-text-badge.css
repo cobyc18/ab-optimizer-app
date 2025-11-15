@@ -3,161 +3,124 @@
 .simple-text-badge-widget {
   width: 100%;
   margin: 0;
-  padding: 0;
+  padding: var(--badge-outer-padding-y, 0px) var(--badge-outer-padding-x, 0px);
+  box-sizing: border-box;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 }
 
 .simple-text-badge {
   display: flex;
   align-items: center;
-  position: relative;
+  gap: 20px;
   width: 100%;
-  min-height: 80px;
-  padding: 20px 24px 20px 0;
-  background-color: var(--badge-background-color, #f5f5f0);
-  border-radius: 0;
   box-sizing: border-box;
-  overflow: hidden;
+  padding: var(--badge-inner-padding-y, 16px) var(--badge-inner-padding-x, 24px);
+  background-color: var(--badge-background-color, #f5f5f0);
+  border-radius: var(--badge-border-radius, 8px);
+  border: var(--badge-border-thickness, 1px) solid var(--badge-border-color, #d4d4d8);
+  box-shadow: var(--badge-drop-shadow, none);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
-/* Ribbon effect on the left side - vertical strip */
-.simple-text-badge::before {
-  content: '';
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 50px;
-  background: var(--badge-ribbon-color, #dc2626);
-  z-index: 1;
-  /* Satin ribbon effect with gradient and shine */
-  box-shadow: 
-    inset -2px 0 6px rgba(0, 0, 0, 0.15),
-    inset 2px 0 4px rgba(255, 255, 255, 0.2);
-  /* Add subtle gradient for satin effect */
-  background-image: 
-    linear-gradient(90deg, rgba(0, 0, 0, 0.1) 0%, transparent 50%, rgba(255, 255, 255, 0.2) 100%),
-    var(--badge-ribbon-color, #dc2626);
-}
-
-.simple-text-badge.has-icon::before {
-  display: block;
-}
-
-.simple-text-badge.no-icon::before {
-  display: none;
-}
-
-/* Ribbon bow effect - horizontal bow in the middle */
-.simple-text-badge.has-icon::after {
-  content: '';
-  position: absolute;
-  left: 25px;
-  top: 50%;
-  transform: translateY(-50%) translateX(-50%);
-  width: 40px;
-  height: 35px;
-  background: var(--badge-ribbon-color, #dc2626);
-  z-index: 2;
-  /* Create bow shape with clip-path */
-  clip-path: polygon(
-    20% 0%, 80% 0%, 100% 30%, 80% 50%, 100% 70%, 80% 100%, 20% 100%, 0% 70%, 20% 50%, 0% 30%
-  );
-  /* Satin shine effect with gradients */
-  background-image: 
-    linear-gradient(135deg, rgba(255, 255, 255, 0.3) 0%, transparent 30%, transparent 70%, rgba(0, 0, 0, 0.2) 100%),
-    var(--badge-ribbon-color, #dc2626);
-  box-shadow: 
-    inset 2px 2px 6px rgba(255, 255, 255, 0.4),
-    inset -2px -2px 6px rgba(0, 0, 0, 0.3),
-    0 2px 6px rgba(0, 0, 0, 0.2);
+.simple-text-badge.hover-enabled:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--badge-drop-shadow-hover, var(--badge-drop-shadow, none));
 }
 
 .badge-icon-container {
-  position: relative;
-  z-index: 3;
-  width: 50px;
-  height: 100%;
+  width: var(--badge-icon-size, 36px);
+  height: var(--badge-icon-size, 36px);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
-  margin-right: 24px;
-  padding-left: 8px;
+  border-radius: 50%;
+  background-color: rgba(255, 255, 255, 0.2);
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.12);
 }
 
-.badge-icon {
-  width: 36px;
-  height: 36px;
+.badge-icon-container.blinking {
+  animation: badgeBlink 1.8s ease-in-out infinite;
+}
+
+@keyframes badgeBlink {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.92); }
+}
+
+.badge-icon-img {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   display: block;
-  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.1));
+}
+
+.badge-icon-swatch {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: calc(var(--badge-icon-size, 36px) * 0.6);
 }
 
 .badge-content {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center;
-  position: relative;
-  z-index: 2;
-  color: var(--badge-text-color, #1a5f5f);
-  padding-left: 0;
+  gap: 6px;
+  min-width: 0;
 }
 
-.badge-text {
-  font-size: 16px;
-  line-height: 1.5;
+.badge-heading {
   margin: 0;
+  line-height: 1.2;
+}
+
+.badge-body {
+  margin: 0;
+  line-height: 1.5;
   color: var(--badge-text-color, #1a5f5f);
-  font-weight: 400;
 }
 
-.badge-text-bold {
-  font-weight: 600;
-}
-
-.badge-text-link {
+.badge-heading a,
+.badge-body a {
+  color: inherit;
   text-decoration: underline;
-  cursor: pointer;
-  transition: opacity 0.2s ease;
-  font-weight: 400;
 }
 
-.badge-text-link:hover {
-  opacity: 0.8;
+.badge-heading strong,
+.badge-body strong {
+  font-weight: bold;
 }
 
-/* Mobile styles */
+.badge-heading em,
+.badge-body em {
+  font-style: italic;
+}
+
 @media (max-width: 768px) {
+  .simple-text-badge-widget {
+    padding: var(--badge-outer-padding-y-mobile, var(--badge-outer-padding-y, 0px))
+      var(--badge-outer-padding-x-mobile, var(--badge-outer-padding-x, 0px));
+  }
+
   .simple-text-badge {
-    min-height: 70px;
-    padding: 16px 20px 16px 0;
-  }
-
-  .simple-text-badge::before {
-    width: 45px;
-  }
-
-  .simple-text-badge.has-icon::after {
-    left: 22px;
-    width: 26px;
-    height: 26px;
+    padding: var(--badge-inner-padding-y-mobile, var(--badge-inner-padding-y, 16px))
+      var(--badge-inner-padding-x-mobile, var(--badge-inner-padding-x, 24px));
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
   }
 
   .badge-icon-container {
-    width: 45px;
-    margin-right: 16px;
-    padding-left: 6px;
+    width: var(--badge-icon-size-mobile, var(--badge-icon-size, 36px));
+    height: var(--badge-icon-size-mobile, var(--badge-icon-size, 36px));
   }
 
-  .badge-icon {
-    width: 30px;
-    height: 30px;
-  }
-
-  .badge-text {
-    font-size: 14px;
+  .badge-icon-swatch {
+    font-size: calc(var(--badge-icon-size-mobile, var(--badge-icon-size, 36px)) * 0.6);
   }
 }
+
 
