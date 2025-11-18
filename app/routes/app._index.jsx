@@ -720,20 +720,12 @@ export default function Dashboard() {
         previewParams.set('view', wizardVariantName);
       }
       if (selectedIdea?.blockId && selectedWidgetConfig) {
-        console.log('🔧 Widget Config Debug - Creating deep link:', {
-          widgetType: selectedIdea.blockId,
-          settings: selectedWidgetConfig,
-          settingsStringified: JSON.stringify(selectedWidgetConfig, null, 2)
-        });
         const encodedConfig = encodeWidgetConfigPayload({
           widgetType: selectedIdea.blockId,
           settings: selectedWidgetConfig
         });
-        console.log('🔧 Encoded config for URL:', encodedConfig);
         if (encodedConfig) {
           previewParams.set('ab_widget_config', encodedConfig);
-          // Verify it's set
-          console.log('🔧 Full preview params:', previewParams.toString());
         }
       }
       const previewPath = previewParams.toString()
@@ -743,27 +735,9 @@ export default function Dashboard() {
 
       const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
       const widgetHandle = selectedIdea?.blockId || null;
-      
-      // Check if template is JSON (to determine if block was pre-configured)
-      const isJsonTemplate = wizardVariantTemplateFilename && wizardVariantTemplateFilename.endsWith('.json');
-      const hasWidgetConfig = selectedWidgetConfig && Object.keys(selectedWidgetConfig).length > 0;
-      
-      // Add addAppBlockId URL parameter if:
-      // 1. There's a widget to add, AND
-      // 2. Either: no widget config, OR it's a Liquid template (can't pre-configure)
-      const shouldAddBlockViaUrl = widgetHandle && (!hasWidgetConfig || !isJsonTemplate);
-      const addBlockParams = shouldAddBlockViaUrl
+      const addBlockParams = widgetHandle
         ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
         : '';
-
-      console.log('🔗 URL Building Decision:', {
-        isJsonTemplate,
-        hasWidgetConfig,
-        shouldAddBlockViaUrl,
-        reason: shouldAddBlockViaUrl 
-          ? (!hasWidgetConfig ? 'No widget config to pre-configure' : 'Liquid template - cannot pre-configure')
-          : 'Block already pre-configured in JSON template'
-      });
 
       const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}`;
 
@@ -856,13 +830,10 @@ export default function Dashboard() {
           ribbon: '#be123c'
         },
         settings: {
-          headerText: '<p><strong>FLASH DEAL</strong></p>',
-          bodyText: '<p>30% OFF ENDS TONIGHT</p>',
-          headerColor: '#be123c',
+          text: 'FLASH DEAL • 30% OFF ENDS TONIGHT',
           textColor: '#be123c',
           backgroundColor: '#fff1f2',
-          borderColor: '#be123c',
-          iconChoice: 'trophy'
+          ribbonColor: '#be123c'
         }
       },
       {
@@ -876,13 +847,10 @@ export default function Dashboard() {
           ribbon: '#8b5cf6'
         },
         settings: {
-          headerText: '<p>Limited Atelier Drop</p>',
-          bodyText: '<p>Complimentary gift wrapping today</p>',
-          headerColor: '#1a5f5f',
+          text: 'Limited Atelier Drop • Complimentary gift wrapping today',
           textColor: '#1a5f5f',
           backgroundColor: '#f5f5f0',
-          borderColor: '#8b5cf6',
-          iconChoice: 'gift'
+          ribbonColor: '#8b5cf6'
         }
       },
       {
@@ -896,13 +864,10 @@ export default function Dashboard() {
           ribbon: '#65a30d'
         },
         settings: {
-          headerText: '<p>Earth Conscious</p>',
-          bodyText: '<p>Ships in recycled packaging</p>',
-          headerColor: '#14532d',
+          text: 'Earth Conscious • Ships in recycled packaging',
           textColor: '#14532d',
           backgroundColor: '#ecfccb',
-          borderColor: '#65a30d',
-          iconChoice: 'star'
+          ribbonColor: '#65a30d'
         }
       },
       {
@@ -916,13 +881,10 @@ export default function Dashboard() {
           ribbon: '#0369a1'
         },
         settings: {
-          headerText: '<p>Members Unlock</p>',
-          bodyText: '<p>Free 2-day shipping + double points</p>',
-          headerColor: '#0c4a6e',
+          text: 'Members unlock free 2-day shipping + double points',
           textColor: '#0c4a6e',
           backgroundColor: '#e0f2fe',
-          borderColor: '#0369a1',
-          iconChoice: 'trophy'
+          ribbonColor: '#0369a1'
         }
       }
     ],
@@ -1030,19 +992,12 @@ export default function Dashboard() {
   };
 
   const handleTweakSelection = (widgetType, tweak) => {
-    console.log('🎨 Widget Tweak Selected:', {
-      widgetType,
-      tweak,
-      tweakSettings: tweak?.settings,
-      tweakId: tweak?.id
-    });
     const idea = getWidgetIdeaByType(widgetType);
     if (!idea) {
       alert('We could not pre-select that widget. Please choose one manually.');
       return;
     }
     const configOverride = tweak?.settings ? cloneConfig(tweak.settings) : null;
-    console.log('🎨 Config override after clone:', configOverride);
     startWizardForIdea(idea, configOverride, tweak?.id || null);
     setWizardTestName('');
     setWizardLaunchError(null);
@@ -1356,59 +1311,6 @@ export default function Dashboard() {
           selectedIdeaUtility: selectedIdea?.utility,
           conditionMet: !!(selectedIdea?.blockId && selectedIdea?.appExtensionId)
         });
-
-        // Configure app block settings if widget tweaks are present (only for JSON templates)
-        if (selectedWidgetConfig && Object.keys(selectedWidgetConfig).length > 0 && selectedIdea?.blockId && selectedIdea?.appExtensionId) {
-          // Check if this is a JSON template (OS 2.0)
-          const isJsonTemplate = result.newFilename && result.newFilename.endsWith('.json');
-          
-          if (isJsonTemplate) {
-            console.log('⚙️ Configuring app block settings for widget tweak (JSON template):', {
-              blockType: `${selectedIdea.appExtensionId}/${selectedIdea.blockId}`,
-              templateFilename: result.newFilename,
-              settings: selectedWidgetConfig
-            });
-
-            try {
-              // Give Shopify a moment to commit the file
-              console.log('⏳ Waiting 3 seconds for template to be available...');
-              await new Promise(resolve => setTimeout(resolve, 3000));
-
-              const configResponse = await fetch('/api/configure-app-block-settings', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  themeId: mainTheme.id,
-                  templateName: variantName,
-                  templateFilename: result.newFilename,
-                  blockType: `${selectedIdea.appExtensionId}/${selectedIdea.blockId}`,
-                  settings: selectedWidgetConfig
-                })
-              });
-
-              const configResult = await configResponse.json();
-              if (configResponse.ok && configResult.success) {
-                console.log('✅ App block settings configured successfully!', {
-                  sectionKey: configResult.sectionKey,
-                  blockId: configResult.blockId,
-                  settingsApplied: configResult.settingsApplied
-                });
-              } else {
-                console.error('❌ Failed to configure app block settings:', configResult.error);
-                // Don't fail the whole process, just log the error
-              }
-            } catch (configError) {
-              console.error('❌ Error configuring app block settings:', configError);
-              // Don't fail the whole process
-            }
-          } else {
-            console.log('⚠️ Template is Liquid (.liquid) - widget tweaks only work with JSON templates (OS 2.0)');
-            console.log('ℹ️ The block will be added via URL parameter, but custom settings cannot be pre-configured');
-            
-            // Show a warning to the user
-            alert('Note: Your theme uses Liquid templates. The widget will be added, but you\'ll need to manually configure the settings in the Theme Editor.\n\nFor automatic configuration, consider upgrading to a theme that supports OS 2.0 (JSON templates).');
-          }
-        }
         
         creationResult = { success: true, variantName, newFilename: result.newFilename };
       } else {

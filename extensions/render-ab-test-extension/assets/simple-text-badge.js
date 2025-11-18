@@ -1,8 +1,6 @@
 // Simple Text Badge Widget JavaScript
-console.log('🚀 simple-text-badge.js file loaded!');
 (function() {
   'use strict';
-  console.log('🚀 simple-text-badge.js IIFE executing...');
 
   var CONFIG_PARAM = 'ab_widget_config';
   var WIDGET_TYPE = 'simple-text-badge';
@@ -40,74 +38,8 @@ console.log('🚀 simple-text-badge.js file loaded!');
   };
 
   function init() {
-    parseUrlConfig();
     refreshBadges();
     registerConfigListener();
-  }
-
-  function parseUrlConfig() {
-    try {
-      console.log('🔍 Simple Text Badge: Checking URL for config...');
-      console.log('🔍 Full URL:', window.location.href);
-      
-      var urlParams = new URLSearchParams(window.location.search);
-      var configParam = urlParams.get(CONFIG_PARAM);
-      
-      console.log('🔍 Config param from URL:', configParam ? 'Found' : 'Not found');
-      
-      if (configParam) {
-        console.log('🔍 Raw config param:', configParam);
-        var decoded = atob(configParam);
-        console.log('🔍 Decoded (Base64 -> JSON string):', decoded);
-        
-        var parsed = JSON.parse(decoded);
-        console.log('🔍 Parsed config object:', parsed);
-        
-        if (parsed && parsed.widgetType === WIDGET_TYPE && parsed.settings) {
-          window.ABTestWidgetConfig = {
-            widgetType: parsed.widgetType,
-            settings: parsed.settings
-          };
-          
-          // Store in sessionStorage so it persists across theme editor navigation
-          try {
-            sessionStorage.setItem('simple-text-badge-config', JSON.stringify(window.ABTestWidgetConfig));
-            console.log('💾 Saved config to sessionStorage');
-          } catch (e) {
-            console.warn('Could not save to sessionStorage:', e);
-          }
-          
-          console.log('✅ Simple Text Badge: Config loaded successfully!', {
-            widgetType: window.ABTestWidgetConfig.widgetType,
-            settings: window.ABTestWidgetConfig.settings,
-            headerText: window.ABTestWidgetConfig.settings.headerText,
-            bodyText: window.ABTestWidgetConfig.settings.bodyText
-          });
-        } else {
-          console.log('⚠️ Config present but not for this widget type:', {
-            foundType: parsed?.widgetType,
-            expectedType: WIDGET_TYPE,
-            hasSettings: !!parsed?.settings
-          });
-        }
-      } else {
-        console.log('ℹ️ No ab_widget_config parameter in URL');
-        
-        // Try to restore from sessionStorage if URL doesn't have it
-        try {
-          var stored = sessionStorage.getItem('simple-text-badge-config');
-          if (stored) {
-            window.ABTestWidgetConfig = JSON.parse(stored);
-            console.log('💾 Restored config from sessionStorage:', window.ABTestWidgetConfig);
-          }
-        } catch (e) {
-          console.warn('Could not restore from sessionStorage:', e);
-        }
-      }
-    } catch (error) {
-      console.error('❌ Simple Text Badge: Error parsing ab_widget_config', error);
-      console.error('Error details:', error.message, error.stack);
-    }
   }
 
   function refreshBadges() {
@@ -124,17 +56,7 @@ console.log('🚀 simple-text-badge.js file loaded!');
 
   function renderBadge(container) {
     var overrides = getWidgetOverride();
-    console.log('🎨 Rendering badge with overrides:', overrides);
-    
     var settings = getSettings(container, overrides);
-    console.log('🎨 Final badge settings:', {
-      headerText: settings.headerText,
-      bodyText: settings.bodyText,
-      headerColor: settings.headerColor,
-      backgroundColor: settings.backgroundColor,
-      iconChoice: settings.iconChoice
-    });
-    
     applyCssVariables(container, settings);
 
     var iconMarkup = buildIconMarkup(settings);
@@ -400,38 +322,23 @@ console.log('🚀 simple-text-badge.js file loaded!');
   }
 
   function getWidgetOverride() {
-    console.log('🔎 Getting widget override...');
-    
     try {
       var params = new URLSearchParams(window.location.search || '');
-      console.log('🔎 URL params check:', params.has(CONFIG_PARAM));
-      
       if (params.has(CONFIG_PARAM)) {
         var payload = decodeConfigValue(params.get(CONFIG_PARAM));
-        console.log('🔎 Decoded payload from URL:', payload);
-        
         if (payload && payload.widgetType === WIDGET_TYPE) {
-          console.log('✅ Using override from URL params:', payload.settings);
           return payload.settings || null;
         }
       }
     } catch (error) {
-      console.warn('⚠️ Simple Text Badge: Unable to read preview config', error);
+      console.warn('Simple Text Badge: Unable to read preview config', error);
     }
 
     var hasVariantMatch = !window.ABTestVariantTemplate || !window.currentVariant || window.currentVariant === window.ABTestVariantTemplate;
-    console.log('🔎 Variant match check:', {
-      hasVariantMatch,
-      hasABTestWidgetConfig: !!window.ABTestWidgetConfig,
-      widgetType: window.ABTestWidgetConfig?.widgetType
-    });
-    
     if (window.ABTestWidgetConfig && window.ABTestWidgetConfig.widgetType === WIDGET_TYPE && hasVariantMatch) {
-      console.log('✅ Using override from window.ABTestWidgetConfig:', window.ABTestWidgetConfig.settings);
       return window.ABTestWidgetConfig.settings || null;
     }
 
-    console.log('ℹ️ No override found, using default settings');
     return null;
   }
 
