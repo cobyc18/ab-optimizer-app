@@ -27,6 +27,16 @@ export const action = async ({ request }) => {
     const assetKey = templateFilename || `templates/${templateName}.json`;
     console.log(`📖 Reading template asset: ${assetKey}`);
 
+    // Check if this is a JSON template (required for app blocks)
+    if (!assetKey.endsWith('.json')) {
+      console.log('⚠️ Template is not a JSON file - app blocks can only be added to JSON templates');
+      return json({ 
+        error: "App blocks can only be added to JSON templates (OS 2.0 themes), not Liquid templates",
+        templateFile: assetKey,
+        isJsonTemplate: false
+      }, { status: 400 });
+    }
+
     // Strip the 'gid://shopify/OnlineStoreTheme/' prefix if present
     const cleanThemeId = themeId.replace('gid://shopify/OnlineStoreTheme/', '');
     console.log(`🔧 Using theme ID: ${cleanThemeId}`);

@@ -744,12 +744,26 @@ export default function Dashboard() {
       const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
       const widgetHandle = selectedIdea?.blockId || null;
       
-      // Only add addAppBlockId if we haven't pre-configured the block with settings
-      // When selectedWidgetConfig is present, the block was already added programmatically
-      const shouldAddBlockViaUrl = widgetHandle && (!selectedWidgetConfig || Object.keys(selectedWidgetConfig).length === 0);
+      // Check if template is JSON (to determine if block was pre-configured)
+      const isJsonTemplate = wizardVariantTemplateFilename && wizardVariantTemplateFilename.endsWith('.json');
+      const hasWidgetConfig = selectedWidgetConfig && Object.keys(selectedWidgetConfig).length > 0;
+      
+      // Add addAppBlockId URL parameter if:
+      // 1. There's a widget to add, AND
+      // 2. Either: no widget config, OR it's a Liquid template (can't pre-configure)
+      const shouldAddBlockViaUrl = widgetHandle && (!hasWidgetConfig || !isJsonTemplate);
       const addBlockParams = shouldAddBlockViaUrl
         ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
         : '';
+
+      console.log('🔗 URL Building Decision:', {
+        isJsonTemplate,
+        hasWidgetConfig,
+        shouldAddBlockViaUrl,
+        reason: shouldAddBlockViaUrl 
+          ? (!hasWidgetConfig ? 'No widget config to pre-configure' : 'Liquid template - cannot pre-configure')
+          : 'Block already pre-configured in JSON template'
+      });
 
       const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}`;
 
@@ -1343,45 +1357,56 @@ export default function Dashboard() {
           conditionMet: !!(selectedIdea?.blockId && selectedIdea?.appExtensionId)
         });
 
-        // Configure app block settings if widget tweaks are present
+        // Configure app block settings if widget tweaks are present (only for JSON templates)
         if (selectedWidgetConfig && Object.keys(selectedWidgetConfig).length > 0 && selectedIdea?.blockId && selectedIdea?.appExtensionId) {
-          console.log('⚙️ Configuring app block settings for widget tweak:', {
-            blockType: `${selectedIdea.appExtensionId}/${selectedIdea.blockId}`,
-            templateFilename: result.newFilename,
-            settings: selectedWidgetConfig
-          });
-
-          try {
-            // Give Shopify a moment to commit the file
-            console.log('⏳ Waiting 3 seconds for template to be available...');
-            await new Promise(resolve => setTimeout(resolve, 3000));
-
-            const configResponse = await fetch('/api/configure-app-block-settings', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                themeId: mainTheme.id,
-                templateName: variantName,
-                templateFilename: result.newFilename, // Pass the full filename with extension
-                blockType: `${selectedIdea.appExtensionId}/${selectedIdea.blockId}`,
-                settings: selectedWidgetConfig
-              })
+          // Check if this is a JSON template (OS 2.0)
+          const isJsonTemplate = result.newFilename && result.newFilename.endsWith('.json');
+          
+          if (isJsonTemplate) {
+            console.log('⚙️ Configuring app block settings for widget tweak (JSON template):', {
+              blockType: `${selectedIdea.appExtensionId}/${selectedIdea.blockId}`,
+              templateFilename: result.newFilename,
+              settings: selectedWidgetConfig
             });
 
-            const configResult = await configResponse.json();
-            if (configResponse.ok && configResult.success) {
-              console.log('✅ App block settings configured successfully!', {
-                sectionKey: configResult.sectionKey,
-                blockId: configResult.blockId,
-                settingsApplied: configResult.settingsApplied
+            try {
+              // Give Shopify a moment to commit the file
+              console.log('⏳ Waiting 3 seconds for template to be available...');
+              await new Promise(resolve => setTimeout(resolve, 3000));
+
+              const configResponse = await fetch('/api/configure-app-block-settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  themeId: mainTheme.id,
+                  templateName: variantName,
+                  templateFilename: result.newFilename,
+                  blockType: `${selectedIdea.appExtensionId}/${selectedIdea.blockId}`,
+                  settings: selectedWidgetConfig
+                })
               });
-            } else {
-              console.error('❌ Failed to configure app block settings:', configResult.error);
-              // Don't fail the whole process, just log the error
+
+              const configResult = await configResponse.json();
+              if (configResponse.ok && configResult.success) {
+                console.log('✅ App block settings configured successfully!', {
+                  sectionKey: configResult.sectionKey,
+                  blockId: configResult.blockId,
+                  settingsApplied: configResult.settingsApplied
+                });
+              } else {
+                console.error('❌ Failed to configure app block settings:', configResult.error);
+                // Don't fail the whole process, just log the error
+              }
+            } catch (configError) {
+              console.error('❌ Error configuring app block settings:', configError);
+              // Don't fail the whole process
             }
-          } catch (configError) {
-            console.error('❌ Error configuring app block settings:', configError);
-            // Don't fail the whole process
+          } else {
+            console.log('⚠️ Template is Liquid (.liquid) - widget tweaks only work with JSON templates (OS 2.0)');
+            console.log('ℹ️ The block will be added via URL parameter, but custom settings cannot be pre-configured');
+            
+            // Show a warning to the user
+            alert('Note: Your theme uses Liquid templates. The widget will be added, but you\'ll need to manually configure the settings in the Theme Editor.\n\nFor automatic configuration, consider upgrading to a theme that supports OS 2.0 (JSON templates).');
           }
         }
         
