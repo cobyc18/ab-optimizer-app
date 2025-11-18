@@ -720,12 +720,20 @@ export default function Dashboard() {
         previewParams.set('view', wizardVariantName);
       }
       if (selectedIdea?.blockId && selectedWidgetConfig) {
+        console.log('🔧 Widget Config Debug - Creating deep link:', {
+          widgetType: selectedIdea.blockId,
+          settings: selectedWidgetConfig,
+          settingsStringified: JSON.stringify(selectedWidgetConfig, null, 2)
+        });
         const encodedConfig = encodeWidgetConfigPayload({
           widgetType: selectedIdea.blockId,
           settings: selectedWidgetConfig
         });
+        console.log('🔧 Encoded config for URL:', encodedConfig);
         if (encodedConfig) {
           previewParams.set('ab_widget_config', encodedConfig);
+          // Verify it's set
+          console.log('🔧 Full preview params:', previewParams.toString());
         }
       }
       const previewPath = previewParams.toString()
@@ -992,12 +1000,19 @@ export default function Dashboard() {
   };
 
   const handleTweakSelection = (widgetType, tweak) => {
+    console.log('🎨 Widget Tweak Selected:', {
+      widgetType,
+      tweak,
+      tweakSettings: tweak?.settings,
+      tweakId: tweak?.id
+    });
     const idea = getWidgetIdeaByType(widgetType);
     if (!idea) {
       alert('We could not pre-select that widget. Please choose one manually.');
       return;
     }
     const configOverride = tweak?.settings ? cloneConfig(tweak.settings) : null;
+    console.log('🎨 Config override after clone:', configOverride);
     startWizardForIdea(idea, configOverride, tweak?.id || null);
     setWizardTestName('');
     setWizardLaunchError(null);
