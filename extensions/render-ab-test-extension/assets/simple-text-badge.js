@@ -66,6 +66,15 @@
             widgetType: parsed.widgetType,
             settings: parsed.settings
           };
+          
+          // Store in sessionStorage so it persists across theme editor navigation
+          try {
+            sessionStorage.setItem('simple-text-badge-config', JSON.stringify(window.ABTestWidgetConfig));
+            console.log('💾 Saved config to sessionStorage');
+          } catch (e) {
+            console.warn('Could not save to sessionStorage:', e);
+          }
+          
           console.log('✅ Simple Text Badge: Config loaded successfully!', {
             widgetType: window.ABTestWidgetConfig.widgetType,
             settings: window.ABTestWidgetConfig.settings,
@@ -81,6 +90,17 @@
         }
       } else {
         console.log('ℹ️ No ab_widget_config parameter in URL');
+        
+        // Try to restore from sessionStorage if URL doesn't have it
+        try {
+          var stored = sessionStorage.getItem('simple-text-badge-config');
+          if (stored) {
+            window.ABTestWidgetConfig = JSON.parse(stored);
+            console.log('💾 Restored config from sessionStorage:', window.ABTestWidgetConfig);
+          }
+        } catch (e) {
+          console.warn('Could not restore from sessionStorage:', e);
+        }
       }
     } catch (error) {
       console.error('❌ Simple Text Badge: Error parsing ab_widget_config', error);
