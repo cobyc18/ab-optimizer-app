@@ -838,10 +838,13 @@ export default function Dashboard() {
           ribbon: '#be123c'
         },
         settings: {
-          text: 'FLASH DEAL • 30% OFF ENDS TONIGHT',
+          headerText: '<p><strong>FLASH DEAL</strong></p>',
+          bodyText: '<p>30% OFF ENDS TONIGHT</p>',
+          headerColor: '#be123c',
           textColor: '#be123c',
           backgroundColor: '#fff1f2',
-          ribbonColor: '#be123c'
+          borderColor: '#be123c',
+          iconChoice: 'trophy'
         }
       },
       {
@@ -855,10 +858,13 @@ export default function Dashboard() {
           ribbon: '#8b5cf6'
         },
         settings: {
-          text: 'Limited Atelier Drop • Complimentary gift wrapping today',
+          headerText: '<p>Limited Atelier Drop</p>',
+          bodyText: '<p>Complimentary gift wrapping today</p>',
+          headerColor: '#1a5f5f',
           textColor: '#1a5f5f',
           backgroundColor: '#f5f5f0',
-          ribbonColor: '#8b5cf6'
+          borderColor: '#8b5cf6',
+          iconChoice: 'gift'
         }
       },
       {
@@ -872,10 +878,13 @@ export default function Dashboard() {
           ribbon: '#65a30d'
         },
         settings: {
-          text: 'Earth Conscious • Ships in recycled packaging',
+          headerText: '<p>Earth Conscious</p>',
+          bodyText: '<p>Ships in recycled packaging</p>',
+          headerColor: '#14532d',
           textColor: '#14532d',
           backgroundColor: '#ecfccb',
-          ribbonColor: '#65a30d'
+          borderColor: '#65a30d',
+          iconChoice: 'star'
         }
       },
       {
@@ -889,10 +898,13 @@ export default function Dashboard() {
           ribbon: '#0369a1'
         },
         settings: {
-          text: 'Members unlock free 2-day shipping + double points',
+          headerText: '<p>Members Unlock</p>',
+          bodyText: '<p>Free 2-day shipping + double points</p>',
+          headerColor: '#0c4a6e',
           textColor: '#0c4a6e',
           backgroundColor: '#e0f2fe',
-          ribbonColor: '#0369a1'
+          borderColor: '#0369a1',
+          iconChoice: 'trophy'
         }
       }
     ],
