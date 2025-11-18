@@ -6,22 +6,12 @@
 <div class="simple-text-badge-widget" 
      data-badge-id="badge-{{ block.id }}"
      data-block-id="{{ block.id }}"
-     data-header-text="{{ block.settings.header_text | default: 'Store Announcement' | escape }}"
-     data-body-text="{{ block.settings.body_text | default: 'Describe the promotion or offer details here.' | escape }}"
-     data-header-tag="{{ block.settings.header_tag | default: 'p' }}"
-     data-header-font="{{ block.settings.header_font | default: 'system' }}"
-     data-header-font-size="{{ block.settings.header_font_size | default: 24 }}"
-     data-header-bold="{{ block.settings.header_bold | default: false }}"
-     data-header-italic="{{ block.settings.header_italic | default: false }}"
-     data-header-underline="{{ block.settings.header_underline | default: false }}"
-     data-header-link="{{ block.settings.header_link | default: '' | escape }}"
-     data-body-font="{{ block.settings.body_font | default: 'system' }}"
-     data-body-font-size="{{ block.settings.body_font_size | default: 16 }}"
-     data-body-bold="{{ block.settings.body_bold | default: false }}"
-     data-body-italic="{{ block.settings.body_italic | default: false }}"
-     data-body-underline="{{ block.settings.body_underline | default: false }}"
-     data-body-link="{{ block.settings.body_link | default: '' | escape }}"
-     data-text="{{ block.settings.body_text | default: 'Describe the promotion or offer details here.' | escape }}"
+    data-header-text="{{ block.settings.header_text | escape }}"
+    data-body-text="{{ block.settings.body_text | escape }}"
+    data-header-font="{{ block.settings.header_font | default: 'system' }}"
+    data-header-font-size="{{ block.settings.header_font_size | default: 24 }}"
+    data-body-font="{{ block.settings.body_font | default: 'system' }}"
+    data-body-font-size="{{ block.settings.body_font_size | default: 16 }}"
      data-text-color="{{ block.settings.text_color | default: '#1a5f5f' }}"
      data-header-color="{{ block.settings.header_color | default: '#0f172a' }}"
      data-background-color="{{ block.settings.background_color | default: '#f5f5f0' }}"
@@ -35,8 +25,9 @@
      data-outer-padding-x-mobile="{{ block.settings.outer_padding_horizontal_mobile | default: 0 }}"
      data-outer-padding-y-mobile="{{ block.settings.outer_padding_vertical_mobile | default: 0 }}"
      data-icon-choice="{{ block.settings.icon_choice | default: 'star' }}"
-     data-icon-blink="{{ block.settings.icon_blink | default: false }}"
-     data-icon-size="{{ block.settings.icon_size | default: 36 }}"
+    data-icon-blink="{{ block.settings.icon_blink | default: false }}"
+    data-icon-blink-intensity="{{ block.settings.icon_blink_intensity | default: 50 }}"
+    data-icon-size="{{ block.settings.icon_size | default: 36 }}"
      data-icon-size-mobile="{{ block.settings.icon_size_mobile | default: 30 }}"
      data-border-radius="{{ block.settings.border_radius | default: 8 }}"
      data-border-thickness="{{ block.settings.border_thickness | default: 1 }}"
@@ -70,29 +61,33 @@
     },
     {
       "type": "select",
-      "id": "header_tag",
-      "label": "Header tag",
-      "options": [
-        { "value": "h1", "label": "H1" },
-        { "value": "h2", "label": "H2" },
-        { "value": "h3", "label": "H3" },
-        { "value": "h4", "label": "H4" },
-        { "value": "h5", "label": "H5" },
-        { "value": "h6", "label": "H6" },
-        { "value": "p", "label": "Paragraph" },
-        { "value": "div", "label": "Div" }
-      ],
-      "default": "p"
-    },
-    {
-      "type": "select",
       "id": "header_font",
       "label": "Header font",
       "options": [
         { "value": "system", "label": "System default" },
         { "value": "poppins", "label": "Poppins" },
         { "value": "inter", "label": "Inter" },
-        { "value": "serif", "label": "Serif" }
+        { "value": "roboto", "label": "Roboto" },
+        { "value": "lato", "label": "Lato" },
+        { "value": "montserrat", "label": "Montserrat" },
+        { "value": "opensans", "label": "Open Sans" },
+        { "value": "raleway", "label": "Raleway" },
+        { "value": "playfair", "label": "Playfair Display" },
+        { "value": "merriweather", "label": "Merriweather" },
+        { "value": "sourcesans", "label": "Source Sans Pro" },
+        { "value": "nunito", "label": "Nunito" },
+        { "value": "worksans", "label": "Work Sans" },
+        { "value": "ptsans", "label": "PT Sans" },
+        { "value": "oswald", "label": "Oswald" },
+        { "value": "notosans", "label": "Noto Sans" },
+        { "value": "ubuntu", "label": "Ubuntu" },
+        { "value": "georgia", "label": "Georgia" },
+        { "value": "times", "label": "Times New Roman" },
+        { "value": "arial", "label": "Arial" },
+        { "value": "helvetica", "label": "Helvetica" },
+        { "value": "courier", "label": "Courier New" },
+        { "value": "verdana", "label": "Verdana" },
+        { "value": "trebuchet", "label": "Trebuchet MS" }
       ],
       "default": "system"
     },
@@ -104,30 +99,6 @@
       "max": 64,
       "step": 1,
       "default": 24
-    },
-    {
-      "type": "checkbox",
-      "id": "header_bold",
-      "label": "Bold",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "header_italic",
-      "label": "Italicize",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "header_underline",
-      "label": "Underline",
-      "default": false
-    },
-    {
-      "type": "text",
-      "id": "header_link",
-      "label": "Header hyperlink URL",
-      "info": "Optional link for the header text"
     },
     {
       "type": "header",
@@ -147,7 +118,27 @@
         { "value": "system", "label": "System default" },
         { "value": "poppins", "label": "Poppins" },
         { "value": "inter", "label": "Inter" },
-        { "value": "serif", "label": "Serif" }
+        { "value": "roboto", "label": "Roboto" },
+        { "value": "lato", "label": "Lato" },
+        { "value": "montserrat", "label": "Montserrat" },
+        { "value": "opensans", "label": "Open Sans" },
+        { "value": "raleway", "label": "Raleway" },
+        { "value": "playfair", "label": "Playfair Display" },
+        { "value": "merriweather", "label": "Merriweather" },
+        { "value": "sourcesans", "label": "Source Sans Pro" },
+        { "value": "nunito", "label": "Nunito" },
+        { "value": "worksans", "label": "Work Sans" },
+        { "value": "ptsans", "label": "PT Sans" },
+        { "value": "oswald", "label": "Oswald" },
+        { "value": "notosans", "label": "Noto Sans" },
+        { "value": "ubuntu", "label": "Ubuntu" },
+        { "value": "georgia", "label": "Georgia" },
+        { "value": "times", "label": "Times New Roman" },
+        { "value": "arial", "label": "Arial" },
+        { "value": "helvetica", "label": "Helvetica" },
+        { "value": "courier", "label": "Courier New" },
+        { "value": "verdana", "label": "Verdana" },
+        { "value": "trebuchet", "label": "Trebuchet MS" }
       ],
       "default": "system"
     },
@@ -159,30 +150,6 @@
       "max": 36,
       "step": 1,
       "default": 16
-    },
-    {
-      "type": "checkbox",
-      "id": "body_bold",
-      "label": "Bold",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "body_italic",
-      "label": "Italicize",
-      "default": false
-    },
-    {
-      "type": "checkbox",
-      "id": "body_underline",
-      "label": "Underline",
-      "default": false
-    },
-    {
-      "type": "text",
-      "id": "body_link",
-      "label": "Body hyperlink URL",
-      "info": "Optional link for the body text"
     },
     {
       "type": "header",
@@ -273,24 +240,35 @@
       "id": "icon_choice",
       "label": "Icon selector",
       "options": [
-        { "value": "star", "label": "Star" },
-        { "value": "trophy", "label": "Trophy" },
-        { "value": "gift", "label": "Gift" },
-        { "value": "custom", "label": "Use uploaded icon" }
+        { "value": "none", "label": "None (no icon)" },
+        { "value": "star", "label": "⭐ Star" },
+        { "value": "trophy", "label": "🏆 Trophy" },
+        { "value": "gift", "label": "🎁 Gift" }
       ],
       "default": "star",
-      "info": "Choose a built-in icon or switch to custom upload"
+      "info": "Choose a built-in icon or select 'None' to remove. Upload a custom icon below to override."
     },
     {
       "type": "image_picker",
       "id": "icon_custom",
-      "label": "Upload custom icon"
+      "label": "Upload custom icon",
+      "info": "If uploaded, this icon will be used instead of the selected icon above"
     },
     {
       "type": "checkbox",
       "id": "icon_blink",
       "label": "Enable icon blink effect",
       "default": false
+    },
+    {
+      "type": "range",
+      "id": "icon_blink_intensity",
+      "label": "Blink intensity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "default": 50,
+      "info": "Lower = subtle, Higher = intense"
     },
     {
       "type": "range",
@@ -309,6 +287,10 @@
       "max": 100,
       "step": 2,
       "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Border and Colors"
     },
     {
       "type": "range",
@@ -342,10 +324,6 @@
       "max": 50,
       "step": 1,
       "default": 10
-    },
-    {
-      "type": "header",
-      "content": "Colors"
     },
     {
       "type": "color",

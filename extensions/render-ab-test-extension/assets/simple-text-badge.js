@@ -8,6 +8,27 @@
     system: 'inherit',
     poppins: "'Poppins', sans-serif",
     inter: "'Inter', sans-serif",
+    roboto: "'Roboto', sans-serif",
+    lato: "'Lato', sans-serif",
+    montserrat: "'Montserrat', sans-serif",
+    opensans: "'Open Sans', sans-serif",
+    raleway: "'Raleway', sans-serif",
+    playfair: "'Playfair Display', serif",
+    merriweather: "'Merriweather', serif",
+    sourcesans: "'Source Sans Pro', sans-serif",
+    nunito: "'Nunito', sans-serif",
+    worksans: "'Work Sans', sans-serif",
+    ptsans: "'PT Sans', sans-serif",
+    oswald: "'Oswald', sans-serif",
+    notosans: "'Noto Sans', sans-serif",
+    ubuntu: "'Ubuntu', sans-serif",
+    georgia: "'Georgia', serif",
+    times: "'Times New Roman', serif",
+    arial: "'Arial', sans-serif",
+    helvetica: "'Helvetica', sans-serif",
+    courier: "'Courier New', monospace",
+    verdana: "'Verdana', sans-serif",
+    trebuchet: "'Trebuchet MS', sans-serif",
     serif: "'Georgia', serif"
   };
   var ICON_LIBRARY = {
@@ -15,11 +36,33 @@
     trophy: '🏆',
     gift: '🎁'
   };
-  var ALLOWED_TAGS = ['h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'p', 'div'];
 
   function init() {
+    parseUrlConfig();
     refreshBadges();
     registerConfigListener();
+  }
+
+  function parseUrlConfig() {
+    try {
+      var urlParams = new URLSearchParams(window.location.search);
+      var configParam = urlParams.get(CONFIG_PARAM);
+      
+      if (configParam) {
+        var decoded = atob(configParam);
+        var parsed = JSON.parse(decoded);
+        
+        if (parsed && parsed.widgetType === WIDGET_TYPE && parsed.settings) {
+          window.ABTestWidgetConfig = {
+            widgetType: parsed.widgetType,
+            settings: parsed.settings
+          };
+          console.log('Simple Text Badge: Loaded config from URL', window.ABTestWidgetConfig);
+        }
+      }
+    } catch (error) {
+      console.error('Simple Text Badge: Error parsing ab_widget_config', error);
+    }
   }
 
   function refreshBadges() {
@@ -61,7 +104,9 @@
 
   function buildIconMarkup(settings) {
     const blinkClass = settings.iconBlink ? ' blinking' : '';
-    if (settings.iconChoice === 'custom' && settings.iconUrl) {
+    
+    // If a custom icon is uploaded, use it regardless of iconChoice
+    if (settings.iconUrl) {
       return `
         <div class="badge-icon-container${blinkClass}">
           <img src="${settings.iconUrl}" alt="${escapeAttribute(settings.iconAlt || 'Badge icon')}" class="badge-icon-img" loading="lazy">
@@ -69,6 +114,12 @@
       `;
     }
 
+    // If 'none' is selected, don't show any icon
+    if (settings.iconChoice === 'none') {
+      return '';
+    }
+
+    // Otherwise, use the selected emoji icon
     const iconSymbol = ICON_LIBRARY[settings.iconChoice];
     if (!iconSymbol) {
       return '';
@@ -83,35 +134,14 @@
 
   function buildHeadingMarkup(settings) {
     if (!settings.headerText) return '';
-    var tag = sanitizeTag(settings.headerTag);
-    var content = formatTextForHtml(settings.headerText);
-    var wrappedContent = wrapWithLink(content, settings.headerLink);
-    var styles = [
-      'color:' + settings.headerColor,
-      'font-size:' + settings.headerFontSize + 'px',
-      'font-family:' + (FONT_MAP[settings.headerFont] || 'inherit'),
-      'font-weight:' + (settings.headerBold ? 700 : 500),
-      'font-style:' + (settings.headerItalic ? 'italic' : 'normal'),
-      'text-decoration:' + (settings.headerUnderline ? 'underline' : 'none')
-    ].join(';');
-
-    return `<${tag} class="badge-heading" style="${styles}">${wrappedContent}</${tag}>`;
+    var content = settings.headerText;
+    return `<div class="badge-heading">${content}</div>`;
   }
 
   function buildBodyMarkup(settings) {
     if (!settings.bodyText) return '';
-    var content = formatTextForHtml(settings.bodyText);
-    var wrappedContent = wrapWithLink(content, settings.bodyLink);
-    var styles = [
-      'color:' + settings.textColor,
-      'font-size:' + settings.bodyFontSize + 'px',
-      'font-family:' + (FONT_MAP[settings.bodyFont] || 'inherit'),
-      'font-weight:' + (settings.bodyBold ? 600 : 400),
-      'font-style:' + (settings.bodyItalic ? 'italic' : 'normal'),
-      'text-decoration:' + (settings.bodyUnderline ? 'underline' : 'none')
-    ].join(';');
-
-    return `<p class="badge-body" style="${styles}">${wrappedContent}</p>`;
+    var content = settings.bodyText;
+    return `<div class="badge-body">${content}</div>`;
   }
 
   function applyCssVariables(container, settings) {
@@ -133,6 +163,29 @@
 
     container.style.setProperty('--badge-icon-size', settings.iconSize + 'px');
     container.style.setProperty('--badge-icon-size-mobile', settings.iconSizeMobile + 'px');
+    
+    // Blink intensity (0-100 scale)
+    // Calculate minimum opacity and scale based on intensity
+    var intensity = settings.iconBlinkIntensity / 100; // 0 to 1
+    var blinkOpacity = 1 - (intensity * 0.7); // 1.0 to 0.3
+    var blinkScale = 1 - (intensity * 0.15); // 1.0 to 0.85
+    container.style.setProperty('--badge-blink-opacity', blinkOpacity);
+    container.style.setProperty('--badge-blink-scale', blinkScale);
+    
+    // Header typography
+    container.style.setProperty('--badge-header-color', settings.headerColor);
+    container.style.setProperty('--badge-header-font-size', settings.headerFontSize + 'px');
+    container.style.setProperty('--badge-header-font-family', FONT_MAP[settings.headerFont] || 'inherit');
+    container.style.setProperty('--badge-header-font-weight', settings.headerBold ? '700' : '500');
+    container.style.setProperty('--badge-header-font-style', settings.headerItalic ? 'italic' : 'normal');
+    container.style.setProperty('--badge-header-text-decoration', settings.headerUnderline ? 'underline' : 'none');
+    
+    // Body typography
+    container.style.setProperty('--badge-body-font-size', settings.bodyFontSize + 'px');
+    container.style.setProperty('--badge-body-font-family', FONT_MAP[settings.bodyFont] || 'inherit');
+    container.style.setProperty('--badge-body-font-weight', settings.bodyBold ? '600' : '400');
+    container.style.setProperty('--badge-body-font-style', settings.bodyItalic ? 'italic' : 'normal');
+    container.style.setProperty('--badge-body-text-decoration', settings.bodyUnderline ? 'underline' : 'none');
 
     var dropShadow = settings.dropShadow > 0
       ? `0 ${Math.max(4, settings.dropShadow / 3)}px ${Math.max(10, settings.dropShadow)}px rgba(15,23,42,0.16)`
@@ -148,22 +201,19 @@
   function getSettings(container, overrides) {
     var dataset = container.dataset;
     var base = {
-      headerText: formatRichText(dataset.headerText, 'Store Announcement'),
-      headerTag: sanitizeTag(dataset.headerTag || 'p'),
+      headerText: formatRichText(dataset.headerText),
       headerFont: dataset.headerFont || 'system',
       headerFontSize: parseNumber(dataset.headerFontSize, 24),
       headerBold: parseBoolean(dataset.headerBold, true),
       headerItalic: parseBoolean(dataset.headerItalic, false),
       headerUnderline: parseBoolean(dataset.headerUnderline, false),
-      headerLink: dataset.headerLink || '',
       headerColor: dataset.headerColor || '#0f172a',
-      bodyText: formatRichText(dataset.bodyText, 'Describe the promotion or offer details here.'),
+      bodyText: formatRichText(dataset.bodyText),
       bodyFont: dataset.bodyFont || 'system',
       bodyFontSize: parseNumber(dataset.bodyFontSize, 16),
       bodyBold: parseBoolean(dataset.bodyBold, false),
       bodyItalic: parseBoolean(dataset.bodyItalic, false),
       bodyUnderline: parseBoolean(dataset.bodyUnderline, false),
-      bodyLink: dataset.bodyLink || '',
       textColor: dataset.textColor || '#1a5f5f',
       backgroundColor: dataset.backgroundColor || '#f5f5f0',
       borderColor: dataset.borderColor || '#d4d4d8',
@@ -179,6 +229,7 @@
       iconUrl: dataset.iconUrl || '',
       iconAlt: dataset.iconAlt || 'Badge icon',
       iconBlink: parseBoolean(dataset.iconBlink, false),
+      iconBlinkIntensity: parseNumber(dataset.iconBlinkIntensity, 50),
       iconSize: parseNumber(dataset.iconSize, 36),
       iconSizeMobile: parseNumber(dataset.iconSizeMobile, 30),
       borderRadius: parseNumber(dataset.borderRadius, 8),
@@ -231,25 +282,39 @@
     return isNaN(num) ? fallback : num;
   }
 
-  function formatRichText(value, fallback) {
+  function formatRichText(value) {
     var decoded = decodeHtmlEntities(value || '');
-    var stripped = stripHtml(decoded).trim();
-    return stripped || fallback || '';
-  }
+    if (!decoded || !decoded.trim()) return '';
 
-  function formatTextForHtml(text) {
-    return escapeHtml(text).replace(/\n/g, '<br>');
-  }
+    var temp = document.createElement('div');
+    temp.innerHTML = decoded;
+    temp.querySelectorAll('script, style').forEach(function(node) { node.remove(); });
 
-  function wrapWithLink(content, href) {
-    if (!href) return content;
-    var safeHref = escapeAttribute(href);
-    return `<a href="${safeHref}" target="_self" rel="noopener">${content}</a>`;
-  }
+    var allowedTags = ['P', 'SPAN', 'STRONG', 'EM', 'B', 'I', 'A', 'BR', 'UL', 'OL', 'LI'];
+    Array.prototype.slice.call(temp.getElementsByTagName('*')).forEach(function(node) {
+      if (allowedTags.indexOf(node.tagName) === -1) {
+        var parent = node.parentNode;
+        while (node.firstChild) {
+          parent.insertBefore(node.firstChild, node);
+        }
+        parent.removeChild(node);
+        return;
+      }
+      if (node.tagName === 'A') {
+        var href = node.getAttribute('href') || '';
+        if (!href || href.indexOf('javascript:') === 0) {
+          node.removeAttribute('href');
+        }
+        node.setAttribute('rel', 'noopener');
+      } else {
+        node.removeAttribute('style');
+        node.removeAttribute('onclick');
+        node.removeAttribute('onmouseover');
+        node.removeAttribute('onmouseout');
+      }
+    });
 
-  function sanitizeTag(tag) {
-    var safeTag = (tag || '').toLowerCase();
-    return ALLOWED_TAGS.includes(safeTag) ? safeTag : 'p';
+    return temp.innerHTML;
   }
 
   function decodeHtmlEntities(str) {
@@ -257,13 +322,6 @@
     var txt = document.createElement('textarea');
     txt.innerHTML = str;
     return txt.value;
-  }
-
-  function stripHtml(html) {
-    var temp = document.createElement('div');
-    temp.innerHTML = html;
-    temp.querySelectorAll('script, style').forEach(function(node) { node.remove(); });
-    return temp.textContent || temp.innerText || '';
   }
 
   function escapeHtml(text) {

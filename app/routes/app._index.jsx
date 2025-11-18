@@ -2088,7 +2088,7 @@ export default function Dashboard() {
                     }}>
                       {tweak.description}
                     </p>
-                  </div>
+      </div>
                   {spotlightTest.widgetType === 'simple-text-badge' && (
                     <div style={{
                       borderRadius: '12px',

@@ -44,8 +44,14 @@
 }
 
 @keyframes badgeBlink {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.5; transform: scale(0.92); }
+  0%, 100% { 
+    opacity: 1; 
+    transform: scale(1); 
+  }
+  50% { 
+    opacity: var(--badge-blink-opacity, 0.5); 
+    transform: scale(var(--badge-blink-scale, 0.92)); 
+  }
 }
 
 .badge-icon-img {
@@ -75,13 +81,62 @@
 .badge-heading {
   margin: 0;
   line-height: 1.2;
+  color: var(--badge-header-color, #0f172a);
+  font-size: var(--badge-header-font-size, 24px);
+  font-family: var(--badge-header-font-family, inherit);
+  font-weight: var(--badge-header-font-weight, 500);
+  font-style: var(--badge-header-font-style, normal);
+  text-decoration: var(--badge-header-text-decoration, none);
 }
+
+.badge-heading * {
+  color: inherit !important;
+  font-family: inherit !important;
+  font-weight: inherit !important;
+  font-style: inherit !important;
+  text-decoration: inherit !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Allow heading tags to scale relative to base font-size */
+.badge-heading h1 { font-size: 2em !important; }
+.badge-heading h2 { font-size: 1.5em !important; }
+.badge-heading h3 { font-size: 1.17em !important; }
+.badge-heading h4 { font-size: 1em !important; }
+.badge-heading h5 { font-size: 0.83em !important; }
+.badge-heading h6 { font-size: 0.67em !important; }
+.badge-heading p { font-size: 1em !important; }
 
 .badge-body {
   margin: 0;
   line-height: 1.5;
   color: var(--badge-text-color, #1a5f5f);
+  font-size: var(--badge-body-font-size, 16px);
+  font-family: var(--badge-body-font-family, inherit);
+  font-weight: var(--badge-body-font-weight, 400);
+  font-style: var(--badge-body-font-style, normal);
+  text-decoration: var(--badge-body-text-decoration, none);
 }
+
+.badge-body * {
+  color: inherit !important;
+  font-family: inherit !important;
+  font-weight: inherit !important;
+  font-style: inherit !important;
+  text-decoration: inherit !important;
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Allow heading and paragraph tags to scale relative to base font-size */
+.badge-body h1 { font-size: 2em !important; }
+.badge-body h2 { font-size: 1.5em !important; }
+.badge-body h3 { font-size: 1.17em !important; }
+.badge-body h4 { font-size: 1em !important; }
+.badge-body h5 { font-size: 0.83em !important; }
+.badge-body h6 { font-size: 0.67em !important; }
+.badge-body p { font-size: 1em !important; }
 
 .badge-heading a,
 .badge-body a {
@@ -108,9 +163,9 @@
   .simple-text-badge {
     padding: var(--badge-inner-padding-y-mobile, var(--badge-inner-padding-y, 16px))
       var(--badge-inner-padding-x-mobile, var(--badge-inner-padding-x, 24px));
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 14px;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
   }
 
   .badge-icon-container {
