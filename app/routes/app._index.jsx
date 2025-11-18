@@ -743,7 +743,11 @@ export default function Dashboard() {
 
       const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
       const widgetHandle = selectedIdea?.blockId || null;
-      const addBlockParams = widgetHandle
+      
+      // Only add addAppBlockId if we haven't pre-configured the block with settings
+      // When selectedWidgetConfig is present, the block was already added programmatically
+      const shouldAddBlockViaUrl = widgetHandle && (!selectedWidgetConfig || Object.keys(selectedWidgetConfig).length === 0);
+      const addBlockParams = shouldAddBlockViaUrl
         ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
         : '';
 
@@ -1338,6 +1342,42 @@ export default function Dashboard() {
           selectedIdeaUtility: selectedIdea?.utility,
           conditionMet: !!(selectedIdea?.blockId && selectedIdea?.appExtensionId)
         });
+
+        // Configure app block settings if widget tweaks are present
+        if (selectedWidgetConfig && Object.keys(selectedWidgetConfig).length > 0 && selectedIdea?.blockId && selectedIdea?.appExtensionId) {
+          console.log('⚙️ Configuring app block settings for widget tweak:', {
+            blockType: `${selectedIdea.appExtensionId}/${selectedIdea.blockId}`,
+            settings: selectedWidgetConfig
+          });
+
+          try {
+            const configResponse = await fetch('/api/configure-app-block-settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                themeId: mainTheme.id,
+                templateName: variantName,
+                blockType: `${selectedIdea.appExtensionId}/${selectedIdea.blockId}`,
+                settings: selectedWidgetConfig
+              })
+            });
+
+            const configResult = await configResponse.json();
+            if (configResponse.ok && configResult.success) {
+              console.log('✅ App block settings configured successfully!', {
+                sectionKey: configResult.sectionKey,
+                blockId: configResult.blockId,
+                settingsApplied: configResult.settingsApplied
+              });
+            } else {
+              console.error('❌ Failed to configure app block settings:', configResult.error);
+              // Don't fail the whole process, just log the error
+            }
+          } catch (configError) {
+            console.error('❌ Error configuring app block settings:', configError);
+            // Don't fail the whole process
+          }
+        }
         
         creationResult = { success: true, variantName, newFilename: result.newFilename };
       } else {
