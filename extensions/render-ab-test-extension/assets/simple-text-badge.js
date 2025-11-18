@@ -1,6 +1,8 @@
 // Simple Text Badge Widget JavaScript
+console.log('🚀 simple-text-badge.js file loaded!');
 (function() {
   'use strict';
+  console.log('🚀 simple-text-badge.js IIFE executing...');
 
   var CONFIG_PARAM = 'ab_widget_config';
   var WIDGET_TYPE = 'simple-text-badge';
