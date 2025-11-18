@@ -31,24 +31,61 @@ export const action = async ({ request }) => {
     const cleanThemeId = themeId.replace('gid://shopify/OnlineStoreTheme/', '');
     console.log(`🔧 Using theme ID: ${cleanThemeId}`);
 
-    // Retry logic - sometimes the file isn't immediately available
-    let assetResponse;
+    // Retry logic - Use GraphQL instead of REST for consistency
+    let fileContent;
     let attempts = 0;
     const maxAttempts = 3;
     
     while (attempts < maxAttempts) {
       attempts++;
-      console.log(`📖 Attempt ${attempts}/${maxAttempts} to read template asset`);
+      console.log(`📖 Attempt ${attempts}/${maxAttempts} to read template via GraphQL`);
       
       try {
-        assetResponse = await admin.rest.get({
-          path: `themes/${cleanThemeId}/assets`,
-          query: { "asset[key]": assetKey },
+        const fileRes = await admin.graphql(
+          `query getFile($themeId: ID!, $filename: String!) {
+            theme(id: $themeId) {
+              files(filenames: [$filename]) {
+                nodes {
+                  filename
+                  body { 
+                    ... on OnlineStoreThemeFileBodyText { 
+                      content 
+                    } 
+                  }
+                }
+              }
+            }
+          }`,
+          { 
+            variables: { 
+              themeId: themeId, // Use the full GID
+              filename: assetKey 
+            } 
+          }
+        );
+
+        const fileJson = await fileRes.json();
+        console.log(`📋 GraphQL response (attempt ${attempts}):`, {
+          hasData: !!fileJson.data,
+          hasTheme: !!fileJson.data?.theme,
+          filesCount: fileJson.data?.theme?.files?.nodes?.length || 0,
+          errors: fileJson.errors
         });
 
-        if (assetResponse && assetResponse.body && assetResponse.body.asset) {
-          console.log('✅ Template asset found!');
-          break;
+        if (fileJson.errors) {
+          console.error('⚠️ GraphQL errors:', fileJson.errors);
+        } else if (fileJson.data?.theme?.files?.nodes?.length > 0) {
+          const fileNode = fileJson.data.theme.files.nodes[0];
+          fileContent = fileNode?.body?.content;
+          
+          if (fileContent) {
+            console.log('✅ Template file found via GraphQL!');
+            break;
+          } else {
+            console.log('⚠️ File found but has no content');
+          }
+        } else {
+          console.log('⚠️ File not found in theme');
         }
       } catch (error) {
         console.log(`⚠️ Attempt ${attempts} failed:`, error.message);
@@ -60,22 +97,22 @@ export const action = async ({ request }) => {
       }
     }
 
-    if (!assetResponse || !assetResponse.body || !assetResponse.body.asset) {
-      console.error('❌ Failed to read template asset after all retries');
+    if (!fileContent) {
+      console.error('❌ Failed to read template file after all retries');
       return json({ 
         error: "Failed to read template file after multiple attempts",
         assetKey,
+        themeId,
         attempts
       }, { status: 500 });
     }
 
-    const asset = assetResponse.body.asset;
-    console.log('✅ Template asset read successfully');
+    console.log('✅ Template file read successfully via GraphQL');
 
     // Step 2: Parse the JSON
     let templateData;
     try {
-      templateData = JSON.parse(asset.value);
+      templateData = JSON.parse(fileContent);
       console.log('✅ Template JSON parsed, sections:', Object.keys(templateData.sections || {}));
     } catch (parseError) {
       console.error('❌ Failed to parse template JSON:', parseError);
@@ -142,27 +179,66 @@ export const action = async ({ request }) => {
       settingsApplied: Object.keys(settings || {})
     });
 
-    // Step 5: Write the updated JSON back to the theme
+    // Step 5: Write the updated JSON back to the theme using GraphQL
     const updatedJson = JSON.stringify(templateData, null, 2);
     
-    console.log(`💾 Writing updated template back to ${assetKey}`);
+    console.log(`💾 Writing updated template back to ${assetKey} via GraphQL`);
 
-    const updateResponse = await admin.rest.put({
-      path: `themes/${cleanThemeId}/assets`,
-      data: {
-        asset: {
-          key: assetKey,
-          value: updatedJson
+    const upsertMutation = `
+      mutation themeFilesUpsert($themeId: ID!, $files: [OnlineStoreThemeFilesUpsertFileInput!]!) {
+        themeFilesUpsert(themeId: $themeId, files: $files) {
+          upsertedThemeFiles {
+            filename
+          }
+          userErrors {
+            field
+            message
+          }
         }
       }
+    `;
+
+    const upsertVariables = {
+      themeId: themeId,
+      files: [
+        {
+          filename: assetKey,
+          body: {
+            type: "TEXT",
+            value: updatedJson
+          }
+        }
+      ]
+    };
+
+    const upsertResponse = await admin.graphql(upsertMutation, {
+      variables: upsertVariables
     });
 
-    if (!updateResponse || !updateResponse.body || !updateResponse.body.asset) {
-      console.error('❌ Failed to write updated template');
+    const upsertJson = await upsertResponse.json();
+    console.log('📋 GraphQL upsert response:', {
+      hasData: !!upsertJson.data,
+      upsertedFiles: upsertJson.data?.themeFilesUpsert?.upsertedThemeFiles?.length || 0,
+      errors: upsertJson.errors,
+      userErrors: upsertJson.data?.themeFilesUpsert?.userErrors
+    });
+
+    if (upsertJson.errors) {
+      console.error('❌ GraphQL upsert errors:', upsertJson.errors);
+      return json({ error: `GraphQL error: ${upsertJson.errors[0]?.message}` }, { status: 500 });
+    }
+
+    if (upsertJson.data?.themeFilesUpsert?.userErrors?.length > 0) {
+      console.error('❌ Theme upsert user errors:', upsertJson.data.themeFilesUpsert.userErrors);
+      return json({ error: `Theme upsert error: ${upsertJson.data.themeFilesUpsert.userErrors[0]?.message}` }, { status: 500 });
+    }
+
+    if (!upsertJson.data?.themeFilesUpsert?.upsertedThemeFiles?.length) {
+      console.error('❌ No files were upserted');
       return json({ error: "Failed to update template file" }, { status: 500 });
     }
 
-    console.log('✅ Template updated successfully!');
+    console.log('✅ Template updated successfully via GraphQL!');
 
     return json({
       success: true,

@@ -1353,8 +1353,8 @@ export default function Dashboard() {
 
           try {
             // Give Shopify a moment to commit the file
-            console.log('⏳ Waiting 1 second for template to be available...');
-            await new Promise(resolve => setTimeout(resolve, 1000));
+            console.log('⏳ Waiting 3 seconds for template to be available...');
+            await new Promise(resolve => setTimeout(resolve, 3000));
 
             const configResponse = await fetch('/api/configure-app-block-settings', {
               method: 'POST',
