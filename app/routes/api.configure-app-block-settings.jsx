@@ -9,11 +9,12 @@ export const action = async ({ request }) => {
   }
 
   try {
-    const { themeId, templateName, blockType, settings } = await request.json();
+    const { themeId, templateName, templateFilename, blockType, settings } = await request.json();
 
     console.log('📝 Configure App Block Settings Request:', {
       themeId,
       templateName,
+      templateFilename,
       blockType,
       settingsKeys: Object.keys(settings || {})
     });
@@ -22,18 +23,50 @@ export const action = async ({ request }) => {
       return json({ error: "Missing required parameters" }, { status: 400 });
     }
 
-    // Step 1: Read the template JSON file using the Asset REST API
-    const assetKey = `templates/${templateName}.json`;
+    // Determine the asset key - use templateFilename if provided, otherwise default to .json
+    const assetKey = templateFilename || `templates/${templateName}.json`;
     console.log(`📖 Reading template asset: ${assetKey}`);
 
-    const assetResponse = await admin.rest.get({
-      path: `themes/${themeId}/assets`,
-      query: { "asset[key]": assetKey },
-    });
+    // Strip the 'gid://shopify/OnlineStoreTheme/' prefix if present
+    const cleanThemeId = themeId.replace('gid://shopify/OnlineStoreTheme/', '');
+    console.log(`🔧 Using theme ID: ${cleanThemeId}`);
+
+    // Retry logic - sometimes the file isn't immediately available
+    let assetResponse;
+    let attempts = 0;
+    const maxAttempts = 3;
+    
+    while (attempts < maxAttempts) {
+      attempts++;
+      console.log(`📖 Attempt ${attempts}/${maxAttempts} to read template asset`);
+      
+      try {
+        assetResponse = await admin.rest.get({
+          path: `themes/${cleanThemeId}/assets`,
+          query: { "asset[key]": assetKey },
+        });
+
+        if (assetResponse && assetResponse.body && assetResponse.body.asset) {
+          console.log('✅ Template asset found!');
+          break;
+        }
+      } catch (error) {
+        console.log(`⚠️ Attempt ${attempts} failed:`, error.message);
+      }
+
+      if (attempts < maxAttempts) {
+        console.log('⏳ Waiting 2 seconds before retry...');
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+    }
 
     if (!assetResponse || !assetResponse.body || !assetResponse.body.asset) {
-      console.error('❌ Failed to read template asset');
-      return json({ error: "Failed to read template file" }, { status: 500 });
+      console.error('❌ Failed to read template asset after all retries');
+      return json({ 
+        error: "Failed to read template file after multiple attempts",
+        assetKey,
+        attempts
+      }, { status: 500 });
     }
 
     const asset = assetResponse.body.asset;
@@ -115,7 +148,7 @@ export const action = async ({ request }) => {
     console.log(`💾 Writing updated template back to ${assetKey}`);
 
     const updateResponse = await admin.rest.put({
-      path: `themes/${themeId}/assets`,
+      path: `themes/${cleanThemeId}/assets`,
       data: {
         asset: {
           key: assetKey,

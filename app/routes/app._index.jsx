@@ -1347,16 +1347,22 @@ export default function Dashboard() {
         if (selectedWidgetConfig && Object.keys(selectedWidgetConfig).length > 0 && selectedIdea?.blockId && selectedIdea?.appExtensionId) {
           console.log('⚙️ Configuring app block settings for widget tweak:', {
             blockType: `${selectedIdea.appExtensionId}/${selectedIdea.blockId}`,
+            templateFilename: result.newFilename,
             settings: selectedWidgetConfig
           });
 
           try {
+            // Give Shopify a moment to commit the file
+            console.log('⏳ Waiting 1 second for template to be available...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+
             const configResponse = await fetch('/api/configure-app-block-settings', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({
                 themeId: mainTheme.id,
                 templateName: variantName,
+                templateFilename: result.newFilename, // Pass the full filename with extension
                 blockType: `${selectedIdea.appExtensionId}/${selectedIdea.blockId}`,
                 settings: selectedWidgetConfig
               })
