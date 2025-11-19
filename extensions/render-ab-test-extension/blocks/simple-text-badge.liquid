@@ -4,15 +4,21 @@
 {%- endcomment -%}
 
 <div class="simple-text-badge-widget" 
+     {{ block.shopify_attributes }}
      data-badge-id="badge-{{ block.id }}"
      data-block-id="{{ block.id }}"
+    data-enable-step-2="{{ block.settings.enable_step_2 | default: false }}"
     data-header-text="{{ block.settings.header_text | escape }}"
     data-body-text="{{ block.settings.body_text | escape }}"
     data-header-font="{{ block.settings.header_font | default: 'system' }}"
     data-header-font-size="{{ block.settings.header_font_size | default: 24 }}"
+    data-header-underline="{{ block.settings.header_underline | default: false }}"
     data-body-font="{{ block.settings.body_font | default: 'system' }}"
     data-body-font-size="{{ block.settings.body_font_size | default: 16 }}"
-     data-text-color="{{ block.settings.text_color | default: '#1a5f5f' }}"
+    data-body-underline="{{ block.settings.body_underline | default: false }}"
+    data-header-body-spacing="{{ block.settings.header_body_spacing | default: 6 }}"
+    data-icon-text-spacing="{{ block.settings.icon_text_spacing | default: 20 }}"
+    data-text-color="{{ block.settings.text_color | default: '#1a5f5f' }}"
      data-header-color="{{ block.settings.header_color | default: '#0f172a' }}"
      data-background-color="{{ block.settings.background_color | default: '#f5f5f0' }}"
      data-border-color="{{ block.settings.border_color | default: '#d4d4d8' }}"
@@ -50,8 +56,15 @@
   "javascript": "simple-text-badge.js",
   "settings": [
     {
+      "type": "checkbox",
+      "id": "enable_step_2",
+      "label": "Enable Step 2",
+      "default": false,
+      "info": "When enabled, changes text to 'Free Shipping', icon to trophy, and background to red"
+    },
+    {
       "type": "header",
-      "content": "Headline"
+      "content": "Text Content"
     },
     {
       "type": "richtext",
@@ -102,25 +115,9 @@
     },
     {
       "type": "checkbox",
-      "id": "header_bold",
-      "label": "Bold",
-      "default": true
-    },
-    {
-      "type": "checkbox",
-      "id": "header_italic",
-      "label": "Italic",
-      "default": false
-    },
-    {
-      "type": "checkbox",
       "id": "header_underline",
       "label": "Underline",
       "default": false
-    },
-    {
-      "type": "header",
-      "content": "Body text"
     },
     {
       "type": "richtext",
@@ -170,8 +167,34 @@
       "default": 16
     },
     {
+      "type": "checkbox",
+      "id": "body_underline",
+      "label": "Underline",
+      "default": false
+    },
+    {
+      "type": "range",
+      "id": "header_body_spacing",
+      "label": "Header to body spacing (px)",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "default": 6,
+      "info": "Vertical space between header and body text"
+    },
+    {
+      "type": "range",
+      "id": "icon_text_spacing",
+      "label": "Icon to text spacing (px)",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "default": 20,
+      "info": "Horizontal space between icon and text content"
+    },
+    {
       "type": "header",
-      "content": "Inner padding"
+      "content": "Padding"
     },
     {
       "type": "range",
@@ -210,13 +233,9 @@
       "default": 12
     },
     {
-      "type": "header",
-      "content": "Outer padding"
-    },
-    {
       "type": "range",
       "id": "outer_padding_horizontal",
-      "label": "Horizontal padding (px)",
+      "label": "Outer horizontal padding (px)",
       "min": 0,
       "max": 100,
       "step": 1,
@@ -225,7 +244,7 @@
     {
       "type": "range",
       "id": "outer_padding_vertical",
-      "label": "Vertical padding (px)",
+      "label": "Outer vertical padding (px)",
       "min": 0,
       "max": 100,
       "step": 1,
@@ -234,7 +253,7 @@
     {
       "type": "range",
       "id": "outer_padding_horizontal_mobile",
-      "label": "Mobile horizontal padding (px)",
+      "label": "Outer mobile horizontal padding (px)",
       "min": 0,
       "max": 100,
       "step": 1,
@@ -243,7 +262,7 @@
     {
       "type": "range",
       "id": "outer_padding_vertical_mobile",
-      "label": "Mobile vertical padding (px)",
+      "label": "Outer mobile vertical padding (px)",
       "min": 0,
       "max": 100,
       "step": 1,
@@ -258,10 +277,10 @@
       "id": "icon_choice",
       "label": "Icon selector",
       "options": [
-        { "value": "none", "label": "None (no icon)" },
-        { "value": "star", "label": "⭐ Star" },
-        { "value": "trophy", "label": "🏆 Trophy" },
-        { "value": "gift", "label": "🎁 Gift" }
+        { "value": "none", "label": "None (no icon)", "group": "General" },
+        { "value": "star", "label": "⭐ Star", "group": "Star Icons" },
+        { "value": "trophy", "label": "🏆 Trophy", "group": "Trophy Icons" },
+        { "value": "gift", "label": "🎁 Gift", "group": "Gift Icons" }
       ],
       "default": "star",
       "info": "Choose a built-in icon or select 'None' to remove. Upload a custom icon below to override."

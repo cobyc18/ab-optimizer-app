@@ -11,7 +11,7 @@
 .simple-text-badge {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: var(--badge-icon-text-spacing, 20px);
   width: 100%;
   box-sizing: border-box;
   padding: var(--badge-inner-padding-y, 16px) var(--badge-inner-padding-x, 24px);
@@ -74,7 +74,7 @@
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--badge-header-body-spacing, 6px);
   min-width: 0;
 }
 
@@ -84,17 +84,14 @@
   color: var(--badge-header-color, #0f172a);
   font-size: var(--badge-header-font-size, 24px);
   font-family: var(--badge-header-font-family, inherit);
-  font-weight: var(--badge-header-font-weight, 500);
-  font-style: var(--badge-header-font-style, normal);
+  font-weight: 500;
+  font-style: normal;
   text-decoration: var(--badge-header-text-decoration, none);
 }
 
 .badge-heading * {
   color: inherit !important;
   font-family: inherit !important;
-  font-weight: inherit !important;
-  font-style: inherit !important;
-  text-decoration: inherit !important;
   margin: 0 !important;
   padding: 0 !important;
 }
@@ -108,23 +105,35 @@
 .badge-heading h6 { font-size: 0.67em !important; }
 .badge-heading p { font-size: 1em !important; }
 
+/* Allow richtext formatting (bold, italic, underline) to work */
+.badge-heading strong,
+.badge-heading b {
+  font-weight: bold !important;
+}
+
+.badge-heading em,
+.badge-heading i {
+  font-style: italic !important;
+}
+
+.badge-heading u {
+  text-decoration: underline !important;
+}
+
 .badge-body {
   margin: 0;
   line-height: 1.5;
   color: var(--badge-text-color, #1a5f5f);
   font-size: var(--badge-body-font-size, 16px);
   font-family: var(--badge-body-font-family, inherit);
-  font-weight: var(--badge-body-font-weight, 400);
-  font-style: var(--badge-body-font-style, normal);
+  font-weight: 400;
+  font-style: normal;
   text-decoration: var(--badge-body-text-decoration, none);
 }
 
 .badge-body * {
   color: inherit !important;
   font-family: inherit !important;
-  font-weight: inherit !important;
-  font-style: inherit !important;
-  text-decoration: inherit !important;
   margin: 0 !important;
   padding: 0 !important;
 }
@@ -137,6 +146,21 @@
 .badge-body h5 { font-size: 0.83em !important; }
 .badge-body h6 { font-size: 0.67em !important; }
 .badge-body p { font-size: 1em !important; }
+
+/* Allow richtext formatting (bold, italic, underline) to work */
+.badge-body strong,
+.badge-body b {
+  font-weight: bold !important;
+}
+
+.badge-body em,
+.badge-body i {
+  font-style: italic !important;
+}
+
+.badge-body u {
+  text-decoration: underline !important;
+}
 
 .badge-heading a,
 .badge-body a {
@@ -165,7 +189,7 @@
       var(--badge-inner-padding-x-mobile, var(--badge-inner-padding-x, 24px));
     flex-direction: row;
     align-items: center;
-    gap: 16px;
+    gap: var(--badge-icon-text-spacing, 20px);
   }
 
   .badge-icon-container {

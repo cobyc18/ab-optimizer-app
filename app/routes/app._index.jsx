@@ -739,7 +739,13 @@ export default function Dashboard() {
         ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
         : '';
 
-      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}`;
+      // Add step parameter if a widget tweak is selected
+      const stepNumber = selectedIdea?.blockId && selectedWidgetTweakId
+        ? getStepNumberFromTweak(selectedIdea.blockId, selectedWidgetTweakId)
+        : null;
+      const stepParam = stepNumber ? `&step=${stepNumber}` : '';
+
+      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${stepParam}`;
 
       console.log('🧭 Theme Editor Debug Params:', {
         shop,
@@ -970,6 +976,16 @@ export default function Dashboard() {
     const tweaks = getWidgetTweaks(widgetType);
     const tweak = tweaks.find(t => t.id === tweakId);
     return tweak ? tweak.title : null;
+  };
+
+  // Calculate step number from tweak ID (first tweak = step 2, second = step 3, etc.)
+  const getStepNumberFromTweak = (widgetType, tweakId) => {
+    if (!widgetType || !tweakId) return null;
+    const tweaks = getWidgetTweaks(widgetType);
+    const tweakIndex = tweaks.findIndex(t => t.id === tweakId);
+    if (tweakIndex === -1) return null;
+    // Step number = index + 2 (first tweak is step 2)
+    return tweakIndex + 2;
   };
 
   const applyWidgetIdeaSelection = (idea, configOverride = null, tweakId = null) => {

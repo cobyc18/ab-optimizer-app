@@ -141,6 +141,10 @@
     container.style.setProperty('--badge-icon-size', settings.iconSize + 'px');
     container.style.setProperty('--badge-icon-size-mobile', settings.iconSizeMobile + 'px');
     
+    // Spacing
+    container.style.setProperty('--badge-header-body-spacing', settings.headerBodySpacing + 'px');
+    container.style.setProperty('--badge-icon-text-spacing', settings.iconTextSpacing + 'px');
+    
     // Blink intensity (0-100 scale)
     // Calculate minimum opacity and scale based on intensity
     var intensity = settings.iconBlinkIntensity / 100; // 0 to 1
@@ -153,15 +157,11 @@
     container.style.setProperty('--badge-header-color', settings.headerColor);
     container.style.setProperty('--badge-header-font-size', settings.headerFontSize + 'px');
     container.style.setProperty('--badge-header-font-family', FONT_MAP[settings.headerFont] || 'inherit');
-    container.style.setProperty('--badge-header-font-weight', settings.headerBold ? '700' : '500');
-    container.style.setProperty('--badge-header-font-style', settings.headerItalic ? 'italic' : 'normal');
     container.style.setProperty('--badge-header-text-decoration', settings.headerUnderline ? 'underline' : 'none');
     
     // Body typography
     container.style.setProperty('--badge-body-font-size', settings.bodyFontSize + 'px');
     container.style.setProperty('--badge-body-font-family', FONT_MAP[settings.bodyFont] || 'inherit');
-    container.style.setProperty('--badge-body-font-weight', settings.bodyBold ? '600' : '400');
-    container.style.setProperty('--badge-body-font-style', settings.bodyItalic ? 'italic' : 'normal');
     container.style.setProperty('--badge-body-text-decoration', settings.bodyUnderline ? 'underline' : 'none');
 
     var dropShadow = settings.dropShadow > 0
@@ -181,19 +181,17 @@
       headerText: formatRichText(dataset.headerText),
       headerFont: dataset.headerFont || 'system',
       headerFontSize: parseNumber(dataset.headerFontSize, 24),
-      headerBold: parseBoolean(dataset.headerBold, true),
-      headerItalic: parseBoolean(dataset.headerItalic, false),
       headerUnderline: parseBoolean(dataset.headerUnderline, false),
       headerColor: dataset.headerColor || '#0f172a',
       bodyText: formatRichText(dataset.bodyText),
       bodyFont: dataset.bodyFont || 'system',
       bodyFontSize: parseNumber(dataset.bodyFontSize, 16),
-      bodyBold: parseBoolean(dataset.bodyBold, false),
-      bodyItalic: parseBoolean(dataset.bodyItalic, false),
       bodyUnderline: parseBoolean(dataset.bodyUnderline, false),
       textColor: dataset.textColor || '#1a5f5f',
       backgroundColor: dataset.backgroundColor || '#f5f5f0',
       borderColor: dataset.borderColor || '#d4d4d8',
+      headerBodySpacing: parseNumber(dataset.headerBodySpacing, 6),
+      iconTextSpacing: parseNumber(dataset.iconTextSpacing, 20),
       innerPaddingX: parseNumber(dataset.innerPaddingX, 24),
       innerPaddingY: parseNumber(dataset.innerPaddingY, 16),
       innerPaddingXMobile: parseNumber(dataset.innerPaddingXMobile, 16),
@@ -215,8 +213,34 @@
       dropShadow: parseNumber(dataset.dropShadow, 10)
     };
 
+    // Apply Step 2 overrides if enabled
+    // Use getAttribute because dataset API can be unreliable with numbers in attribute names
+    var enableStep2Raw = container.getAttribute('data-enable-step-2') || dataset.enableStep2;
+    var enableStep2 = parseBoolean(enableStep2Raw, false);
+    console.log('Simple Text Badge Debug:', {
+      rawValue: enableStep2Raw,
+      parsed: enableStep2,
+      fromGetAttribute: container.getAttribute('data-enable-step-2'),
+      fromDataset: dataset.enableStep2
+    });
+    if (enableStep2) {
+      console.log('Step 2 is ENABLED - applying overrides');
+      base.headerText = '<p>Free Shipping</p>';
+      base.iconChoice = 'trophy';
+      base.backgroundColor = '#ff0000';
+    } else {
+      console.log('Step 2 is DISABLED - using default settings');
+    }
+
     var normalizedOverrides = normalizeOverrides(overrides);
     Object.assign(base, normalizedOverrides);
+
+    console.log('Final settings after overrides:', {
+      headerText: base.headerText,
+      iconChoice: base.iconChoice,
+      backgroundColor: base.backgroundColor,
+      hasExternalOverrides: Object.keys(normalizedOverrides).length > 0
+    });
 
     return base;
   }
@@ -342,10 +366,108 @@
     return null;
   }
 
+  // Show step instruction banner in theme editor
+  function showStepBanner() {
+    // Only show in theme editor (check for admin.shopify.com or theme editor indicators)
+    var isThemeEditor = window.location.hostname.includes('admin.shopify.com') || 
+                        document.querySelector('[data-shopify-editor-block]') ||
+                        window.Shopify?.designMode;
+    
+    if (!isThemeEditor) return;
+
+    // Check for step parameter in URL
+    var params = new URLSearchParams(window.location.search || '');
+    var stepNumber = params.get('step');
+    
+    if (!stepNumber) return;
+
+    // Remove any existing banner
+    var existingBanner = document.getElementById('ab-optimizer-step-banner');
+    if (existingBanner) {
+      existingBanner.remove();
+    }
+
+    // Create banner element
+    var banner = document.createElement('div');
+    banner.id = 'ab-optimizer-step-banner';
+    banner.style.cssText = [
+      'position: fixed',
+      'top: 0',
+      'left: 0',
+      'right: 0',
+      'z-index: 999999',
+      'background: linear-gradient(135deg, #0038ff 0%, #97cdff 100%)',
+      'color: #ffffff',
+      'padding: 16px 24px',
+      'text-align: center',
+      'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+      'font-size: 16px',
+      'font-weight: 600',
+      'box-shadow: 0 4px 12px rgba(0, 56, 255, 0.3)',
+      'display: flex',
+      'align-items: center',
+      'justify-content: center',
+      'gap: 12px'
+    ].join('; ');
+
+    var message = document.createElement('span');
+    message.textContent = '🎯 Please enable Step ' + stepNumber + ' in the widget settings to apply this tweak';
+    banner.appendChild(message);
+
+    var closeButton = document.createElement('button');
+    closeButton.textContent = '✕';
+    closeButton.style.cssText = [
+      'background: rgba(255, 255, 255, 0.2)',
+      'border: none',
+      'color: #ffffff',
+      'width: 28px',
+      'height: 28px',
+      'border-radius: 50%',
+      'cursor: pointer',
+      'font-size: 18px',
+      'line-height: 1',
+      'padding: 0',
+      'margin-left: 12px',
+      'transition: background 0.2s'
+    ].join('; ');
+    closeButton.addEventListener('click', function() {
+      banner.remove();
+    });
+    closeButton.addEventListener('mouseenter', function() {
+      this.style.background = 'rgba(255, 255, 255, 0.3)';
+    });
+    closeButton.addEventListener('mouseleave', function() {
+      this.style.background = 'rgba(255, 255, 255, 0.2)';
+    });
+    banner.appendChild(closeButton);
+
+    // Insert banner at the top of the body
+    document.body.insertBefore(banner, document.body.firstChild);
+
+    // Add padding to body to prevent content from being hidden under banner
+    if (!document.body.style.paddingTop) {
+      document.body.style.paddingTop = '60px';
+    }
+  }
+
+  // Theme editor event listeners
+  document.addEventListener('shopify:section:load', function(event) {
+    refreshBadges();
+    showStepBanner();
+  });
+
+  document.addEventListener('shopify:block:select', function(event) {
+    refreshBadges();
+  });
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', function() {
+      init();
+      showStepBanner();
+    });
   } else {
     init();
+    showStepBanner();
   }
 })();
 
