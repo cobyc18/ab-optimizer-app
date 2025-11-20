@@ -6,20 +6,23 @@ function stripJsonComments(input) {
   let inString = false;
   let stringChar = '';
   let escapeNext = false;
+  let i = 0;
 
-  for (let i = 0; i < input.length; i++) {
+  while (i < input.length) {
     const char = input[i];
     const nextChar = input[i + 1];
 
     if (escapeNext) {
       result += char;
       escapeNext = false;
+      i += 1;
       continue;
     }
 
     if (char === '\\') {
       result += char;
       escapeNext = true;
+      i += 1;
       continue;
     }
 
@@ -29,6 +32,7 @@ function stripJsonComments(input) {
         stringChar = '';
       }
       result += char;
+      i += 1;
       continue;
     }
 
@@ -36,34 +40,44 @@ function stripJsonComments(input) {
       inString = true;
       stringChar = char;
       result += char;
+      i += 1;
       continue;
     }
 
+    // Handle single-line comments (//)
     if (char === '/' && nextChar === '/') {
-      i += 1;
-      while (i + 1 < input.length && input[i + 1] !== '\n' && input[i + 1] !== '\r') {
+      // Skip until end of line
+      while (i < input.length && input[i] !== '\n' && input[i] !== '\r') {
+        i += 1;
+      }
+      // Include the newline character in the output
+      if (i < input.length) {
+        result += input[i];
         i += 1;
       }
       continue;
     }
 
+    // Handle multi-line comments (/* ... */)
     if (char === '/' && nextChar === '*') {
-      i += 1;
-      while (i + 1 < input.length) {
-        if (input[i + 1] === '*' && input[i + 2] === '/') {
-          i += 2;
+      // Skip the opening /* (both characters)
+      i += 2;
+      // Look for closing */
+      while (i < input.length) {
+        if (input[i] === '*' && i + 1 < input.length && input[i + 1] === '/') {
+          i += 2; // Skip the closing */ (both characters)
           break;
         }
         i += 1;
       }
-      i -= 1;
       continue;
     }
 
     result += char;
+    i += 1;
   }
 
-  return result;
+  return result.trim();
 }
 
 function escapeControlCharacters(input) {
