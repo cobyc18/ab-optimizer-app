@@ -211,7 +211,12 @@ export const action = async ({ request }) => {
     console.log('📄 Template file retrieved successfully, type:', templateFilename.endsWith('.json') ? 'JSON' : 'Liquid');
 
     let updatedContent;
-    const appBlockType = `@shopify/theme-app-extension/${blockId}`;
+    // For JSON templates, app blocks use the format: shopify://apps/{api_key}/blocks/{block_handle}/{unique_id}
+    // The appExtensionId is the same as the API key (client_id from shopify.app.toml)
+    const appApiKey = appExtensionId; // This is the API key (client_id)
+    const blockHandle = blockId; // e.g., "simple-text-badge"
+    const uniqueBlockId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+    const appBlockType = `shopify://apps/${appApiKey}/blocks/${blockHandle}/${uniqueBlockId}`;
     const appBlockId = `${appExtensionId}/${blockId}`;
     const appliedBlockSettings = blockSettings && typeof blockSettings === 'object' ? blockSettings : {};
 
