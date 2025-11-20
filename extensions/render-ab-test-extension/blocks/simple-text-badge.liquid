@@ -1,7 +1,7 @@
 <div class="simple-text-badge-widget" 
      {{ block.shopify_attributes }}
-     data-header-text="{{ block.settings.header_text | escape }}"
-     data-body-text="{{ block.settings.body_text | escape }}"
+     data-header-text="{{ block.settings.header_text | default: '' | escape }}"
+     data-body-text="{{ block.settings.body_text | default: '' | escape }}"
      data-text-color="{{ block.settings.text_color | default: '#1a5f5f' }}"
      data-header-color="{{ block.settings.header_color | default: '#0f172a' }}"
      data-background-color="{{ block.settings.background_color | default: '#f5f5f0' }}"

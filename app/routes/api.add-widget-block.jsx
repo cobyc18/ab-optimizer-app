@@ -332,7 +332,9 @@ export const action = async ({ request }) => {
           appBlockType,
           mainSectionKey,
           updatedBlockOrder: mainSection.block_order,
-          updatedBlocks: Object.keys(mainSection.blocks)
+          updatedBlocks: Object.keys(mainSection.blocks),
+          blockSettings: appliedBlockSettings,
+          settingsKeys: Object.keys(appliedBlockSettings)
         });
 
       } catch (parseError) {

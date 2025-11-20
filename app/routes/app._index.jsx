@@ -1323,11 +1323,29 @@ export default function Dashboard() {
         if (selectedIdea?.blockId === 'simple-text-badge' && selectedIdea?.appExtensionId) {
           try {
             const appExtensionId = selectedIdea.appExtensionId;
-            const blockSettings = {
-              header_text: widgetSettings.headerText,
-              body_text: widgetSettings.bodyText,
-              text_color: widgetSettings.textColor
+            // Wrap text in <p> tags if not already wrapped, to match richtext format
+            const formatText = (text) => {
+              if (!text || text.trim() === '') return '';
+              // If text already contains HTML tags, return as is
+              if (text.includes('<') && text.includes('>')) return text;
+              // Otherwise wrap in <p> tags
+              return `<p>${text}</p>`;
             };
+            
+            const blockSettings = {
+              header_text: formatText(widgetSettings.headerText),
+              body_text: formatText(widgetSettings.bodyText),
+              text_color: widgetSettings.textColor || '#1a5f5f'
+            };
+            
+            console.log('🔧 Widget settings being sent:', {
+              original: {
+                headerText: widgetSettings.headerText,
+                bodyText: widgetSettings.bodyText,
+                textColor: widgetSettings.textColor
+              },
+              formatted: blockSettings
+            });
 
             console.log('🔧 Adding widget block with settings:', {
               templateFilename: result.newFilename,
