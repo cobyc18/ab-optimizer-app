@@ -459,11 +459,11 @@ export const action = async ({ request }) => {
       }
     }
 
-    // 2. Update the template file using themeFileUpdate mutation
+    // 2. Update the template file using themeFilesUpsert mutation
     const updateMutation = `
-      mutation themeFileUpdate($themeId: ID!, $files: [OnlineStoreThemeFileInput!]!) {
-        themeFileUpdate(themeId: $themeId, files: $files) {
-          updatedThemeFiles {
+      mutation themeFilesUpsert($themeId: ID!, $files: [OnlineStoreThemeFilesUpsertFileInput!]!) {
+        themeFilesUpsert(themeId: $themeId, files: $files) {
+          upsertedThemeFiles {
             filename
           }
           userErrors {
@@ -479,12 +479,15 @@ export const action = async ({ request }) => {
       files: [
         {
           filename: templateFilename,
-          content: updatedContent
+          body: {
+            type: "TEXT",
+            value: updatedContent
+          }
         }
       ]
     };
 
-    console.log('📝 Updating template file with app block...');
+    console.log('📝 Updating template file with app block using themeFilesUpsert...');
 
     const updateResponse = await admin.graphql(updateMutation, {
       variables: updateVariables
@@ -498,12 +501,12 @@ export const action = async ({ request }) => {
       return json({ error: `GraphQL update error: ${updateJson.errors[0]?.message || 'Unknown error'}` }, { status: 400 });
     }
 
-    if (updateJson.data?.themeFileUpdate?.userErrors?.length > 0) {
-      console.error('❌ Theme update user errors:', updateJson.data.themeFileUpdate.userErrors);
-      return json({ error: `Theme update error: ${updateJson.data.themeFileUpdate.userErrors[0]?.message || 'Unknown error'}` }, { status: 400 });
+    if (updateJson.data?.themeFilesUpsert?.userErrors?.length > 0) {
+      console.error('❌ Theme upsert user errors:', updateJson.data.themeFilesUpsert.userErrors);
+      return json({ error: `Theme update error: ${updateJson.data.themeFilesUpsert.userErrors[0]?.message || 'Unknown error'}` }, { status: 400 });
     }
 
-    const updatedFiles = updateJson.data?.themeFileUpdate?.updatedThemeFiles || [];
+    const updatedFiles = updateJson.data?.themeFilesUpsert?.upsertedThemeFiles || [];
     console.log('✅ Template updated successfully with app block:', {
       updatedFiles: updatedFiles.map(f => f.filename),
       templateFilename,
