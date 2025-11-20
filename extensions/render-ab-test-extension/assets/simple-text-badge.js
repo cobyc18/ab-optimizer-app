@@ -366,94 +366,9 @@
     return null;
   }
 
-  // Show step instruction banner in theme editor
-  function showStepBanner() {
-    // Only show in theme editor (check for admin.shopify.com or theme editor indicators)
-    var isThemeEditor = window.location.hostname.includes('admin.shopify.com') || 
-                        document.querySelector('[data-shopify-editor-block]') ||
-                        window.Shopify?.designMode;
-    
-    if (!isThemeEditor) return;
-
-    // Check for step parameter in URL
-    var params = new URLSearchParams(window.location.search || '');
-    var stepNumber = params.get('step');
-    
-    if (!stepNumber) return;
-
-    // Remove any existing banner
-    var existingBanner = document.getElementById('ab-optimizer-step-banner');
-    if (existingBanner) {
-      existingBanner.remove();
-    }
-
-    // Create banner element
-    var banner = document.createElement('div');
-    banner.id = 'ab-optimizer-step-banner';
-    banner.style.cssText = [
-      'position: fixed',
-      'top: 0',
-      'left: 0',
-      'right: 0',
-      'z-index: 999999',
-      'background: linear-gradient(135deg, #0038ff 0%, #97cdff 100%)',
-      'color: #ffffff',
-      'padding: 16px 24px',
-      'text-align: center',
-      'font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
-      'font-size: 16px',
-      'font-weight: 600',
-      'box-shadow: 0 4px 12px rgba(0, 56, 255, 0.3)',
-      'display: flex',
-      'align-items: center',
-      'justify-content: center',
-      'gap: 12px'
-    ].join('; ');
-
-    var message = document.createElement('span');
-    message.textContent = '🎯 Please enable Step ' + stepNumber + ' in the widget settings to apply this tweak';
-    banner.appendChild(message);
-
-    var closeButton = document.createElement('button');
-    closeButton.textContent = '✕';
-    closeButton.style.cssText = [
-      'background: rgba(255, 255, 255, 0.2)',
-      'border: none',
-      'color: #ffffff',
-      'width: 28px',
-      'height: 28px',
-      'border-radius: 50%',
-      'cursor: pointer',
-      'font-size: 18px',
-      'line-height: 1',
-      'padding: 0',
-      'margin-left: 12px',
-      'transition: background 0.2s'
-    ].join('; ');
-    closeButton.addEventListener('click', function() {
-      banner.remove();
-    });
-    closeButton.addEventListener('mouseenter', function() {
-      this.style.background = 'rgba(255, 255, 255, 0.3)';
-    });
-    closeButton.addEventListener('mouseleave', function() {
-      this.style.background = 'rgba(255, 255, 255, 0.2)';
-    });
-    banner.appendChild(closeButton);
-
-    // Insert banner at the top of the body
-    document.body.insertBefore(banner, document.body.firstChild);
-
-    // Add padding to body to prevent content from being hidden under banner
-    if (!document.body.style.paddingTop) {
-      document.body.style.paddingTop = '60px';
-    }
-  }
-
   // Theme editor event listeners
   document.addEventListener('shopify:section:load', function(event) {
     refreshBadges();
-    showStepBanner();
   });
 
   document.addEventListener('shopify:block:select', function(event) {
@@ -461,13 +376,9 @@
   });
 
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-      init();
-      showStepBanner();
-    });
+    document.addEventListener('DOMContentLoaded', init);
   } else {
     init();
-    showStepBanner();
   }
 })();
 

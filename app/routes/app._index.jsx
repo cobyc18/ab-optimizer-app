@@ -647,6 +647,13 @@ export default function Dashboard() {
   const [isLaunchingTest, setIsLaunchingTest] = useState(false);
   const [wizardLaunchError, setWizardLaunchError] = useState(null);
   const [wizardLaunchSuccess, setWizardLaunchSuccess] = useState(null);
+  
+  // Widget settings state (for simple-text-badge)
+  const [widgetSettings, setWidgetSettings] = useState({
+    headerText: '',
+    bodyText: '',
+    textColor: '#000000'
+  });
   const [isVariantTemplateReady, setIsVariantTemplateReady] = useState(false);
   const [isVariantRequestInFlight, setIsVariantRequestInFlight] = useState(false);
   const encodeWidgetConfigPayload = (payload) => {
@@ -739,13 +746,7 @@ export default function Dashboard() {
         ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
         : '';
 
-      // Add step parameter if a widget tweak is selected
-      const stepNumber = selectedIdea?.blockId && selectedWidgetTweakId
-        ? getStepNumberFromTweak(selectedIdea.blockId, selectedWidgetTweakId)
-        : null;
-      const stepParam = stepNumber ? `&step=${stepNumber}` : '';
-
-      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${stepParam}`;
+      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}`;
 
       console.log('🧭 Theme Editor Debug Params:', {
         shop,
@@ -976,16 +977,6 @@ export default function Dashboard() {
     const tweaks = getWidgetTweaks(widgetType);
     const tweak = tweaks.find(t => t.id === tweakId);
     return tweak ? tweak.title : null;
-  };
-
-  // Calculate step number from tweak ID (first tweak = step 2, second = step 3, etc.)
-  const getStepNumberFromTweak = (widgetType, tweakId) => {
-    if (!widgetType || !tweakId) return null;
-    const tweaks = getWidgetTweaks(widgetType);
-    const tweakIndex = tweaks.findIndex(t => t.id === tweakId);
-    if (tweakIndex === -1) return null;
-    // Step number = index + 2 (first tweak is step 2)
-    return tweakIndex + 2;
   };
 
   const applyWidgetIdeaSelection = (idea, configOverride = null, tweakId = null) => {
@@ -1327,6 +1318,48 @@ export default function Dashboard() {
           selectedIdeaUtility: selectedIdea?.utility,
           conditionMet: !!(selectedIdea?.blockId && selectedIdea?.appExtensionId)
         });
+
+        // Add widget block with settings if simple-text-badge is selected
+        if (selectedIdea?.blockId === 'simple-text-badge' && selectedIdea?.appExtensionId) {
+          try {
+            const appExtensionId = selectedIdea.appExtensionId;
+            const blockSettings = {
+              header_text: widgetSettings.headerText,
+              body_text: widgetSettings.bodyText,
+              text_color: widgetSettings.textColor
+            };
+
+            console.log('🔧 Adding widget block with settings:', {
+              templateFilename: result.newFilename,
+              blockId: selectedIdea.blockId,
+              appExtensionId,
+              blockSettings
+            });
+
+            const addBlockResponse = await fetch('/api/add-widget-block', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                templateFilename: result.newFilename,
+                themeId: mainTheme.id,
+                blockId: selectedIdea.blockId,
+                appExtensionId: appExtensionId,
+                blockSettings: blockSettings
+              })
+            });
+
+            const addBlockResult = await addBlockResponse.json();
+            if (addBlockResponse.ok && addBlockResult.success) {
+              console.log('✅ Widget block added with settings:', addBlockResult);
+            } else {
+              console.error('⚠️ Failed to add widget block:', addBlockResult.error);
+              // Don't fail the whole process if widget addition fails
+            }
+          } catch (addBlockError) {
+            console.error('⚠️ Error adding widget block:', addBlockError);
+            // Don't fail the whole process if widget addition fails
+          }
+        }
         
         creationResult = { success: true, variantName, newFilename: result.newFilename };
       } else {
@@ -4005,6 +4038,124 @@ export default function Dashboard() {
                           }}
                         />
                       </div>
+
+                      {/* Widget Settings (only for simple-text-badge) */}
+                      {selectedIdea?.blockId === 'simple-text-badge' && (
+                        <div style={{
+                          padding: '20px',
+                          background: '#F8FAFC',
+                          borderRadius: '12px',
+                          border: '1px solid #E5E7EB'
+                        }}>
+                          <h4 style={{
+                            fontSize: '16px',
+                            fontWeight: '600',
+                            color: '#1F2937',
+                            margin: '0 0 16px 0'
+                          }}>
+                            Widget Settings
+                          </h4>
+                          
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            {/* Header Text */}
+                            <div>
+                              <label style={{
+                                display: 'block',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                color: '#374151',
+                                marginBottom: '8px'
+                              }}>
+                                Header Text
+                              </label>
+                              <input
+                                type="text"
+                                value={widgetSettings.headerText}
+                                onChange={(e) => setWidgetSettings(prev => ({ ...prev, headerText: e.target.value }))}
+                                placeholder="Enter header text..."
+                                style={{
+                                  width: '100%',
+                                  padding: '12px 16px',
+                                  border: '1px solid #D1D5DB',
+                                  borderRadius: '8px',
+                                  fontSize: '14px',
+                                  background: '#FFFFFF'
+                                }}
+                              />
+                            </div>
+
+                            {/* Body Text */}
+                            <div>
+                              <label style={{
+                                display: 'block',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                color: '#374151',
+                                marginBottom: '8px'
+                              }}>
+                                Body Text
+                              </label>
+                              <textarea
+                                value={widgetSettings.bodyText}
+                                onChange={(e) => setWidgetSettings(prev => ({ ...prev, bodyText: e.target.value }))}
+                                placeholder="Enter body text..."
+                                rows={3}
+                                style={{
+                                  width: '100%',
+                                  padding: '12px 16px',
+                                  border: '1px solid #D1D5DB',
+                                  borderRadius: '8px',
+                                  fontSize: '14px',
+                                  background: '#FFFFFF',
+                                  resize: 'vertical',
+                                  fontFamily: 'inherit'
+                                }}
+                              />
+                            </div>
+
+                            {/* Text Color */}
+                            <div>
+                              <label style={{
+                                display: 'block',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                color: '#374151',
+                                marginBottom: '8px'
+                              }}>
+                                Text Color
+                              </label>
+                              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                                <input
+                                  type="color"
+                                  value={widgetSettings.textColor}
+                                  onChange={(e) => setWidgetSettings(prev => ({ ...prev, textColor: e.target.value }))}
+                                  style={{
+                                    width: '60px',
+                                    height: '40px',
+                                    border: '1px solid #D1D5DB',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer'
+                                  }}
+                                />
+                                <input
+                                  type="text"
+                                  value={widgetSettings.textColor}
+                                  onChange={(e) => setWidgetSettings(prev => ({ ...prev, textColor: e.target.value }))}
+                                  placeholder="#000000"
+                                  style={{
+                                    flex: 1,
+                                    padding: '12px 16px',
+                                    border: '1px solid #D1D5DB',
+                                    borderRadius: '8px',
+                                    fontSize: '14px',
+                                    background: '#FFFFFF'
+                                  }}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      )}
 
                       {/* Screenshot Preview */}
                       <div style={{
