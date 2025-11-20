@@ -326,6 +326,18 @@ export const action = async ({ request }) => {
 
         templateJson.sections[mainSectionKey] = mainSection;
 
+        // Verify the settings are in the block before stringifying
+        const finalBlock = templateJson.sections[mainSectionKey].blocks[blockInstanceId];
+        console.log('🔍 Final block structure before stringify:', {
+          blockInstanceId,
+          blockType: finalBlock.type,
+          blockSettings: finalBlock.settings,
+          settingsKeys: Object.keys(finalBlock.settings || {}),
+          headerTextValue: finalBlock.settings?.header_text,
+          bodyTextValue: finalBlock.settings?.body_text,
+          textColorValue: finalBlock.settings?.text_color
+        });
+
         updatedContent = JSON.stringify(templateJson, null, 2);
         console.log('✅ Added app block to JSON template:', { 
           blockInstanceId, 

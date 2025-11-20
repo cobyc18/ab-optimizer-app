@@ -1,7 +1,7 @@
 <div class="simple-text-badge-widget" 
      {{ block.shopify_attributes }}
-     data-header-text="{{ block.settings.header_text | default: '' | escape }}"
-     data-body-text="{{ block.settings.body_text | default: '' | escape }}"
+     data-header-text="{{ block.settings.header_text | default: '<p></p>' | escape }}"
+     data-body-text="{{ block.settings.body_text | default: '<p></p>' | escape }}"
      data-text-color="{{ block.settings.text_color | default: '#1a5f5f' }}"
      data-header-color="{{ block.settings.header_color | default: '#0f172a' }}"
      data-background-color="{{ block.settings.background_color | default: '#f5f5f0' }}"
@@ -44,22 +44,25 @@
       "type": "richtext",
       "id": "header_text",
       "label": "Header Text",
-      "default": "<p></p>",
-      "visible_if": "{{ 1 == 0 }}"
+      "default": "<p></p>"
     },
     {
       "type": "richtext",
       "id": "body_text",
       "label": "Body Text",
-      "default": "<p></p>",
-      "visible_if": "{{ 1 == 0 }}"
+      "default": "<p></p>"
     },
     {
       "type": "color",
       "id": "text_color",
       "label": "Text Color",
-      "default": "#1a5f5f",
-      "visible_if": "{{ 1 == 0 }}"
+      "default": "#1a5f5f"
+    },
+    {
+      "type": "color_background",
+      "id": "background_color",
+      "label": "Background Color",
+      "default": "#f5f5f0"
     }
   ]
 }

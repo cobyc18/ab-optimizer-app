@@ -1325,7 +1325,7 @@ export default function Dashboard() {
             const appExtensionId = selectedIdea.appExtensionId;
             // Wrap text in <p> tags if not already wrapped, to match richtext format
             const formatText = (text) => {
-              if (!text || text.trim() === '') return '';
+              if (!text || text.trim() === '') return '<p></p>'; // Return empty p tag instead of empty string
               // If text already contains HTML tags, return as is
               if (text.includes('<') && text.includes('>')) return text;
               // Otherwise wrap in <p> tags
@@ -1336,6 +1336,14 @@ export default function Dashboard() {
               header_text: formatText(widgetSettings.headerText),
               body_text: formatText(widgetSettings.bodyText),
               text_color: widgetSettings.textColor || '#1a5f5f'
+            };
+            
+            // Always include all settings so they're written to the JSON template
+            // This ensures Liquid can read them even if they're empty
+            const finalBlockSettings = {
+              header_text: blockSettings.header_text || '<p></p>',
+              body_text: blockSettings.body_text || '<p></p>',
+              text_color: blockSettings.text_color || '#1a5f5f'
             };
             
             console.log('🔧 Widget settings being sent:', {
@@ -1351,7 +1359,7 @@ export default function Dashboard() {
               templateFilename: result.newFilename,
               blockId: selectedIdea.blockId,
               appExtensionId,
-              blockSettings
+              blockSettings: finalBlockSettings
             });
 
             const addBlockResponse = await fetch('/api/add-widget-block', {
@@ -1362,7 +1370,7 @@ export default function Dashboard() {
                 themeId: mainTheme.id,
                 blockId: selectedIdea.blockId,
                 appExtensionId: appExtensionId,
-                blockSettings: blockSettings
+                blockSettings: finalBlockSettings
               })
             });
 
