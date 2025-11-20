@@ -39,7 +39,29 @@
   "target": "section",
   "stylesheet": "simple-text-badge.css",
   "javascript": "simple-text-badge.js",
-  "settings": []
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "header_text",
+      "label": "Header Text",
+      "default": "<p></p>",
+      "visible_if": "{{ 1 == 0 }}"
+    },
+    {
+      "type": "richtext",
+      "id": "body_text",
+      "label": "Body Text",
+      "default": "<p></p>",
+      "visible_if": "{{ 1 == 0 }}"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text Color",
+      "default": "#1a5f5f",
+      "visible_if": "{{ 1 == 0 }}"
+    }
+  ]
 }
 {% endschema %}
 

@@ -44,6 +44,8 @@
 
   function refreshBadges() {
     document.querySelectorAll('.simple-text-badge-widget').forEach(function(container) {
+      // Debug: Log the container's HTML to see what data attributes are present
+      console.log('🔍 Container HTML:', container.outerHTML.substring(0, 500));
       renderBadge(container);
     });
   }
@@ -177,17 +179,30 @@
 
   function getSettings(container, overrides) {
     var dataset = container.dataset;
+    
+    // Debug: Log all data attributes
+    console.log('🔍 Reading data attributes from container:', {
+      hasContainer: !!container,
+      allDataAttributes: Object.keys(dataset),
+      headerTextRaw: container.getAttribute('data-header-text'),
+      bodyTextRaw: container.getAttribute('data-body-text'),
+      textColorRaw: container.getAttribute('data-text-color'),
+      headerTextDataset: dataset.headerText,
+      bodyTextDataset: dataset.bodyText,
+      textColorDataset: dataset.textColor
+    });
+    
     var base = {
-      headerText: formatRichText(dataset.headerText),
+      headerText: formatRichText(dataset.headerText || container.getAttribute('data-header-text') || ''),
       headerFont: dataset.headerFont || 'system',
       headerFontSize: parseNumber(dataset.headerFontSize, 24),
       headerUnderline: parseBoolean(dataset.headerUnderline, false),
       headerColor: dataset.headerColor || '#0f172a',
-      bodyText: formatRichText(dataset.bodyText),
+      bodyText: formatRichText(dataset.bodyText || container.getAttribute('data-body-text') || ''),
       bodyFont: dataset.bodyFont || 'system',
       bodyFontSize: parseNumber(dataset.bodyFontSize, 16),
       bodyUnderline: parseBoolean(dataset.bodyUnderline, false),
-      textColor: dataset.textColor || '#1a5f5f',
+      textColor: dataset.textColor || container.getAttribute('data-text-color') || '#1a5f5f',
       backgroundColor: dataset.backgroundColor || '#f5f5f0',
       borderColor: dataset.borderColor || '#d4d4d8',
       headerBodySpacing: parseNumber(dataset.headerBodySpacing, 6),
