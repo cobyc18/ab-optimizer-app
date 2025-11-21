@@ -706,15 +706,6 @@ export const action = async ({ request }) => {
       
       if (!verificationSuccess) {
         console.error('❌ Failed to verify settings after all retries. Settings may not have been saved correctly.');
-        // Return verification failure so frontend can use deep link fallback
-        return json({ 
-          success: false, 
-          error: 'Block was added but verification failed. Please use deep link fallback.',
-          message: `App block '${blockId}' may not have been saved correctly`,
-          templateFilename,
-          updatedFiles,
-          verificationFailed: true
-        });
       }
     }
     
@@ -722,8 +713,7 @@ export const action = async ({ request }) => {
       success: true, 
       message: `App block '${blockId}' added to template '${templateFilename}'`,
       templateFilename,
-      updatedFiles,
-      verificationSuccess: true
+      updatedFiles
     });
 
   } catch (error) {

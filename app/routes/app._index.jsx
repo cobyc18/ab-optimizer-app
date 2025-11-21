@@ -749,8 +749,13 @@ export default function Dashboard() {
       // Add cache-busting parameter to force theme editor to reload fresh content
       const cacheBuster = `&_t=${Date.now()}`;
 
-      // If we have widget settings, add the block via API FIRST with correct settings
-      // Then open theme editor WITHOUT addAppBlockId (since block is already there)
+      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
+
+      // Open the theme editor
+      const themeEditorWindow = window.open(editorUrl, '_blank');
+
+      // After opening, update the block's settings (deep link adds it with defaults)
+      // Wait a bit for the deep link to add the block, then update its settings
       if (selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
         // Format settings for the API
         const formatText = (text) => {
@@ -768,53 +773,57 @@ export default function Dashboard() {
           background_color: widgetSettings.backgroundColor || '#f5f5f0'
         };
 
-        console.log('🔧 Adding widget block with settings via API (before opening theme editor)...');
-        
-        try {
-          // Add the block via API with correct settings FIRST
-          const addBlockResponse = await fetch('/api/add-widget-block', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
-              themeId: mainTheme.id,
-              blockId: selectedIdea.blockId,
-              appExtensionId: apiKey,
-              blockSettings: finalBlockSettings
-            })
-          });
+        const updateBlockSettings = async (attempt = 1, maxAttempts = 5) => {
+          try {
+            console.log(`🔄 Updating widget settings (attempt ${attempt}/${maxAttempts})...`);
+            
+            const updateResponse = await fetch('/api/update-widget-settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                themeId: mainTheme.id,
+                blockId: selectedIdea.blockId,
+                appExtensionId: apiKey,
+                blockSettings: finalBlockSettings
+              })
+            });
 
-          const addBlockResult = await addBlockResponse.json();
-          
-          if (addBlockResponse.ok && addBlockResult.success && addBlockResult.verificationSuccess) {
-            console.log('✅ Widget block added and verified via API:', addBlockResult);
-            // Block is now in the JSON template with correct settings and verified
-            // Open theme editor WITHOUT addAppBlockId (block is already there)
-            const editorUrlWithoutBlock = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${cacheBuster}`;
-            window.open(editorUrlWithoutBlock, '_blank', 'noopener');
-          } else {
-            console.error('⚠️ Failed to add widget block via API or verification failed:', addBlockResult.error || addBlockResult.message);
-            // Fallback: use deep link approach (will have default settings, but at least block will be added)
-            console.log('🔄 Using deep link fallback to ensure block is added...');
-            const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
-            window.open(editorUrl, '_blank', 'noopener');
+            const updateResult = await updateResponse.json();
+            
+            if (updateResponse.ok && updateResult.success) {
+              console.log('✅ Widget settings updated successfully:', updateResult);
+              // Refresh the theme editor window to show updated settings
+              if (themeEditorWindow && !themeEditorWindow.closed) {
+                themeEditorWindow.location.reload();
+              }
+              return true;
+            } else {
+              console.error(`⚠️ Failed to update widget settings (attempt ${attempt}):`, updateResult.error);
+              
+              // If block not found and we have more attempts, retry
+              if (updateResponse.status === 404 && attempt < maxAttempts) {
+                const delay = attempt * 2000; // 2s, 4s, 6s, 8s, 10s
+                console.log(`⏳ Retrying in ${delay}ms...`);
+                setTimeout(() => updateBlockSettings(attempt + 1, maxAttempts), delay);
+              } else {
+                console.error('❌ Failed to update widget settings after all attempts');
+              }
+              return false;
+            }
+          } catch (updateError) {
+            console.error(`⚠️ Error updating widget settings (attempt ${attempt}):`, updateError);
+            if (attempt < maxAttempts) {
+              const delay = attempt * 2000;
+              setTimeout(() => updateBlockSettings(attempt + 1, maxAttempts), delay);
+            }
+            return false;
           }
-        } catch (addBlockError) {
-          console.error('⚠️ Error adding widget block via API:', addBlockError);
-          // Fallback: use deep link approach
-          const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
-          window.open(editorUrl, '_blank', 'noopener');
-        }
-      } else {
-        // No widget settings, use deep link approach
-        const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
-        window.open(editorUrl, '_blank', 'noopener');
-      }
+        };
 
-      // Determine which URL was used (for debugging)
-      const finalEditorUrl = selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0
-        ? `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${cacheBuster}`
-        : `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
+        // Start the update process after initial delay
+        setTimeout(() => updateBlockSettings(1, 5), 3000); // Wait 3 seconds initially
+      }
 
       console.log('🧭 Theme Editor Debug Params:', {
         shop,
@@ -831,7 +840,7 @@ export default function Dashboard() {
         productHandleForPreview,
         productTitleForPreview,
         addBlockParams,
-        finalEditorUrl
+        editorUrl
       });
     } catch (err) {
       console.error('❌ Failed to open Theme Editor (debug):', err);
