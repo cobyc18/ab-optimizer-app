@@ -1,3 +1,11 @@
+{% comment %}DEBUG: Check what block.settings contains{% endcomment %}
+{% if request.design_mode %}
+  <!-- DEBUG: block.settings.header_text = {{ block.settings.header_text | json }} -->
+  <!-- DEBUG: block.settings.body_text = {{ block.settings.body_text | json }} -->
+  <!-- DEBUG: block.settings.text_color = {{ block.settings.text_color | json }} -->
+  <!-- DEBUG: block.settings.background_color = {{ block.settings.background_color | json }} -->
+{% endif %}
+
 <div class="simple-text-badge-widget" 
      {{ block.shopify_attributes }}
      data-header-text="{{ block.settings.header_text }}"

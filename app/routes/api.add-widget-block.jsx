@@ -496,6 +496,9 @@ export const action = async ({ request }) => {
           upsertedThemeFiles {
             filename
           }
+          job {
+            id
+          }
           userErrors {
             field
             message
@@ -537,70 +540,148 @@ export const action = async ({ request }) => {
     }
 
     const updatedFiles = updateJson.data?.themeFilesUpsert?.upsertedThemeFiles || [];
+    const jobId = updateJson.data?.themeFilesUpsert?.job?.id;
+    
     console.log('✅ Template updated successfully with app block:', {
       updatedFiles: updatedFiles.map(f => f.filename),
       templateFilename,
       blockId,
-      appExtensionId
+      appExtensionId,
+      jobId: jobId || 'none (synchronous)'
     });
 
-    // 3. Verify the settings were saved by reading the template back
+    // 3. Wait for Shopify to process the update (handle caching)
+    // Add a delay to allow Shopify's internal systems to process the update
+    console.log('⏳ Waiting for Shopify to process template update (2 seconds)...');
+    await new Promise(resolve => setTimeout(resolve, 2000));
+
+    // 4. Verify the settings were saved by reading the template back with retry logic
     if (templateFilename.endsWith('.json')) {
       console.log('🔍 Verifying settings were saved by reading template back...');
-      const verifyRes = await admin.graphql(
-        `query getFile($themeId: ID!, $filename: String!) {
-          theme(id: $themeId) {
-            files(filenames: [$filename]) {
-              nodes {
-                filename
-                body { 
-                  ... on OnlineStoreThemeFileBodyText { 
-                    content 
-                  } 
+      
+      let verificationSuccess = false;
+      let retryCount = 0;
+      const maxRetries = 3;
+      const retryDelay = 1000; // 1 second between retries
+      
+      while (!verificationSuccess && retryCount < maxRetries) {
+        if (retryCount > 0) {
+          console.log(`🔄 Retry ${retryCount}/${maxRetries - 1} - waiting ${retryDelay}ms before retry...`);
+          await new Promise(resolve => setTimeout(resolve, retryDelay));
+        }
+        
+        try {
+          const verifyRes = await admin.graphql(
+            `query getFile($themeId: ID!, $filename: String!) {
+              theme(id: $themeId) {
+                files(filenames: [$filename]) {
+                  nodes {
+                    filename
+                    body { 
+                      ... on OnlineStoreThemeFileBodyText { 
+                        content 
+                      } 
+                    }
+                  }
                 }
               }
+            }`,
+            { 
+              variables: { 
+                themeId: themeId, 
+                filename: templateFilename 
+              } 
             }
-          }
-        }`,
-        { 
-          variables: { 
-            themeId: themeId, 
-            filename: templateFilename 
-          } 
-        }
-      );
-      
-      const verifyJson = await verifyRes.json();
-      const verifyContent = verifyJson.data?.theme?.files?.nodes?.[0]?.body?.content;
-      
-      if (verifyContent) {
-        try {
-          const cleanedContent = stripJsonComments(verifyContent);
-          const verifyTemplate = JSON.parse(cleanedContent);
-          const mainSection = verifyTemplate.sections?.main;
-          const blocks = mainSection?.blocks || {};
-          
-          // Find our app block
-          const appBlock = Object.values(blocks).find(block => 
-            typeof block === 'object' && 
-            block.type && 
-            block.type.includes('simple-text-badge')
           );
           
-          if (appBlock) {
-            console.log('✅ Verified app block settings in template:', {
-              blockType: appBlock.type,
-              settings: appBlock.settings,
-              headerText: appBlock.settings?.header_text,
-              bodyText: appBlock.settings?.body_text,
-              textColor: appBlock.settings?.text_color
-            });
+          const verifyJson = await verifyRes.json();
+          const verifyContent = verifyJson.data?.theme?.files?.nodes?.[0]?.body?.content;
+          
+          if (verifyContent) {
+            try {
+              const cleanedContent = stripJsonComments(verifyContent);
+              const verifyTemplate = JSON.parse(cleanedContent);
+              const mainSection = verifyTemplate.sections?.main;
+              const blocks = mainSection?.blocks || {};
+              
+              // Find our app block
+              const appBlock = Object.values(blocks).find(block => 
+                typeof block === 'object' && 
+                block.type && 
+                block.type.includes('simple-text-badge')
+              );
+              
+              if (appBlock) {
+                const allSettings = appBlock.settings || {};
+                const settingsKeys = Object.keys(allSettings);
+                
+                console.log('✅ Verified app block settings in template:', {
+                  blockType: appBlock.type,
+                  settingsCount: settingsKeys.length,
+                  settingsKeys: settingsKeys,
+                  allSettings: JSON.stringify(allSettings, null, 2),
+                  headerText: appBlock.settings?.header_text,
+                  headerTextType: typeof appBlock.settings?.header_text,
+                  headerTextLength: appBlock.settings?.header_text?.length,
+                  bodyText: appBlock.settings?.body_text,
+                  bodyTextType: typeof appBlock.settings?.body_text,
+                  textColor: appBlock.settings?.text_color,
+                  backgroundColor: appBlock.settings?.background_color,
+                  attempt: retryCount + 1
+                });
+                
+                // Check if settings are actually present and have values
+                if (appBlock.settings && Object.keys(appBlock.settings).length > 0) {
+                  // Check if the specific settings we care about are present
+                  const hasHeaderText = appBlock.settings.hasOwnProperty('header_text');
+                  const hasBodyText = appBlock.settings.hasOwnProperty('body_text');
+                  const hasTextColor = appBlock.settings.hasOwnProperty('text_color');
+                  const hasBackgroundColor = appBlock.settings.hasOwnProperty('background_color');
+                  
+                  console.log('🔍 Settings presence check:', {
+                    hasHeaderText,
+                    hasBodyText,
+                    hasTextColor,
+                    hasBackgroundColor,
+                    headerTextValue: appBlock.settings.header_text,
+                    bodyTextValue: appBlock.settings.body_text,
+                    textColorValue: appBlock.settings.text_color,
+                    backgroundColorValue: appBlock.settings.background_color
+                  });
+                  
+                  if (hasHeaderText || hasBodyText || hasTextColor || hasBackgroundColor) {
+                    verificationSuccess = true;
+                  } else {
+                    console.warn(`⚠️ Settings object exists but doesn't contain expected keys (attempt ${retryCount + 1})`);
+                  }
+                } else {
+                  console.warn(`⚠️ Settings object exists but is empty (attempt ${retryCount + 1})`);
+                }
+              } else {
+                console.warn(`⚠️ App block not found in verified template (attempt ${retryCount + 1})`);
+                // Log all blocks to help debug
+                console.log('🔍 All blocks in main section:', Object.keys(blocks).map(id => ({
+                  id,
+                  type: blocks[id]?.type,
+                  hasSettings: !!blocks[id]?.settings,
+                  settingsKeys: blocks[id]?.settings ? Object.keys(blocks[id].settings) : []
+                })));
+              }
+            } catch (verifyError) {
+              console.error(`❌ Error parsing verified template (attempt ${retryCount + 1}):`, verifyError);
+            }
           } else {
-            console.warn('⚠️ App block not found in verified template');
+            console.warn(`⚠️ No content found in verified template (attempt ${retryCount + 1})`);
           }
         } catch (verifyError) {
-          console.error('❌ Error verifying template:', verifyError);
+          console.error(`❌ Error verifying template (attempt ${retryCount + 1}):`, verifyError);
         }
+        
+        retryCount++;
+      }
+      
+      if (!verificationSuccess) {
+        console.error('❌ Failed to verify settings after all retries. Settings may not have been saved correctly.');
       }
     }
     

@@ -745,8 +745,11 @@ export default function Dashboard() {
       const addBlockParams = widgetHandle
         ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
         : '';
+      
+      // Add cache-busting parameter to force theme editor to reload fresh content
+      const cacheBuster = `&_t=${Date.now()}`;
 
-      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}`;
+      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
 
       console.log('🧭 Theme Editor Debug Params:', {
         shop,
