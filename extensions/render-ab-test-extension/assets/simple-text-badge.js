@@ -381,12 +381,19 @@
     return null;
   }
 
-  // Theme editor event listeners
+  // Theme editor event listeners - refresh widget when section/block is updated
   document.addEventListener('shopify:section:load', function(event) {
+    // Re-initialize all badges when section loads/re-renders
     refreshBadges();
   });
 
   document.addEventListener('shopify:block:select', function(event) {
+    // Refresh badges when block is selected to ensure latest settings are displayed
+    refreshBadges();
+  });
+
+  document.addEventListener('shopify:block:deselect', function(event) {
+    // Refresh badges when block is deselected to ensure settings are synced
     refreshBadges();
   });
 
