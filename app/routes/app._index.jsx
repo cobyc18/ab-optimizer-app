@@ -757,26 +757,26 @@ export default function Dashboard() {
       // After opening, update the block's settings (deep link adds it with defaults)
       // Wait a bit for the deep link to add the block, then update its settings
       if (selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
-        setTimeout(async () => {
-          try {
-            console.log('🔄 Updating widget settings after block was added via deep link...');
-            
-            // Format settings for the API
-            const formatText = (text) => {
-              if (!text || text.trim() === '') return '<p></p>';
-              // If already wrapped in HTML tags, return as-is
-              if (text.trim().startsWith('<')) return text;
-              // Otherwise wrap in <p> tags
-              return `<p>${text}</p>`;
-            };
-            
-            const finalBlockSettings = {
-              header_text: formatText(widgetSettings.headerText),
-              body_text: formatText(widgetSettings.bodyText),
-              text_color: widgetSettings.textColor || '#1a5f5f',
-              background_color: widgetSettings.backgroundColor || '#f5f5f0'
-            };
+        // Format settings for the API
+        const formatText = (text) => {
+          if (!text || text.trim() === '') return '<p></p>';
+          // If already wrapped in HTML tags, return as-is
+          if (text.trim().startsWith('<')) return text;
+          // Otherwise wrap in <p> tags
+          return `<p>${text}</p>`;
+        };
+        
+        const finalBlockSettings = {
+          header_text: formatText(widgetSettings.headerText),
+          body_text: formatText(widgetSettings.bodyText),
+          text_color: widgetSettings.textColor || '#1a5f5f',
+          background_color: widgetSettings.backgroundColor || '#f5f5f0'
+        };
 
+        const updateBlockSettings = async (attempt = 1, maxAttempts = 5) => {
+          try {
+            console.log(`🔄 Updating widget settings (attempt ${attempt}/${maxAttempts})...`);
+            
             const updateResponse = await fetch('/api/update-widget-settings', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -790,42 +790,39 @@ export default function Dashboard() {
             });
 
             const updateResult = await updateResponse.json();
+            
             if (updateResponse.ok && updateResult.success) {
               console.log('✅ Widget settings updated successfully:', updateResult);
               // Refresh the theme editor window to show updated settings
               if (themeEditorWindow && !themeEditorWindow.closed) {
                 themeEditorWindow.location.reload();
               }
+              return true;
             } else {
-              console.error('⚠️ Failed to update widget settings:', updateResult.error);
-              // Retry once after a longer delay
-              setTimeout(async () => {
-                const retryResponse = await fetch('/api/update-widget-settings', {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({
-                    templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
-                    themeId: mainTheme.id,
-                    blockId: selectedIdea.blockId,
-                    appExtensionId: apiKey,
-                    blockSettings: finalBlockSettings
-                  })
-                });
-                const retryResult = await retryResponse.json();
-                if (retryResponse.ok && retryResult.success) {
-                  console.log('✅ Widget settings updated on retry:', retryResult);
-                  if (themeEditorWindow && !themeEditorWindow.closed) {
-                    themeEditorWindow.location.reload();
-                  }
-                } else {
-                  console.error('⚠️ Failed to update widget settings on retry:', retryResult.error);
-                }
-              }, 3000);
+              console.error(`⚠️ Failed to update widget settings (attempt ${attempt}):`, updateResult.error);
+              
+              // If block not found and we have more attempts, retry
+              if (updateResponse.status === 404 && attempt < maxAttempts) {
+                const delay = attempt * 2000; // 2s, 4s, 6s, 8s, 10s
+                console.log(`⏳ Retrying in ${delay}ms...`);
+                setTimeout(() => updateBlockSettings(attempt + 1, maxAttempts), delay);
+              } else {
+                console.error('❌ Failed to update widget settings after all attempts');
+              }
+              return false;
             }
           } catch (updateError) {
-            console.error('⚠️ Error updating widget settings:', updateError);
+            console.error(`⚠️ Error updating widget settings (attempt ${attempt}):`, updateError);
+            if (attempt < maxAttempts) {
+              const delay = attempt * 2000;
+              setTimeout(() => updateBlockSettings(attempt + 1, maxAttempts), delay);
+            }
+            return false;
           }
-        }, 2000); // Wait 2 seconds for deep link to add the block
+        };
+
+        // Start the update process after initial delay
+        setTimeout(() => updateBlockSettings(1, 5), 3000); // Wait 3 seconds initially
       }
 
       console.log('🧭 Theme Editor Debug Params:', {

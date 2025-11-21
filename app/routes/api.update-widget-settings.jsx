@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { authenticate } from "../shopify.server";
+import { authenticate } from "../shopify.server.js";
 
 /**
  * API endpoint to update an existing app block's settings in a JSON template.
@@ -181,21 +181,70 @@ export const action = async ({ request }) => {
     const mainSection = sections[mainSectionKey];
     const blocks = mainSection.blocks || {};
 
+    // Log all blocks for debugging
+    console.log('🔍 Searching for app block in template:', {
+      totalBlocks: Object.keys(blocks).length,
+      blockDetails: Object.entries(blocks).map(([id, block]) => ({
+        id,
+        type: block?.type,
+        hasSettings: !!block?.settings,
+        settingsKeys: block?.settings ? Object.keys(block.settings) : []
+      })),
+      searchingFor: `blocks/${blockId}`,
+      appExtensionId
+    });
+
     // Find the app block that was just added by the deep link
     // It will have a type like: shopify://apps/{api_key}/blocks/{block_handle}/{unique_id}
+    // OR it might be in a different format depending on how Shopify saves it
     const appBlockEntry = Object.entries(blocks).find(([blockInstanceId, block]) => {
       if (typeof block !== 'object' || !block.type) return false;
-      // Match by block handle in the type (blockId is the handle like "simple-text-badge")
-      return block.type.includes(`blocks/${blockId}`) || 
-             block.type.includes('shopify://apps');
+      
+      const typeStr = String(block.type);
+      
+      // Try multiple matching strategies:
+      // 1. Match by block handle in the type path
+      const matchesBlockHandle = typeStr.includes(`blocks/${blockId}`);
+      // 2. Match by app extension ID
+      const matchesAppExtension = typeStr.includes(appExtensionId);
+      // 3. Match by shopify://apps prefix
+      const matchesShopifyApps = typeStr.includes('shopify://apps');
+      // 4. Match by block handle anywhere in the type
+      const matchesBlockIdAnywhere = typeStr.includes(blockId);
+      
+      const isMatch = matchesBlockHandle || 
+                     (matchesShopifyApps && matchesAppExtension) ||
+                     (matchesShopifyApps && matchesBlockIdAnywhere);
+      
+      if (isMatch || matchesShopifyApps) {
+        console.log('🔍 Potential match found:', {
+          blockInstanceId,
+          type: typeStr,
+          matchesBlockHandle,
+          matchesAppExtension,
+          matchesShopifyApps,
+          matchesBlockIdAnywhere,
+          isMatch
+        });
+      }
+      
+      return isMatch;
     });
 
     if (!appBlockEntry) {
+      console.error('❌ App block not found. All blocks:', Object.entries(blocks).map(([id, b]) => ({
+        id,
+        type: b?.type
+      })));
+      
       return json({ 
         error: 'App block not found in template. Make sure the block was added via deep link first.',
         debug: {
           totalBlocks: Object.keys(blocks).length,
-          blockTypes: Object.values(blocks).map(b => b?.type)
+          blockTypes: Object.values(blocks).map(b => b?.type),
+          blockIds: Object.keys(blocks),
+          searchingFor: `blocks/${blockId}`,
+          appExtensionId
         }
       }, { status: 404 });
     }
