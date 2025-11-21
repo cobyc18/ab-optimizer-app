@@ -604,49 +604,72 @@ export const action = async ({ request }) => {
               const mainSection = verifyTemplate.sections?.main;
               const blocks = mainSection?.blocks || {};
               
-              // Find our app block
+              // Log all blocks for debugging
+              console.log('🔍 All blocks in template:', {
+                totalBlocks: Object.keys(blocks).length,
+                blockDetails: Object.entries(blocks).map(([id, block]) => ({
+                  id,
+                  type: block?.type,
+                  hasSettings: !!block?.settings,
+                  settingsKeys: block?.settings ? Object.keys(block.settings) : [],
+                  settings: block?.settings
+                }))
+              });
+              
+              // Find our app block - check for both the full shopify:// format and just the block handle
               const appBlock = Object.values(blocks).find(block => 
                 typeof block === 'object' && 
                 block.type && 
-                block.type.includes('simple-text-badge')
+                (block.type.includes('simple-text-badge') || 
+                 block.type.includes('shopify://apps') ||
+                 block.type.startsWith('@'))
               );
               
-              if (appBlock) {
-                const allSettings = appBlock.settings || {};
+              // Also try finding by block ID if we know it
+              const appBlockById = blockInstanceId ? blocks[blockInstanceId] : null;
+              
+              // Use whichever we found
+              const foundBlock = appBlock || appBlockById;
+              
+              if (foundBlock) {
+                const allSettings = foundBlock.settings || {};
                 const settingsKeys = Object.keys(allSettings);
                 
                 console.log('✅ Verified app block settings in template:', {
-                  blockType: appBlock.type,
+                  blockType: foundBlock.type,
+                  blockId: blockInstanceId,
+                  foundBy: appBlock ? 'type search' : 'ID search',
                   settingsCount: settingsKeys.length,
                   settingsKeys: settingsKeys,
                   allSettings: JSON.stringify(allSettings, null, 2),
-                  headerText: appBlock.settings?.header_text,
-                  headerTextType: typeof appBlock.settings?.header_text,
-                  headerTextLength: appBlock.settings?.header_text?.length,
-                  bodyText: appBlock.settings?.body_text,
-                  bodyTextType: typeof appBlock.settings?.body_text,
-                  textColor: appBlock.settings?.text_color,
-                  backgroundColor: appBlock.settings?.background_color,
+                  headerText: foundBlock.settings?.header_text,
+                  headerTextType: typeof foundBlock.settings?.header_text,
+                  headerTextLength: foundBlock.settings?.header_text?.length,
+                  bodyText: foundBlock.settings?.body_text,
+                  bodyTextType: typeof foundBlock.settings?.body_text,
+                  textColor: foundBlock.settings?.text_color,
+                  backgroundColor: foundBlock.settings?.background_color,
                   attempt: retryCount + 1
                 });
                 
                 // Check if settings are actually present and have values
-                if (appBlock.settings && Object.keys(appBlock.settings).length > 0) {
+                if (foundBlock.settings && Object.keys(foundBlock.settings).length > 0) {
                   // Check if the specific settings we care about are present
-                  const hasHeaderText = appBlock.settings.hasOwnProperty('header_text');
-                  const hasBodyText = appBlock.settings.hasOwnProperty('body_text');
-                  const hasTextColor = appBlock.settings.hasOwnProperty('text_color');
-                  const hasBackgroundColor = appBlock.settings.hasOwnProperty('background_color');
+                  const hasHeaderText = foundBlock.settings.hasOwnProperty('header_text');
+                  const hasBodyText = foundBlock.settings.hasOwnProperty('body_text');
+                  const hasTextColor = foundBlock.settings.hasOwnProperty('text_color');
+                  const hasBackgroundColor = foundBlock.settings.hasOwnProperty('background_color');
                   
                   console.log('🔍 Settings presence check:', {
                     hasHeaderText,
                     hasBodyText,
                     hasTextColor,
                     hasBackgroundColor,
-                    headerTextValue: appBlock.settings.header_text,
-                    bodyTextValue: appBlock.settings.body_text,
-                    textColorValue: appBlock.settings.text_color,
-                    backgroundColorValue: appBlock.settings.background_color
+                    headerTextValue: foundBlock.settings.header_text,
+                    bodyTextValue: foundBlock.settings.body_text,
+                    textColorValue: foundBlock.settings.text_color,
+                    backgroundColorValue: foundBlock.settings.background_color,
+                    allSettingsInBlock: Object.keys(foundBlock.settings)
                   });
                   
                   if (hasHeaderText || hasBodyText || hasTextColor || hasBackgroundColor) {

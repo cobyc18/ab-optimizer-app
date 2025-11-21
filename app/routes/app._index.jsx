@@ -751,6 +751,83 @@ export default function Dashboard() {
 
       const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
 
+      // Open the theme editor
+      const themeEditorWindow = window.open(editorUrl, '_blank');
+
+      // After opening, update the block's settings (deep link adds it with defaults)
+      // Wait a bit for the deep link to add the block, then update its settings
+      if (selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
+        setTimeout(async () => {
+          try {
+            console.log('🔄 Updating widget settings after block was added via deep link...');
+            
+            // Format settings for the API
+            const formatText = (text) => {
+              if (!text || text.trim() === '') return '<p></p>';
+              // If already wrapped in HTML tags, return as-is
+              if (text.trim().startsWith('<')) return text;
+              // Otherwise wrap in <p> tags
+              return `<p>${text}</p>`;
+            };
+            
+            const finalBlockSettings = {
+              header_text: formatText(widgetSettings.headerText),
+              body_text: formatText(widgetSettings.bodyText),
+              text_color: widgetSettings.textColor || '#1a5f5f',
+              background_color: widgetSettings.backgroundColor || '#f5f5f0'
+            };
+
+            const updateResponse = await fetch('/api/update-widget-settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                themeId: mainTheme.id,
+                blockId: selectedIdea.blockId,
+                appExtensionId: apiKey,
+                blockSettings: finalBlockSettings
+              })
+            });
+
+            const updateResult = await updateResponse.json();
+            if (updateResponse.ok && updateResult.success) {
+              console.log('✅ Widget settings updated successfully:', updateResult);
+              // Refresh the theme editor window to show updated settings
+              if (themeEditorWindow && !themeEditorWindow.closed) {
+                themeEditorWindow.location.reload();
+              }
+            } else {
+              console.error('⚠️ Failed to update widget settings:', updateResult.error);
+              // Retry once after a longer delay
+              setTimeout(async () => {
+                const retryResponse = await fetch('/api/update-widget-settings', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({
+                    templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                    themeId: mainTheme.id,
+                    blockId: selectedIdea.blockId,
+                    appExtensionId: apiKey,
+                    blockSettings: finalBlockSettings
+                  })
+                });
+                const retryResult = await retryResponse.json();
+                if (retryResponse.ok && retryResult.success) {
+                  console.log('✅ Widget settings updated on retry:', retryResult);
+                  if (themeEditorWindow && !themeEditorWindow.closed) {
+                    themeEditorWindow.location.reload();
+                  }
+                } else {
+                  console.error('⚠️ Failed to update widget settings on retry:', retryResult.error);
+                }
+              }, 3000);
+            }
+          } catch (updateError) {
+            console.error('⚠️ Error updating widget settings:', updateError);
+          }
+        }, 2000); // Wait 2 seconds for deep link to add the block
+      }
+
       console.log('🧭 Theme Editor Debug Params:', {
         shop,
         storeSubdomain,
@@ -1358,35 +1435,18 @@ export default function Dashboard() {
               formatted: blockSettings
             });
 
-            console.log('🔧 Adding widget block with settings:', {
+            // Store widget settings for later update (after deep link adds the block)
+            // The block will be added via deep link when theme editor opens,
+            // then we'll update its settings using /api/update-widget-settings
+            console.log('📝 Widget settings stored for later update:', {
               templateFilename: result.newFilename,
               blockId: selectedIdea.blockId,
               appExtensionId,
               blockSettings: finalBlockSettings
             });
-
-            const addBlockResponse = await fetch('/api/add-widget-block', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                templateFilename: result.newFilename,
-                themeId: mainTheme.id,
-                blockId: selectedIdea.blockId,
-                appExtensionId: appExtensionId,
-                blockSettings: finalBlockSettings
-              })
-            });
-
-            const addBlockResult = await addBlockResponse.json();
-            if (addBlockResponse.ok && addBlockResult.success) {
-              console.log('✅ Widget block added with settings:', addBlockResult);
-            } else {
-              console.error('⚠️ Failed to add widget block:', addBlockResult.error);
-              // Don't fail the whole process if widget addition fails
-            }
-          } catch (addBlockError) {
-            console.error('⚠️ Error adding widget block:', addBlockError);
-            // Don't fail the whole process if widget addition fails
+          } catch (widgetError) {
+            console.error('⚠️ Error storing widget settings:', widgetError);
+            // Don't fail the whole process if widget settings storage fails
           }
         }
         
