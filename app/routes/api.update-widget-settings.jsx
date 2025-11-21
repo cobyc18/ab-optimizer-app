@@ -40,11 +40,13 @@ export const action = async ({ request }) => {
     const fileQuery = `
       query getThemeFile($themeId: ID!, $filename: String!) {
         theme(id: $themeId) {
-          files(first: 1, filenames: [$filename]) {
+          files(filenames: [$filename]) {
             nodes {
               filename
               body {
-                content
+                ... on OnlineStoreThemeFileBodyText {
+                  content
+                }
               }
             }
           }
