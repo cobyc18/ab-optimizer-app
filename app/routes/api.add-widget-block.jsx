@@ -314,9 +314,20 @@ export const action = async ({ request }) => {
         const blockInstanceId = `app_block_${Date.now()}`;
 
         // Add the app block
+        // Ensure settings are properly formatted - all values must be strings for richtext
+        const formattedSettings = {};
+        for (const [key, value] of Object.entries(appliedBlockSettings)) {
+          // Ensure richtext values are properly formatted
+          if (key === 'header_text' || key === 'body_text') {
+            formattedSettings[key] = value || '<p></p>';
+          } else {
+            formattedSettings[key] = value;
+          }
+        }
+        
         mainSection.blocks[blockInstanceId] = {
           type: appBlockType,
-          settings: appliedBlockSettings
+          settings: formattedSettings
         };
 
         // Add to block_order if not already there
