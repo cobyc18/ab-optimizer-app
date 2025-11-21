@@ -765,67 +765,93 @@ export default function Dashboard() {
           }
         } catch (checkError) {
           console.error('⚠️ Error checking if widget exists:', checkError);
-          // If check fails, assume it doesn't exist and proceed
+          // If check fails, assume it doesn't exist and proceed with deep link
         }
       }
       
-      // Option 1: Add block via API BEFORE opening theme editor (if it doesn't exist)
-      if (widgetHandle && !blockAlreadyExists) {
-        try {
-          // Format settings for the API
-          const formatText = (text) => {
-            if (!text || text.trim() === '') return '<p></p>';
-            // If already wrapped in HTML tags, return as-is
-            if (text.trim().startsWith('<')) return text;
-            // Otherwise wrap in <p> tags
-            return `<p>${text}</p>`;
-          };
-          
-          const finalBlockSettings = selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0
-            ? {
-                header_text: formatText(widgetSettings.headerText),
-                body_text: formatText(widgetSettings.bodyText),
-                text_color: widgetSettings.textColor || '#1a5f5f',
-                background_color: widgetSettings.backgroundColor || '#f5f5f0'
-              }
-            : {};
+      // Only add deep link parameter if block doesn't already exist
+      const addBlockParams = (widgetHandle && !blockAlreadyExists)
+        ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
+        : '';
 
-          console.log('🔧 Adding widget block via API before opening theme editor...');
-          
-          const addBlockResponse = await fetch('/api/add-widget-block', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
-              themeId: mainTheme.id,
-              blockId: widgetHandle,
-              appExtensionId: apiKey,
-              blockSettings: finalBlockSettings
-            })
-          });
-
-          const addBlockResult = await addBlockResponse.json();
-          
-          if (addBlockResponse.ok && addBlockResult.success) {
-            console.log('✅ Widget block added successfully via API:', addBlockResult);
-          } else {
-            console.error('⚠️ Failed to add widget block via API:', addBlockResult.error);
-            // Continue anyway - the deep link will add it
-          }
-        } catch (addBlockError) {
-          console.error('⚠️ Error adding widget block via API:', addBlockError);
-          // Continue anyway - the deep link will add it
-        }
-      }
-
-      // No deep link parameter needed - block is already added via API
       // Add cache-busting parameter to force theme editor to reload fresh content
       const cacheBuster = `&_t=${Date.now()}`;
 
-      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${cacheBuster}`;
+      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
 
       // Open the theme editor
-      window.open(editorUrl, '_blank');
+      const themeEditorWindow = window.open(editorUrl, '_blank');
+
+      // After opening, update the block's settings (deep link adds it with defaults)
+      // Wait a bit for the deep link to add the block, then update its settings
+      if (selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
+        // Format settings for the API
+        const formatText = (text) => {
+          if (!text || text.trim() === '') return '<p></p>';
+          // If already wrapped in HTML tags, return as-is
+          if (text.trim().startsWith('<')) return text;
+          // Otherwise wrap in <p> tags
+          return `<p>${text}</p>`;
+        };
+        
+        const finalBlockSettings = {
+          header_text: formatText(widgetSettings.headerText),
+          body_text: formatText(widgetSettings.bodyText),
+          text_color: widgetSettings.textColor || '#1a5f5f',
+          background_color: widgetSettings.backgroundColor || '#f5f5f0'
+        };
+
+        const updateBlockSettings = async (attempt = 1, maxAttempts = 5) => {
+          try {
+            console.log(`🔄 Updating widget settings (attempt ${attempt}/${maxAttempts})...`);
+            
+            const updateResponse = await fetch('/api/update-widget-settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                themeId: mainTheme.id,
+                blockId: selectedIdea.blockId,
+                appExtensionId: apiKey,
+                blockSettings: finalBlockSettings
+              })
+            });
+
+            const updateResult = await updateResponse.json();
+            
+            if (updateResponse.ok && updateResult.success) {
+              console.log('✅ Widget settings updated successfully:', updateResult);
+              // Refresh the theme editor window to show updated settings
+              if (themeEditorWindow && !themeEditorWindow.closed) {
+                themeEditorWindow.location.reload();
+              }
+              return true;
+            } else {
+              console.error(`⚠️ Failed to update widget settings (attempt ${attempt}):`, updateResult.error);
+              
+              // If block not found and we have more attempts, retry
+              if (updateResponse.status === 404 && attempt < maxAttempts) {
+                const delay = attempt * 2000; // 2s, 4s, 6s, 8s, 10s
+                console.log(`⏳ Retrying in ${delay}ms...`);
+                setTimeout(() => updateBlockSettings(attempt + 1, maxAttempts), delay);
+              } else {
+                console.error('❌ Failed to update widget settings after all attempts');
+              }
+              return false;
+            }
+          } catch (updateError) {
+            console.error(`⚠️ Error updating widget settings (attempt ${attempt}):`, updateError);
+            if (attempt < maxAttempts) {
+              const delay = attempt * 2000;
+              setTimeout(() => updateBlockSettings(attempt + 1, maxAttempts), delay);
+            }
+            return false;
+          }
+        };
+
+        // Start the update process after initial delay
+        setTimeout(() => updateBlockSettings(1, 5), 3000); // Wait 3 seconds initially
+      }
 
       console.log('🧭 Theme Editor Debug Params:', {
         shop,
@@ -841,7 +867,7 @@ export default function Dashboard() {
         selectedIdea,
         productHandleForPreview,
         productTitleForPreview,
-        blockAlreadyExists,
+        addBlockParams,
         editorUrl
       });
     } catch (err) {
