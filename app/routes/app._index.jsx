@@ -842,8 +842,6 @@ export default function Dashboard() {
         addBlockParams,
         editorUrl
       });
-
-      window.open(editorUrl, '_blank', 'noopener');
     } catch (err) {
       console.error('❌ Failed to open Theme Editor (debug):', err);
       alert(`Failed to open Theme Editor: ${err.message}`);
