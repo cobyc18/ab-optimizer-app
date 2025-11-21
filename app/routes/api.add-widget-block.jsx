@@ -543,6 +543,66 @@ export const action = async ({ request }) => {
       blockId,
       appExtensionId
     });
+
+    // 3. Verify the settings were saved by reading the template back
+    if (templateFilename.endsWith('.json')) {
+      console.log('🔍 Verifying settings were saved by reading template back...');
+      const verifyRes = await admin.graphql(
+        `query getFile($themeId: ID!, $filename: String!) {
+          theme(id: $themeId) {
+            files(filenames: [$filename]) {
+              nodes {
+                filename
+                body { 
+                  ... on OnlineStoreThemeFileBodyText { 
+                    content 
+                  } 
+                }
+              }
+            }
+          }
+        }`,
+        { 
+          variables: { 
+            themeId: themeId, 
+            filename: templateFilename 
+          } 
+        }
+      );
+      
+      const verifyJson = await verifyRes.json();
+      const verifyContent = verifyJson.data?.theme?.files?.nodes?.[0]?.body?.content;
+      
+      if (verifyContent) {
+        try {
+          const cleanedContent = stripJsonComments(verifyContent);
+          const verifyTemplate = JSON.parse(cleanedContent);
+          const mainSection = verifyTemplate.sections?.main;
+          const blocks = mainSection?.blocks || {};
+          
+          // Find our app block
+          const appBlock = Object.values(blocks).find(block => 
+            typeof block === 'object' && 
+            block.type && 
+            block.type.includes('simple-text-badge')
+          );
+          
+          if (appBlock) {
+            console.log('✅ Verified app block settings in template:', {
+              blockType: appBlock.type,
+              settings: appBlock.settings,
+              headerText: appBlock.settings?.header_text,
+              bodyText: appBlock.settings?.body_text,
+              textColor: appBlock.settings?.text_color
+            });
+          } else {
+            console.warn('⚠️ App block not found in verified template');
+          }
+        } catch (verifyError) {
+          console.error('❌ Error verifying template:', verifyError);
+        }
+      }
+    }
     
     return json({ 
       success: true, 
