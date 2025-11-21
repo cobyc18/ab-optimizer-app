@@ -786,15 +786,16 @@ export default function Dashboard() {
 
           const addBlockResult = await addBlockResponse.json();
           
-          if (addBlockResponse.ok && addBlockResult.success) {
-            console.log('✅ Widget block added with settings via API:', addBlockResult);
-            // Block is now in the JSON template with correct settings
+          if (addBlockResponse.ok && addBlockResult.success && addBlockResult.verificationSuccess) {
+            console.log('✅ Widget block added and verified via API:', addBlockResult);
+            // Block is now in the JSON template with correct settings and verified
             // Open theme editor WITHOUT addAppBlockId (block is already there)
             const editorUrlWithoutBlock = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${cacheBuster}`;
             window.open(editorUrlWithoutBlock, '_blank', 'noopener');
           } else {
-            console.error('⚠️ Failed to add widget block via API:', addBlockResult.error);
-            // Fallback: use deep link approach (will have default settings)
+            console.error('⚠️ Failed to add widget block via API or verification failed:', addBlockResult.error || addBlockResult.message);
+            // Fallback: use deep link approach (will have default settings, but at least block will be added)
+            console.log('🔄 Using deep link fallback to ensure block is added...');
             const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
             window.open(editorUrl, '_blank', 'noopener');
           }
