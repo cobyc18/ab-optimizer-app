@@ -742,7 +742,35 @@ export default function Dashboard() {
 
       const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
       const widgetHandle = selectedIdea?.blockId || null;
-      const addBlockParams = widgetHandle
+      
+      // Check if widget block already exists in the template
+      let blockAlreadyExists = false;
+      if (widgetHandle && wizardVariantTemplateFilename) {
+        try {
+          const checkResponse = await fetch('/api/check-widget-exists', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+              themeId: mainTheme.id,
+              blockId: widgetHandle,
+              appExtensionId: apiKey
+            })
+          });
+          
+          if (checkResponse.ok) {
+            const checkResult = await checkResponse.json();
+            blockAlreadyExists = checkResult.exists || false;
+            console.log('🔍 Widget block existence check:', { exists: blockAlreadyExists });
+          }
+        } catch (checkError) {
+          console.error('⚠️ Error checking if widget exists:', checkError);
+          // If check fails, assume it doesn't exist and proceed with deep link
+        }
+      }
+      
+      // Only add deep link parameter if block doesn't already exist
+      const addBlockParams = (widgetHandle && !blockAlreadyExists)
         ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
         : '';
 
