@@ -211,6 +211,7 @@ export const action = async ({ request }) => {
     console.log('📄 Template file retrieved successfully, type:', templateFilename.endsWith('.json') ? 'JSON' : 'Liquid');
 
     let updatedContent;
+    let blockInstanceId; // Declare at higher scope for verification code
     // For JSON templates, app blocks use the format: shopify://apps/{api_key}/blocks/{block_handle}/{unique_id}
     // The appExtensionId is the same as the API key (client_id from shopify.app.toml)
     const appApiKey = appExtensionId; // This is the API key (client_id)
@@ -311,7 +312,7 @@ export const action = async ({ request }) => {
         }
 
         // Generate unique block instance ID
-        const blockInstanceId = `app_block_${Date.now()}`;
+        blockInstanceId = `app_block_${Date.now()}`;
 
         // Add the app block
         // Ensure settings are properly formatted - all values must be strings for richtext
@@ -440,7 +441,7 @@ export const action = async ({ request }) => {
           }
 
           // Generate unique block instance ID
-          const blockInstanceId = `app_block_${Date.now()}`;
+          blockInstanceId = `app_block_${Date.now()}`;
 
           // Add the app block
           mainSection.blocks[blockInstanceId] = {
