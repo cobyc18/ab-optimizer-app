@@ -810,6 +810,11 @@ export default function Dashboard() {
         window.open(editorUrl, '_blank', 'noopener');
       }
 
+      // Determine which URL was used (for debugging)
+      const finalEditorUrl = selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0
+        ? `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${cacheBuster}`
+        : `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
+
       console.log('🧭 Theme Editor Debug Params:', {
         shop,
         storeSubdomain,
@@ -825,7 +830,7 @@ export default function Dashboard() {
         productHandleForPreview,
         productTitleForPreview,
         addBlockParams,
-        editorUrl
+        finalEditorUrl
       });
     } catch (err) {
       console.error('❌ Failed to open Theme Editor (debug):', err);
