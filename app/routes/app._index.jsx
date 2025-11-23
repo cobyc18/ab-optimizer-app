@@ -691,7 +691,7 @@ export default function Dashboard() {
       const storeSubdomain = (shop || '').replace('.myshopify.com', '');
 
       if (!wizardVariantProductHandle) {
-        console.error('❌ No stored product handle for this variant template');
+        console.error('❌ No stored product handle for this variant template!');
         alert('We could not determine which product to preview. Please go back, re-select your product, and duplicate the template again.');
         return;
       }
