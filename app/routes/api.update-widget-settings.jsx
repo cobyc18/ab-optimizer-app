@@ -274,6 +274,35 @@ export const action = async ({ request }) => {
       ...formattedSettings
     };
 
+    // Reorder block to appear after "price" block
+    if (!mainSection.block_order) {
+      mainSection.block_order = [];
+    }
+    
+    // Remove block from current position if it exists
+    const currentIndex = mainSection.block_order.indexOf(blockInstanceId);
+    if (currentIndex !== -1) {
+      mainSection.block_order.splice(currentIndex, 1);
+    }
+    
+    // Find "price" block index and insert after it
+    const priceIndex = mainSection.block_order.indexOf('price');
+    if (priceIndex !== -1) {
+      // Insert after price block
+      mainSection.block_order.splice(priceIndex + 1, 0, blockInstanceId);
+      console.log('✅ Reordered block to appear after "price":', {
+        blockInstanceId,
+        priceIndex,
+        newBlockOrder: mainSection.block_order
+      });
+    } else {
+      // Fallback: add to end if price block not found
+      if (!mainSection.block_order.includes(blockInstanceId)) {
+        mainSection.block_order.push(blockInstanceId);
+      }
+      console.log('⚠️ Price block not found, added block to end of block_order');
+    }
+
     // Update the template
     templateJson.sections[mainSectionKey] = mainSection;
 
