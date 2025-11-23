@@ -331,9 +331,16 @@ export const action = async ({ request }) => {
           settings: formattedSettings
         };
 
-        // Add to block_order if not already there
+        // Add to block_order after "price" block if not already there
         if (!mainSection.block_order.includes(blockInstanceId)) {
-          mainSection.block_order.push(blockInstanceId);
+          const priceIndex = mainSection.block_order.indexOf('price');
+          if (priceIndex !== -1) {
+            // Insert after price block
+            mainSection.block_order.splice(priceIndex + 1, 0, blockInstanceId);
+          } else {
+            // Fallback: add to end if price block not found
+            mainSection.block_order.push(blockInstanceId);
+          }
         }
 
         templateJson.sections[mainSectionKey] = mainSection;
@@ -449,9 +456,16 @@ export const action = async ({ request }) => {
             settings: appliedBlockSettings
           };
 
-          // Add to block_order if not already there
+          // Add to block_order after "price" block if not already there
           if (!mainSection.block_order.includes(blockInstanceId)) {
-            mainSection.block_order.push(blockInstanceId);
+            const priceIndex = mainSection.block_order.indexOf('price');
+            if (priceIndex !== -1) {
+              // Insert after price block
+              mainSection.block_order.splice(priceIndex + 1, 0, blockInstanceId);
+            } else {
+              // Fallback: add to end if price block not found
+              mainSection.block_order.push(blockInstanceId);
+            }
           }
 
           sections[mainSectionKey] = mainSection;
