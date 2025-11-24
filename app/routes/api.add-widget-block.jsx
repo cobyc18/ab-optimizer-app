@@ -367,6 +367,16 @@ export const action = async ({ request }) => {
           blockSettings: appliedBlockSettings,
           settingsKeys: Object.keys(appliedBlockSettings)
         });
+        
+        // Log the actual block structure that will be sent
+        console.log('🔍 Block structure being sent to Shopify:', JSON.stringify({
+          blockId: blockInstanceId,
+          block: mainSection.blocks[blockInstanceId],
+          blockOrder: mainSection.block_order
+        }, null, 2));
+        
+        // Log a preview of the JSON content (first 2000 chars)
+        console.log('📄 JSON content preview (first 2000 chars):', updatedContent.substring(0, 2000));
 
       } catch (parseError) {
         console.error('❌ Failed to parse JSON template:', parseError);
@@ -580,7 +590,8 @@ export const action = async ({ request }) => {
 
     // 4. If no jobId, this is synchronous - verify the settings were saved
     console.log('⏳ Synchronous operation detected. Verifying settings...');
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    // Wait longer for Shopify to process even synchronous operations
+    await new Promise(resolve => setTimeout(resolve, 3000));
 
     // 5. Verify the settings were saved by reading the template back with retry logic
     if (templateFilename.endsWith('.json')) {
@@ -643,6 +654,16 @@ export const action = async ({ request }) => {
                 }))
               });
               
+              // Log what we're looking for
+              console.log('🔍 Searching for app block:', {
+                blockInstanceId,
+                appBlockType,
+                searchingFor: {
+                  byType: 'shopify://apps or simple-text-badge',
+                  byId: blockInstanceId
+                }
+              });
+              
               // Find our app block - check for both the full shopify:// format and just the block handle
               const appBlock = Object.values(blocks).find(block => 
                 typeof block === 'object' && 
@@ -654,6 +675,13 @@ export const action = async ({ request }) => {
               
               // Also try finding by block ID if we know it
               const appBlockById = blockInstanceId ? blocks[blockInstanceId] : null;
+              
+              console.log('🔍 Block search results:', {
+                foundByType: !!appBlock,
+                foundById: !!appBlockById,
+                appBlockType: appBlock?.type,
+                appBlockByIdType: appBlockById?.type
+              });
               
               // Use whichever we found
               const foundBlock = appBlock || appBlockById;
