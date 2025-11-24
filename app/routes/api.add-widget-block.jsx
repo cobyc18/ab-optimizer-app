@@ -727,7 +727,8 @@ export const action = async ({ request }) => {
       success: true, 
       message: `App block '${blockId}' added to template '${templateFilename}'`,
       templateFilename,
-      updatedFiles
+      updatedFiles,
+      jobId: jobId || null
     });
 
   } catch (error) {
