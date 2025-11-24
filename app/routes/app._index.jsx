@@ -776,75 +776,66 @@ export default function Dashboard() {
         };
 
         // Poll for the block to exist, then update settings
-        const pollAndUpdateSettings = async (maxAttempts = 15, delay = 1500) => {
-          for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+        // Note: Deep links add blocks to the editor UI immediately, but the file may not be saved yet
+        // So we'll try to update settings after a reasonable delay, even if we can't verify the block exists
+        const pollAndUpdateSettings = async () => {
+          // Wait longer initially for the deep link to fully process and the editor to add the block
+          console.log('⏳ Waiting for deep link to process and block to be added...');
+          await new Promise(resolve => setTimeout(resolve, 5000)); // 5 second initial wait
+          
+          // Try to update settings - the block should exist in the editor by now
+          // Even if it's not in the file yet, Shopify might handle the update gracefully
+          let updateAttempts = 0;
+          const maxUpdateAttempts = 5;
+          const updateDelay = 2000;
+          
+          while (updateAttempts < maxUpdateAttempts) {
+            updateAttempts++;
             try {
-              // Check if block exists
-              const checkResponse = await fetch('/api/check-widget-exists', {
+              console.log(`🔄 Attempting to update settings (attempt ${updateAttempts}/${maxUpdateAttempts})...`);
+              
+              const updateResponse = await fetch('/api/update-widget-settings', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                   templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
                   themeId: mainTheme.id,
                   blockId: widgetHandle,
-                  appExtensionId: apiKey
+                  appExtensionId: apiKey,
+                  blockSettings: finalBlockSettings
                 })
               });
 
-              if (checkResponse.ok) {
-                const checkResult = await checkResponse.json();
-                if (checkResult.exists) {
-                  console.log(`✅ Block found after ${attempt} attempt(s), updating settings...`);
-                  
-                  // Block exists, now update settings
-                  const updateResponse = await fetch('/api/update-widget-settings', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
-                      themeId: mainTheme.id,
-                      blockId: widgetHandle,
-                      appExtensionId: apiKey,
-                      blockSettings: finalBlockSettings
-                    })
-                  });
-
-                  const updateResult = await updateResponse.json();
-                  
-                  if (updateResponse.ok && updateResult.success) {
-                    console.log('✅ Widget block settings updated successfully:', updateResult);
-                    // Reload the editor window to show the updated settings
-                    if (editorWindow && !editorWindow.closed) {
-                      setTimeout(() => {
-                        editorWindow.location.reload();
-                      }, 1000);
-                    }
-                    return; // Success, exit polling
-                  } else {
-                    console.error('⚠️ Failed to update widget block settings:', updateResult.error);
-                    return; // Exit even on update failure
-                  }
-                } else {
-                  console.log(`⏳ Block not found yet (attempt ${attempt}/${maxAttempts}), waiting ${delay}ms...`);
+              const updateResult = await updateResponse.json();
+              
+              if (updateResponse.ok && updateResult.success) {
+                console.log('✅ Widget block settings updated successfully:', updateResult);
+                // Reload the editor window to show the updated settings
+                if (editorWindow && !editorWindow.closed) {
+                  setTimeout(() => {
+                    editorWindow.location.reload();
+                  }, 1000);
+                }
+                return; // Success, exit
+              } else {
+                console.log(`⏳ Update failed (attempt ${updateAttempts}), will retry...`, updateResult.error);
+                if (updateAttempts < maxUpdateAttempts) {
+                  await new Promise(resolve => setTimeout(resolve, updateDelay));
                 }
               }
             } catch (error) {
-              console.error(`⚠️ Error checking/updating block (attempt ${attempt}):`, error);
-            }
-
-            // Wait before next attempt (except on last attempt)
-            if (attempt < maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, delay));
+              console.error(`⚠️ Error updating block settings (attempt ${updateAttempts}):`, error);
+              if (updateAttempts < maxUpdateAttempts) {
+                await new Promise(resolve => setTimeout(resolve, updateDelay));
+              }
             }
           }
           
-          console.warn(`⚠️ Block not found after ${maxAttempts} attempts. Settings may need to be updated manually.`);
+          console.warn(`⚠️ Failed to update settings after ${maxUpdateAttempts} attempts. Settings may need to be updated manually in the theme editor.`);
         };
 
-        // Start polling after a short initial delay to allow deep link to process
-        setTimeout(() => {
-          pollAndUpdateSettings();
-        }, 2000);
+        // Start the update process after opening the editor
+        pollAndUpdateSettings();
       }
 
       console.log('🧭 Theme Editor Debug Params:', {

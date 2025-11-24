@@ -170,13 +170,42 @@ export const action = async ({ request }) => {
 
     // Check if an app block of this type already exists
     // Look for blocks with type containing the block handle or shopify://apps format
-    const blockExists = Object.values(blocks).some(block => 
-      typeof block === 'object' && 
-      block.type && 
-      (block.type.includes(blockId) || 
-       block.type.includes(`blocks/${blockId}`) ||
-       block.type.includes(`shopify://apps/${appExtensionId}/blocks/${blockId}`))
-    );
+    const allBlockTypes = Object.entries(blocks).map(([id, block]) => ({
+      id,
+      type: block?.type,
+      hasType: !!block?.type
+    }));
+    
+    console.log('🔍 Checking for app block:', {
+      blockId,
+      appExtensionId,
+      totalBlocks: Object.keys(blocks).length,
+      allBlockTypes,
+      searchingFor: [
+        blockId,
+        `blocks/${blockId}`,
+        `shopify://apps/${appExtensionId}/blocks/${blockId}`
+      ]
+    });
+    
+    const blockExists = Object.values(blocks).some(block => {
+      if (typeof block !== 'object' || !block.type) return false;
+      
+      const type = block.type;
+      const matches = 
+        type.includes(blockId) || 
+        type.includes(`blocks/${blockId}`) ||
+        type.includes(`shopify://apps/${appExtensionId}/blocks/${blockId}`) ||
+        type.startsWith('shopify://apps/') && type.includes(`/blocks/${blockId}`);
+      
+      if (matches) {
+        console.log('✅ Found matching block:', { type, block });
+      }
+      
+      return matches;
+    });
+
+    console.log('🔍 Block existence check result:', { exists: blockExists });
 
     return json({ 
       exists: blockExists
