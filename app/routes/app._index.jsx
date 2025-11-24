@@ -743,37 +743,22 @@ export default function Dashboard() {
       const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
       const widgetHandle = selectedIdea?.blockId || null;
       
-      // Check if widget block already exists in the template
-      // Note: The block should already be added right after template duplication in createVariantTemplate,
-      // but we check here as a fallback in case something went wrong
-      let blockAlreadyExists = false;
-      if (widgetHandle && wizardVariantTemplateFilename) {
-        try {
-          const checkResponse = await fetch('/api/check-widget-exists', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
-              themeId: mainTheme.id,
-              blockId: widgetHandle,
-              appExtensionId: apiKey
-            })
-          });
-          
-          if (checkResponse.ok) {
-            const checkResult = await checkResponse.json();
-            blockAlreadyExists = checkResult.exists || false;
-            console.log('🔍 Widget block existence check:', { exists: blockAlreadyExists });
-          }
-        } catch (checkError) {
-          console.error('⚠️ Error checking if widget exists:', checkError);
-          // If check fails, assume it doesn't exist and proceed with fallback addition
-        }
-      }
+      // Always use deep link to add the block (most reliable method)
+      // Then immediately update settings after the editor opens
+      const addBlockParams = widgetHandle
+        ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
+        : '';
 
-      // Fallback: If block doesn't exist (shouldn't happen since we add it after duplication),
-      // add it via API before opening theme editor
-      if (!blockAlreadyExists && widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
+      // Add cache-busting parameter to force theme editor to reload fresh content
+      const cacheBuster = `&_t=${Date.now()}`;
+
+      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
+
+      // Open the theme editor
+      const editorWindow = window.open(editorUrl, '_blank');
+
+      // If we have widget settings, update them immediately after opening the editor
+      if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
         // Format settings for the API
         const formatText = (text) => {
           if (!text || text.trim() === '') return '<p></p>';
@@ -790,81 +775,39 @@ export default function Dashboard() {
           background_color: widgetSettings.backgroundColor || '#f5f5f0'
         };
 
-        try {
-          console.log('🔧 Fallback: Adding widget block with settings via API (block should already exist from template duplication)...');
-          
-          const addBlockResponse = await fetch('/api/add-widget-block', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
-              themeId: mainTheme.id,
-              blockId: widgetHandle,
-              appExtensionId: apiKey,
-              blockSettings: finalBlockSettings
-            })
-          });
+        // Wait a moment for the editor to open and the block to be added via deep link
+        setTimeout(async () => {
+          try {
+            console.log('🔧 Updating widget block settings immediately after editor opens...');
+            
+            const updateResponse = await fetch('/api/update-widget-settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                themeId: mainTheme.id,
+                blockId: widgetHandle,
+                appExtensionId: apiKey,
+                blockSettings: finalBlockSettings
+              })
+            });
 
-          const addBlockResult = await addBlockResponse.json();
-          
-          if (addBlockResponse.ok && addBlockResult.success) {
-            console.log('✅ Widget block added successfully with settings:', addBlockResult);
+            const updateResult = await updateResponse.json();
             
-            // Wait longer for Shopify to process the update
-            // themeFilesUpsert may return success but Shopify needs time to process app blocks
-            console.log('⏳ Waiting for Shopify to process app block addition (5 seconds)...');
-            await new Promise(resolve => setTimeout(resolve, 5000));
-            
-            // Verify the block was actually added by checking again
-            try {
-              const verifyResponse = await fetch('/api/check-widget-exists', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
-                  themeId: mainTheme.id,
-                  blockId: widgetHandle,
-                  appExtensionId: apiKey
-                })
-              });
-              
-              if (verifyResponse.ok) {
-                const verifyResult = await verifyResponse.json();
-                if (verifyResult.exists) {
-                  console.log('✅ Verified: Widget block exists in template');
-                  blockAlreadyExists = true;
-                } else {
-                  console.warn('⚠️ Widget block not found after addition - will use deep link as fallback');
-                  // Don't mark as existing - will use deep link
-                }
+            if (updateResponse.ok && updateResult.success) {
+              console.log('✅ Widget block settings updated successfully:', updateResult);
+              // Reload the editor window to show the updated settings
+              if (editorWindow && !editorWindow.closed) {
+                editorWindow.location.reload();
               }
-            } catch (verifyError) {
-              console.error('⚠️ Error verifying block existence:', verifyError);
-              // Trust the API success and mark as existing
-              blockAlreadyExists = true;
+            } else {
+              console.error('⚠️ Failed to update widget block settings:', updateResult.error);
             }
-          } else {
-            console.error('⚠️ Failed to add widget block via API:', addBlockResult.error);
-            // Continue anyway - will fall back to deep link approach
+          } catch (updateError) {
+            console.error('⚠️ Error updating widget block settings:', updateError);
           }
-        } catch (addBlockError) {
-          console.error('⚠️ Error adding widget block via API:', addBlockError);
-          // Continue anyway - will fall back to deep link approach
-        }
+        }, 2000); // Wait 2 seconds for the editor to open and block to be added
       }
-      
-      // Only add deep link parameter if block doesn't already exist (fallback)
-      const addBlockParams = (widgetHandle && !blockAlreadyExists)
-        ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
-        : '';
-
-      // Add cache-busting parameter to force theme editor to reload fresh content
-      const cacheBuster = `&_t=${Date.now()}`;
-
-      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
-
-      // Open the theme editor
-      window.open(editorUrl, '_blank');
 
       console.log('🧭 Theme Editor Debug Params:', {
         shop,
@@ -1436,61 +1379,9 @@ export default function Dashboard() {
           conditionMet: !!(selectedIdea?.blockId && selectedIdea?.appExtensionId)
         });
         
-        // Add widget block with settings immediately after template duplication
-        if (selectedIdea?.blockId === 'simple-text-badge' && selectedIdea?.appExtensionId && widgetSettings && Object.keys(widgetSettings).length > 0) {
-          try {
-            const appExtensionId = selectedIdea.appExtensionId;
-            // Wrap text in <p> tags if not already wrapped, to match richtext format
-            const formatText = (text) => {
-              if (!text || text.trim() === '') return '<p></p>'; // Return empty p tag instead of empty string
-              // If text already contains HTML tags, return as is
-              if (text.includes('<') && text.includes('>')) return text;
-              // Otherwise wrap in <p> tags
-              return `<p>${text}</p>`;
-            };
-            
-            const finalBlockSettings = {
-              header_text: formatText(widgetSettings.headerText),
-              body_text: formatText(widgetSettings.bodyText),
-              text_color: widgetSettings.textColor || '#1a5f5f',
-              background_color: widgetSettings.backgroundColor || '#f5f5f0'
-            };
-            
-            console.log('🔧 Adding widget block immediately after template duplication:', {
-              templateFilename: result.newFilename,
-              blockId: selectedIdea.blockId,
-              appExtensionId,
-              blockSettings: finalBlockSettings
-            });
-
-            // Add the widget block via API immediately after template duplication
-            const addBlockResponse = await fetch('/api/add-widget-block', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                templateFilename: result.newFilename,
-                themeId: mainTheme.id,
-                blockId: selectedIdea.blockId,
-                appExtensionId: appExtensionId,
-                blockSettings: finalBlockSettings
-              })
-            });
-
-            const addBlockResult = await addBlockResponse.json();
-            
-            if (addBlockResponse.ok && addBlockResult.success) {
-              console.log('✅ Widget block added successfully after template duplication:', addBlockResult);
-              // Wait a bit for Shopify to process the update
-              await new Promise(resolve => setTimeout(resolve, 3000));
-            } else {
-              console.error('⚠️ Failed to add widget block after template duplication:', addBlockResult.error);
-              // Don't fail the whole process if widget block addition fails
-            }
-          } catch (widgetError) {
-            console.error('⚠️ Error adding widget block after template duplication:', widgetError);
-            // Don't fail the whole process if widget block addition fails
-          }
-        }
+        // Note: We don't add the widget block here via API because Shopify may silently reject it.
+        // Instead, we'll use the deep link approach in openVariantInThemeEditor which is more reliable.
+        // The block will be added when the theme editor opens, and then we'll immediately update its settings.
         
         creationResult = { success: true, variantName, newFilename: result.newFilename };
       } else {
