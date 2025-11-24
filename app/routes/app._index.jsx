@@ -806,10 +806,40 @@ export default function Dashboard() {
           
           if (addBlockResponse.ok && addBlockResult.success) {
             console.log('✅ Widget block added successfully with settings:', addBlockResult);
-            // Mark as existing so we don't use deep link
-            blockAlreadyExists = true;
-            // Wait a bit for Shopify to process the update
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            
+            // Wait longer for Shopify to process the update
+            // themeFilesUpsert may return success but Shopify needs time to process app blocks
+            console.log('⏳ Waiting for Shopify to process app block addition (5 seconds)...');
+            await new Promise(resolve => setTimeout(resolve, 5000));
+            
+            // Verify the block was actually added by checking again
+            try {
+              const verifyResponse = await fetch('/api/check-widget-exists', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                  themeId: mainTheme.id,
+                  blockId: widgetHandle,
+                  appExtensionId: apiKey
+                })
+              });
+              
+              if (verifyResponse.ok) {
+                const verifyResult = await verifyResponse.json();
+                if (verifyResult.exists) {
+                  console.log('✅ Verified: Widget block exists in template');
+                  blockAlreadyExists = true;
+                } else {
+                  console.warn('⚠️ Widget block not found after addition - will use deep link as fallback');
+                  // Don't mark as existing - will use deep link
+                }
+              }
+            } catch (verifyError) {
+              console.error('⚠️ Error verifying block existence:', verifyError);
+              // Trust the API success and mark as existing
+              blockAlreadyExists = true;
+            }
           } else {
             console.error('⚠️ Failed to add widget block via API:', addBlockResult.error);
             // Continue anyway - will fall back to deep link approach
