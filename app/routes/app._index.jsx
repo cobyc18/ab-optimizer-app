@@ -743,7 +743,21 @@ export default function Dashboard() {
       const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
       const widgetHandle = selectedIdea?.blockId || null;
       
-      // If we have widget settings, add the block via API first, poll job until done, then open editor
+      // Always use deep link to add the block (Shopify validates and adds it correctly)
+      // Then immediately update settings via API
+      const addBlockParams = widgetHandle
+        ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
+        : '';
+
+      // Add cache-busting parameter to force theme editor to reload fresh content
+      const cacheBuster = `&_t=${Date.now()}`;
+
+      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
+
+      // Open the theme editor
+      const editorWindow = window.open(editorUrl, '_blank');
+
+      // If we have widget settings, update them after the block is added via deep link
       if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
         // Format settings for the API
         const formatText = (text) => {
@@ -761,105 +775,77 @@ export default function Dashboard() {
           background_color: widgetSettings.backgroundColor || '#f5f5f0'
         };
 
-        try {
-          // 1. Add block via API with settings
-          console.log('🔧 Adding widget block via API with settings...');
-          const addBlockResponse = await fetch('/api/add-widget-block', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
-              themeId: mainTheme.id,
-              blockId: widgetHandle,
-              appExtensionId: apiKey,
-              blockSettings: finalBlockSettings
-            })
-          });
+        // Poll for the block to exist, then update settings
+        const pollAndUpdateSettings = async (maxAttempts = 15, delay = 1500) => {
+          for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+              // Check if block exists
+              const checkResponse = await fetch('/api/check-widget-exists', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                  themeId: mainTheme.id,
+                  blockId: widgetHandle,
+                  appExtensionId: apiKey
+                })
+              });
 
-          const addBlockResult = await addBlockResponse.json();
-          
-          if (!addBlockResponse.ok || !addBlockResult.success) {
-            console.error('⚠️ Failed to add widget block via API:', addBlockResult.error);
-            // Fallback to deep link approach
-            const addBlockParams = `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`;
-            const cacheBuster = `&_t=${Date.now()}`;
-            const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
-            window.open(editorUrl, '_blank');
-            return;
-          }
-
-          const jobId = addBlockResult.jobId;
-          
-          // 2. Poll job until done
-          if (jobId) {
-            console.log('⏳ Polling job until complete...', jobId);
-            const pollJob = async (maxAttempts = 30, delay = 1000) => {
-              for (let attempt = 1; attempt <= maxAttempts; attempt++) {
-                try {
-                  const pollResponse = await fetch('/api/poll-job', {
+              if (checkResponse.ok) {
+                const checkResult = await checkResponse.json();
+                if (checkResult.exists) {
+                  console.log(`✅ Block found after ${attempt} attempt(s), updating settings...`);
+                  
+                  // Block exists, now update settings
+                  const updateResponse = await fetch('/api/update-widget-settings', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ jobId })
+                    body: JSON.stringify({
+                      templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                      themeId: mainTheme.id,
+                      blockId: widgetHandle,
+                      appExtensionId: apiKey,
+                      blockSettings: finalBlockSettings
+                    })
                   });
 
-                  if (pollResponse.ok) {
-                    const pollResult = await pollResponse.json();
-                    if (pollResult.done) {
-                      console.log(`✅ Job completed after ${attempt} attempt(s)`);
-                      // Wait a moment for Shopify to finalize
-                      await new Promise(resolve => setTimeout(resolve, 1000));
-                      return true;
-                    } else {
-                      console.log(`⏳ Job still processing (attempt ${attempt}/${maxAttempts})...`);
+                  const updateResult = await updateResponse.json();
+                  
+                  if (updateResponse.ok && updateResult.success) {
+                    console.log('✅ Widget block settings updated successfully:', updateResult);
+                    // Reload the editor window to show the updated settings
+                    if (editorWindow && !editorWindow.closed) {
+                      setTimeout(() => {
+                        editorWindow.location.reload();
+                      }, 1000);
                     }
+                    return; // Success, exit polling
+                  } else {
+                    console.error('⚠️ Failed to update widget block settings:', updateResult.error);
+                    return; // Exit even on update failure
                   }
-                } catch (error) {
-                  console.error(`⚠️ Error polling job (attempt ${attempt}):`, error);
-                }
-
-                if (attempt < maxAttempts) {
-                  await new Promise(resolve => setTimeout(resolve, delay));
+                } else {
+                  console.log(`⏳ Block not found yet (attempt ${attempt}/${maxAttempts}), waiting ${delay}ms...`);
                 }
               }
-              console.warn(`⚠️ Job not completed after ${maxAttempts} attempts, proceeding anyway`);
-              return false;
-            };
+            } catch (error) {
+              console.error(`⚠️ Error checking/updating block (attempt ${attempt}):`, error);
+            }
 
-            await pollJob();
-          } else {
-            // No job ID means synchronous, wait a bit anyway
-            console.log('⏳ No job ID (synchronous), waiting 2 seconds...');
-            await new Promise(resolve => setTimeout(resolve, 2000));
+            // Wait before next attempt (except on last attempt)
+            if (attempt < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, delay));
+            }
           }
+          
+          console.warn(`⚠️ Block not found after ${maxAttempts} attempts. Settings may need to be updated manually.`);
+        };
 
-          // 3. Open editor WITHOUT addAppBlockId (block already added via API)
-          const cacheBuster = `&_t=${Date.now()}`;
-          const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${cacheBuster}`;
-          window.open(editorUrl, '_blank');
-          return;
-        } catch (error) {
-          console.error('⚠️ Error adding block via API, falling back to deep link:', error);
-          // Fallback to deep link approach
-          const addBlockParams = `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`;
-          const cacheBuster = `&_t=${Date.now()}`;
-          const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
-          window.open(editorUrl, '_blank');
-          return;
-        }
+        // Start polling after a short initial delay to allow deep link to process
+        setTimeout(() => {
+          pollAndUpdateSettings();
+        }, 2000);
       }
-      
-      // No widget settings or not simple-text-badge - use deep link approach
-      const addBlockParams = widgetHandle
-        ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
-        : '';
-
-      // Add cache-busting parameter to force theme editor to reload fresh content
-      const cacheBuster = `&_t=${Date.now()}`;
-
-      const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
-
-      // Open the theme editor
-      window.open(editorUrl, '_blank');
 
       console.log('🧭 Theme Editor Debug Params:', {
         shop,
