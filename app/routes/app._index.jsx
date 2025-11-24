@@ -744,6 +744,8 @@ export default function Dashboard() {
       const widgetHandle = selectedIdea?.blockId || null;
       
       // Check if widget block already exists in the template
+      // Note: The block should already be added right after template duplication in createVariantTemplate,
+      // but we check here as a fallback in case something went wrong
       let blockAlreadyExists = false;
       if (widgetHandle && wizardVariantTemplateFilename) {
         try {
@@ -765,11 +767,12 @@ export default function Dashboard() {
           }
         } catch (checkError) {
           console.error('⚠️ Error checking if widget exists:', checkError);
-          // If check fails, assume it doesn't exist and proceed with API addition
+          // If check fails, assume it doesn't exist and proceed with fallback addition
         }
       }
 
-      // If block doesn't exist and we have widget settings, add it via API FIRST before opening theme editor
+      // Fallback: If block doesn't exist (shouldn't happen since we add it after duplication),
+      // add it via API before opening theme editor
       if (!blockAlreadyExists && widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
         // Format settings for the API
         const formatText = (text) => {
@@ -788,7 +791,7 @@ export default function Dashboard() {
         };
 
         try {
-          console.log('🔧 Adding widget block with settings via API before opening theme editor...');
+          console.log('🔧 Fallback: Adding widget block with settings via API (block should already exist from template duplication)...');
           
           const addBlockResponse = await fetch('/api/add-widget-block', {
             method: 'POST',
@@ -1433,8 +1436,8 @@ export default function Dashboard() {
           conditionMet: !!(selectedIdea?.blockId && selectedIdea?.appExtensionId)
         });
         
-        // Add widget block with settings if simple-text-badge is selected
-        if (selectedIdea?.blockId === 'simple-text-badge' && selectedIdea?.appExtensionId) {
+        // Add widget block with settings immediately after template duplication
+        if (selectedIdea?.blockId === 'simple-text-badge' && selectedIdea?.appExtensionId && widgetSettings && Object.keys(widgetSettings).length > 0) {
           try {
             const appExtensionId = selectedIdea.appExtensionId;
             // Wrap text in <p> tags if not already wrapped, to match richtext format
@@ -1446,41 +1449,46 @@ export default function Dashboard() {
               return `<p>${text}</p>`;
             };
             
-            const blockSettings = {
+            const finalBlockSettings = {
               header_text: formatText(widgetSettings.headerText),
               body_text: formatText(widgetSettings.bodyText),
-              text_color: widgetSettings.textColor || '#1a5f5f'
+              text_color: widgetSettings.textColor || '#1a5f5f',
+              background_color: widgetSettings.backgroundColor || '#f5f5f0'
             };
             
-            // Always include all settings so they're written to the JSON template
-            // This ensures Liquid can read them even if they're empty
-            const finalBlockSettings = {
-              header_text: blockSettings.header_text || '<p></p>',
-              body_text: blockSettings.body_text || '<p></p>',
-              text_color: blockSettings.text_color || '#1a5f5f'
-            };
-            
-            console.log('🔧 Widget settings being sent:', {
-              original: {
-                headerText: widgetSettings.headerText,
-                bodyText: widgetSettings.bodyText,
-                textColor: widgetSettings.textColor
-              },
-              formatted: blockSettings
-            });
-
-            // Store widget settings for later update (after deep link adds the block)
-            // The block will be added via deep link when theme editor opens,
-            // then we'll update its settings using /api/update-widget-settings
-            console.log('📝 Widget settings stored for later update:', {
+            console.log('🔧 Adding widget block immediately after template duplication:', {
               templateFilename: result.newFilename,
               blockId: selectedIdea.blockId,
               appExtensionId,
               blockSettings: finalBlockSettings
             });
+
+            // Add the widget block via API immediately after template duplication
+            const addBlockResponse = await fetch('/api/add-widget-block', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                templateFilename: result.newFilename,
+                themeId: mainTheme.id,
+                blockId: selectedIdea.blockId,
+                appExtensionId: appExtensionId,
+                blockSettings: finalBlockSettings
+              })
+            });
+
+            const addBlockResult = await addBlockResponse.json();
+            
+            if (addBlockResponse.ok && addBlockResult.success) {
+              console.log('✅ Widget block added successfully after template duplication:', addBlockResult);
+              // Wait a bit for Shopify to process the update
+              await new Promise(resolve => setTimeout(resolve, 3000));
+            } else {
+              console.error('⚠️ Failed to add widget block after template duplication:', addBlockResult.error);
+              // Don't fail the whole process if widget block addition fails
+            }
           } catch (widgetError) {
-            console.error('⚠️ Error storing widget settings:', widgetError);
-            // Don't fail the whole process if widget settings storage fails
+            console.error('⚠️ Error adding widget block after template duplication:', widgetError);
+            // Don't fail the whole process if widget block addition fails
           }
         }
         
