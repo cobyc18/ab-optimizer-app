@@ -565,12 +565,24 @@ export const action = async ({ request }) => {
       jobId: jobId || 'none (synchronous)'
     });
 
-    // 3. Wait for Shopify to process the update (handle caching)
-    // Add a delay to allow Shopify's internal systems to process the update
-    console.log('⏳ Waiting for Shopify to process template update (2 seconds)...');
+    // 3. If there's a jobId, this is an async operation - skip verification and return jobId
+    // The client will poll the job status before opening the theme editor
+    if (jobId) {
+      console.log('⏳ Async operation detected (jobId present). Skipping verification - client will poll job status.');
+      return json({ 
+        success: true, 
+        message: `App block '${blockId}' added to template '${templateFilename}'`,
+        templateFilename,
+        updatedFiles,
+        jobId: jobId
+      });
+    }
+
+    // 4. If no jobId, this is synchronous - verify the settings were saved
+    console.log('⏳ Synchronous operation detected. Verifying settings...');
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // 4. Verify the settings were saved by reading the template back with retry logic
+    // 5. Verify the settings were saved by reading the template back with retry logic
     if (templateFilename.endsWith('.json')) {
       console.log('🔍 Verifying settings were saved by reading template back...');
       
