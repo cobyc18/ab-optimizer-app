@@ -757,7 +757,7 @@ export default function Dashboard() {
       // Open the theme editor
       const editorWindow = window.open(editorUrl, '_blank');
 
-      // If we have widget settings, update them immediately after opening the editor
+      // If we have widget settings, update them after the block is added via deep link
       if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
         // Format settings for the API
         const formatText = (text) => {
@@ -775,38 +775,76 @@ export default function Dashboard() {
           background_color: widgetSettings.backgroundColor || '#f5f5f0'
         };
 
-        // Wait a moment for the editor to open and the block to be added via deep link
-        setTimeout(async () => {
-          try {
-            console.log('🔧 Updating widget block settings immediately after editor opens...');
-            
-            const updateResponse = await fetch('/api/update-widget-settings', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
-                themeId: mainTheme.id,
-                blockId: widgetHandle,
-                appExtensionId: apiKey,
-                blockSettings: finalBlockSettings
-              })
-            });
+        // Poll for the block to exist before updating settings
+        const pollAndUpdateSettings = async (maxAttempts = 10, delay = 1000) => {
+          for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+            try {
+              // Check if block exists
+              const checkResponse = await fetch('/api/check-widget-exists', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                  templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                  themeId: mainTheme.id,
+                  blockId: widgetHandle,
+                  appExtensionId: apiKey
+                })
+              });
 
-            const updateResult = await updateResponse.json();
-            
-            if (updateResponse.ok && updateResult.success) {
-              console.log('✅ Widget block settings updated successfully:', updateResult);
-              // Reload the editor window to show the updated settings
-              if (editorWindow && !editorWindow.closed) {
-                editorWindow.location.reload();
+              if (checkResponse.ok) {
+                const checkResult = await checkResponse.json();
+                if (checkResult.exists) {
+                  console.log(`✅ Block found after ${attempt} attempt(s), updating settings...`);
+                  
+                  // Block exists, now update settings
+                  const updateResponse = await fetch('/api/update-widget-settings', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                      themeId: mainTheme.id,
+                      blockId: widgetHandle,
+                      appExtensionId: apiKey,
+                      blockSettings: finalBlockSettings
+                    })
+                  });
+
+                  const updateResult = await updateResponse.json();
+                  
+                  if (updateResponse.ok && updateResult.success) {
+                    console.log('✅ Widget block settings updated successfully:', updateResult);
+                    // Reload the editor window to show the updated settings
+                    if (editorWindow && !editorWindow.closed) {
+                      setTimeout(() => {
+                        editorWindow.location.reload();
+                      }, 500);
+                    }
+                    return; // Success, exit polling
+                  } else {
+                    console.error('⚠️ Failed to update widget block settings:', updateResult.error);
+                    return; // Exit even on update failure
+                  }
+                } else {
+                  console.log(`⏳ Block not found yet (attempt ${attempt}/${maxAttempts}), waiting ${delay}ms...`);
+                }
               }
-            } else {
-              console.error('⚠️ Failed to update widget block settings:', updateResult.error);
+            } catch (error) {
+              console.error(`⚠️ Error checking/updating block (attempt ${attempt}):`, error);
             }
-          } catch (updateError) {
-            console.error('⚠️ Error updating widget block settings:', updateError);
+
+            // Wait before next attempt (except on last attempt)
+            if (attempt < maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, delay));
+            }
           }
-        }, 2000); // Wait 2 seconds for the editor to open and block to be added
+          
+          console.warn(`⚠️ Block not found after ${maxAttempts} attempts. Settings may need to be updated manually.`);
+        };
+
+        // Start polling after a short initial delay
+        setTimeout(() => {
+          pollAndUpdateSettings();
+        }, 2000);
       }
 
       console.log('🧭 Theme Editor Debug Params:', {
@@ -823,7 +861,6 @@ export default function Dashboard() {
         selectedIdea,
         productHandleForPreview,
         productTitleForPreview,
-        blockAlreadyExists,
         addBlockParams,
         editorUrl
       });
