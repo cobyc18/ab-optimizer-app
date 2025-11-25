@@ -743,9 +743,34 @@ export default function Dashboard() {
       const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
       const widgetHandle = selectedIdea?.blockId || null;
       
-      // Always use deep link to add the block (Shopify validates and adds it correctly)
-      // Then immediately update settings via API
-      const addBlockParams = widgetHandle
+      // Check if widget block already exists in the template
+      let blockAlreadyExists = false;
+      if (widgetHandle && wizardVariantTemplateFilename) {
+        try {
+          const checkResponse = await fetch('/api/check-widget-exists', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+              themeId: mainTheme.id,
+              blockId: widgetHandle,
+              appExtensionId: apiKey
+            })
+          });
+          
+          if (checkResponse.ok) {
+            const checkResult = await checkResponse.json();
+            blockAlreadyExists = checkResult.exists || false;
+            console.log('🔍 Widget block existence check:', { exists: blockAlreadyExists });
+          }
+        } catch (checkError) {
+          console.error('⚠️ Error checking if widget exists:', checkError);
+          // If check fails, assume it doesn't exist and proceed with deep link
+        }
+      }
+      
+      // Only add deep link parameter if block doesn't already exist
+      const addBlockParams = (widgetHandle && !blockAlreadyExists)
         ? `&addAppBlockId=${apiKey}/${widgetHandle}&target=mainSection`
         : '';
 
@@ -755,7 +780,7 @@ export default function Dashboard() {
       const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
 
       // Open the theme editor
-      const editorWindow = window.open(editorUrl, '_blank');
+      const themeEditorWindow = window.open(editorUrl, '_blank');
 
       // If we have widget settings, update them after the block is added via deep link
       if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
@@ -775,10 +800,63 @@ export default function Dashboard() {
           background_color: widgetSettings.backgroundColor || '#f5f5f0'
         };
 
-        // Note: With the simple save-and-refresh approach, the merchant will need to:
-        // 1. Save the widget in the theme editor
-        // 2. Refresh the theme editor to see the updated settings
-        console.log('📝 Widget settings configured. Merchant should save and refresh the theme editor to see changes.');
+        const updateBlockSettings = async (attempt = 1, maxAttempts = 5) => {
+          try {
+            console.log(`🔄 Updating widget settings (attempt ${attempt}/${maxAttempts})...`);
+            
+            const updateResponse = await fetch('/api/update-widget-settings', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                themeId: mainTheme.id,
+                blockId: selectedIdea.blockId,
+                appExtensionId: apiKey,
+                blockSettings: finalBlockSettings
+              })
+            });
+
+            const updateResult = await updateResponse.json();
+            
+            if (updateResponse.ok && updateResult.success) {
+              console.log('✅ Widget settings updated successfully:', updateResult);
+              // Refresh the theme editor window to show updated settings
+              if (themeEditorWindow && !themeEditorWindow.closed) {
+                themeEditorWindow.location.reload();
+              }
+              return true;
+            } else {
+              console.error(`⚠️ Failed to update widget settings (attempt ${attempt}):`, updateResult.error);
+              
+              // If block not found and we have more attempts, retry
+              if (updateResponse.status === 404 && attempt < maxAttempts) {
+                const delay = attempt * 2000; // 2s, 4s, 6s, 8s, 10s
+                console.log(`⏳ Retrying in ${delay}ms...`);
+                setTimeout(() => updateBlockSettings(attempt + 1, maxAttempts), delay);
+              } else {
+                console.error('❌ Failed to update widget settings after all attempts');
+              }
+            }
+          } catch (error) {
+            console.error(`⚠️ Error updating widget settings (attempt ${attempt}):`, error);
+            if (attempt < maxAttempts) {
+              const delay = attempt * 2000;
+              console.log(`⏳ Retrying in ${delay}ms...`);
+              setTimeout(() => updateBlockSettings(attempt + 1, maxAttempts), delay);
+            }
+          }
+        };
+
+        // Start updating settings with appropriate delay
+        if (blockAlreadyExists) {
+          // Block already exists, update immediately
+          console.log('🔄 Block already exists, updating settings immediately...');
+          updateBlockSettings();
+        } else {
+          // Block is being added via deep link, wait a bit then update
+          console.log('🔄 Block being added via deep link, waiting before updating settings...');
+          setTimeout(() => updateBlockSettings(), 3000);
+        }
       }
 
       console.log('🧭 Theme Editor Debug Params:', {
