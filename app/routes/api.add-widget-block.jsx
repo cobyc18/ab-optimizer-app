@@ -565,31 +565,16 @@ export const action = async ({ request }) => {
     }
 
     const updatedFiles = updateJson.data?.themeFilesUpsert?.upsertedThemeFiles || [];
-    const jobId = updateJson.data?.themeFilesUpsert?.job?.id;
     
     console.log('✅ Template updated successfully with app block:', {
       updatedFiles: updatedFiles.map(f => f.filename),
       templateFilename,
       blockId,
-      appExtensionId,
-      jobId: jobId || 'none (synchronous)'
+      appExtensionId
     });
 
-    // 3. If there's a jobId, this is an async operation - skip verification and return jobId
-    // The client will poll the job status before opening the theme editor
-    if (jobId) {
-      console.log('⏳ Async operation detected (jobId present). Skipping verification - client will poll job status.');
-      return json({ 
-        success: true, 
-        message: `App block '${blockId}' added to template '${templateFilename}'`,
-        templateFilename,
-        updatedFiles,
-        jobId: jobId
-      });
-    }
-
-    // 4. If no jobId, this is synchronous - verify the settings were saved
-    console.log('⏳ Synchronous operation detected. Verifying settings...');
+    // 3. Always proceed with verification (no more async job polling)
+    console.log('⏳ Verifying settings were saved...');
     // Wait longer for Shopify to process even synchronous operations
     await new Promise(resolve => setTimeout(resolve, 3000));
 
@@ -767,8 +752,7 @@ export const action = async ({ request }) => {
       success: true, 
       message: `App block '${blockId}' added to template '${templateFilename}'`,
       templateFilename,
-      updatedFiles,
-      jobId: jobId || null
+      updatedFiles
     });
 
   } catch (error) {
