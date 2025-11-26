@@ -4521,58 +4521,7 @@ export default function Dashboard() {
                       gap: '12px'
                     }}>
                       <button
-                        onClick={async () => {
-                          // Update widget settings and then open theme editor
-                          const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
-                          const widgetHandle = selectedIdea?.blockId || null;
-                          
-                          if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
-                            // Format settings for the API
-                            const formatText = (text) => {
-                              if (!text || text.trim() === '') return '<p></p>';
-                              if (text.trim().startsWith('<')) return text;
-                              return `<p>${text}</p>`;
-                            };
-                            
-                            const finalBlockSettings = {
-                              header_text: formatText(widgetSettings.headerText),
-                              body_text: formatText(widgetSettings.bodyText),
-                              text_color: widgetSettings.textColor || '#1a5f5f',
-                              background_color: widgetSettings.backgroundColor || '#f5f5f0'
-                            };
-
-                            try {
-                              const updateResponse = await fetch('/api/update-widget-settings', {
-                                method: 'POST',
-                                headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({
-                                  templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
-                                  themeId: themes.find(t => t.role === 'main')?.id,
-                                  blockId: selectedIdea.blockId,
-                                  appExtensionId: apiKey,
-                                  blockSettings: finalBlockSettings
-                                })
-                              });
-
-                              const updateResult = await updateResponse.json();
-                              
-                              if (updateResponse.ok && updateResult.success) {
-                                console.log('✅ Widget settings updated successfully');
-                                // Open theme editor to preview
-                                openVariantInThemeEditor();
-                              } else {
-                                console.error('⚠️ Failed to update widget settings:', updateResult.error);
-                                alert('Failed to update widget settings. Please try again.');
-                              }
-                            } catch (error) {
-                              console.error('❌ Error updating widget settings:', error);
-                              alert('Error updating widget settings. Please try again.');
-                            }
-                          } else {
-                            // Just open theme editor if no settings to update
-                            openVariantInThemeEditor();
-                          }
-                        }}
+                        onClick={openVariantInThemeEditor}
                         disabled={!canOpenThemeEditor}
                         style={{
                           padding: '12px 24px',
