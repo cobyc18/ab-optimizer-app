@@ -652,7 +652,8 @@ export default function Dashboard() {
   const [widgetSettings, setWidgetSettings] = useState({
     headerText: '',
     bodyText: '',
-    textColor: '#000000'
+    textColor: '#000000',
+    backgroundColor: '#f5f5f0'
   });
   const [isVariantTemplateReady, setIsVariantTemplateReady] = useState(false);
   const [isVariantRequestInFlight, setIsVariantRequestInFlight] = useState(false);
@@ -4110,123 +4111,6 @@ export default function Dashboard() {
                         />
                       </div>
 
-                      {/* Widget Settings (only for simple-text-badge) */}
-                      {selectedIdea?.blockId === 'simple-text-badge' && (
-                        <div style={{
-                          padding: '20px',
-                          background: '#F8FAFC',
-                          borderRadius: '12px',
-                          border: '1px solid #E5E7EB'
-                        }}>
-                          <h4 style={{
-                            fontSize: '16px',
-                            fontWeight: '600',
-                            color: '#1F2937',
-                            margin: '0 0 16px 0'
-                          }}>
-                            Widget Settings
-                          </h4>
-                          
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            {/* Header Text */}
-                            <div>
-                              <label style={{
-                                display: 'block',
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                color: '#374151',
-                                marginBottom: '8px'
-                              }}>
-                                Header Text
-                              </label>
-                              <input
-                                type="text"
-                                value={widgetSettings.headerText}
-                                onChange={(e) => setWidgetSettings(prev => ({ ...prev, headerText: e.target.value }))}
-                                placeholder="Enter header text..."
-                                style={{
-                                  width: '100%',
-                                  padding: '12px 16px',
-                                  border: '1px solid #D1D5DB',
-                                  borderRadius: '8px',
-                                  fontSize: '14px',
-                                  background: '#FFFFFF'
-                                }}
-                              />
-                            </div>
-
-                            {/* Body Text */}
-                            <div>
-                              <label style={{
-                                display: 'block',
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                color: '#374151',
-                                marginBottom: '8px'
-                              }}>
-                                Body Text
-                              </label>
-                              <textarea
-                                value={widgetSettings.bodyText}
-                                onChange={(e) => setWidgetSettings(prev => ({ ...prev, bodyText: e.target.value }))}
-                                placeholder="Enter body text..."
-                                rows={3}
-                                style={{
-                                  width: '100%',
-                                  padding: '12px 16px',
-                                  border: '1px solid #D1D5DB',
-                                  borderRadius: '8px',
-                                  fontSize: '14px',
-                                  background: '#FFFFFF',
-                                  resize: 'vertical',
-                                  fontFamily: 'inherit'
-                                }}
-                              />
-                            </div>
-
-                            {/* Text Color */}
-                            <div>
-                              <label style={{
-                                display: 'block',
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                color: '#374151',
-                                marginBottom: '8px'
-                              }}>
-                                Text Color
-                              </label>
-                              <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                                <input
-                                  type="color"
-                                  value={widgetSettings.textColor}
-                                  onChange={(e) => setWidgetSettings(prev => ({ ...prev, textColor: e.target.value }))}
-                                  style={{
-                                    width: '60px',
-                                    height: '40px',
-                                    border: '1px solid #D1D5DB',
-                                    borderRadius: '8px',
-                                    cursor: 'pointer'
-                                  }}
-                                />
-                                <input
-                                  type="text"
-                                  value={widgetSettings.textColor}
-                                  onChange={(e) => setWidgetSettings(prev => ({ ...prev, textColor: e.target.value }))}
-                                  placeholder="#000000"
-                                  style={{
-                                    flex: 1,
-                                    padding: '12px 16px',
-                                    border: '1px solid #D1D5DB',
-                                    borderRadius: '8px',
-                                    fontSize: '14px',
-                                    background: '#FFFFFF'
-                                  }}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
 
                       {/* Screenshot Preview */}
                       <div style={{
@@ -4326,7 +4210,7 @@ export default function Dashboard() {
                 </div>
               )}
 
-              {/* Step 3: Variant Preview */}
+              {/* Step 3: Save Widget & Configure Settings */}
               {currentStep === 3 && (
                 <div style={{
                   animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -4339,77 +4223,373 @@ export default function Dashboard() {
                     color: '#1F2937',
                     marginBottom: '8px'
                   }}>
-                    Open Variant in Theme Editor
+                    Save Widget & Configure Settings
                   </h3>
                   <p style={{
                     fontSize: '14px',
                     color: '#6B7280',
-                    marginBottom: '16px'
+                    marginBottom: '24px'
                   }}>
-                    We duplicated the template and attached your widget. Open the theme editor to adjust placement or styling directly on the product page.
+                    First, save the empty widget in the theme editor, then configure your widget settings below
                   </p>
 
+                  {/* Step 1: Save Widget in Theme Editor */}
                   <div style={{
-                    background: '#F3F4F6',
-                    padding: '12px',
-                    borderRadius: '8px',
-                    marginBottom: '16px',
-                    fontSize: '12px',
-                    color: '#374151'
-                  }}>
-                    <strong>Debug Info:</strong><br/>
-                    Product: {previewProductTitle || 'Not selected'}<br/>
-                    Product ID (snapshot): {previewProductId || 'N/A'}<br/>
-                    Product handle (snapshot): {wizardVariantProductHandle || 'Not set'}<br/>
-                    Current selection handle: {selectedProduct?.handle || 'N/A'}<br/>
-                    Original template suffix: {wizardVariantOriginalTemplateSuffix || 'None (using default)'}<br/>
-                    Template suffix: {selectedProduct?.templateSuffix || 'None (using default)'}<br/>
-                    Variant template: {wizardVariantName ? `product.${wizardVariantName}` : 'product'}<br/>
-                    Template file: {wizardVariantTemplateFilename || 'Creating...'}<br/>
-                    Status: {isVariantRequestInFlight ? 'Creating duplicate…' : (isVariantTemplateReady ? 'Ready' : 'Pending')}
-                  </div>
-
-                  <div style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '40px 20px',
-                    background: '#F8FAFC',
+                    background: '#FEF3C7',
+                    padding: '20px',
                     borderRadius: '12px',
-                    border: '1px solid #E5E7EB'
+                    border: '1px solid #F59E0B',
+                    marginBottom: '24px'
                   }}>
-                    <p style={{
+                    <h4 style={{
                       fontSize: '16px',
-                      color: '#6B7280',
-                      margin: 0,
-                      textAlign: 'center'
+                      fontWeight: '600',
+                      color: '#92400E',
+                      margin: '0 0 12px 0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
                     }}>
-                      {isVariantRequestInFlight
-                        ? 'Hang tight, we’re duplicating your product template…'
-                        : canOpenThemeEditor
-                        ? `Variant template ${wizardVariantName} is ready.`
-                          : 'Variant template created. You can open the Theme Editor once it finishes preparing.'}
+                      <span style={{ 
+                        background: '#F59E0B', 
+                        color: 'white', 
+                        borderRadius: '50%', 
+                        width: '20px', 
+                        height: '20px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: '12px', 
+                        fontWeight: 'bold' 
+                      }}>1</span>
+                      Save Empty Widget in Theme Editor
+                    </h4>
+                    <p style={{
+                      fontSize: '14px',
+                      color: '#92400E',
+                      margin: '0 0 16px 0'
+                    }}>
+                      Click the button below to open the theme editor, then save the template to add the empty widget. Close the tab and return here to configure the widget settings.
                     </p>
-                    <div style={{ display: 'flex', gap: '12px', marginTop: '16px', alignItems: 'center', flexWrap: 'wrap' }}>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}>
                       <button
                         onClick={openVariantInThemeEditor}
                         disabled={!canOpenThemeEditor}
                         style={{
-                          padding: '10px 14px',
-                          background: canOpenThemeEditor ? '#111827' : '#9CA3AF',
+                          padding: '12px 24px',
+                          background: canOpenThemeEditor ? '#F59E0B' : '#9CA3AF',
                           color: '#FFFFFF',
                           borderRadius: '8px',
-                          border: `1px solid ${canOpenThemeEditor ? '#111827' : '#9CA3AF'}`,
+                          border: `1px solid ${canOpenThemeEditor ? '#F59E0B' : '#9CA3AF'}`,
                           cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
-                          opacity: canOpenThemeEditor ? 1 : 0.7
+                          opacity: canOpenThemeEditor ? 1 : 0.7,
+                          fontSize: '14px',
+                          fontWeight: '600'
                         }}
                       >
                         {isVariantRequestInFlight && !isVariantTemplateReady ? 'Preparing Theme Editor…' : 'Open in Theme Editor'}
                       </button>
-                      <span style={{ fontSize: '12px', color: '#6B7280', textAlign: 'center' }}>
+                      <span style={{ fontSize: '12px', color: '#92400E', textAlign: 'center' }}>
                         Opens template <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
                         {wizardVariantProductHandle ? `, previewing /products/${wizardVariantProductHandle}${wizardVariantName ? `?view=${wizardVariantName}` : ''}` : ''}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Step 2: Configure Widget Settings */}
+                  <div style={{
+                    background: '#F0F9FF',
+                    padding: '20px',
+                    borderRadius: '12px',
+                    border: '1px solid #0EA5E9',
+                    marginBottom: '24px'
+                  }}>
+                    <h4 style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#0C4A6E',
+                      margin: '0 0 16px 0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <span style={{ 
+                        background: '#0EA5E9', 
+                        color: 'white', 
+                        borderRadius: '50%', 
+                        width: '20px', 
+                        height: '20px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: '12px', 
+                        fontWeight: 'bold' 
+                      }}>2</span>
+                      Configure Widget Settings
+                    </h4>
+                    
+                    {/* Widget Settings (only for simple-text-badge) */}
+                    {selectedIdea?.blockId === 'simple-text-badge' && (
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                        {/* Header Text */}
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            color: '#374151',
+                            marginBottom: '8px'
+                          }}>
+                            Header Text
+                          </label>
+                          <input
+                            type="text"
+                            value={widgetSettings.headerText}
+                            onChange={(e) => setWidgetSettings(prev => ({ ...prev, headerText: e.target.value }))}
+                            placeholder="Enter header text..."
+                            style={{
+                              width: '100%',
+                              padding: '12px 16px',
+                              border: '1px solid #D1D5DB',
+                              borderRadius: '8px',
+                              fontSize: '14px',
+                              background: '#FFFFFF'
+                            }}
+                          />
+                        </div>
+
+                        {/* Body Text */}
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            color: '#374151',
+                            marginBottom: '8px'
+                          }}>
+                            Body Text
+                          </label>
+                          <textarea
+                            value={widgetSettings.bodyText}
+                            onChange={(e) => setWidgetSettings(prev => ({ ...prev, bodyText: e.target.value }))}
+                            placeholder="Enter body text..."
+                            rows={3}
+                            style={{
+                              width: '100%',
+                              padding: '12px 16px',
+                              border: '1px solid #D1D5DB',
+                              borderRadius: '8px',
+                              fontSize: '14px',
+                              background: '#FFFFFF',
+                              resize: 'vertical',
+                              fontFamily: 'inherit'
+                            }}
+                          />
+                        </div>
+
+                        {/* Text Color */}
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            color: '#374151',
+                            marginBottom: '8px'
+                          }}>
+                            Text Color
+                          </label>
+                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <input
+                              type="color"
+                              value={widgetSettings.textColor}
+                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, textColor: e.target.value }))}
+                              style={{
+                                width: '60px',
+                                height: '40px',
+                                border: '1px solid #D1D5DB',
+                                borderRadius: '8px',
+                                cursor: 'pointer'
+                              }}
+                            />
+                            <input
+                              type="text"
+                              value={widgetSettings.textColor}
+                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, textColor: e.target.value }))}
+                              placeholder="#000000"
+                              style={{
+                                flex: 1,
+                                padding: '12px 16px',
+                                border: '1px solid #D1D5DB',
+                                borderRadius: '8px',
+                                fontSize: '14px',
+                                background: '#FFFFFF'
+                              }}
+                            />
+                          </div>
+                        </div>
+
+                        {/* Background Color */}
+                        <div>
+                          <label style={{
+                            display: 'block',
+                            fontSize: '14px',
+                            fontWeight: '500',
+                            color: '#374151',
+                            marginBottom: '8px'
+                          }}>
+                            Background Color
+                          </label>
+                          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                            <input
+                              type="color"
+                              value={widgetSettings.backgroundColor}
+                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, backgroundColor: e.target.value }))}
+                              style={{
+                                width: '60px',
+                                height: '40px',
+                                border: '1px solid #D1D5DB',
+                                borderRadius: '8px',
+                                cursor: 'pointer'
+                              }}
+                            />
+                            <input
+                              type="text"
+                              value={widgetSettings.backgroundColor}
+                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, backgroundColor: e.target.value }))}
+                              placeholder="#f5f5f0"
+                              style={{
+                                flex: 1,
+                                padding: '12px 16px',
+                                border: '1px solid #D1D5DB',
+                                borderRadius: '8px',
+                                fontSize: '14px',
+                                background: '#FFFFFF'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Step 3: Preview in Theme Editor */}
+                  <div style={{
+                    background: '#F0FDF4',
+                    padding: '20px',
+                    borderRadius: '12px',
+                    border: '1px solid #22C55E'
+                  }}>
+                    <h4 style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#15803D',
+                      margin: '0 0 12px 0',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}>
+                      <span style={{ 
+                        background: '#22C55E', 
+                        color: 'white', 
+                        borderRadius: '50%', 
+                        width: '20px', 
+                        height: '20px', 
+                        display: 'flex', 
+                        alignItems: 'center', 
+                        justifyContent: 'center', 
+                        fontSize: '12px', 
+                        fontWeight: 'bold' 
+                      }}>3</span>
+                      Preview Updated Widget
+                    </h4>
+                    <p style={{
+                      fontSize: '14px',
+                      color: '#15803D',
+                      margin: '0 0 16px 0'
+                    }}>
+                      Click below to preview your configured widget settings in the theme editor
+                    </p>
+                    <div style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      gap: '12px'
+                    }}>
+                      <button
+                        onClick={async () => {
+                          // Update widget settings and then open theme editor
+                          const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
+                          const widgetHandle = selectedIdea?.blockId || null;
+                          
+                          if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
+                            // Format settings for the API
+                            const formatText = (text) => {
+                              if (!text || text.trim() === '') return '<p></p>';
+                              if (text.trim().startsWith('<')) return text;
+                              return `<p>${text}</p>`;
+                            };
+                            
+                            const finalBlockSettings = {
+                              header_text: formatText(widgetSettings.headerText),
+                              body_text: formatText(widgetSettings.bodyText),
+                              text_color: widgetSettings.textColor || '#1a5f5f',
+                              background_color: widgetSettings.backgroundColor || '#f5f5f0'
+                            };
+
+                            try {
+                              const updateResponse = await fetch('/api/update-widget-settings', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({
+                                  templateFilename: wizardVariantTemplateFilename || `templates/product.${wizardVariantName}.json`,
+                                  themeId: themes.find(t => t.role === 'main')?.id,
+                                  blockId: selectedIdea.blockId,
+                                  appExtensionId: apiKey,
+                                  blockSettings: finalBlockSettings
+                                })
+                              });
+
+                              const updateResult = await updateResponse.json();
+                              
+                              if (updateResponse.ok && updateResult.success) {
+                                console.log('✅ Widget settings updated successfully');
+                                // Open theme editor to preview
+                                openVariantInThemeEditor();
+                              } else {
+                                console.error('⚠️ Failed to update widget settings:', updateResult.error);
+                                alert('Failed to update widget settings. Please try again.');
+                              }
+                            } catch (error) {
+                              console.error('❌ Error updating widget settings:', error);
+                              alert('Error updating widget settings. Please try again.');
+                            }
+                          } else {
+                            // Just open theme editor if no settings to update
+                            openVariantInThemeEditor();
+                          }
+                        }}
+                        disabled={!canOpenThemeEditor}
+                        style={{
+                          padding: '12px 24px',
+                          background: canOpenThemeEditor ? '#22C55E' : '#9CA3AF',
+                          color: '#FFFFFF',
+                          borderRadius: '8px',
+                          border: `1px solid ${canOpenThemeEditor ? '#22C55E' : '#9CA3AF'}`,
+                          cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
+                          opacity: canOpenThemeEditor ? 1 : 0.7,
+                          fontSize: '14px',
+                          fontWeight: '600'
+                        }}
+                      >
+                        Preview in Theme Editor
+                      </button>
+                      <span style={{ fontSize: '12px', color: '#15803D', textAlign: 'center' }}>
+                        Updates widget settings and opens theme editor for preview
                       </span>
                     </div>
                   </div>
