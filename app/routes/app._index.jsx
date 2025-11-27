@@ -657,6 +657,8 @@ export default function Dashboard() {
   });
   const [isVariantTemplateReady, setIsVariantTemplateReady] = useState(false);
   const [isVariantRequestInFlight, setIsVariantRequestInFlight] = useState(false);
+  const [isBlockSaved, setIsBlockSaved] = useState(false);
+  const [isCheckingBlockSaved, setIsCheckingBlockSaved] = useState(false);
   const encodeWidgetConfigPayload = (payload) => {
     if (!payload) return null;
     try {
@@ -665,6 +667,55 @@ export default function Dashboard() {
     } catch (error) {
       console.error('⚠️ Failed to encode widget config payload:', error);
       return null;
+    }
+  };
+
+  // Check if app block has been saved in the template
+  const checkIfBlockSaved = async () => {
+    if (!wizardVariantName || !themes?.length) {
+      alert('Template information not available. Please ensure the template has been duplicated.');
+      return;
+    }
+
+    const mainTheme = themes.find(t => t.role === 'MAIN');
+    if (!mainTheme) {
+      alert('Main theme not found.');
+      return;
+    }
+
+    const themeId = mainTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
+    
+    setIsCheckingBlockSaved(true);
+    
+    try {
+      const formData = new FormData();
+      formData.append('templateName', `product.${wizardVariantName}`);
+      formData.append('themeId', themeId);
+
+      const response = await fetch('/api/check-block-saved', {
+        method: 'POST',
+        body: formData
+      });
+
+      const result = await response.json();
+      
+      if (result.success) {
+        setIsBlockSaved(result.blockExists);
+        
+        if (result.blockExists) {
+          console.log('✅ App block found in template:', result.blockDetails);
+        } else {
+          console.log('❌ App block not found in template');
+        }
+      } else {
+        console.error('❌ Failed to check block status:', result.error);
+        alert(`Failed to check if widget is saved: ${result.error}`);
+      }
+    } catch (error) {
+      console.error('❌ Error checking block status:', error);
+      alert('Error checking if widget is saved. Please try again.');
+    } finally {
+      setIsCheckingBlockSaved(false);
     }
   };
 
@@ -4301,6 +4352,75 @@ export default function Dashboard() {
                     </div>
                   </div>
 
+                  {/* Check if Saved Button */}
+                  <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '20px',
+                    background: '#F3F4F6',
+                    borderRadius: '12px',
+                    border: '1px solid #D1D5DB',
+                    marginBottom: '24px'
+                  }}>
+                    <p style={{
+                      fontSize: '16px',
+                      color: '#374151',
+                      margin: '0 0 16px 0',
+                      textAlign: 'center',
+                      fontWeight: '500'
+                    }}>
+                      After saving in the theme editor, click below to verify the widget was saved:
+                    </p>
+                    <button
+                      onClick={checkIfBlockSaved}
+                      disabled={isCheckingBlockSaved}
+                      style={{
+                        padding: '12px 24px',
+                        background: isCheckingBlockSaved ? '#9CA3AF' : '#10B981',
+                        color: '#FFFFFF',
+                        borderRadius: '8px',
+                        border: `1px solid ${isCheckingBlockSaved ? '#9CA3AF' : '#10B981'}`,
+                        cursor: isCheckingBlockSaved ? 'not-allowed' : 'pointer',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px'
+                      }}
+                    >
+                      {isCheckingBlockSaved ? (
+                        <>
+                          <div style={{
+                            width: '16px',
+                            height: '16px',
+                            border: '2px solid #FFFFFF',
+                            borderTop: '2px solid transparent',
+                            borderRadius: '50%',
+                            animation: 'spin 1s linear infinite'
+                          }}></div>
+                          Checking...
+                        </>
+                      ) : (
+                        <>
+                          {isBlockSaved ? '✅ Widget Saved' : 'Check if Saved'}
+                        </>
+                      )}
+                    </button>
+                    {isBlockSaved && (
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#059669',
+                        margin: '12px 0 0 0',
+                        textAlign: 'center',
+                        fontWeight: '500'
+                      }}>
+                        ✅ Widget successfully saved! You can now configure the settings below.
+                      </p>
+                    )}
+                  </div>
+
                   {/* Step 2: Configure Widget Settings */}
                   <div style={{
                     background: '#F0F9FF',
@@ -4333,8 +4453,27 @@ export default function Dashboard() {
                       Configure Widget Settings
                     </h4>
                     
-                    {/* Widget Settings (only for simple-text-badge) */}
-                    {selectedIdea?.blockId === 'simple-text-badge' && (
+                    {/* Widget Settings (only for simple-text-badge and if block is saved) */}
+                    {selectedIdea?.blockId === 'simple-text-badge' && !isBlockSaved && (
+                      <div style={{
+                        padding: '20px',
+                        background: '#FEF3C7',
+                        borderRadius: '8px',
+                        border: '1px solid #F59E0B',
+                        textAlign: 'center'
+                      }}>
+                        <p style={{
+                          fontSize: '14px',
+                          color: '#92400E',
+                          margin: 0,
+                          fontWeight: '500'
+                        }}>
+                          ⚠️ Please save the widget in the theme editor first, then click "Check if Saved" to enable widget configuration.
+                        </p>
+                      </div>
+                    )}
+                    
+                    {selectedIdea?.blockId === 'simple-text-badge' && isBlockSaved && (
                       <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                         {/* Header Text */}
                         <div>
@@ -4477,13 +4616,14 @@ export default function Dashboard() {
                     )}
                   </div>
 
-                  {/* Step 3: Preview in Theme Editor */}
-                  <div style={{
-                    background: '#F0FDF4',
-                    padding: '20px',
-                    borderRadius: '12px',
-                    border: '1px solid #22C55E'
-                  }}>
+                  {/* Step 3: Preview in Theme Editor (only if block is saved) */}
+                  {isBlockSaved && (
+                    <div style={{
+                      background: '#F0FDF4',
+                      padding: '20px',
+                      borderRadius: '12px',
+                      border: '1px solid #22C55E'
+                    }}>
                     <h4 style={{
                       fontSize: '16px',
                       fontWeight: '600',
@@ -4586,6 +4726,7 @@ export default function Dashboard() {
                       </span>
                     </div>
                   </div>
+                  )}
                 </div>
               )}
 
