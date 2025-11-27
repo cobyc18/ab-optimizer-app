@@ -4520,25 +4520,56 @@ export default function Dashboard() {
                       alignItems: 'center',
                       gap: '12px'
                     }}>
-                      <button
-                        onClick={openVariantInThemeEditor}
-                        disabled={!canOpenThemeEditor}
-                        style={{
-                          padding: '12px 24px',
-                          background: canOpenThemeEditor ? '#22C55E' : '#9CA3AF',
-                          color: '#FFFFFF',
-                          borderRadius: '8px',
-                          border: `1px solid ${canOpenThemeEditor ? '#22C55E' : '#9CA3AF'}`,
-                          cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
-                          opacity: canOpenThemeEditor ? 1 : 0.7,
-                          fontSize: '14px',
-                          fontWeight: '600'
-                        }}
-                      >
-                        Preview in Theme Editor
-                      </button>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+                        <button
+                          onClick={openVariantInThemeEditor}
+                          disabled={!canOpenThemeEditor}
+                          style={{
+                            padding: '12px 24px',
+                            background: canOpenThemeEditor ? '#22C55E' : '#9CA3AF',
+                            color: '#FFFFFF',
+                            borderRadius: '8px',
+                            border: `1px solid ${canOpenThemeEditor ? '#22C55E' : '#9CA3AF'}`,
+                            cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
+                            opacity: canOpenThemeEditor ? 1 : 0.7,
+                            fontSize: '14px',
+                            fontWeight: '600'
+                          }}
+                        >
+                          Preview in Theme Editor
+                        </button>
+                        <button
+                          onClick={() => {
+                            // Open storefront preview with the variant template
+                            const storeUrl = shop?.myshopifyDomain || shop?.domain;
+                            const productHandle = wizardVariantProductHandle;
+                            const variantName = wizardVariantName;
+                            
+                            if (storeUrl && productHandle && variantName) {
+                              const storefrontUrl = `https://${storeUrl}/products/${productHandle}?view=${variantName}`;
+                              window.open(storefrontUrl, '_blank');
+                            } else {
+                              alert('Missing information to generate storefront preview URL');
+                            }
+                          }}
+                          disabled={!canOpenThemeEditor || !wizardVariantProductHandle || !wizardVariantName}
+                          style={{
+                            padding: '12px 24px',
+                            background: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF',
+                            color: '#FFFFFF',
+                            borderRadius: '8px',
+                            border: `1px solid ${(canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF'}`,
+                            cursor: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 'pointer' : 'not-allowed',
+                            opacity: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 1 : 0.7,
+                            fontSize: '14px',
+                            fontWeight: '600'
+                          }}
+                        >
+                          Preview in Storefront
+                        </button>
+                      </div>
                       <span style={{ fontSize: '12px', color: '#15803D', textAlign: 'center' }}>
-                        Updates widget settings and opens theme editor for preview
+                        Preview in theme editor or live storefront with updated widget settings
                       </span>
                     </div>
                   </div>
