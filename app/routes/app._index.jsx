@@ -4541,15 +4541,28 @@ export default function Dashboard() {
                         <button
                           onClick={() => {
                             // Open storefront preview with the variant template
-                            const storeUrl = shop?.myshopifyDomain || shop?.domain;
                             const productHandle = wizardVariantProductHandle;
                             const variantName = wizardVariantName;
                             
-                            if (storeUrl && productHandle && variantName) {
-                              const storefrontUrl = `https://${storeUrl}/products/${productHandle}?view=${variantName}`;
+                            console.log('🔍 Storefront Preview Debug:', {
+                              shop,
+                              productHandle,
+                              variantName,
+                              wizardVariantProductHandle,
+                              wizardVariantName
+                            });
+                            
+                            if (shop && productHandle && variantName) {
+                              const storefrontUrl = `https://${shop}/products/${productHandle}?view=${variantName}`;
+                              console.log('🔗 Opening storefront URL:', storefrontUrl);
                               window.open(storefrontUrl, '_blank');
                             } else {
-                              alert('Missing information to generate storefront preview URL');
+                              console.error('❌ Missing data for storefront preview:', {
+                                shop: !!shop,
+                                productHandle: !!productHandle,
+                                variantName: !!variantName
+                              });
+                              alert(`Missing information to generate storefront preview URL. Missing: ${!shop ? 'shop domain, ' : ''}${!productHandle ? 'product handle, ' : ''}${!variantName ? 'variant name' : ''}`);
                             }
                           }}
                           disabled={!canOpenThemeEditor || !wizardVariantProductHandle || !wizardVariantName}
