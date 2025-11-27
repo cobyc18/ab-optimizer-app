@@ -22,32 +22,39 @@ export const action = async ({ request }) => {
 
     // Read the template file using Asset REST API
     const assetKey = `templates/${templateName}.json`;
-    const response = await admin.rest.resources.Asset.all({
-      session: admin.rest.session,
-      theme_id: themeId,
-      asset: {
-        key: assetKey
+    
+    console.log('🔍 Fetching asset:', { assetKey, themeId });
+    
+    const response = await fetch(`https://${admin.rest.session.shop}/admin/api/2023-10/themes/${themeId}/assets.json?asset[key]=${encodeURIComponent(assetKey)}`, {
+      method: 'GET',
+      headers: {
+        'X-Shopify-Access-Token': admin.rest.session.accessToken,
+        'Content-Type': 'application/json'
       }
     });
 
-    if (!response.data || response.data.length === 0) {
-      console.log('❌ Template not found:', assetKey);
+    if (!response.ok) {
+      console.log('❌ Failed to fetch template:', response.status, response.statusText);
       return json({ 
         success: false, 
         blockExists: false,
-        error: "Template not found" 
+        error: `Failed to fetch template: ${response.status} ${response.statusText}` 
       });
     }
 
-    const asset = response.data[0];
-    if (!asset.value) {
-      console.log('❌ Template has no content:', assetKey);
+    const responseData = await response.json();
+    console.log('📄 Asset API response:', responseData);
+
+    if (!responseData.asset || !responseData.asset.value) {
+      console.log('❌ Template not found or has no content:', assetKey);
       return json({ 
         success: false, 
         blockExists: false,
-        error: "Template has no content" 
+        error: "Template not found or has no content" 
       });
     }
+
+    const asset = responseData.asset;
 
     // Parse the template JSON
     let templateData;
