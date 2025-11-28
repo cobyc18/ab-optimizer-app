@@ -296,7 +296,7 @@ export const loader = async ({ request }) => {
           (key === "templates/product.liquid" || key === "templates/product.json")
         );
       
-      console.log('📄 Filtered product templates!:', productTemplates);
+      console.log('📄 Filtered product templates!!!:', productTemplates);
     }
 
     // Fetch all A/B tests (both active and completed with winners)
@@ -611,7 +611,8 @@ export default function Dashboard() {
 
   // Wizard state variables
   const [wizardOpen, setWizardOpen] = useState(false);
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(0);
+  const [selectedGoal, setSelectedGoal] = useState(null);
   const [selectedIdea, setSelectedIdea] = useState(null);
   const [selectedWidgetConfig, setSelectedWidgetConfig] = useState(null);
   const [selectedWidgetTweakId, setSelectedWidgetTweakId] = useState(null);
@@ -1210,7 +1211,8 @@ export default function Dashboard() {
   };
 
   const resetSwiper = () => {
-    setCurrentStep(1);
+    setCurrentStep(0);
+    setSelectedGoal(null);
     setCurrentWidgetIndex(0);
     setSelectedIdea(null);
     setSelectedWidgetConfig(null);
@@ -3044,6 +3046,95 @@ export default function Dashboard() {
               flex: 1,
               overflow: 'auto'
             }}>
+              {/* Step 0: Pick an Idea - Goal Selection */}
+              {currentStep === 0 && (
+                <div style={{
+                  animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                  transform: 'translateX(0)',
+                  opacity: 1,
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  justifyContent: 'flex-start',
+                  padding: '40px 20px',
+                  minHeight: '500px'
+                }}>
+                  <div style={{ textAlign: 'center', marginBottom: '48px', maxWidth: '600px' }}>
+                    <h3 style={{
+                      fontSize: '24px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '12px',
+                      textAlign: 'center'
+                    }}>
+                      Pick an idea
+                    </h3>
+                    <p style={{
+                      fontSize: '16px',
+                      color: '#6B7280',
+                      textAlign: 'center',
+                      margin: 0
+                    }}>
+                      What's your goal for this product page?
+                    </p>
+                  </div>
+
+                  {/* Goal Selection Buttons */}
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(2, 1fr)',
+                    gap: '20px',
+                    width: '100%',
+                    maxWidth: '800px',
+                    marginTop: '20px'
+                  }}>
+                    {['Increase Trust', 'Create Urgency', 'Reduce Friction', 'Boost Add-to-Cart', 'Increase Social Proof', 'Improve Clarity'].map((goal) => (
+                      <button
+                        key={goal}
+                        onClick={() => {
+                          if (goal === 'Increase Trust') {
+                            setSelectedGoal(goal);
+                            setCurrentStep(1);
+                          }
+                        }}
+                        style={{
+                          backgroundColor: '#FFFFFF',
+                          border: '2px solid #E5E7EB',
+                          borderRadius: '12px',
+                          padding: '32px 24px',
+                          cursor: 'pointer',
+                          textAlign: 'center',
+                          fontSize: '18px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          transition: 'all 0.2s ease',
+                          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                          minHeight: '120px',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.currentTarget.style.borderColor = '#3e3bf3';
+                          e.currentTarget.style.backgroundColor = '#F3F4F6';
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(62, 59, 243, 0.15)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.currentTarget.style.borderColor = '#E5E7EB';
+                          e.currentTarget.style.backgroundColor = '#FFFFFF';
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+                        }}
+                      >
+                        {goal}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Step 1: Tinder Swiper for A/B Test Ideas */}
               {currentStep === 1 && (
                 <div style={{
