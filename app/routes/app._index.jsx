@@ -596,6 +596,154 @@ export const loader = async ({ request }) => {
   }
 };
 
+// Widget Tweaks Catalog - used for displaying widget tweak suggestions in the dashboard
+const widgetTweaksCatalog = {
+  'simple-text-badge': [
+    {
+      id: 'simple-text-badge-bold-sale',
+      title: 'Bold Sale Banner',
+      description: 'High-contrast banner for flash or limited-time promotions.',
+      badgeText: 'FLASH DEAL • 30% OFF ENDS TONIGHT',
+      previewColors: {
+        background: '#fff1f2',
+        text: '#be123c',
+        ribbon: '#be123c'
+      },
+      settings: {
+        text: 'FLASH DEAL • 30% OFF ENDS TONIGHT',
+        textColor: '#be123c',
+        backgroundColor: '#fff1f2',
+        ribbonColor: '#be123c'
+      }
+    },
+    {
+      id: 'simple-text-badge-luxury',
+      title: 'Luxury Ribbon Message',
+      description: 'Muted palette with serif tone for premium drops.',
+      badgeText: 'Limited Atelier Drop • Complimentary gift wrapping today',
+      previewColors: {
+        background: '#f5f5f0',
+        text: '#1a5f5f',
+        ribbon: '#8b5cf6'
+      },
+      settings: {
+        text: 'Limited Atelier Drop • Complimentary gift wrapping today',
+        textColor: '#1a5f5f',
+        backgroundColor: '#f5f5f0',
+        ribbonColor: '#8b5cf6'
+      }
+    },
+    {
+      id: 'simple-text-badge-eco',
+      title: 'Eco Friendly Highlight',
+      description: 'Earthy tones to promote sustainability messaging.',
+      badgeText: 'Earth Conscious • Ships in recycled packaging',
+      previewColors: {
+        background: '#ecfccb',
+        text: '#14532d',
+        ribbon: '#65a30d'
+      },
+      settings: {
+        text: 'Earth Conscious • Ships in recycled packaging',
+        textColor: '#14532d',
+        backgroundColor: '#ecfccb',
+        ribbonColor: '#65a30d'
+      }
+    },
+    {
+      id: 'simple-text-badge-loyalty',
+      title: 'Loyalty Boost',
+      description: 'Spotlight perks for logged-in or VIP customers.',
+      badgeText: 'Members unlock free 2-day shipping + double points',
+      previewColors: {
+        background: '#e0f2fe',
+        text: '#0c4a6e',
+        ribbon: '#0369a1'
+      },
+      settings: {
+        text: 'Members unlock free 2-day shipping + double points',
+        textColor: '#0c4a6e',
+        backgroundColor: '#e0f2fe',
+        ribbonColor: '#0369a1'
+      }
+    }
+  ],
+  'live-visitor-count': [
+    {
+      id: 'live-visitor-count-urgency',
+      title: 'Urgency Pulse',
+      description: 'Higher range and bold copy to push scarcity.',
+      previewText: '87 people just viewed this item — almost gone!',
+      settings: {
+        countMin: 72,
+        countMax: 98,
+        desktopText: 'people just viewed this item — almost gone!',
+        mobileText: 'viewing now — selling fast!',
+        desktopBorderShape: 'rectangular',
+        mobileBorderShape: 'rectangular',
+        desktopAlignment: 'center',
+        mobileAlignment: 'center',
+        desktopFont: 'helvetica',
+        desktopFontSize: 16,
+        mobileFontSize: 14
+      }
+    },
+    {
+      id: 'live-visitor-count-social',
+      title: 'Social Proof',
+      description: 'Highlights how many shoppers have this in cart.',
+      previewText: '54 shoppers have this in their cart right now',
+      settings: {
+        countMin: 40,
+        countMax: 62,
+        desktopText: 'shoppers have this in their cart right now',
+        mobileText: 'carted right now ⚡',
+        desktopBorderShape: 'rounded',
+        mobileBorderShape: 'rounded',
+        desktopAlignment: 'left',
+        desktopFont: 'georgia',
+        desktopFontSize: 15
+      }
+    },
+    {
+      id: 'live-visitor-count-minimal',
+      title: 'Minimal Meter',
+      description: 'Clean layout aligned right for luxe brands.',
+      previewText: '32 people considering this piece today',
+      settings: {
+        countMin: 26,
+        countMax: 42,
+        desktopText: 'people considering this piece today',
+        mobileText: 'considering today',
+        desktopBorderShape: 'rectangular',
+        mobileBorderShape: 'rectangular',
+        desktopAlignment: 'right',
+        desktopFont: 'helvetica',
+        desktopFontSize: 14
+      }
+    },
+    {
+      id: 'live-visitor-count-socialproof',
+      title: 'Drop Countdown',
+      description: 'Short text and tight padding for hero sections.',
+      previewText: '46 others viewing this drop in the last hour',
+      settings: {
+        countMin: 38,
+        countMax: 56,
+        desktopText: 'others viewing this drop in the last hour',
+        mobileText: 'live this hour',
+        desktopPaddingInside: 10,
+        mobilePaddingInside: 8,
+        desktopAlignment: 'center',
+        desktopFontSize: 15,
+        mobileFontSize: 13
+      }
+    }
+  ]
+};
+
+const getWidgetTweaks = (widgetType) => widgetTweaksCatalog[widgetType] || [];
+
 export default function Dashboard() {
   const { user, experiments, testCards, queuedTests, recentActivities, themes, products, productTemplates, shop } = useLoaderData();
   const [expandedTests, setExpandedTests] = useState(new Set());
