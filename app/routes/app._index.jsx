@@ -907,7 +907,7 @@ export default function Dashboard() {
           descriptionText = `Variant is ${liftText} ATC with ${certainty}% certainty.`;
         } else {
           descriptionText = winnerDeclared
-            ? 'Winner locked based on purchase probability.'
+            ? 'Winner locked based on purchase probability!.'
             : 'Test is running. Collecting data to determine results.';
         }
 
