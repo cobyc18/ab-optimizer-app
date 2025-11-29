@@ -1039,76 +1039,146 @@ export default function ABTests() {
             padding: '40px 20px',
             minHeight: '500px'
           }}>
-            <div style={{ textAlign: 'center', marginBottom: '48px', maxWidth: '600px' }}>
-              <h3 style={{
-                fontSize: '24px',
-                fontWeight: '600',
-                color: '#1F2937',
-                marginBottom: '12px',
-                textAlign: 'center'
-              }}>
-                Pick an idea
-              </h3>
-              <p style={{
-                fontSize: '16px',
-                color: '#6B7280',
-                textAlign: 'center',
-                margin: 0
-              }}>
-                What's your goal for this product page?
-              </p>
-            </div>
-
+            {/* Goal Selection Card - Matching Image Design */}
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(2, 1fr)',
-              gap: '20px',
+              backgroundColor: '#E0F2FE',
+              borderRadius: '16px',
+              padding: '40px',
               width: '100%',
-              maxWidth: '800px',
-              marginTop: '20px'
+              maxWidth: '600px',
+              marginBottom: '20px'
             }}>
-              {['Increase Trust', 'Create Urgency', 'Reduce Friction', 'Boost Add-to-Cart', 'Increase Social Proof', 'Improve Clarity'].map((goal) => (
-                <button
-                  key={goal}
-                  onClick={() => {
-                    if (goal === 'Increase Trust') {
-                      setSelectedGoal(goal);
-                      setCurrentStep(1);
-                    }
-                  }}
-                  style={{
-                    backgroundColor: '#FFFFFF',
-                    border: '2px solid #E5E7EB',
-                    borderRadius: '12px',
-                    padding: '32px 24px',
-                    cursor: 'pointer',
-                    textAlign: 'center',
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    transition: 'all 0.2s ease',
-                    boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                    minHeight: '120px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.borderColor = '#3e3bf3';
-                    e.currentTarget.style.backgroundColor = '#F3F4F6';
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(62, 59, 243, 0.15)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.borderColor = '#E5E7EB';
-                    e.currentTarget.style.backgroundColor = '#FFFFFF';
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
-                  }}
-                >
-                  {goal}
-                </button>
-              ))}
+              {/* Title */}
+              <p style={{
+                fontSize: '12px',
+                fontWeight: '500',
+                color: '#6B7280',
+                textTransform: 'uppercase',
+                letterSpacing: '0.5px',
+                margin: '0 0 16px 0'
+              }}>
+                SELECT YOUR GOAL
+              </p>
+              
+              {/* Main Question */}
+              <h3 style={{
+                fontSize: '32px',
+                fontWeight: '700',
+                color: '#FFFFFF',
+                margin: '0 0 32px 0',
+                lineHeight: '1.2'
+              }}>
+                What do you want to improve?
+              </h3>
+
+              {/* Goal Buttons */}
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '16px'
+              }}>
+                {[
+                  { 
+                    goal: 'Increase Trust', 
+                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/%3E%3Cpath d='M9 12l2 2 4-4'/%3E%3C/svg%3E",
+                    description: 'Build credibility with new visitors'
+                  },
+                  { 
+                    goal: 'Create Urgency', 
+                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3Cpath d='M8 12l4 4'/%3E%3C/svg%3E",
+                    description: 'Encourage faster purchase decisions'
+                  },
+                  { 
+                    goal: 'Reduce Friction', 
+                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/%3E%3C/svg%3E",
+                    description: 'Smooth out the path to purchase'
+                  },
+                  { 
+                    goal: 'Boost Add-to-Cart', 
+                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='21' r='1'/%3E%3Ccircle cx='20' cy='21' r='1'/%3E%3Cpath d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'/%3E%3C/svg%3E",
+                    description: 'Increase cart additions'
+                  },
+                  { 
+                    goal: 'Increase Social Proof', 
+                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E",
+                    description: 'Show others are buying'
+                  },
+                  { 
+                    goal: 'Improve Clarity', 
+                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='16' x2='12' y2='12'/%3E%3Cline x1='12' y1='8' x2='12.01' y2='8'/%3E%3C/svg%3E",
+                    description: 'Make product information clearer'
+                  }
+                ].map(({ goal, icon, description }) => (
+                  <button
+                    key={goal}
+                    onClick={() => {
+                      if (goal === 'Increase Trust') {
+                        setSelectedGoal(goal);
+                        setCurrentStep(1);
+                      }
+                    }}
+                    style={{
+                      backgroundColor: '#FFFFFF',
+                      border: 'none',
+                      borderRadius: '12px',
+                      padding: '20px 24px',
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      transition: 'all 0.2s ease',
+                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '16px',
+                      width: '100%'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+                    }}
+                  >
+                    {/* Icon */}
+                    <div style={{
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      flexShrink: 0
+                    }}>
+                      <img src={icon} alt="" style={{ width: '24px', height: '24px' }} />
+                    </div>
+                    
+                    {/* Text Content */}
+                    <div style={{ flex: 1 }}>
+                      <p style={{
+                        margin: 0,
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        marginBottom: '4px'
+                      }}>
+                        {goal}
+                      </p>
+                      <p style={{
+                        margin: 0,
+                        fontSize: '14px',
+                        fontWeight: '400',
+                        color: '#6B7280',
+                        lineHeight: '1.4'
+                      }}>
+                        {description}
+                      </p>
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           </div>
         )}
