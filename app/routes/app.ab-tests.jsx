@@ -158,10 +158,10 @@ export default function ABTests() {
     },
     {
       id: 2,
-      utility: 'Simple Text Badge',
-      rationale: 'Displays promotional badges with customizable text, colors, and icons to highlight special offers',
-      style: 'Promotional',
-      preview: '🎁 Up to 25% Off Everything: Our biggest savings of the year are here. Learn More',
+      utility: 'Free Shipping Badge',
+      rationale: 'Displaying a free-shipping badge helps build trust by showing customers there are no hidden costs',
+      style: 'Increase Trust',
+      preview: 'In-stock, ships in 1-2 business days | Free shipping & returns',
       blockId: 'simple-text-badge',
       appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
     }
@@ -1204,14 +1204,15 @@ export default function ABTests() {
                         })
                       }}
                     >
-                      <div style={{
-                        fontSize: '48px',
-                        textAlign: 'center',
-                        marginBottom: '16px'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex].utility === 'Live Visitor Count' && '👁️'}
-                        {abTestIdeas[currentWidgetIndex].utility === 'Simple Text Badge' && '🎁'}
-                      </div>
+                      {abTestIdeas[currentWidgetIndex].utility === 'Live Visitor Count' && (
+                        <div style={{
+                          fontSize: '48px',
+                          textAlign: 'center',
+                          marginBottom: '16px'
+                        }}>
+                          👁️
+                        </div>
+                      )}
 
                       <h4 style={{
                         fontSize: '24px',
@@ -1247,18 +1248,45 @@ export default function ABTests() {
                         {abTestIdeas[currentWidgetIndex].rationale}
                       </p>
 
-                      <div style={{
-                        background: '#F8FAFC',
-                        border: '1px solid #E5E7EB',
-                        padding: '16px',
-                        borderRadius: '12px',
-                        fontSize: '14px',
-                        color: '#6B7280',
-                        fontStyle: 'italic',
-                        textAlign: 'center'
-                      }}>
-                        "{abTestIdeas[currentWidgetIndex].preview}"
-                      </div>
+                      {abTestIdeas[currentWidgetIndex].utility === 'Free Shipping Badge' ? (
+                        <div style={{
+                          background: '#F3F4F6',
+                          border: '1px solid #E5E7EB',
+                          padding: '16px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: '#1E3A8A',
+                          textAlign: 'left',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px'
+                        }}>
+                          <div style={{
+                            width: '24px',
+                            height: '24px',
+                            flexShrink: 0
+                          }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/>
+                              <path d="M1 8h15M16 8v8"/>
+                            </svg>
+                          </div>
+                          <span>{abTestIdeas[currentWidgetIndex].preview}</span>
+                        </div>
+                      ) : (
+                        <div style={{
+                          background: '#F8FAFC',
+                          border: '1px solid #E5E7EB',
+                          padding: '16px',
+                          borderRadius: '12px',
+                          fontSize: '14px',
+                          color: '#6B7280',
+                          fontStyle: 'italic',
+                          textAlign: 'center'
+                        }}>
+                          "{abTestIdeas[currentWidgetIndex].preview}"
+                        </div>
+                      )}
                     </div>
                   )}
 
@@ -1287,14 +1315,15 @@ export default function ABTests() {
                         })
                       }}
                     >
-                      <div style={{
-                        fontSize: '48px',
-                        textAlign: 'center',
-                        marginBottom: '16px'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex + 1].utility === 'Live Visitor Count' && '👁️'}
-                        {abTestIdeas[currentWidgetIndex + 1].utility === 'Simple Text Badge' && '🎁'}
-                      </div>
+                      {abTestIdeas[currentWidgetIndex + 1].utility === 'Live Visitor Count' && (
+                        <div style={{
+                          fontSize: '48px',
+                          textAlign: 'center',
+                          marginBottom: '16px'
+                        }}>
+                          👁️
+                        </div>
+                      )}
 
                       <h4 style={{
                         fontSize: '24px',
@@ -1330,18 +1359,45 @@ export default function ABTests() {
                         {abTestIdeas[currentWidgetIndex + 1].rationale}
                       </p>
 
-                      <div style={{
-                        background: '#F8FAFC',
-                        border: '1px solid #E5E7EB',
-                        padding: '16px',
-                        borderRadius: '12px',
-                        fontSize: '14px',
-                        color: '#6B7280',
-                        fontStyle: 'italic',
-                        textAlign: 'center'
-                      }}>
-                        "{abTestIdeas[currentWidgetIndex + 1].preview}"
-                      </div>
+                      {abTestIdeas[currentWidgetIndex + 1].utility === 'Free Shipping Badge' ? (
+                        <div style={{
+                          background: '#F3F4F6',
+                          border: '1px solid #E5E7EB',
+                          padding: '16px',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          color: '#1E3A8A',
+                          textAlign: 'left',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '12px'
+                        }}>
+                          <div style={{
+                            width: '24px',
+                            height: '24px',
+                            flexShrink: 0
+                          }}>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                              <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/>
+                              <path d="M1 8h15M16 8v8"/>
+                            </svg>
+                          </div>
+                          <span>{abTestIdeas[currentWidgetIndex + 1].preview}</span>
+                        </div>
+                      ) : (
+                        <div style={{
+                          background: '#F8FAFC',
+                          border: '1px solid #E5E7EB',
+                          padding: '16px',
+                          borderRadius: '12px',
+                          fontSize: '14px',
+                          color: '#6B7280',
+                          fontStyle: 'italic',
+                          textAlign: 'center'
+                        }}>
+                          "{abTestIdeas[currentWidgetIndex + 1].preview}"
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
