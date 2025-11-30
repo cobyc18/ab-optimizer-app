@@ -1041,7 +1041,7 @@ export default function ABTests() {
           }}>
             {/* Goal Selection Card - Matching Image Design */}
             <div style={{
-              backgroundColor: '#E0F2FE',
+              backgroundColor: '#7DD3FC',
               borderRadius: '16px',
               padding: '40px',
               width: '100%',
@@ -1120,19 +1120,20 @@ export default function ABTests() {
                     style={{
                       backgroundColor: '#FFFFFF',
                       border: 'none',
-                      borderRadius: '12px',
-                      padding: '20px 24px',
+                      borderRadius: '20px',
+                      padding: '32px 36px',
                       cursor: 'pointer',
                       textAlign: 'left',
-                      fontSize: '16px',
+                      fontSize: '18px',
                       fontWeight: '600',
                       color: '#1F2937',
                       transition: 'all 0.2s ease',
                       boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '16px',
-                      width: '100%'
+                      gap: '20px',
+                      width: '100%',
+                      minHeight: '90px'
                     }}
                     onMouseEnter={(e) => {
                       e.currentTarget.style.transform = 'translateY(-2px)';
@@ -1145,30 +1146,30 @@ export default function ABTests() {
                   >
                     {/* Icon */}
                     <div style={{
-                      width: '32px',
-                      height: '32px',
+                      width: '40px',
+                      height: '40px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                       flexShrink: 0
                     }}>
-                      <img src={icon} alt="" style={{ width: '24px', height: '24px' }} />
+                      <img src={icon} alt="" style={{ width: '28px', height: '28px' }} />
                     </div>
                     
                     {/* Text Content */}
                     <div style={{ flex: 1 }}>
                       <p style={{
                         margin: 0,
-                        fontSize: '16px',
+                        fontSize: '18px',
                         fontWeight: '600',
                         color: '#1F2937',
-                        marginBottom: '4px'
+                        marginBottom: '6px'
                       }}>
                         {goal}
                       </p>
                       <p style={{
                         margin: 0,
-                        fontSize: '14px',
+                        fontSize: '15px',
                         fontWeight: '400',
                         color: '#6B7280',
                         lineHeight: '1.4'
