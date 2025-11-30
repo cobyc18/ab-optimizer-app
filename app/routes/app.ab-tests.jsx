@@ -990,7 +990,7 @@ export default function ABTests() {
             opacity: 1,
             display: 'flex',
             flexDirection: 'row',
-            alignItems: 'flex-start',
+            alignItems: 'stretch',
             justifyContent: 'center',
             gap: '24px',
             padding: '40px 20px',
@@ -1003,7 +1003,9 @@ export default function ABTests() {
               padding: '40px',
               width: '100%',
               maxWidth: '600px',
-              flexShrink: 0
+              flexShrink: 0,
+              display: 'flex',
+              flexDirection: 'column'
             }}>
               {/* Title */}
               <p style={{
@@ -1148,7 +1150,8 @@ export default function ABTests() {
                 maxWidth: '600px',
                 flexShrink: 0,
                 display: 'flex',
-                flexDirection: 'column'
+                flexDirection: 'column',
+                minHeight: '100%'
               }}>
                 {/* Title */}
                 <p style={{
@@ -1165,7 +1168,7 @@ export default function ABTests() {
                 <div style={{
                   position: 'relative',
                   width: '100%',
-                  minHeight: '400px',
+                  flex: 1,
                   marginBottom: '20px'
                 }}>
                   {abTestIdeas[currentWidgetIndex] && (
@@ -1176,15 +1179,16 @@ export default function ABTests() {
                         top: 0,
                         left: 0,
                         width: '100%',
-                        background: 'transparent',
-                        padding: '0',
+                        background: '#E0F2FE',
+                        borderRadius: '12px',
+                        padding: '24px',
                         zIndex: 2,
                         opacity: 1,
                         transform: 'scale(1) translateY(0)',
                         transition: 'all 0.3s ease',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '20px',
+                        gap: '24px',
                         ...(isAnimating && swipeDirection === 'like' && {
                           animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
                         }),
@@ -1198,28 +1202,33 @@ export default function ABTests() {
                         <div style={{
                           background: '#F3F4F6',
                           border: '1px solid #E5E7EB',
-                          padding: '16px',
+                          padding: '20px',
                           borderRadius: '8px',
-                          fontSize: '14px',
+                          fontSize: '16px',
                           color: '#1E3A8A',
                           textAlign: 'left',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '12px',
                           wordWrap: 'break-word',
-                          overflowWrap: 'break-word'
+                          overflowWrap: 'break-word',
+                          boxSizing: 'border-box'
                         }}>
                           <div style={{
-                            width: '24px',
-                            height: '24px',
+                            width: '28px',
+                            height: '28px',
                             flexShrink: 0
                           }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/>
                               <path d="M1 8h15M16 8v8"/>
                             </svg>
                           </div>
-                          <span style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                          <span style={{ 
+                            wordWrap: 'break-word', 
+                            overflowWrap: 'break-word',
+                            flex: 1
+                          }}>
                             {abTestIdeas[currentWidgetIndex].preview}
                           </span>
                         </div>
@@ -1227,14 +1236,15 @@ export default function ABTests() {
                         <div style={{
                           background: '#F8FAFC',
                           border: '1px solid #E5E7EB',
-                          padding: '16px',
+                          padding: '20px',
                           borderRadius: '12px',
-                          fontSize: '14px',
+                          fontSize: '18px',
                           color: '#6B7280',
                           fontStyle: 'italic',
                           textAlign: 'center',
                           wordWrap: 'break-word',
-                          overflowWrap: 'break-word'
+                          overflowWrap: 'break-word',
+                          boxSizing: 'border-box'
                         }}>
                           "{abTestIdeas[currentWidgetIndex].preview}"
                         </div>
@@ -1242,35 +1252,37 @@ export default function ABTests() {
 
                       {/* Title - Second */}
                       <h4 style={{
-                        fontSize: '24px',
+                        fontSize: '28px',
                         fontWeight: '700',
                         color: '#1F2937',
                         margin: 0,
                         wordWrap: 'break-word',
-                        overflowWrap: 'break-word'
+                        overflowWrap: 'break-word',
+                        lineHeight: '1.3'
                       }}>
                         {abTestIdeas[currentWidgetIndex].utility}
                       </h4>
 
                       {/* Tag - Third */}
                       <div style={{
-                        background: '#F0F9FF',
+                        background: '#FFFFFF',
                         color: '#1E40AF',
-                        padding: '6px 12px',
+                        padding: '8px 16px',
                         borderRadius: '16px',
-                        fontSize: '12px',
+                        fontSize: '14px',
                         fontWeight: '500',
-                        width: 'fit-content'
+                        width: 'fit-content',
+                        border: '1px solid #E5E7EB'
                       }}>
-                        {abTestIdeas[currentWidgetIndex].style} Style
+                        {abTestIdeas[currentWidgetIndex].style}
                       </div>
 
                       {/* Description - Fourth */}
                       <p style={{
-                        fontSize: '16px',
+                        fontSize: '18px',
                         color: '#374151',
                         margin: 0,
-                        lineHeight: '1.5',
+                        lineHeight: '1.6',
                         wordWrap: 'break-word',
                         overflowWrap: 'break-word'
                       }}>
@@ -1287,15 +1299,16 @@ export default function ABTests() {
                         top: 0,
                         left: 0,
                         width: '100%',
-                        background: 'transparent',
-                        padding: '0',
+                        background: '#E0F2FE',
+                        borderRadius: '12px',
+                        padding: '24px',
                         transform: 'scale(0.95) translateY(15px)',
                         zIndex: 1,
                         opacity: 0.6,
                         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                         display: 'flex',
                         flexDirection: 'column',
-                        gap: '20px',
+                        gap: '24px',
                         ...(isAnimating && swipeDirection === 'dislike' && {
                           transform: 'scale(1) translateY(0)',
                           opacity: 1,
@@ -1307,28 +1320,33 @@ export default function ABTests() {
                         <div style={{
                           background: '#F3F4F6',
                           border: '1px solid #E5E7EB',
-                          padding: '16px',
+                          padding: '20px',
                           borderRadius: '8px',
-                          fontSize: '14px',
+                          fontSize: '16px',
                           color: '#1E3A8A',
                           textAlign: 'left',
                           display: 'flex',
                           alignItems: 'center',
                           gap: '12px',
                           wordWrap: 'break-word',
-                          overflowWrap: 'break-word'
+                          overflowWrap: 'break-word',
+                          boxSizing: 'border-box'
                         }}>
                           <div style={{
-                            width: '24px',
-                            height: '24px',
+                            width: '28px',
+                            height: '28px',
                             flexShrink: 0
                           }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                               <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/>
                               <path d="M1 8h15M16 8v8"/>
                             </svg>
                           </div>
-                          <span style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                          <span style={{ 
+                            wordWrap: 'break-word', 
+                            overflowWrap: 'break-word',
+                            flex: 1
+                          }}>
                             {abTestIdeas[currentWidgetIndex + 1].preview}
                           </span>
                         </div>
@@ -1336,47 +1354,50 @@ export default function ABTests() {
                         <div style={{
                           background: '#F8FAFC',
                           border: '1px solid #E5E7EB',
-                          padding: '16px',
+                          padding: '20px',
                           borderRadius: '12px',
-                          fontSize: '14px',
+                          fontSize: '18px',
                           color: '#6B7280',
                           fontStyle: 'italic',
                           textAlign: 'center',
                           wordWrap: 'break-word',
-                          overflowWrap: 'break-word'
+                          overflowWrap: 'break-word',
+                          boxSizing: 'border-box'
                         }}>
                           "{abTestIdeas[currentWidgetIndex + 1].preview}"
                         </div>
                       ) : null}
 
                       <h4 style={{
-                        fontSize: '24px',
+                        fontSize: '28px',
                         fontWeight: '700',
                         color: '#1F2937',
                         margin: 0,
                         wordWrap: 'break-word',
-                        overflowWrap: 'break-word'
+                        overflowWrap: 'break-word',
+                        lineHeight: '1.3'
                       }}>
                         {abTestIdeas[currentWidgetIndex + 1].utility}
                       </h4>
 
                       <div style={{
-                        background: '#F0F9FF',
+                        background: '#FFFFFF',
                         color: '#1E40AF',
-                        padding: '6px 12px',
+                        padding: '8px 16px',
                         borderRadius: '16px',
-                        fontSize: '12px',
+                        fontSize: '14px',
                         fontWeight: '500',
-                        width: 'fit-content'
+                        width: 'fit-content',
+                        border: '1px solid #E5E7EB'
                       }}>
-                        {abTestIdeas[currentWidgetIndex + 1].style} Style
+                        {abTestIdeas[currentWidgetIndex + 1].style}
                       </div>
 
                       <p style={{
-                        fontSize: '16px',
+                        fontSize: '18px',
                         color: '#374151',
                         margin: 0,
-                        lineHeight: '1.5',
+                        lineHeight: '1.6',
                         wordWrap: 'break-word',
                         overflowWrap: 'break-word'
                       }}>
