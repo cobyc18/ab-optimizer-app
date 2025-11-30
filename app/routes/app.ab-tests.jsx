@@ -1151,7 +1151,9 @@ export default function ABTests() {
                 flexShrink: 0,
                 display: 'flex',
                 flexDirection: 'column',
-                minHeight: '100%'
+                minHeight: '100%',
+                boxSizing: 'border-box',
+                overflow: 'hidden'
               }}>
                 {/* Title */}
                 <p style={{
@@ -1169,7 +1171,9 @@ export default function ABTests() {
                   position: 'relative',
                   width: '100%',
                   flex: 1,
-                  marginBottom: '20px'
+                  marginBottom: '20px',
+                  boxSizing: 'border-box',
+                  overflow: 'hidden'
                 }}>
                   {abTestIdeas[currentWidgetIndex] && (
                     <div
@@ -1178,10 +1182,15 @@ export default function ABTests() {
                         position: 'absolute',
                         top: 0,
                         left: 0,
+                        right: 0,
                         width: '100%',
+                        maxWidth: '100%',
                         background: '#E0F2FE',
                         borderRadius: '12px',
                         padding: '24px',
+                        margin: '0',
+                        boxSizing: 'border-box',
+                        overflow: 'hidden',
                         zIndex: 2,
                         opacity: 1,
                         transform: 'scale(1) translateY(0)',
@@ -1298,10 +1307,14 @@ export default function ABTests() {
                         position: 'absolute',
                         top: 0,
                         left: 0,
+                        right: 0,
                         width: '100%',
+                        maxWidth: '100%',
                         background: '#E0F2FE',
                         borderRadius: '12px',
                         padding: '24px',
+                        margin: '0',
+                        boxSizing: 'border-box',
                         transform: 'scale(0.95) translateY(15px)',
                         zIndex: 1,
                         opacity: 0.6,
