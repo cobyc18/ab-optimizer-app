@@ -451,50 +451,6 @@ export default function ABTests() {
     }
   };
 
-  // Generate screenshot for wizard
-  const generateWizardScreenshot = async () => {
-    if (!selectedProduct) {
-      console.error('❌ No product selected for screenshot');
-      setWizardScreenshotLoading(false);
-      return;
-    }
-
-    const themeToUse = selectedTheme || themes.find(t => t.role === 'MAIN');
-    if (!themeToUse) {
-      console.error('❌ No theme available for screenshot');
-      setWizardScreenshotLoading(false);
-      return;
-    }
-    
-    setWizardScreenshotLoading(true);
-    try {
-      const previewUrl = generateWizardPreviewUrl(selectedProduct.handle, themeToUse.id);
-      
-      const response = await fetch('/api/screenshot-selenium', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          previewUrl,
-          productHandle: selectedProduct.handle,
-          themeId: themeToUse.id,
-          storePassword: wizardStorePassword || storePassword
-        })
-      });
-      
-      const result = await response.json();
-      
-      if (result.success) {
-        setWizardScreenshot(result.screenshotUrl);
-      } else {
-        console.error('❌ Screenshot generation failed:', result.error);
-      }
-    } catch (error) {
-      console.error('❌ Screenshot generation failed:', error);
-    } finally {
-      setWizardScreenshotLoading(false);
-    }
-  };
-
   // Generate preview URL for wizard
   const generateWizardPreviewUrl = (productHandle, themeId) => {
     const cleanThemeId = themeId.replace('gid://shopify/OnlineStoreTheme/', '');
@@ -1477,7 +1433,7 @@ export default function ABTests() {
               color: '#6B7280',
               marginBottom: '24px'
             }}>
-              Select a product and enter your store password to see a preview
+              Select a product and enter your store password
             </p>
 
             <div style={{
@@ -1503,9 +1459,6 @@ export default function ABTests() {
                       key={product.id}
                       onClick={() => {
                         handleProductSelection(product);
-                        if (wizardStorePassword || storePassword) {
-                          generateWizardScreenshot();
-                        }
                       }}
                       style={{
                         background: selectedProduct?.id === product.id ? '#F0F9FF' : '#FFFFFF',
@@ -1585,22 +1538,12 @@ export default function ABTests() {
                     color: '#6B7280',
                     margin: '0 0 16px 0'
                   }}>
-                    Enter your store password to generate a preview
+                    Enter your store password
                   </p>
                   <input
                     type="password"
                     value={wizardStorePassword}
                     onChange={(e) => setWizardStorePassword(e.target.value)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && selectedProduct && wizardStorePassword && !wizardScreenshotLoading) {
-                        generateWizardScreenshot();
-                      }
-                    }}
-                    onBlur={() => {
-                      if (selectedProduct && wizardStorePassword && !wizardScreenshotLoading) {
-                        generateWizardScreenshot();
-                      }
-                    }}
                     placeholder="Enter store password..."
                     style={{
                       width: '100%',
@@ -1611,99 +1554,6 @@ export default function ABTests() {
                       background: '#FFFFFF'
                     }}
                   />
-                </div>
-
-                <div style={{
-                  flex: 1,
-                  display: 'flex',
-                  flexDirection: 'column'
-                }}>
-                  {wizardScreenshotLoading ? (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '60px 20px',
-                      background: '#F8FAFC',
-                      borderRadius: '12px',
-                      border: '1px solid #E5E7EB',
-                      flex: 1
-                    }}>
-                      <div style={{
-                        width: '40px',
-                        height: '40px',
-                        border: '4px solid #E5E7EB',
-                        borderTop: '4px solid #3B82F6',
-                        borderRadius: '50%',
-                        animation: 'spin 1s linear infinite',
-                        marginBottom: '16px'
-                      }}></div>
-                      <p style={{
-                        fontSize: '16px',
-                        color: '#6B7280',
-                        margin: 0
-                      }}>
-                        Generating screenshot...
-                      </p>
-                    </div>
-                  ) : wizardScreenshot ? (
-                    <div style={{
-                      background: '#FFFFFF',
-                      borderRadius: '12px',
-                      border: '1px solid #E5E7EB',
-                      padding: '20px',
-                      flex: 1,
-                      display: 'flex',
-                      flexDirection: 'column'
-                    }}>
-                      <h4 style={{
-                        fontSize: '16px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        margin: '0 0 16px 0'
-                      }}>
-                        {selectedProduct?.title} Preview
-                      </h4>
-                      <div style={{
-                        flex: 1,
-                        overflow: 'auto',
-                        textAlign: 'center'
-                      }}>
-                        <img
-                          src={wizardScreenshot}
-                          alt="Product preview"
-                          style={{
-                            maxWidth: '100%',
-                            height: 'auto',
-                            borderRadius: '8px',
-                            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div style={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      padding: '60px 20px',
-                      background: '#F8FAFC',
-                      borderRadius: '12px',
-                      border: '1px solid #E5E7EB',
-                      flex: 1
-                    }}>
-                      <p style={{
-                        fontSize: '16px',
-                        color: '#6B7280',
-                        margin: 0,
-                        textAlign: 'center'
-                      }}>
-                        {selectedProduct ? 'Enter password and select a product to see preview' : 'Select a product and enter password to see preview'}
-                      </p>
-                    </div>
-                  )}
                 </div>
               </div>
             </div>
