@@ -374,7 +374,7 @@ export default function ABTests() {
       const selectedWidget = abTestIdeas[currentWidgetIndex];
       applyWidgetIdeaSelection(selectedWidget);
       setTimeout(() => {
-        setCurrentStep(2);
+        setCurrentStep(1);
         setIsAnimating(false);
         setSwipeDirection(null);
       }, 400);
@@ -944,8 +944,8 @@ export default function ABTests() {
                 width: '32px',
                 height: '32px',
                 borderRadius: '50%',
-                background: currentStep >= step ? '#4F46E5' : '#E5E5E5',
-                color: currentStep >= step ? '#FFFFFF' : '#9CA3AF',
+                background: currentStep + 1 >= step ? '#4F46E5' : '#E5E5E5',
+                color: currentStep + 1 >= step ? '#FFFFFF' : '#9CA3AF',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
@@ -958,7 +958,7 @@ export default function ABTests() {
                 <div style={{
                   width: '60px',
                   height: '2px',
-                  background: currentStep > step ? '#4F46E5' : '#E5E5E5',
+                  background: currentStep + 1 > step ? '#4F46E5' : '#E5E5E5',
                   margin: '0 8px'
                 }} />
               )}
@@ -970,7 +970,7 @@ export default function ABTests() {
           color: '#6B7280',
           textAlign: 'center'
         }}>
-          Step {currentStep} of 5
+          Step {currentStep + 1} of 5
         </div>
       </div>
 
@@ -989,20 +989,21 @@ export default function ABTests() {
             transform: 'translateX(0)',
             opacity: 1,
             display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'flex-start',
+            flexDirection: 'row',
+            alignItems: 'flex-start',
+            justifyContent: 'center',
+            gap: '24px',
             padding: '40px 20px',
             minHeight: '500px'
           }}>
-            {/* Goal Selection Card - Matching Image Design */}
+            {/* Goal Selection Card - Left Side */}
             <div style={{
               backgroundColor: '#7DD3FC',
               borderRadius: '16px',
               padding: '40px',
               width: '100%',
               maxWidth: '600px',
-              marginBottom: '20px'
+              flexShrink: 0
             }}>
               {/* Title */}
               <p style={{
@@ -1035,42 +1036,41 @@ export default function ABTests() {
               }}>
                 {[
                   { 
-                    goal: 'Increase Trust', 
+                    goal: 'Trust', 
                     icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z'/%3E%3Cpath d='M9 12l2 2 4-4'/%3E%3C/svg%3E",
                     description: 'Build credibility with new visitors'
                   },
                   { 
-                    goal: 'Create Urgency', 
-                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3Cpath d='M8 12l4 4'/%3E%3C/svg%3E",
-                    description: 'Encourage faster purchase decisions'
-                  },
-                  { 
-                    goal: 'Reduce Friction', 
-                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='13 2 3 14 12 14 11 22 21 10 12 10 13 2'/%3E%3C/svg%3E",
-                    description: 'Smooth out the path to purchase'
-                  },
-                  { 
-                    goal: 'Boost Add-to-Cart', 
-                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='9' cy='21' r='1'/%3E%3Ccircle cx='20' cy='21' r='1'/%3E%3Cpath d='M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6'/%3E%3C/svg%3E",
-                    description: 'Increase cart additions'
-                  },
-                  { 
-                    goal: 'Increase Social Proof', 
+                    goal: 'Social Proof', 
                     icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2'/%3E%3Ccircle cx='9' cy='7' r='4'/%3E%3Cpath d='M23 21v-2a4 4 0 0 0-3-3.87'/%3E%3Cpath d='M16 3.13a4 4 0 0 1 0 7.75'/%3E%3C/svg%3E",
                     description: 'Show others are buying'
                   },
                   { 
-                    goal: 'Improve Clarity', 
+                    goal: 'Urgency', 
+                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cpolyline points='12 6 12 12 16 14'/%3E%3Cpath d='M8 12l4 4'/%3E%3C/svg%3E",
+                    description: 'Encourage faster purchase decisions'
+                  },
+                  { 
+                    goal: 'Scarcity', 
+                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z'/%3E%3Cline x1='3' y1='6' x2='21' y2='6'/%3E%3Cpath d='M16 10a4 4 0 0 1-8 0'/%3E%3C/svg%3E",
+                    description: 'Create limited availability signals'
+                  },
+                  { 
+                    goal: 'Clarity', 
                     icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='12' cy='12' r='10'/%3E%3Cline x1='12' y1='16' x2='12' y2='12'/%3E%3Cline x1='12' y1='8' x2='12.01' y2='8'/%3E%3C/svg%3E",
                     description: 'Make product information clearer'
+                  },
+                  { 
+                    goal: 'Value', 
+                    icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='1' x2='12' y2='23'/%3E%3Cpath d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'/%3E%3C/svg%3E",
+                    description: 'Highlight product value and benefits'
                   }
                 ].map(({ goal, icon, description }) => (
                   <button
                     key={goal}
                     onClick={() => {
-                      if (goal === 'Increase Trust') {
+                      if (goal === 'Trust') {
                         setSelectedGoal(goal);
-                        setCurrentStep(1);
                       }
                     }}
                     style={{
@@ -1137,284 +1137,284 @@ export default function ABTests() {
                 ))}
               </div>
             </div>
-          </div>
-        )}
 
-        {/* Step 1: Choose Widget */}
-        {currentStep === 1 && (
-          <div style={{
-            animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-            transform: 'translateX(0)',
-            opacity: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            padding: '10px 0',
-            minHeight: '500px'
-          }}>
-            <div style={{ textAlign: 'center' }}>
-              <h3 style={{
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1F2937',
-                marginBottom: '8px',
-                textAlign: 'center'
-              }}>
-                Choose Your Widget
-              </h3>
-              <div style={{
-                marginBottom: '10px',
-                fontSize: '11px',
-                color: '#6B7280',
-                textAlign: 'center'
-              }}>
-                {currentWidgetIndex + 1} of {abTestIdeas.length}
-              </div>
-            </div>
-
-            <div style={{
-              position: 'relative',
-              width: '400px',
-              height: '450px',
-              margin: '0 auto',
-              overflow: 'hidden'
-            }}>
-              {abTestIdeas[currentWidgetIndex] && (
-                <div
-                  key={`current-${currentWidgetIndex}`}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    background: '#FFFFFF',
-                    borderRadius: '16px',
-                    boxShadow: '0 15px 30px rgba(0, 0, 0, 0.15)',
-                    padding: '30px',
-                    cursor: 'pointer',
-                    zIndex: 2,
-                    opacity: 1,
-                    transform: 'scale(1) translateY(0)',
-                    transition: 'all 0.3s ease',
-                    ...(isAnimating && swipeDirection === 'like' && {
-                      animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
-                    }),
-                    ...(isAnimating && swipeDirection === 'dislike' && {
-                      animation: 'swipeLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
-                    })
-                  }}
-                >
-                  <div style={{
-                    fontSize: '48px',
-                    textAlign: 'center',
-                    marginBottom: '16px'
-                  }}>
-                    {abTestIdeas[currentWidgetIndex].utility === 'Live Visitor Count' && '👁️'}
-                    {abTestIdeas[currentWidgetIndex].utility === 'Simple Text Badge' && '🎁'}
-                  </div>
-
-                  <h4 style={{
-                    fontSize: '24px',
-                    fontWeight: '700',
-                    color: '#1F2937',
-                    margin: '0 0 12px 0',
-                    textAlign: 'center'
-                  }}>
-                    {abTestIdeas[currentWidgetIndex].utility}
-                  </h4>
-
-                  <div style={{
-                    background: '#F0F9FF',
-                    color: '#1E40AF',
-                    padding: '6px 12px',
-                    borderRadius: '16px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    textAlign: 'center',
-                    margin: '0 auto 16px auto',
-                    width: 'fit-content'
-                  }}>
-                    {abTestIdeas[currentWidgetIndex].style} Style
-                  </div>
-
-                  <p style={{
-                    fontSize: '16px',
-                    color: '#374151',
-                    margin: '0 0 20px 0',
-                    lineHeight: '1.5',
-                    textAlign: 'center'
-                  }}>
-                    {abTestIdeas[currentWidgetIndex].rationale}
-                  </p>
-
-                  <div style={{
-                    background: '#F8FAFC',
-                    border: '1px solid #E5E7EB',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    fontSize: '14px',
-                    color: '#6B7280',
-                    fontStyle: 'italic',
-                    textAlign: 'center'
-                  }}>
-                    "{abTestIdeas[currentWidgetIndex].preview}"
-                  </div>
-                </div>
-              )}
-
-              {abTestIdeas[currentWidgetIndex + 1] && (
-                <div
-                  key={`next-${currentWidgetIndex + 1}`}
-                  style={{
-                    position: 'absolute',
-                    top: 0,
-                    left: 0,
-                    width: '100%',
-                    height: '100%',
-                    background: '#FFFFFF',
-                    borderRadius: '16px',
-                    boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
-                    padding: '30px',
-                    cursor: 'pointer',
-                    transform: 'scale(0.95) translateY(15px)',
-                    zIndex: 1,
-                    opacity: 0.6,
-                    transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                    ...(isAnimating && swipeDirection === 'dislike' && {
-                      transform: 'scale(1) translateY(0)',
-                      opacity: 1,
-                      zIndex: 2
-                    })
-                  }}
-                >
-                  <div style={{
-                    fontSize: '48px',
-                    textAlign: 'center',
-                    marginBottom: '16px'
-                  }}>
-                    {abTestIdeas[currentWidgetIndex + 1].utility === 'Live Visitor Count' && '👁️'}
-                    {abTestIdeas[currentWidgetIndex + 1].utility === 'Simple Text Badge' && '🎁'}
-                  </div>
-
-                  <h4 style={{
-                    fontSize: '24px',
-                    fontWeight: '700',
-                    color: '#1F2937',
-                    margin: '0 0 12px 0',
-                    textAlign: 'center'
-                  }}>
-                    {abTestIdeas[currentWidgetIndex + 1].utility}
-                  </h4>
-
-                  <div style={{
-                    background: '#F0F9FF',
-                    color: '#1E40AF',
-                    padding: '6px 12px',
-                    borderRadius: '16px',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    textAlign: 'center',
-                    margin: '0 auto 16px auto',
-                    width: 'fit-content'
-                  }}>
-                    {abTestIdeas[currentWidgetIndex + 1].style} Style
-                  </div>
-
-                  <p style={{
-                    fontSize: '16px',
-                    color: '#374151',
-                    margin: '0 0 20px 0',
-                    lineHeight: '1.5',
-                    textAlign: 'center'
-                  }}>
-                    {abTestIdeas[currentWidgetIndex + 1].rationale}
-                  </p>
-
-                  <div style={{
-                    background: '#F8FAFC',
-                    border: '1px solid #E5E7EB',
-                    padding: '16px',
-                    borderRadius: '12px',
-                    fontSize: '14px',
-                    color: '#6B7280',
-                    fontStyle: 'italic',
-                    textAlign: 'center'
-                  }}>
-                    "{abTestIdeas[currentWidgetIndex + 1].preview}"
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: '12px',
-              marginTop: '5px'
-            }}>
+            {/* Tinder Swiper - Right Side (appears when goal is selected) */}
+            {selectedGoal && selectedGoal === 'Trust' && (
               <div style={{
                 display: 'flex',
-                gap: '25px',
+                flexDirection: 'column',
                 alignItems: 'center',
-                justifyContent: 'center'
+                justifyContent: 'space-between',
+                padding: '10px 0',
+                minHeight: '500px',
+                width: '100%',
+                maxWidth: '500px',
+                flexShrink: 0
               }}>
-                <button
-                  onClick={() => handleSwipe('dislike')}
-                  disabled={isAnimating}
-                  style={{
-                    width: '70px',
-                    height: '70px',
-                    borderRadius: '50%',
-                    background: '#FEE2E2',
-                    border: '3px solid #FCA5A5',
-                    cursor: isAnimating ? 'not-allowed' : 'pointer',
+                <div style={{ textAlign: 'center' }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '8px',
+                    textAlign: 'center'
+                  }}>
+                    Choose Your Widget
+                  </h3>
+                  <div style={{
+                    marginBottom: '10px',
+                    fontSize: '11px',
+                    color: '#6B7280',
+                    textAlign: 'center'
+                  }}>
+                    {currentWidgetIndex + 1} of {abTestIdeas.length}
+                  </div>
+                </div>
+
+                <div style={{
+                  position: 'relative',
+                  width: '400px',
+                  height: '450px',
+                  margin: '0 auto',
+                  overflow: 'hidden'
+                }}>
+                  {abTestIdeas[currentWidgetIndex] && (
+                    <div
+                      key={`current-${currentWidgetIndex}`}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        background: '#FFFFFF',
+                        borderRadius: '16px',
+                        boxShadow: '0 15px 30px rgba(0, 0, 0, 0.15)',
+                        padding: '30px',
+                        cursor: 'pointer',
+                        zIndex: 2,
+                        opacity: 1,
+                        transform: 'scale(1) translateY(0)',
+                        transition: 'all 0.3s ease',
+                        ...(isAnimating && swipeDirection === 'like' && {
+                          animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+                        }),
+                        ...(isAnimating && swipeDirection === 'dislike' && {
+                          animation: 'swipeLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+                        })
+                      }}
+                    >
+                      <div style={{
+                        fontSize: '48px',
+                        textAlign: 'center',
+                        marginBottom: '16px'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex].utility === 'Live Visitor Count' && '👁️'}
+                        {abTestIdeas[currentWidgetIndex].utility === 'Simple Text Badge' && '🎁'}
+                      </div>
+
+                      <h4 style={{
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        color: '#1F2937',
+                        margin: '0 0 12px 0',
+                        textAlign: 'center'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex].utility}
+                      </h4>
+
+                      <div style={{
+                        background: '#F0F9FF',
+                        color: '#1E40AF',
+                        padding: '6px 12px',
+                        borderRadius: '16px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        textAlign: 'center',
+                        margin: '0 auto 16px auto',
+                        width: 'fit-content'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex].style} Style
+                      </div>
+
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#374151',
+                        margin: '0 0 20px 0',
+                        lineHeight: '1.5',
+                        textAlign: 'center'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex].rationale}
+                      </p>
+
+                      <div style={{
+                        background: '#F8FAFC',
+                        border: '1px solid #E5E7EB',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        fontStyle: 'italic',
+                        textAlign: 'center'
+                      }}>
+                        "{abTestIdeas[currentWidgetIndex].preview}"
+                      </div>
+                    </div>
+                  )}
+
+                  {abTestIdeas[currentWidgetIndex + 1] && (
+                    <div
+                      key={`next-${currentWidgetIndex + 1}`}
+                      style={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        background: '#FFFFFF',
+                        borderRadius: '16px',
+                        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
+                        padding: '30px',
+                        cursor: 'pointer',
+                        transform: 'scale(0.95) translateY(15px)',
+                        zIndex: 1,
+                        opacity: 0.6,
+                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        ...(isAnimating && swipeDirection === 'dislike' && {
+                          transform: 'scale(1) translateY(0)',
+                          opacity: 1,
+                          zIndex: 2
+                        })
+                      }}
+                    >
+                      <div style={{
+                        fontSize: '48px',
+                        textAlign: 'center',
+                        marginBottom: '16px'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex + 1].utility === 'Live Visitor Count' && '👁️'}
+                        {abTestIdeas[currentWidgetIndex + 1].utility === 'Simple Text Badge' && '🎁'}
+                      </div>
+
+                      <h4 style={{
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        color: '#1F2937',
+                        margin: '0 0 12px 0',
+                        textAlign: 'center'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex + 1].utility}
+                      </h4>
+
+                      <div style={{
+                        background: '#F0F9FF',
+                        color: '#1E40AF',
+                        padding: '6px 12px',
+                        borderRadius: '16px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        textAlign: 'center',
+                        margin: '0 auto 16px auto',
+                        width: 'fit-content'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex + 1].style} Style
+                      </div>
+
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#374151',
+                        margin: '0 0 20px 0',
+                        lineHeight: '1.5',
+                        textAlign: 'center'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex + 1].rationale}
+                      </p>
+
+                      <div style={{
+                        background: '#F8FAFC',
+                        border: '1px solid #E5E7EB',
+                        padding: '16px',
+                        borderRadius: '12px',
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        fontStyle: 'italic',
+                        textAlign: 'center'
+                      }}>
+                        "{abTestIdeas[currentWidgetIndex + 1].preview}"
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                <div style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: '12px',
+                  marginTop: '5px'
+                }}>
+                  <div style={{
                     display: 'flex',
+                    gap: '25px',
                     alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '28px',
-                    color: '#DC2626',
-                    boxShadow: '0 6px 16px rgba(220, 38, 38, 0.4)',
-                    transition: 'all 0.2s ease',
-                    opacity: isAnimating ? 0.5 : 1,
-                    transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
-                  }}
-                >
-                  ✕
-                </button>
-                
-                <button
-                  onClick={() => handleSwipe('like')}
-                  disabled={isAnimating}
-                  style={{
-                    width: '70px',
-                    height: '70px',
-                    borderRadius: '50%',
-                    background: '#DCFCE7',
-                    border: '3px solid #86EFAC',
-                    cursor: isAnimating ? 'not-allowed' : 'pointer',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    fontSize: '28px',
-                    color: '#16A34A',
-                    boxShadow: '0 6px 16px rgba(22, 163, 74, 0.4)',
-                    transition: 'all 0.2s ease',
-                    opacity: isAnimating ? 0.5 : 1,
-                    transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
-                  }}
-                >
-                  ♥
-                </button>
+                    justifyContent: 'center'
+                  }}>
+                    <button
+                      onClick={() => handleSwipe('dislike')}
+                      disabled={isAnimating}
+                      style={{
+                        width: '70px',
+                        height: '70px',
+                        borderRadius: '50%',
+                        background: '#FEE2E2',
+                        border: '3px solid #FCA5A5',
+                        cursor: isAnimating ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '28px',
+                        color: '#DC2626',
+                        boxShadow: '0 6px 16px rgba(220, 38, 38, 0.4)',
+                        transition: 'all 0.2s ease',
+                        opacity: isAnimating ? 0.5 : 1,
+                        transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
+                      }}
+                    >
+                      ✕
+                    </button>
+                    
+                    <button
+                      onClick={() => handleSwipe('like')}
+                      disabled={isAnimating}
+                      style={{
+                        width: '70px',
+                        height: '70px',
+                        borderRadius: '50%',
+                        background: '#DCFCE7',
+                        border: '3px solid #86EFAC',
+                        cursor: isAnimating ? 'not-allowed' : 'pointer',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        fontSize: '28px',
+                        color: '#16A34A',
+                        boxShadow: '0 6px 16px rgba(22, 163, 74, 0.4)',
+                        transition: 'all 0.2s ease',
+                        opacity: isAnimating ? 0.5 : 1,
+                        transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
+                      }}
+                    >
+                      ♥
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
+            )}
           </div>
         )}
 
-        {/* Step 2: Choose Product & Preview */}
-        {currentStep === 2 && (
+        {/* Step 1: Choose Product & Preview */}
+        {currentStep === 1 && (
           <div style={{
             animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             transform: 'translateX(0)',
@@ -1560,8 +1560,8 @@ export default function ABTests() {
           </div>
         )}
 
-        {/* Step 3: Save Widget & Configure Settings */}
-        {currentStep === 3 && (
+        {/* Step 2: Save Widget & Configure Settings */}
+        {currentStep === 2 && (
           <div style={{
             animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             transform: 'translateX(0)',
@@ -2003,8 +2003,8 @@ export default function ABTests() {
           </div>
         )}
 
-        {/* Step 4: Configure Test */}
-        {currentStep === 4 && (
+        {/* Step 3: Configure Test */}
+        {currentStep === 3 && (
           <div style={{
             animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             transform: 'translateX(0)',
@@ -2141,8 +2141,8 @@ export default function ABTests() {
           </div>
         )}
 
-        {/* Step 5: Launch */}
-        {currentStep === 5 && (
+        {/* Step 4: Launch */}
+        {currentStep === 4 && (
           <div style={{
             animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             transform: 'translateX(0)',
@@ -2397,7 +2397,7 @@ export default function ABTests() {
           <button
             disabled={
               (currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)) ||
-              (currentStep === 5 && (isLaunchingTest || !canLaunchTest))
+              (currentStep === 4 && (isLaunchingTest || !canLaunchTest))
             }
             onClick={async () => {
               if (currentStep === 2) {
@@ -2420,14 +2420,14 @@ export default function ABTests() {
                   }
                   return;
                 }
-                setCurrentStep(3);
+                setCurrentStep(2);
                 return;
               }
 
-              if (currentStep < 5) {
+              if (currentStep < 4) {
                 setWizardLaunchError(null);
                 setWizardLaunchSuccess(null);
-                setCurrentStep(prev => Math.min(prev + 1, 5));
+                setCurrentStep(prev => Math.min(prev + 1, 4));
               } else {
                 await handleLaunchTest();
               }
@@ -2436,7 +2436,7 @@ export default function ABTests() {
               background:
                 currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)
                   ? '#818CF8'
-                  : currentStep === 5 && (isLaunchingTest || !canLaunchTest)
+                  : currentStep === 4 && (isLaunchingTest || !canLaunchTest)
                     ? '#818CF8'
                     : '#4F46E5',
               border: 'none',
@@ -2445,7 +2445,7 @@ export default function ABTests() {
               cursor:
                 currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)
                   ? 'not-allowed'
-                  : currentStep === 5 && (isLaunchingTest || !canLaunchTest)
+                  : currentStep === 4 && (isLaunchingTest || !canLaunchTest)
                     ? 'not-allowed'
                     : 'pointer',
               fontSize: '14px',
@@ -2453,16 +2453,16 @@ export default function ABTests() {
               color: '#FFFFFF',
               opacity:
                 (currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)) ||
-                (currentStep === 5 && (isLaunchingTest || !canLaunchTest))
+                (currentStep === 4 && (isLaunchingTest || !canLaunchTest))
                   ? 0.8
                   : 1
             }}
           >
             {currentStep === 2 && isVariantRequestInFlight
               ? 'Duplicating...'
-              : currentStep === 5 && isLaunchingTest
+              : currentStep === 4 && isLaunchingTest
                 ? 'Launching...'
-                : currentStep === 5
+                : currentStep === 4
                   ? 'Launch Test'
                   : 'Next'}
           </button>
