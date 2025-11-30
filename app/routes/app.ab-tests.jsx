@@ -1141,42 +1141,32 @@ export default function ABTests() {
             {/* Tinder Swiper - Right Side (appears when goal is selected) */}
             {selectedGoal && selectedGoal === 'Trust' && (
               <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                padding: '10px 0',
-                minHeight: '500px',
+                backgroundColor: '#FFFFFF',
+                borderRadius: '16px',
+                padding: '40px',
                 width: '100%',
-                maxWidth: '500px',
-                flexShrink: 0
+                maxWidth: '600px',
+                flexShrink: 0,
+                display: 'flex',
+                flexDirection: 'column'
               }}>
-                <div style={{ textAlign: 'center' }}>
-                  <h3 style={{
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    marginBottom: '8px',
-                    textAlign: 'center'
-                  }}>
-                    Choose Your Widget
-                  </h3>
-                  <div style={{
-                    marginBottom: '10px',
-                    fontSize: '11px',
-                    color: '#6B7280',
-                    textAlign: 'center'
-                  }}>
-                    {currentWidgetIndex + 1} of {abTestIdeas.length}
-                  </div>
-                </div>
+                {/* Title */}
+                <p style={{
+                  fontSize: '12px',
+                  fontWeight: '500',
+                  color: '#6B7280',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  margin: '0 0 16px 0'
+                }}>
+                  CHOOSE YOUR CONVERSION PLAY
+                </p>
 
                 <div style={{
                   position: 'relative',
-                  width: '400px',
-                  height: '450px',
-                  margin: '0 auto',
-                  overflow: 'hidden'
+                  width: '100%',
+                  minHeight: '400px',
+                  marginBottom: '20px'
                 }}>
                   {abTestIdeas[currentWidgetIndex] && (
                     <div
@@ -1186,16 +1176,15 @@ export default function ABTests() {
                         top: 0,
                         left: 0,
                         width: '100%',
-                        height: '100%',
-                        background: '#FFFFFF',
-                        borderRadius: '16px',
-                        boxShadow: '0 15px 30px rgba(0, 0, 0, 0.15)',
-                        padding: '30px',
-                        cursor: 'pointer',
+                        background: 'transparent',
+                        padding: '0',
                         zIndex: 2,
                         opacity: 1,
                         transform: 'scale(1) translateY(0)',
                         transition: 'all 0.3s ease',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '20px',
                         ...(isAnimating && swipeDirection === 'like' && {
                           animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
                         }),
@@ -1204,50 +1193,7 @@ export default function ABTests() {
                         })
                       }}
                     >
-                      {abTestIdeas[currentWidgetIndex].utility === 'Live Visitor Count' && (
-                        <div style={{
-                          fontSize: '48px',
-                          textAlign: 'center',
-                          marginBottom: '16px'
-                        }}>
-                          👁️
-                        </div>
-                      )}
-
-                      <h4 style={{
-                        fontSize: '24px',
-                        fontWeight: '700',
-                        color: '#1F2937',
-                        margin: '0 0 12px 0',
-                        textAlign: 'center'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex].utility}
-                      </h4>
-
-                      <div style={{
-                        background: '#F0F9FF',
-                        color: '#1E40AF',
-                        padding: '6px 12px',
-                        borderRadius: '16px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        textAlign: 'center',
-                        margin: '0 auto 16px auto',
-                        width: 'fit-content'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex].style} Style
-                      </div>
-
-                      <p style={{
-                        fontSize: '16px',
-                        color: '#374151',
-                        margin: '0 0 20px 0',
-                        lineHeight: '1.5',
-                        textAlign: 'center'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex].rationale}
-                      </p>
-
+                      {/* Widget Preview - First */}
                       {abTestIdeas[currentWidgetIndex].utility === 'Free Shipping Badge' ? (
                         <div style={{
                           background: '#F3F4F6',
@@ -1259,7 +1205,9 @@ export default function ABTests() {
                           textAlign: 'left',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '12px'
+                          gap: '12px',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word'
                         }}>
                           <div style={{
                             width: '24px',
@@ -1271,9 +1219,11 @@ export default function ABTests() {
                               <path d="M1 8h15M16 8v8"/>
                             </svg>
                           </div>
-                          <span>{abTestIdeas[currentWidgetIndex].preview}</span>
+                          <span style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                            {abTestIdeas[currentWidgetIndex].preview}
+                          </span>
                         </div>
-                      ) : (
+                      ) : abTestIdeas[currentWidgetIndex].utility === 'Live Visitor Count' ? (
                         <div style={{
                           background: '#F8FAFC',
                           border: '1px solid #E5E7EB',
@@ -1282,11 +1232,50 @@ export default function ABTests() {
                           fontSize: '14px',
                           color: '#6B7280',
                           fontStyle: 'italic',
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word'
                         }}>
                           "{abTestIdeas[currentWidgetIndex].preview}"
                         </div>
-                      )}
+                      ) : null}
+
+                      {/* Title - Second */}
+                      <h4 style={{
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        color: '#1F2937',
+                        margin: 0,
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex].utility}
+                      </h4>
+
+                      {/* Tag - Third */}
+                      <div style={{
+                        background: '#F0F9FF',
+                        color: '#1E40AF',
+                        padding: '6px 12px',
+                        borderRadius: '16px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        width: 'fit-content'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex].style} Style
+                      </div>
+
+                      {/* Description - Fourth */}
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#374151',
+                        margin: 0,
+                        lineHeight: '1.5',
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex].rationale}
+                      </p>
                     </div>
                   )}
 
@@ -1298,16 +1287,15 @@ export default function ABTests() {
                         top: 0,
                         left: 0,
                         width: '100%',
-                        height: '100%',
-                        background: '#FFFFFF',
-                        borderRadius: '16px',
-                        boxShadow: '0 8px 16px rgba(0, 0, 0, 0.1)',
-                        padding: '30px',
-                        cursor: 'pointer',
+                        background: 'transparent',
+                        padding: '0',
                         transform: 'scale(0.95) translateY(15px)',
                         zIndex: 1,
                         opacity: 0.6,
                         transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: '20px',
                         ...(isAnimating && swipeDirection === 'dislike' && {
                           transform: 'scale(1) translateY(0)',
                           opacity: 1,
@@ -1315,50 +1303,6 @@ export default function ABTests() {
                         })
                       }}
                     >
-                      {abTestIdeas[currentWidgetIndex + 1].utility === 'Live Visitor Count' && (
-                        <div style={{
-                          fontSize: '48px',
-                          textAlign: 'center',
-                          marginBottom: '16px'
-                        }}>
-                          👁️
-                        </div>
-                      )}
-
-                      <h4 style={{
-                        fontSize: '24px',
-                        fontWeight: '700',
-                        color: '#1F2937',
-                        margin: '0 0 12px 0',
-                        textAlign: 'center'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex + 1].utility}
-                      </h4>
-
-                      <div style={{
-                        background: '#F0F9FF',
-                        color: '#1E40AF',
-                        padding: '6px 12px',
-                        borderRadius: '16px',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        textAlign: 'center',
-                        margin: '0 auto 16px auto',
-                        width: 'fit-content'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex + 1].style} Style
-                      </div>
-
-                      <p style={{
-                        fontSize: '16px',
-                        color: '#374151',
-                        margin: '0 0 20px 0',
-                        lineHeight: '1.5',
-                        textAlign: 'center'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex + 1].rationale}
-                      </p>
-
                       {abTestIdeas[currentWidgetIndex + 1].utility === 'Free Shipping Badge' ? (
                         <div style={{
                           background: '#F3F4F6',
@@ -1370,7 +1314,9 @@ export default function ABTests() {
                           textAlign: 'left',
                           display: 'flex',
                           alignItems: 'center',
-                          gap: '12px'
+                          gap: '12px',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word'
                         }}>
                           <div style={{
                             width: '24px',
@@ -1382,9 +1328,11 @@ export default function ABTests() {
                               <path d="M1 8h15M16 8v8"/>
                             </svg>
                           </div>
-                          <span>{abTestIdeas[currentWidgetIndex + 1].preview}</span>
+                          <span style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                            {abTestIdeas[currentWidgetIndex + 1].preview}
+                          </span>
                         </div>
-                      ) : (
+                      ) : abTestIdeas[currentWidgetIndex + 1].utility === 'Live Visitor Count' ? (
                         <div style={{
                           background: '#F8FAFC',
                           border: '1px solid #E5E7EB',
@@ -1393,76 +1341,107 @@ export default function ABTests() {
                           fontSize: '14px',
                           color: '#6B7280',
                           fontStyle: 'italic',
-                          textAlign: 'center'
+                          textAlign: 'center',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word'
                         }}>
                           "{abTestIdeas[currentWidgetIndex + 1].preview}"
                         </div>
-                      )}
+                      ) : null}
+
+                      <h4 style={{
+                        fontSize: '24px',
+                        fontWeight: '700',
+                        color: '#1F2937',
+                        margin: 0,
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex + 1].utility}
+                      </h4>
+
+                      <div style={{
+                        background: '#F0F9FF',
+                        color: '#1E40AF',
+                        padding: '6px 12px',
+                        borderRadius: '16px',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        width: 'fit-content'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex + 1].style} Style
+                      </div>
+
+                      <p style={{
+                        fontSize: '16px',
+                        color: '#374151',
+                        margin: 0,
+                        lineHeight: '1.5',
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word'
+                      }}>
+                        {abTestIdeas[currentWidgetIndex + 1].rationale}
+                      </p>
                     </div>
                   )}
                 </div>
 
+                {/* Swipe Buttons */}
                 <div style={{
                   display: 'flex',
-                  flexDirection: 'column',
+                  gap: '25px',
                   alignItems: 'center',
-                  gap: '12px',
-                  marginTop: '5px'
+                  justifyContent: 'center',
+                  marginTop: 'auto',
+                  paddingTop: '20px'
                 }}>
-                  <div style={{
-                    display: 'flex',
-                    gap: '25px',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <button
-                      onClick={() => handleSwipe('dislike')}
-                      disabled={isAnimating}
-                      style={{
-                        width: '70px',
-                        height: '70px',
-                        borderRadius: '50%',
-                        background: '#FEE2E2',
-                        border: '3px solid #FCA5A5',
-                        cursor: isAnimating ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '28px',
-                        color: '#DC2626',
-                        boxShadow: '0 6px 16px rgba(220, 38, 38, 0.4)',
-                        transition: 'all 0.2s ease',
-                        opacity: isAnimating ? 0.5 : 1,
-                        transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
-                      }}
-                    >
-                      ✕
-                    </button>
-                    
-                    <button
-                      onClick={() => handleSwipe('like')}
-                      disabled={isAnimating}
-                      style={{
-                        width: '70px',
-                        height: '70px',
-                        borderRadius: '50%',
-                        background: '#DCFCE7',
-                        border: '3px solid #86EFAC',
-                        cursor: isAnimating ? 'not-allowed' : 'pointer',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '28px',
-                        color: '#16A34A',
-                        boxShadow: '0 6px 16px rgba(22, 163, 74, 0.4)',
-                        transition: 'all 0.2s ease',
-                        opacity: isAnimating ? 0.5 : 1,
-                        transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
-                      }}
-                    >
-                      ♥
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => handleSwipe('dislike')}
+                    disabled={isAnimating}
+                    style={{
+                      width: '70px',
+                      height: '70px',
+                      borderRadius: '50%',
+                      background: '#FEE2E2',
+                      border: '3px solid #FCA5A5',
+                      cursor: isAnimating ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '28px',
+                      color: '#DC2626',
+                      boxShadow: '0 6px 16px rgba(220, 38, 38, 0.4)',
+                      transition: 'all 0.2s ease',
+                      opacity: isAnimating ? 0.5 : 1,
+                      transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
+                    }}
+                  >
+                    ✕
+                  </button>
+                  
+                  <button
+                    onClick={() => handleSwipe('like')}
+                    disabled={isAnimating}
+                    style={{
+                      width: '70px',
+                      height: '70px',
+                      borderRadius: '50%',
+                      background: '#DCFCE7',
+                      border: '3px solid #86EFAC',
+                      cursor: isAnimating ? 'not-allowed' : 'pointer',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '28px',
+                      color: '#16A34A',
+                      boxShadow: '0 6px 16px rgba(22, 163, 74, 0.4)',
+                      transition: 'all 0.2s ease',
+                      opacity: isAnimating ? 0.5 : 1,
+                      transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
+                    }}
+                  >
+                    ♥
+                  </button>
                 </div>
               </div>
             )}
