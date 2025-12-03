@@ -186,14 +186,13 @@ export default function ABTests() {
     return colorMap[utility] || '#F3F4F6'; // Default gray
   };
 
-  // Get visible cards in stack (current + up to 2 behind)
+  // Get visible cards in stack (current + ALL widgets behind)
   const getVisibleCards = () => {
     const cards = [];
-    const maxCards = 3;
     const remainingCards = abTestIdeas.length - currentWidgetIndex;
-    const cardsToShow = Math.min(maxCards, remainingCards);
     
-    for (let i = 0; i < cardsToShow; i++) {
+    // Show current card + all cards behind it
+    for (let i = 0; i < remainingCards; i++) {
       const widgetIndex = currentWidgetIndex + i;
       if (widgetIndex < abTestIdeas.length) {
         cards.push({
@@ -1216,7 +1215,7 @@ export default function ABTests() {
                   minHeight: '500px',
                   padding: '20px 0'
                 }}>
-                  {/* Render stacked cards - show current + up to 2 behind with fan effect */}
+                  {/* Render stacked cards - show current + ALL widgets behind with fan effect */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
                     if (!widget) return null;
 
@@ -1229,20 +1228,20 @@ export default function ABTests() {
                     const translateY = stackIndex * 16;
                     
                     // Always apply rotation to cards behind - they should always be visible and rotated
-                    // Card 1 (first behind): rotates right, Card 2 (second behind): rotates left
+                    // Alternate rotation: odd stackIndex rotates right, even stackIndex rotates left
                     let translateX = 0;
                     let rotation = 0;
                     
-                    if (stackIndex === 1) {
-                      // First card behind - always rotate right and offset right (more pronounced)
-                      translateX = 25;
-                      rotation = 5;
-                    } else if (stackIndex === 2) {
-                      // Second card behind - always rotate left and offset left (more pronounced)
-                      translateX = -25;
-                      rotation = -5;
+                    if (stackIndex === 0) {
+                      // Current card stays centered with no rotation
+                      translateX = 0;
+                      rotation = 0;
+                    } else {
+                      // All cards behind alternate: right, left, right, left, etc.
+                      const isOdd = stackIndex % 2 === 1;
+                      translateX = isOdd ? 25 : -25;
+                      rotation = isOdd ? 5 : -5;
                     }
-                    // Current card (stackIndex === 0) stays centered with no rotation
                     
                     // Opacity: 100%, 90%, 80% - more visible
                     const opacity = isCurrent ? 1 : Math.max(0.8, 1 - (stackIndex * 0.1));
