@@ -1083,7 +1083,7 @@ export default function ABTests() {
                       <span style={{
                         fontSize: '16px',
                         fontWeight: '500',
-                        color: '#9CA3AF'
+                        color: '#FFFFFF'
                       }}>
                         {step}
                       </span>
@@ -1104,7 +1104,7 @@ export default function ABTests() {
         </div>
         <div style={{
           fontSize: '14px',
-          color: '#9CA3AF',
+          color: '#374151',
           textAlign: 'center',
           marginTop: '16px'
         }}>
@@ -1208,52 +1208,70 @@ export default function ABTests() {
                     icon: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%231F2937' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cline x1='12' y1='1' x2='12' y2='23'/%3E%3Cpath d='M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6'/%3E%3C/svg%3E",
                     description: 'Highlight product value and benefits'
                   }
-                ].map(({ goal, icon, description }) => (
-                  <button
-                    key={goal}
-                    onClick={() => {
-                      if (goal === 'Trust') {
-                        setSelectedGoal(goal);
-                      }
-                    }}
-                    style={{
-                      backgroundColor: '#FFFFFF',
-                      border: 'none',
-                      borderRadius: '20px',
-                      padding: '32px 36px',
-                      cursor: 'pointer',
-                      textAlign: 'left',
-                      fontSize: '18px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      transition: 'all 0.2s ease',
-                      boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '20px',
-                      width: '100%',
-                      minHeight: '90px'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
-                    }}
-                  >
-                    {/* Icon */}
-                    <div style={{
-                      width: '40px',
-                      height: '40px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      flexShrink: 0
-                    }}>
-                      <img src={icon} alt="" style={{ width: '28px', height: '28px' }} />
-                    </div>
+                ].map(({ goal, icon, description }) => {
+                  const isSelected = selectedGoal === goal;
+                  const isClickable = goal === 'Trust';
+                  
+                  return (
+                    <button
+                      key={goal}
+                      onClick={() => {
+                        if (isClickable) {
+                          setSelectedGoal(goal);
+                        }
+                      }}
+                      style={{
+                        backgroundColor: selectedGoal && !isSelected ? 'rgba(59, 130, 246, 0.08)' : '#FFFFFF',
+                        border: 'none',
+                        borderRadius: '20px',
+                        padding: '32px 36px',
+                        cursor: isClickable ? 'pointer' : 'default',
+                        textAlign: 'left',
+                        fontSize: '18px',
+                        fontWeight: '600',
+                        color: selectedGoal && !isSelected ? 'rgba(31, 41, 55, 0.6)' : '#1F2937',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+                        boxShadow: selectedGoal && !isSelected ? '0 1px 2px rgba(0, 0, 0, 0.03)' : '0 2px 4px rgba(0, 0, 0, 0.05)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '20px',
+                        width: '100%',
+                        minHeight: '90px',
+                        position: 'relative',
+                        overflow: 'hidden'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (isClickable && (!selectedGoal || isSelected)) {
+                          e.currentTarget.style.transform = 'translateY(-2px)';
+                          e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isClickable && (!selectedGoal || isSelected)) {
+                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+                        }
+                      }}
+                    >
+                      {/* Icon with subtle blue circular background */}
+                      <div style={{
+                        width: '48px',
+                        height: '48px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                        backgroundColor: selectedGoal && !isSelected ? 'rgba(59, 130, 246, 0.15)' : '#E0F2FE',
+                        borderRadius: '50%',
+                        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                      }}>
+                        <img src={icon} alt="" style={{ 
+                          width: '28px', 
+                          height: '28px',
+                          opacity: selectedGoal && !isSelected ? 0.7 : 1,
+                          transition: 'opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+                        }} />
+                      </div>
                     
                     {/* Text Content */}
                     <div style={{ flex: 1 }}>
@@ -1270,14 +1288,16 @@ export default function ABTests() {
                         margin: 0,
                         fontSize: '15px',
                         fontWeight: '400',
-                        color: '#6B7280',
-                        lineHeight: '1.4'
+                        color: selectedGoal && !isSelected ? 'rgba(107, 114, 128, 0.6)' : '#6B7280',
+                        lineHeight: '1.4',
+                        transition: 'color 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}>
                         {description}
                       </p>
                     </div>
                   </button>
-                ))}
+                  );
+                })}
               </div>
             </div>
 
