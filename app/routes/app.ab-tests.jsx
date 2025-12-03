@@ -1,6 +1,6 @@
 import { json } from "@remix-run/node";
 import { useLoaderData, useNavigate } from "@remix-run/react";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { authenticate } from "../shopify.server.js";
 
 export const loader = async ({ request }) => {
@@ -113,6 +113,11 @@ export default function ABTests() {
   const [currentWidgetIndex, setCurrentWidgetIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  
+  // Drag state
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+  const [dragCurrent, setDragCurrent] = useState({ x: 0, y: 0 });
   
   // Wizard screenshot state
   const [wizardScreenshot, setWizardScreenshot] = useState(null);
@@ -417,7 +422,7 @@ export default function ABTests() {
 
   // Tinder swiper functions
   const handleSwipe = (direction) => {
-    if (isAnimating) return;
+    if (isAnimating || isDragging) return;
     
     setIsAnimating(true);
     setSwipeDirection(direction);
@@ -442,6 +447,75 @@ export default function ABTests() {
       }, 400);
     }
   };
+
+  // Drag handlers
+  const handleDragMove = useCallback((e) => {
+    if (!isDragging || isAnimating) return;
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    setDragCurrent({ x: clientX, y: clientY });
+  }, [isDragging, isAnimating]);
+
+  const handleDragEnd = useCallback(() => {
+    if (!isDragging || isAnimating) return;
+    
+    // Use functional updates to get current values
+    setDragCurrent(current => {
+      setDragStart(start => {
+        const deltaX = current.x - start.x;
+        const deltaY = current.y - start.y;
+        const dragDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+        const threshold = 50; // Minimum drag distance to trigger navigation
+        
+        if (dragDistance > threshold) {
+          // Determine direction based on horizontal movement
+          if (Math.abs(deltaX) > Math.abs(deltaY)) {
+            setCurrentWidgetIndex(prevIndex => {
+              if (deltaX > 0) {
+                // Dragged right - go to next widget
+                return prevIndex < abTestIdeas.length - 1 ? prevIndex + 1 : 0;
+              } else {
+                // Dragged left - go to previous widget
+                return prevIndex > 0 ? prevIndex - 1 : abTestIdeas.length - 1;
+              }
+            });
+          }
+        }
+        
+        setIsDragging(false);
+        return { x: 0, y: 0 };
+      });
+      return { x: 0, y: 0 };
+    });
+  }, [isDragging, isAnimating]);
+
+  const handleDragStart = (e) => {
+    if (isAnimating) return;
+    e.preventDefault();
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    setIsDragging(true);
+    setDragStart({ x: clientX, y: clientY });
+    setDragCurrent({ x: clientX, y: clientY });
+  };
+
+  // Add document-level event listeners for better drag handling
+  useEffect(() => {
+    if (isDragging) {
+      document.addEventListener('mousemove', handleDragMove);
+      document.addEventListener('mouseup', handleDragEnd);
+      document.addEventListener('touchmove', handleDragMove, { passive: false });
+      document.addEventListener('touchend', handleDragEnd);
+
+      return () => {
+        document.removeEventListener('mousemove', handleDragMove);
+        document.removeEventListener('mouseup', handleDragEnd);
+        document.removeEventListener('touchmove', handleDragMove);
+        document.removeEventListener('touchend', handleDragEnd);
+      };
+    }
+  }, [isDragging, handleDragMove, handleDragEnd]);
 
   const encodeWidgetConfigPayload = (payload) => {
     if (!payload) return null;
@@ -1246,10 +1320,23 @@ export default function ABTests() {
                     let translateX = 0;
                     let rotation = 0;
                     
+                    // Calculate drag offset for current card
+                    let dragOffsetX = 0;
+                    let dragOffsetY = 0;
+                    let dragRotation = 0;
+                    
+                    if (isCurrent && isDragging) {
+                      dragOffsetX = dragCurrent.x - dragStart.x;
+                      dragOffsetY = dragCurrent.y - dragStart.y;
+                      // Add rotation based on horizontal drag
+                      dragRotation = dragOffsetX * 0.1; // Rotate based on drag distance
+                    }
+                    
                     if (stackIndex === 0) {
-                      // Current card stays centered with no rotation
-                      translateX = 0;
-                      rotation = 0;
+                      // Current card - apply drag offset on top of base position
+                      translateX = dragOffsetX;
+                      translateY = translateY + dragOffsetY; // Add drag offset to base vertical offset
+                      rotation = dragRotation;
                     } else {
                       // All cards behind alternate: right, left, right, left, etc.
                       const isOdd = stackIndex % 2 === 1;
@@ -1263,6 +1350,8 @@ export default function ABTests() {
                     return (
                       <div
                         key={`stack-${index}-${stackIndex}`}
+                        onMouseDown={isCurrent ? handleDragStart : undefined}
+                        onTouchStart={isCurrent ? handleDragStart : undefined}
                         style={{
                           position: 'absolute',
                           top: 0,
@@ -1281,9 +1370,12 @@ export default function ABTests() {
                           transform: `scale(${scale}) translate(${translateX}px, ${translateY}px) rotate(${rotation}deg)`,
                           transformOrigin: 'center center',
                           // Only transition opacity and position for cards behind, keep rotation constant
-                          transition: isCurrent 
+                          // Disable transition during drag for smooth dragging
+                          transition: isCurrent && !isDragging
                             ? 'all 0.3s ease' 
-                            : `opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)`,
+                            : !isCurrent 
+                              ? `opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)`
+                              : 'none',
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '24px',
@@ -1291,6 +1383,8 @@ export default function ABTests() {
                             ? '0 10px 30px rgba(0, 0, 0, 0.2)' 
                             : `0 ${8 + stackIndex * 3}px ${15 + stackIndex * 5}px rgba(0, 0, 0, ${0.15 - stackIndex * 0.05})`,
                           border: '1px solid rgba(0, 0, 0, 0.08)',
+                          cursor: isCurrent ? (isDragging ? 'grabbing' : 'grab') : 'default',
+                          userSelect: 'none',
                           ...(isCurrent && isAnimating && swipeDirection === 'like' && {
                             animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
                           }),
