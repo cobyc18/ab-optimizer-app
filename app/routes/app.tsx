@@ -12,6 +12,8 @@ const imgSetting = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'
 const imgVideo = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z' stroke='%23151515' stroke-width='2'/%3E%3C/svg%3E";
 const imgLogout = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none'%3E%3Cpath d='M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9' stroke='%23151515' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E";
 const imgGroup1000003393 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='4'%3E%3Crect x='0' y='0' width='180' height='4' rx='2' fill='%23e6e6e6'/%3E%3Crect x='0' y='0' width='144' height='4' rx='2' fill='%230038ff'/%3E%3C/svg%3E";
+const imgChevronLeft = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23151515' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M15 18l-6-6 6-6'/%3E%3C/svg%3E";
+const imgChevronRight = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24' fill='none' stroke='%23151515' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M9 18l6-6-6-6'/%3E%3C/svg%3E";
 
 // Figma Design Variables
 const figmaColors = {
@@ -32,6 +34,7 @@ const figmaColors = {
 export default function AppLayout() {
   const location = useLocation();
   const [selectedNavItem, setSelectedNavItem] = useState("Home");
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const navigationItems = [
     { id: "Home", label: "Home", icon: img, href: "/app" },
@@ -56,51 +59,66 @@ export default function AppLayout() {
   return (
     <div style={{ backgroundColor: figmaColors.gray, position: 'relative', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
       {/* LEFT SIDEBAR */}
-      <div style={{ position: 'absolute', left: '60px', top: 0, zIndex: 10 }}>
-        {/* Background line */}
-        <div style={{
-          position: 'absolute',
-          backgroundColor: 'rgba(230,230,230,0.85)',
-          height: '2342px',
-          left: 'calc(12.5% + 107.5px)',
-          mixBlendMode: 'multiply',
-          top: 0,
-          transform: 'translateX(-50%)',
-          width: '1px'
-        }} />
+      <div style={{ 
+        position: 'absolute', 
+        left: isCollapsed ? '20px' : '60px', 
+        top: 0, 
+        zIndex: 10,
+        transition: 'left 0.3s ease'
+      }}>
+        {/* Background line - only show when expanded */}
+        {!isCollapsed && (
+          <div style={{
+            position: 'absolute',
+            backgroundColor: 'rgba(230,230,230,0.85)',
+            height: '2342px',
+            left: 'calc(12.5% + 107.5px)',
+            mixBlendMode: 'multiply',
+            top: 0,
+            transform: 'translateX(-50%)',
+            width: '1px'
+          }} />
+        )}
         
-        {/* TryLab Logo */}
-        <div style={{
-          position: 'absolute',
-          height: '44.613px',
-          left: '134.49px',
-          top: '67.39px',
-          width: '159.51px'
-        }}>
-          <img alt="TryLab" src={imgTryLab} style={{ width: '100%', height: '100%' }} />
-        </div>
+        {/* TryLab Logo - only show when expanded */}
+        {!isCollapsed && (
+          <div style={{
+            position: 'absolute',
+            height: '44.613px',
+            left: '134.49px',
+            top: '67.39px',
+            width: '159.51px',
+            transition: 'opacity 0.3s ease'
+          }}>
+            <img alt="TryLab" src={imgTryLab} style={{ width: '100%', height: '100%' }} />
+          </div>
+        )}
         
-        {/* User Avatar */}
-        <div style={{
-          position: 'absolute',
-          left: '26px',
-          width: '108.793px',
-          height: '108.793px',
-          top: '35.1px'
-        }}>
-          <img alt="User Avatar" src={imgOption11} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
+        {/* User Avatar - only show when expanded */}
+        {!isCollapsed && (
+          <div style={{
+            position: 'absolute',
+            left: '26px',
+            width: '108.793px',
+            height: '108.793px',
+            top: '35.1px',
+            transition: 'opacity 0.3s ease'
+          }}>
+            <img alt="User Avatar" src={imgOption11} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          </div>
+        )}
         
         {/* Navigation Menu */}
         <div style={{
           position: 'absolute',
-          left: 'calc(4.167% + 94px)',
-          top: '178.32px',
-          transform: 'translateX(-50%)',
+          left: isCollapsed ? '0' : 'calc(4.167% + 94px)',
+          top: isCollapsed ? '40px' : '178.32px',
+          transform: isCollapsed ? 'none' : 'translateX(-50%)',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
-          alignItems: 'flex-start'
+          alignItems: isCollapsed ? 'center' : 'flex-start',
+          transition: 'all 0.3s ease'
         }}>
           {navigationItems.map((item, index) => (
             <Link
@@ -110,15 +128,18 @@ export default function AppLayout() {
               style={{
                 backgroundColor: selectedNavItem === item.id ? figmaColors.blue : 'transparent',
                 display: 'flex',
-                gap: '16px',
+                gap: isCollapsed ? '0' : '16px',
                 alignItems: 'center',
-                padding: '16px 24px',
+                justifyContent: isCollapsed ? 'center' : 'flex-start',
+                padding: isCollapsed ? '12px' : '16px 24px',
                 borderRadius: selectedNavItem === item.id ? '12px' : '60px',
-                width: '252px',
+                width: isCollapsed ? '48px' : '252px',
                 cursor: 'pointer',
-                transition: 'all 0.2s ease',
-                textDecoration: 'none'
+                transition: 'all 0.3s ease',
+                textDecoration: 'none',
+                position: 'relative'
               }}
+              title={isCollapsed ? item.label : ''}
             >
               <div style={{ width: '28px', height: '28px', flexShrink: 0 }}>
                 <img 
@@ -131,84 +152,125 @@ export default function AppLayout() {
                   }} 
                 />
               </div>
-              <p style={{
-                fontFamily: 'Poppins, sans-serif',
-                fontWeight: 500,
-                fontSize: '16px',
-                color: selectedNavItem === item.id ? figmaColors.white : figmaColors.themeDark,
-                margin: 0,
-                letterSpacing: '0.4px'
-              }}>
-                {item.label}
-              </p>
+              {!isCollapsed && (
+                <p style={{
+                  fontFamily: 'Poppins, sans-serif',
+                  fontWeight: 500,
+                  fontSize: '16px',
+                  color: selectedNavItem === item.id ? figmaColors.white : figmaColors.themeDark,
+                  margin: 0,
+                  letterSpacing: '0.4px',
+                  whiteSpace: 'nowrap',
+                  opacity: isCollapsed ? 0 : 1,
+                  transition: 'opacity 0.3s ease'
+                }}>
+                  {item.label}
+                </p>
+              )}
             </Link>
           ))}
         </div>
         
-        {/* Trial Banner */}
-        <div style={{
-          position: 'absolute',
-          backgroundColor: figmaColors.orange,
-          left: 'calc(4.167% + 103.5px)',
-          top: '736px',
-          transform: 'translateX(-50%)',
-          padding: '30px 25px',
-          borderRadius: '20px',
-          width: '230px'
-        }}>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: '35px', alignItems: 'flex-start' }}>
+        {/* Trial Banner - only show when expanded */}
+        {!isCollapsed && (
+          <div style={{
+            position: 'absolute',
+            backgroundColor: figmaColors.orange,
+            left: 'calc(4.167% + 103.5px)',
+            top: '736px',
+            transform: 'translateX(-50%)',
+            padding: '30px 25px',
+            borderRadius: '20px',
+            width: '230px',
+            transition: 'opacity 0.3s ease'
+          }}>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '35px', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', alignItems: 'flex-start' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '35px', alignItems: 'flex-start' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '25px', alignItems: 'flex-start' }}>
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 600,
+                    fontSize: '16px',
+                    color: figmaColors.darkGray,
+                    margin: 0,
+                    letterSpacing: '0.4px'
+                  }}>
+                    You have 9 days on the Pro free trial
+                  </p>
+                  <div style={{ width: '180px', height: '0px' }}>
+                    <img alt="Progress" src={imgGroup1000003393} style={{ width: '100%' }} />
+                  </div>
+                </div>
                 <p style={{
                   fontFamily: 'Inter, sans-serif',
-                  fontWeight: 600,
-                  fontSize: '16px',
+                  fontWeight: 400,
+                  fontSize: '14px',
                   color: figmaColors.darkGray,
+                  margin: 0,
+                  letterSpacing: '0.4px',
+                  lineHeight: '20px'
+                }}>
+                  Usage is unlimited while on trial and will reset when the trial ends.
+                </p>
+              </div>
+              <button style={{
+                backgroundColor: figmaColors.blue,
+                border: 'none',
+                borderRadius: '12px',
+                padding: '12px 22px',
+                cursor: 'pointer'
+              }}>
+                <p style={{
+                  fontFamily: 'Poppins, sans-serif',
+                  fontWeight: 500,
+                  fontSize: '14px',
+                  color: figmaColors.white,
                   margin: 0,
                   letterSpacing: '0.4px'
                 }}>
-                  You have 9 days on the Pro free trial
+                  Upgrade your free trial →
                 </p>
-                <div style={{ width: '180px', height: '0px' }}>
-                  <img alt="Progress" src={imgGroup1000003393} style={{ width: '100%' }} />
-                </div>
-              </div>
-              <p style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 400,
-                fontSize: '14px',
-                color: figmaColors.darkGray,
-                margin: 0,
-                letterSpacing: '0.4px',
-                lineHeight: '20px'
-              }}>
-                Usage is unlimited while on trial and will reset when the trial ends.
-              </p>
+              </button>
             </div>
-            <button style={{
-              backgroundColor: figmaColors.blue,
-              border: 'none',
-              borderRadius: '12px',
-              padding: '12px 22px',
-              cursor: 'pointer'
-            }}>
-              <p style={{
-                fontFamily: 'Poppins, sans-serif',
-                fontWeight: 500,
-                fontSize: '14px',
-                color: figmaColors.white,
-                margin: 0,
-                letterSpacing: '0.4px'
-              }}>
-                Upgrade your free trial →
-              </p>
-            </button>
           </div>
-        </div>
+        )}
+
+        {/* Collapse/Expand Toggle Button */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          style={{
+            position: 'absolute',
+            top: isCollapsed ? '20px' : '67.39px',
+            left: isCollapsed ? '60px' : 'calc(4.167% + 350px)',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            borderRadius: '8px',
+            width: '36px',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.3s ease',
+            zIndex: 20
+          }}
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          <img 
+            src={isCollapsed ? imgChevronRight : imgChevronLeft} 
+            alt={isCollapsed ? 'Expand' : 'Collapse'} 
+            style={{ width: '20px', height: '20px' }} 
+          />
+        </button>
       </div>
 
       {/* MAIN CONTENT AREA - Adjusted for sidebar */}
-      <div style={{ marginLeft: '350px', minHeight: '100vh' }}>
+      <div style={{ 
+        marginLeft: isCollapsed ? '100px' : '350px', 
+        minHeight: '100vh',
+        transition: 'margin-left 0.3s ease'
+      }}>
         <Outlet />
       </div>
     </div>

@@ -1210,22 +1210,19 @@ export default function ABTests() {
                   }
                 ].map(({ goal, icon, description }) => {
                   const isSelected = selectedGoal === goal;
-                  const isClickable = goal === 'Trust';
                   
                   return (
                     <button
                       key={goal}
                       onClick={() => {
-                        if (isClickable) {
-                          setSelectedGoal(goal);
-                        }
+                        setSelectedGoal(goal);
                       }}
                       style={{
                         backgroundColor: selectedGoal && !isSelected ? 'rgba(59, 130, 246, 0.08)' : '#FFFFFF',
                         border: 'none',
                         borderRadius: '20px',
                         padding: '32px 36px',
-                        cursor: isClickable ? 'pointer' : 'default',
+                        cursor: 'pointer',
                         textAlign: 'left',
                         fontSize: '18px',
                         fontWeight: '600',
@@ -1241,15 +1238,15 @@ export default function ABTests() {
                         overflow: 'hidden'
                       }}
                       onMouseEnter={(e) => {
-                        if (isClickable && (!selectedGoal || isSelected)) {
+                        if (!selectedGoal || isSelected) {
                           e.currentTarget.style.transform = 'translateY(-2px)';
                           e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.1)';
                         }
                       }}
                       onMouseLeave={(e) => {
-                        if (isClickable && (!selectedGoal || isSelected)) {
+                        if (!selectedGoal || isSelected) {
                           e.currentTarget.style.transform = 'translateY(0)';
-                          e.currentTarget.style.boxShadow = '0 2px 4px rgba(0, 0, 0, 0.05)';
+                          e.currentTarget.style.boxShadow = selectedGoal && !isSelected ? '0 1px 2px rgba(0, 0, 0, 0.03)' : '0 2px 4px rgba(0, 0, 0, 0.05)';
                         }
                       }}
                     >
