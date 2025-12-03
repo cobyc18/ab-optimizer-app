@@ -1213,23 +1213,27 @@ export default function ABTests() {
                   marginBottom: '20px',
                   boxSizing: 'border-box',
                   overflow: 'visible',
-                  minHeight: '500px'
+                  minHeight: '500px',
+                  padding: '20px 0'
                 }}>
-                  {/* Render stacked cards - show current + up to 2 behind */}
+                  {/* Render stacked cards - show current + up to 2 behind with fan effect */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
                     if (!widget) return null;
 
                     const isCurrent = stackIndex === 0;
-                    // Higher z-index for cards on top (reverse order so top card has highest z-index)
+                    // Higher z-index for cards on top
                     const zIndex = 100 - stackIndex;
-                    // More visible scale difference: 100%, 94%, 88%
-                    const scale = 1 - (stackIndex * 0.06);
-                    // More visible vertical offset: 0px, 24px, 48px - so edges are clearly visible
-                    const translateY = stackIndex * 24;
-                    // More visible opacity: 100%, 80%, 65% - so all cards are clearly visible
-                    const opacity = isCurrent ? 1 : Math.max(0.65, 1 - (stackIndex * 0.2));
-                    // Slight horizontal offset for depth: 0px, 6px, 12px
-                    const translateX = stackIndex * 6;
+                    // Scale difference: 100%, 97%, 94% - less scaling so cards are more visible
+                    const scale = 1 - (stackIndex * 0.03);
+                    // Vertical offset: 0px, 16px, 32px - less offset
+                    const translateY = stackIndex * 16;
+                    // Horizontal offset that alternates: right, left for fan effect
+                    // Card 1 goes right, Card 2 goes left, creating a fan
+                    const translateX = stackIndex === 0 ? 0 : (stackIndex === 1 ? 20 : -20);
+                    // Rotation for fan effect: 0deg, 4deg, -4deg - more pronounced rotation
+                    const rotation = stackIndex === 0 ? 0 : (stackIndex === 1 ? 4 : -4);
+                    // Opacity: 100%, 90%, 80% - more visible
+                    const opacity = isCurrent ? 1 : Math.max(0.8, 1 - (stackIndex * 0.1));
 
                     return (
                       <div
@@ -1246,18 +1250,19 @@ export default function ABTests() {
                           padding: '24px',
                           margin: '0',
                           boxSizing: 'border-box',
-                          overflow: 'hidden',
+                          overflow: 'visible',
                           zIndex: zIndex,
                           opacity: opacity,
-                          transform: `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
-                          transformOrigin: 'top center',
+                          transform: `scale(${scale}) translate(${translateX}px, ${translateY}px) rotate(${rotation}deg)`,
+                          transformOrigin: 'center center',
                           transition: isCurrent ? 'all 0.3s ease' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '24px',
                           boxShadow: isCurrent 
-                            ? '0 10px 25px rgba(0, 0, 0, 0.15)' 
-                            : `0 ${5 + stackIndex * 2}px ${10 + stackIndex * 3}px rgba(0, 0, 0, ${0.1 - stackIndex * 0.03})`,
+                            ? '0 10px 30px rgba(0, 0, 0, 0.2)' 
+                            : `0 ${8 + stackIndex * 3}px ${15 + stackIndex * 5}px rgba(0, 0, 0, ${0.15 - stackIndex * 0.05})`,
+                          border: '1px solid rgba(0, 0, 0, 0.08)',
                           ...(isCurrent && isAnimating && swipeDirection === 'like' && {
                             animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
                           }),
