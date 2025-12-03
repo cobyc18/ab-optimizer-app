@@ -1315,12 +1315,11 @@ export default function ABTests() {
                 <div style={{
                   position: 'relative',
                   width: '100%',
-                  flex: 1,
-                  marginBottom: '0px',
+                  flex: '0 0 auto',
                   boxSizing: 'border-box',
                   overflow: 'visible',
                   minHeight: '500px',
-                  padding: '20px 0'
+                  padding: '20px 0 0 0'
                 }}>
                   {/* Render stacked cards - show current + ALL widgets behind with fan effect */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
@@ -1547,9 +1546,9 @@ export default function ABTests() {
                   gap: '8px',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '0px',
-                  paddingTop: '10px',
-                  paddingBottom: '8px'
+                  marginTop: '4px',
+                  paddingTop: '0px',
+                  paddingBottom: '0px'
                 }}>
                   {abTestIdeas.map((widget, index) => (
                     <button
@@ -1583,6 +1582,7 @@ export default function ABTests() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
+                  marginTop: '4px',
                   paddingTop: '0px',
                   paddingBottom: '10px'
                 }}>
