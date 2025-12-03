@@ -1312,12 +1312,13 @@ export default function ABTests() {
                     const zIndex = 100 - stackIndex;
                     // Scale difference: 100%, 97%, 94% - less scaling so cards are more visible
                     const scale = 1 - (stackIndex * 0.03);
-                    // Vertical offset: 0px, 16px, 32px - less offset
-                    const translateY = stackIndex * 16;
+                    // Base vertical offset: 0px, 16px, 32px - less offset
+                    const baseTranslateY = stackIndex * 16;
                     
                     // Always apply rotation to cards behind - they should always be visible and rotated
                     // Alternate rotation: odd stackIndex rotates right, even stackIndex rotates left
                     let translateX = 0;
+                    let translateY = baseTranslateY;
                     let rotation = 0;
                     
                     // Calculate drag offset for current card
@@ -1335,7 +1336,7 @@ export default function ABTests() {
                     if (stackIndex === 0) {
                       // Current card - apply drag offset on top of base position
                       translateX = dragOffsetX;
-                      translateY = translateY + dragOffsetY; // Add drag offset to base vertical offset
+                      translateY = baseTranslateY + dragOffsetY; // Add drag offset to base vertical offset
                       rotation = dragRotation;
                     } else {
                       // All cards behind alternate: right, left, right, left, etc.
