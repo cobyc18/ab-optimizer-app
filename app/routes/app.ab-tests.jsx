@@ -119,6 +119,10 @@ export default function ABTests() {
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [dragCurrent, setDragCurrent] = useState({ x: 0, y: 0 });
   
+  // Use refs to track drag values to avoid stale closures
+  const dragStartRef = React.useRef({ x: 0, y: 0 });
+  const dragCurrentRef = React.useRef({ x: 0, y: 0 });
+  
   // Wizard screenshot state
   const [wizardScreenshot, setWizardScreenshot] = useState(null);
   const [wizardScreenshotLoading, setWizardScreenshotLoading] = useState(false);
@@ -454,40 +458,52 @@ export default function ABTests() {
     e.preventDefault();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    dragCurrentRef.current = { x: clientX, y: clientY };
     setDragCurrent({ x: clientX, y: clientY });
   }, [isDragging, isAnimating]);
 
   const handleDragEnd = useCallback(() => {
     if (!isDragging || isAnimating) return;
     
-    // Use functional updates to get current values
-    setDragCurrent(current => {
-      setDragStart(start => {
-        const deltaX = current.x - start.x;
-        const deltaY = current.y - start.y;
-        const dragDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
-        const threshold = 50; // Minimum drag distance to trigger navigation
-        
-        if (dragDistance > threshold) {
-          // Determine direction based on horizontal movement
-          if (Math.abs(deltaX) > Math.abs(deltaY)) {
-            setCurrentWidgetIndex(prevIndex => {
-              if (deltaX > 0) {
-                // Dragged right - go to next widget
-                return prevIndex < abTestIdeas.length - 1 ? prevIndex + 1 : 0;
-              } else {
-                // Dragged left - go to previous widget
-                return prevIndex > 0 ? prevIndex - 1 : abTestIdeas.length - 1;
-              }
-            });
-          }
+    // Use refs to get the most current values
+    const current = dragCurrentRef.current;
+    const start = dragStartRef.current;
+    const deltaX = current.x - start.x;
+    const deltaY = current.y - start.y;
+    const dragDistance = Math.sqrt(deltaX * deltaX + deltaY * deltaY);
+    const threshold = 50; // Minimum drag distance to trigger navigation
+    
+    if (dragDistance > threshold) {
+      // Determine direction based on horizontal movement
+      if (Math.abs(deltaX) > Math.abs(deltaY)) {
+        // Only move one widget at a time
+        if (deltaX > 0) {
+          // Dragged right - go to next widget (only one step)
+          setCurrentWidgetIndex(prevIndex => {
+            if (prevIndex < abTestIdeas.length - 1) {
+              return prevIndex + 1;
+            } else {
+              return 0; // Wrap around
+            }
+          });
+        } else {
+          // Dragged left - go to previous widget (only one step)
+          setCurrentWidgetIndex(prevIndex => {
+            if (prevIndex > 0) {
+              return prevIndex - 1;
+            } else {
+              return abTestIdeas.length - 1; // Wrap around
+            }
+          });
         }
-        
-        setIsDragging(false);
-        return { x: 0, y: 0 };
-      });
-      return { x: 0, y: 0 };
-    });
+      }
+    }
+    
+    setIsDragging(false);
+    setDragStart({ x: 0, y: 0 });
+    setDragCurrent({ x: 0, y: 0 });
+    dragStartRef.current = { x: 0, y: 0 };
+    dragCurrentRef.current = { x: 0, y: 0 };
   }, [isDragging, isAnimating]);
 
   const handleDragStart = (e) => {
@@ -495,9 +511,12 @@ export default function ABTests() {
     e.preventDefault();
     const clientX = e.touches ? e.touches[0].clientX : e.clientX;
     const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+    const startPos = { x: clientX, y: clientY };
     setIsDragging(true);
-    setDragStart({ x: clientX, y: clientY });
-    setDragCurrent({ x: clientX, y: clientY });
+    setDragStart(startPos);
+    setDragCurrent(startPos);
+    dragStartRef.current = startPos;
+    dragCurrentRef.current = startPos;
   };
 
   // Add document-level event listeners for better drag handling
