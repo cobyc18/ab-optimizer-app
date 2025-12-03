@@ -1037,83 +1037,76 @@ export default function ABTests() {
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* Header */}
-      <div style={{
-        background: 'linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%)',
-        color: '#FFFFFF',
-        padding: '32px',
-        textAlign: 'center'
-      }}>
-        <h1 style={{
-          fontSize: '32px',
-          fontWeight: '700',
-          margin: '0 0 8px 0',
-          background: 'linear-gradient(135deg, #FFFFFF 0%, #E0E7FF 100%)',
-          WebkitBackgroundClip: 'text',
-          WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text'
-        }}>
-          🚀 A/B Test Optimizer
-        </h1>
-        <p style={{
-          fontSize: '16px',
-          margin: 0,
-          opacity: 0.9
-        }}>
-          Boost your conversion rates with data-driven widget experiments
-        </p>
-      </div>
-
       {/* Progress Bar */}
       <div style={{
-        background: '#FFFFFF',
+        background: '#1F2937',
         padding: '24px 32px',
-        borderBottom: '1px solid #E5E5E5',
-        boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+        borderBottom: '1px solid #374151'
       }}>
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'center',
           alignItems: 'center',
-          marginBottom: '16px',
+          gap: '8px',
           maxWidth: '800px',
-          margin: '0 auto 16px auto'
+          margin: '0 auto'
         }}>
-          {[1, 2, 3, 4, 5].map((step) => (
-            <div key={step} style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px'
-            }}>
-              <div style={{
-                width: '32px',
-                height: '32px',
-                borderRadius: '50%',
-                background: currentStep + 1 >= step ? '#4F46E5' : '#E5E5E5',
-                color: currentStep + 1 >= step ? '#FFFFFF' : '#9CA3AF',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '14px',
-                fontWeight: '600'
-              }}>
-                {step}
-              </div>
-              {step < 5 && (
+          {[1, 2, 3, 4, 5].map((step) => {
+            const isActive = currentStep + 1 === step;
+            const isCompleted = currentStep + 1 > step;
+            
+            return (
+              <React.Fragment key={step}>
                 <div style={{
-                  width: '60px',
-                  height: '2px',
-                  background: currentStep + 1 > step ? '#4F46E5' : '#E5E5E5',
-                  margin: '0 8px'
-                }} />
-              )}
-            </div>
-          ))}
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
+                }}>
+                  <div style={{
+                    width: '40px',
+                    height: '40px',
+                    borderRadius: '50%',
+                    background: isActive ? '#3B82F6' : '#374151',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'relative'
+                  }}>
+                    {isActive ? (
+                      <div style={{
+                        width: '12px',
+                        height: '12px',
+                        borderRadius: '50%',
+                        background: '#FFFFFF'
+                      }} />
+                    ) : (
+                      <span style={{
+                        fontSize: '16px',
+                        fontWeight: '500',
+                        color: '#9CA3AF'
+                      }}>
+                        {step}
+                      </span>
+                    )}
+                  </div>
+                </div>
+                {step < 5 && (
+                  <div style={{
+                    width: '60px',
+                    height: '1px',
+                    background: isCompleted ? '#3B82F6' : '#374151',
+                    margin: '0 4px'
+                  }} />
+                )}
+              </React.Fragment>
+            );
+          })}
         </div>
         <div style={{
           fontSize: '14px',
-          color: '#6B7280',
-          textAlign: 'center'
+          color: '#9CA3AF',
+          textAlign: 'center',
+          marginTop: '16px'
         }}>
           Step {currentStep + 1} of 5
         </div>
