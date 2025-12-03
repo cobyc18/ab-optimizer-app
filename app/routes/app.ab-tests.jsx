@@ -1143,14 +1143,17 @@ export default function ABTests() {
           }}>
             {/* Goal Selection Card - Left Side */}
             <div style={{
-              backgroundColor: '#7DD3FC',
+              background: 'linear-gradient(to right, #7DD3FC, #BAE6FD)',
               borderRadius: '16px',
               padding: '40px',
               width: '100%',
               maxWidth: '600px',
               flexShrink: 0,
               display: 'flex',
-              flexDirection: 'column'
+              flexDirection: 'column',
+              boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+              minHeight: '100%',
+              boxSizing: 'border-box'
             }}>
               {/* Title */}
               <p style={{
@@ -1298,7 +1301,8 @@ export default function ABTests() {
                 flexDirection: 'column',
                 minHeight: '100%',
                 boxSizing: 'border-box',
-                overflow: 'visible'
+                overflow: 'visible',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
               }}>
                 {/* Title */}
                 <p style={{
