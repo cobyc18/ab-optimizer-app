@@ -1227,11 +1227,23 @@ export default function ABTests() {
                     const scale = 1 - (stackIndex * 0.03);
                     // Vertical offset: 0px, 16px, 32px - less offset
                     const translateY = stackIndex * 16;
-                    // Horizontal offset that alternates: right, left for fan effect
-                    // Card 1 goes right, Card 2 goes left, creating a fan
-                    const translateX = stackIndex === 0 ? 0 : (stackIndex === 1 ? 20 : -20);
-                    // Rotation for fan effect: 0deg, 4deg, -4deg - more pronounced rotation
-                    const rotation = stackIndex === 0 ? 0 : (stackIndex === 1 ? 4 : -4);
+                    
+                    // Always apply rotation to cards behind - they should always be visible and rotated
+                    // Card 1 (first behind): rotates right, Card 2 (second behind): rotates left
+                    let translateX = 0;
+                    let rotation = 0;
+                    
+                    if (stackIndex === 1) {
+                      // First card behind - always rotate right and offset right (more pronounced)
+                      translateX = 25;
+                      rotation = 5;
+                    } else if (stackIndex === 2) {
+                      // Second card behind - always rotate left and offset left (more pronounced)
+                      translateX = -25;
+                      rotation = -5;
+                    }
+                    // Current card (stackIndex === 0) stays centered with no rotation
+                    
                     // Opacity: 100%, 90%, 80% - more visible
                     const opacity = isCurrent ? 1 : Math.max(0.8, 1 - (stackIndex * 0.1));
 
@@ -1255,7 +1267,10 @@ export default function ABTests() {
                           opacity: opacity,
                           transform: `scale(${scale}) translate(${translateX}px, ${translateY}px) rotate(${rotation}deg)`,
                           transformOrigin: 'center center',
-                          transition: isCurrent ? 'all 0.3s ease' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                          // Only transition opacity and position for cards behind, keep rotation constant
+                          transition: isCurrent 
+                            ? 'all 0.3s ease' 
+                            : `opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)`,
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '24px',
@@ -1399,14 +1414,50 @@ export default function ABTests() {
                   })}
                 </div>
 
+                {/* Navigation Dots */}
+                <div style={{
+                  display: 'flex',
+                  gap: '8px',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: 'auto',
+                  paddingTop: '20px',
+                  paddingBottom: '10px'
+                }}>
+                  {abTestIdeas.map((widget, index) => (
+                    <button
+                      key={`dot-${index}`}
+                      onClick={() => {
+                        if (!isAnimating && index !== currentWidgetIndex) {
+                          setCurrentWidgetIndex(index);
+                          setIsAnimating(false);
+                          setSwipeDirection(null);
+                        }
+                      }}
+                      disabled={isAnimating}
+                      style={{
+                        width: currentWidgetIndex === index ? '10px' : '8px',
+                        height: currentWidgetIndex === index ? '10px' : '8px',
+                        borderRadius: '50%',
+                        background: currentWidgetIndex === index ? '#3B82F6' : '#9CA3AF',
+                        border: 'none',
+                        cursor: isAnimating || currentWidgetIndex === index ? 'default' : 'pointer',
+                        padding: 0,
+                        transition: 'all 0.3s ease',
+                        opacity: isAnimating && currentWidgetIndex !== index ? 0.5 : 1
+                      }}
+                      aria-label={`Go to widget ${index + 1}`}
+                    />
+                  ))}
+                </div>
+
                 {/* Swipe Buttons */}
                 <div style={{
                   display: 'flex',
                   gap: '25px',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: 'auto',
-                  paddingTop: '20px'
+                  paddingTop: '10px'
                 }}>
                   <button
                     onClick={() => handleSwipe('dislike')}
