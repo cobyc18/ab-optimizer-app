@@ -186,22 +186,36 @@ export default function ABTests() {
     return colorMap[utility] || '#F3F4F6'; // Default gray
   };
 
-  // Get visible cards in stack (current + ALL widgets behind)
+  // Get visible cards in stack (current + ALL other widgets behind in circular order)
   const getVisibleCards = () => {
     const cards = [];
-    const remainingCards = abTestIdeas.length - currentWidgetIndex;
     
-    // Show current card + all cards behind it
-    for (let i = 0; i < remainingCards; i++) {
-      const widgetIndex = currentWidgetIndex + i;
-      if (widgetIndex < abTestIdeas.length) {
-        cards.push({
-          index: widgetIndex,
-          widget: abTestIdeas[widgetIndex],
-          stackIndex: i
-        });
-      }
+    // First, add the current card (stackIndex 0)
+    cards.push({
+      index: currentWidgetIndex,
+      widget: abTestIdeas[currentWidgetIndex],
+      stackIndex: 0
+    });
+    
+    // Then add all other widgets in circular order (starting from next, wrapping around)
+    let stackIndex = 1;
+    // Add widgets after current
+    for (let i = currentWidgetIndex + 1; i < abTestIdeas.length; i++) {
+      cards.push({
+        index: i,
+        widget: abTestIdeas[i],
+        stackIndex: stackIndex++
+      });
     }
+    // Add widgets before current (wrapping around)
+    for (let i = 0; i < currentWidgetIndex; i++) {
+      cards.push({
+        index: i,
+        widget: abTestIdeas[i],
+        stackIndex: stackIndex++
+      });
+    }
+    
     return cards;
   };
 
