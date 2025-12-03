@@ -1546,7 +1546,7 @@ export default function ABTests() {
                   gap: '8px',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '4px',
+                  marginTop: '2px',
                   paddingTop: '0px',
                   paddingBottom: '0px'
                 }}>
@@ -1582,7 +1582,7 @@ export default function ABTests() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '4px',
+                  marginTop: '16px',
                   paddingTop: '0px',
                   paddingBottom: '10px'
                 }}>
