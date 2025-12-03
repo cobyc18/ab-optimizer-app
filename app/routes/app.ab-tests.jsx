@@ -176,14 +176,34 @@ export default function ABTests() {
     }
   ];
 
-  // Background colors for each widget type
+  // Background colors for each widget type - more vibrant and distinct
   const getWidgetBackgroundColor = (utility) => {
     const colorMap = {
-      'Free Shipping Badge': '#E0F2FE', // Baby blue
-      'Live Visitor Count': '#FEF3C7', // Light yellow/amber
-      'Stock Alert Badge': '#FCE7F3' // Light pink
+      'Free Shipping Badge': '#DBEAFE', // Brighter baby blue
+      'Live Visitor Count': '#FEF08A', // Brighter yellow/amber
+      'Stock Alert Badge': '#FBCFE8' // Brighter pink
     };
     return colorMap[utility] || '#F3F4F6'; // Default gray
+  };
+
+  // Get visible cards in stack (current + up to 2 behind)
+  const getVisibleCards = () => {
+    const cards = [];
+    const maxCards = 3;
+    const remainingCards = abTestIdeas.length - currentWidgetIndex;
+    const cardsToShow = Math.min(maxCards, remainingCards);
+    
+    for (let i = 0; i < cardsToShow; i++) {
+      const widgetIndex = currentWidgetIndex + i;
+      if (widgetIndex < abTestIdeas.length) {
+        cards.push({
+          index: widgetIndex,
+          widget: abTestIdeas[widgetIndex],
+          stackIndex: i
+        });
+      }
+    }
+    return cards;
   };
 
   const widgetTweaksCatalog = {
@@ -1172,7 +1192,7 @@ export default function ABTests() {
                 flexDirection: 'column',
                 minHeight: '100%',
                 boxSizing: 'border-box',
-                overflow: 'hidden'
+                overflow: 'visible'
               }}>
                 {/* Title */}
                 <p style={{
@@ -1192,23 +1212,28 @@ export default function ABTests() {
                   flex: 1,
                   marginBottom: '20px',
                   boxSizing: 'border-box',
-                  overflow: 'hidden'
+                  overflow: 'visible',
+                  minHeight: '500px'
                 }}>
-                  {/* Render stacked cards - show up to 3 cards behind */}
-                  {[...Array(Math.min(3, abTestIdeas.length - currentWidgetIndex))].map((_, stackIndex) => {
-                    const widgetIndex = currentWidgetIndex + stackIndex;
-                    const widget = abTestIdeas[widgetIndex];
+                  {/* Render stacked cards - show current + up to 2 behind */}
+                  {getVisibleCards().map(({ index, widget, stackIndex }) => {
                     if (!widget) return null;
 
                     const isCurrent = stackIndex === 0;
-                    const zIndex = 10 - stackIndex;
-                    const scale = 1 - (stackIndex * 0.05);
-                    const translateY = stackIndex * 12;
-                    const opacity = isCurrent ? 1 : Math.max(0.3, 0.8 - (stackIndex * 0.2));
+                    // Higher z-index for cards on top (reverse order so top card has highest z-index)
+                    const zIndex = 100 - stackIndex;
+                    // More visible scale difference: 100%, 94%, 88%
+                    const scale = 1 - (stackIndex * 0.06);
+                    // More visible vertical offset: 0px, 24px, 48px - so edges are clearly visible
+                    const translateY = stackIndex * 24;
+                    // More visible opacity: 100%, 80%, 65% - so all cards are clearly visible
+                    const opacity = isCurrent ? 1 : Math.max(0.65, 1 - (stackIndex * 0.2));
+                    // Slight horizontal offset for depth: 0px, 6px, 12px
+                    const translateX = stackIndex * 6;
 
                     return (
                       <div
-                        key={`stack-${widgetIndex}`}
+                        key={`stack-${index}-${stackIndex}`}
                         style={{
                           position: 'absolute',
                           top: 0,
@@ -1224,11 +1249,15 @@ export default function ABTests() {
                           overflow: 'hidden',
                           zIndex: zIndex,
                           opacity: opacity,
-                          transform: `scale(${scale}) translateY(${translateY}px)`,
+                          transform: `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
+                          transformOrigin: 'top center',
                           transition: isCurrent ? 'all 0.3s ease' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '24px',
+                          boxShadow: isCurrent 
+                            ? '0 10px 25px rgba(0, 0, 0, 0.15)' 
+                            : `0 ${5 + stackIndex * 2}px ${10 + stackIndex * 3}px rgba(0, 0, 0, ${0.1 - stackIndex * 0.03})`,
                           ...(isCurrent && isAnimating && swipeDirection === 'like' && {
                             animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
                           }),
