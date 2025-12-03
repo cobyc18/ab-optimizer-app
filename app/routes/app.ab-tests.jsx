@@ -164,8 +164,27 @@ export default function ABTests() {
       preview: 'In-stock, ships in 1-2 business days | Free shipping & returns',
       blockId: 'simple-text-badge',
       appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
+    },
+    {
+      id: 3,
+      utility: 'Stock Alert Badge',
+      rationale: 'Creates urgency by showing limited inventory, encouraging faster purchase decisions',
+      style: 'Create Urgency',
+      preview: '⚡ Only 3 left in stock - Order soon!',
+      blockId: 'simple-text-badge',
+      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
     }
   ];
+
+  // Background colors for each widget type
+  const getWidgetBackgroundColor = (utility) => {
+    const colorMap = {
+      'Free Shipping Badge': '#E0F2FE', // Baby blue
+      'Live Visitor Count': '#FEF3C7', // Light yellow/amber
+      'Stock Alert Badge': '#FCE7F3' // Light pink
+    };
+    return colorMap[utility] || '#F3F4F6'; // Default gray
+  };
 
   const widgetTweaksCatalog = {
     'simple-text-badge': [
@@ -1175,39 +1194,51 @@ export default function ABTests() {
                   boxSizing: 'border-box',
                   overflow: 'hidden'
                 }}>
-                  {abTestIdeas[currentWidgetIndex] && (
-                    <div
-                      key={`current-${currentWidgetIndex}`}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        width: '100%',
-                        maxWidth: '100%',
-                        background: '#E0F2FE',
-                        borderRadius: '12px',
-                        padding: '24px',
-                        margin: '0',
-                        boxSizing: 'border-box',
-                        overflow: 'hidden',
-                        zIndex: 2,
-                        opacity: 1,
-                        transform: 'scale(1) translateY(0)',
-                        transition: 'all 0.3s ease',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '24px',
-                        ...(isAnimating && swipeDirection === 'like' && {
-                          animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
-                        }),
-                        ...(isAnimating && swipeDirection === 'dislike' && {
-                          animation: 'swipeLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
-                        })
-                      }}
-                    >
-                      {/* Widget Preview - First */}
-                      {abTestIdeas[currentWidgetIndex].utility === 'Free Shipping Badge' ? (
+                  {/* Render stacked cards - show up to 3 cards behind */}
+                  {[...Array(Math.min(3, abTestIdeas.length - currentWidgetIndex))].map((_, stackIndex) => {
+                    const widgetIndex = currentWidgetIndex + stackIndex;
+                    const widget = abTestIdeas[widgetIndex];
+                    if (!widget) return null;
+
+                    const isCurrent = stackIndex === 0;
+                    const zIndex = 10 - stackIndex;
+                    const scale = 1 - (stackIndex * 0.05);
+                    const translateY = stackIndex * 12;
+                    const opacity = isCurrent ? 1 : Math.max(0.3, 0.8 - (stackIndex * 0.2));
+
+                    return (
+                      <div
+                        key={`stack-${widgetIndex}`}
+                        style={{
+                          position: 'absolute',
+                          top: 0,
+                          left: 0,
+                          right: 0,
+                          width: '100%',
+                          maxWidth: '100%',
+                          background: getWidgetBackgroundColor(widget.utility),
+                          borderRadius: '12px',
+                          padding: '24px',
+                          margin: '0',
+                          boxSizing: 'border-box',
+                          overflow: 'hidden',
+                          zIndex: zIndex,
+                          opacity: opacity,
+                          transform: `scale(${scale}) translateY(${translateY}px)`,
+                          transition: isCurrent ? 'all 0.3s ease' : 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          gap: '24px',
+                          ...(isCurrent && isAnimating && swipeDirection === 'like' && {
+                            animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+                          }),
+                          ...(isCurrent && isAnimating && swipeDirection === 'dislike' && {
+                            animation: 'swipeLeft 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
+                          })
+                        }}
+                      >
+                        {/* Widget Preview - First */}
+                        {widget.utility === 'Free Shipping Badge' ? (
                         <div style={{
                           background: '#F3F4F6',
                           border: '1px solid #E5E7EB',
@@ -1238,186 +1269,100 @@ export default function ABTests() {
                             overflowWrap: 'break-word',
                             flex: 1
                           }}>
-                            {abTestIdeas[currentWidgetIndex].preview}
+                            {widget.preview}
                           </span>
                         </div>
-                      ) : abTestIdeas[currentWidgetIndex].utility === 'Live Visitor Count' ? (
-                        <div style={{
-                          background: '#F8FAFC',
-                          border: '1px solid #E5E7EB',
-                          padding: '20px',
-                          borderRadius: '12px',
-                          fontSize: '18px',
-                          color: '#6B7280',
-                          fontStyle: 'italic',
-                          textAlign: 'center',
-                          wordWrap: 'break-word',
-                          overflowWrap: 'break-word',
-                          boxSizing: 'border-box'
-                        }}>
-                          "{abTestIdeas[currentWidgetIndex].preview}"
-                        </div>
-                      ) : null}
-
-                      {/* Title - Second */}
-                      <h4 style={{
-                        fontSize: '28px',
-                        fontWeight: '700',
-                        color: '#1F2937',
-                        margin: 0,
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        lineHeight: '1.3'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex].utility}
-                      </h4>
-
-                      {/* Tag - Third */}
-                      <div style={{
-                        background: '#FFFFFF',
-                        color: '#1E40AF',
-                        padding: '8px 16px',
-                        borderRadius: '16px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        width: 'fit-content',
-                        border: '1px solid #E5E7EB'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex].style}
-                      </div>
-
-                      {/* Description - Fourth */}
-                      <p style={{
-                        fontSize: '18px',
-                        color: '#374151',
-                        margin: 0,
-                        lineHeight: '1.6',
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex].rationale}
-                      </p>
-                    </div>
-                  )}
-
-                  {abTestIdeas[currentWidgetIndex + 1] && (
-                    <div
-                      key={`next-${currentWidgetIndex + 1}`}
-                      style={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        width: '100%',
-                        maxWidth: '100%',
-                        background: '#E0F2FE',
-                        borderRadius: '12px',
-                        padding: '24px',
-                        margin: '0',
-                        boxSizing: 'border-box',
-                        transform: 'scale(0.95) translateY(15px)',
-                        zIndex: 1,
-                        opacity: 0.6,
-                        transition: 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: '24px',
-                        ...(isAnimating && swipeDirection === 'dislike' && {
-                          transform: 'scale(1) translateY(0)',
-                          opacity: 1,
-                          zIndex: 2
-                        })
-                      }}
-                    >
-                      {abTestIdeas[currentWidgetIndex + 1].utility === 'Free Shipping Badge' ? (
-                        <div style={{
-                          background: '#F3F4F6',
-                          border: '1px solid #E5E7EB',
-                          padding: '20px',
-                          borderRadius: '8px',
-                          fontSize: '16px',
-                          color: '#1E3A8A',
-                          textAlign: 'left',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          wordWrap: 'break-word',
-                          overflowWrap: 'break-word',
-                          boxSizing: 'border-box'
-                        }}>
+                        ) : widget.utility === 'Live Visitor Count' ? (
                           <div style={{
-                            width: '28px',
-                            height: '28px',
-                            flexShrink: 0
-                          }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/>
-                              <path d="M1 8h15M16 8v8"/>
-                            </svg>
-                          </div>
-                          <span style={{ 
-                            wordWrap: 'break-word', 
+                            background: '#F8FAFC',
+                            border: '1px solid #E5E7EB',
+                            padding: '20px',
+                            borderRadius: '12px',
+                            fontSize: '18px',
+                            color: '#6B7280',
+                            fontStyle: 'italic',
+                            textAlign: 'center',
+                            wordWrap: 'break-word',
                             overflowWrap: 'break-word',
-                            flex: 1
+                            boxSizing: 'border-box'
                           }}>
-                            {abTestIdeas[currentWidgetIndex + 1].preview}
-                          </span>
-                        </div>
-                      ) : abTestIdeas[currentWidgetIndex + 1].utility === 'Live Visitor Count' ? (
-                        <div style={{
-                          background: '#F8FAFC',
-                          border: '1px solid #E5E7EB',
-                          padding: '20px',
-                          borderRadius: '12px',
-                          fontSize: '18px',
-                          color: '#6B7280',
-                          fontStyle: 'italic',
-                          textAlign: 'center',
+                            "{widget.preview}"
+                          </div>
+                        ) : widget.utility === 'Stock Alert Badge' ? (
+                          <div style={{
+                            background: '#F3F4F6',
+                            border: '1px solid #E5E7EB',
+                            padding: '20px',
+                            borderRadius: '8px',
+                            fontSize: '16px',
+                            color: '#9F1239',
+                            textAlign: 'left',
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: '12px',
+                            wordWrap: 'break-word',
+                            overflowWrap: 'break-word',
+                            boxSizing: 'border-box'
+                          }}>
+                            <div style={{
+                              width: '28px',
+                              height: '28px',
+                              flexShrink: 0,
+                              fontSize: '24px'
+                            }}>
+                              ⚡
+                            </div>
+                            <span style={{ 
+                              wordWrap: 'break-word', 
+                              overflowWrap: 'break-word',
+                              flex: 1
+                            }}>
+                              {widget.preview}
+                            </span>
+                          </div>
+                        ) : null}
+
+                        {/* Title - Second */}
+                        <h4 style={{
+                          fontSize: '28px',
+                          fontWeight: '700',
+                          color: '#1F2937',
+                          margin: 0,
                           wordWrap: 'break-word',
                           overflowWrap: 'break-word',
-                          boxSizing: 'border-box'
+                          lineHeight: '1.3'
                         }}>
-                          "{abTestIdeas[currentWidgetIndex + 1].preview}"
+                          {widget.utility}
+                        </h4>
+
+                        {/* Tag - Third */}
+                        <div style={{
+                          background: '#FFFFFF',
+                          color: '#1E40AF',
+                          padding: '8px 16px',
+                          borderRadius: '16px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          width: 'fit-content',
+                          border: '1px solid #E5E7EB'
+                        }}>
+                          {widget.style}
                         </div>
-                      ) : null}
 
-                      <h4 style={{
-                        fontSize: '28px',
-                        fontWeight: '700',
-                        color: '#1F2937',
-                        margin: 0,
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word',
-                        lineHeight: '1.3'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex + 1].utility}
-                      </h4>
-
-                      <div style={{
-                        background: '#FFFFFF',
-                        color: '#1E40AF',
-                        padding: '8px 16px',
-                        borderRadius: '16px',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        width: 'fit-content',
-                        border: '1px solid #E5E7EB'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex + 1].style}
+                        {/* Description - Fourth */}
+                        <p style={{
+                          fontSize: '18px',
+                          color: '#374151',
+                          margin: 0,
+                          lineHeight: '1.6',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word'
+                        }}>
+                          {widget.rationale}
+                        </p>
                       </div>
-
-                      <p style={{
-                        fontSize: '18px',
-                        color: '#374151',
-                        margin: 0,
-                        lineHeight: '1.6',
-                        wordWrap: 'break-word',
-                        overflowWrap: 'break-word'
-                      }}>
-                        {abTestIdeas[currentWidgetIndex + 1].rationale}
-                      </p>
-                    </div>
-                  )}
+                    );
+                  })}
                 </div>
 
                 {/* Swipe Buttons */}
