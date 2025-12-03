@@ -1578,60 +1578,46 @@ export default function ABTests() {
                   ))}
                 </div>
 
-                {/* Swipe Buttons */}
+                {/* Select Button */}
                 <div style={{
                   display: 'flex',
-                  gap: '25px',
                   alignItems: 'center',
                   justifyContent: 'center',
                   paddingTop: '10px'
                 }}>
                   <button
-                    onClick={() => handleSwipe('dislike')}
-                    disabled={isAnimating}
-                    style={{
-                      width: '70px',
-                      height: '70px',
-                      borderRadius: '50%',
-                      background: '#FEE2E2',
-                      border: '3px solid #FCA5A5',
-                      cursor: isAnimating ? 'not-allowed' : 'pointer',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '28px',
-                      color: '#DC2626',
-                      boxShadow: '0 6px 16px rgba(220, 38, 38, 0.4)',
-                      transition: 'all 0.2s ease',
-                      opacity: isAnimating ? 0.5 : 1,
-                      transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
-                    }}
-                  >
-                    ✕
-                  </button>
-                  
-                  <button
                     onClick={() => handleSwipe('like')}
                     disabled={isAnimating}
                     style={{
-                      width: '70px',
-                      height: '70px',
-                      borderRadius: '50%',
-                      background: '#DCFCE7',
-                      border: '3px solid #86EFAC',
+                      background: '#FFFFFF',
+                      border: '1px solid #2563EB',
+                      borderRadius: '20px',
+                      padding: '12px 32px',
                       cursor: isAnimating ? 'not-allowed' : 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: '28px',
-                      color: '#16A34A',
-                      boxShadow: '0 6px 16px rgba(22, 163, 74, 0.4)',
+                      fontSize: '16px',
+                      fontWeight: '500',
+                      color: '#2563EB',
                       transition: 'all 0.2s ease',
                       opacity: isAnimating ? 0.5 : 1,
-                      transform: isAnimating ? 'scale(0.95)' : 'scale(1)'
+                      fontFamily: 'inherit'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isAnimating) {
+                        e.currentTarget.style.background = '#2563EB';
+                        e.currentTarget.style.color = '#FFFFFF';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isAnimating) {
+                        e.currentTarget.style.background = '#FFFFFF';
+                        e.currentTarget.style.color = '#2563EB';
+                      }
                     }}
                   >
-                    ♥
+                    SELECT
                   </button>
                 </div>
               </div>
