@@ -1316,7 +1316,7 @@ export default function ABTests() {
                   position: 'relative',
                   width: '100%',
                   flex: 1,
-                  marginBottom: '20px',
+                  marginBottom: '0px',
                   boxSizing: 'border-box',
                   overflow: 'visible',
                   minHeight: '500px',
@@ -1547,9 +1547,9 @@ export default function ABTests() {
                   gap: '8px',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: 'auto',
-                  paddingTop: '20px',
-                  paddingBottom: '10px'
+                  marginTop: '0px',
+                  paddingTop: '10px',
+                  paddingBottom: '8px'
                 }}>
                   {abTestIdeas.map((widget, index) => (
                     <button
@@ -1583,7 +1583,8 @@ export default function ABTests() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  paddingTop: '10px'
+                  paddingTop: '0px',
+                  paddingBottom: '10px'
                 }}>
                   <button
                     onClick={() => handleSwipe('like')}
