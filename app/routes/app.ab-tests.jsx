@@ -1039,7 +1039,7 @@ export default function ABTests() {
     }}>
       {/* Progress Bar */}
       <div style={{
-        background: '#1F2937',
+        background: '#e6e6e6',
         padding: '24px 32px',
         borderBottom: '1px solid #374151'
       }}>
