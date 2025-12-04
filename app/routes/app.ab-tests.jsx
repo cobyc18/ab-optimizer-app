@@ -1561,23 +1561,19 @@ export default function ABTests() {
                   margin: '0 auto',
                   flex: '0 0 auto',
                   boxSizing: 'border-box',
-                  overflow: 'visible',
+                  overflow: 'hidden',
                   minHeight: '600px',
                   padding: '32px 0 120px 0'
                 }}>
-                  {/* Render stacked cards - show current + ALL widgets behind */}
+                  {/* Render stacked cards - all cards exactly behind each other */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
                     if (!widget) return null;
 
                     const isCurrent = stackIndex === 0;
                     // Higher z-index for cards on top
                     const zIndex = 100 - stackIndex;
-                    // Scale difference: 100%, 97%, 94%
-                    const scale = 1 - (stackIndex * 0.03);
-                    // Base vertical offset: 0px, 16px, 32px
-                    const baseTranslateY = stackIndex * 16;
                     
-                    // Calculate drag offset for current card
+                    // Calculate drag offset for current card only
                     let dragOffsetX = 0;
                     let dragOffsetY = 0;
                     
@@ -1586,12 +1582,12 @@ export default function ABTests() {
                       dragOffsetY = dragCurrent.y - dragStart.y;
                     }
                     
-                    // No rotation - just vertical stacking
-                    const translateY = baseTranslateY + (isCurrent ? dragOffsetY : 0);
+                    // No stacking offsets - all cards in exact same position
                     const translateX = isCurrent ? dragOffsetX : 0;
+                    const translateY = isCurrent ? dragOffsetY : 0;
                     
-                    // Opacity: 100%, 90%, 80%
-                    const opacity = isCurrent ? 1 : Math.max(0.8, 1 - (stackIndex * 0.1));
+                    // Opacity: 100% for current, lower for others
+                    const opacity = isCurrent ? 1 : 0.3;
 
                     return (
                       <div
@@ -1609,15 +1605,15 @@ export default function ABTests() {
                           padding: '40px',
                           margin: '0',
                           boxSizing: 'border-box',
-                          overflow: 'visible',
+                          overflow: 'hidden',
                           zIndex: zIndex,
                           opacity: opacity,
-                          transform: `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
+                          transform: `translate(${translateX}px, ${translateY}px)`,
                           transformOrigin: 'center center',
                           transition: isCurrent && !isDragging
                             ? 'all 0.3s ease' 
                             : !isCurrent 
-                              ? `opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)`
+                              ? `opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)`
                               : 'none',
                           display: 'flex',
                           flexDirection: 'column',
@@ -1633,8 +1629,8 @@ export default function ABTests() {
                           })
                         }}
                       >
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'flex-start', width: '100%' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'flex-start', width: '100%' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'flex-start', width: '100%', boxSizing: 'border-box' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'flex-start', width: '100%', boxSizing: 'border-box' }}>
                             {/* Widget Preview - Image Section */}
                             <div style={{ 
                               width: '280px', 
@@ -1651,7 +1647,7 @@ export default function ABTests() {
                                 <div style={{
                                   background: '#F3F4F6',
                                   border: '1px solid #E5E7EB',
-                                  padding: '20px',
+                                  padding: '16px',
                                   borderRadius: '8px',
                                   fontSize: '16px',
                                   color: '#1E3A8A',
@@ -1663,7 +1659,9 @@ export default function ABTests() {
                                   overflowWrap: 'break-word',
                                   boxSizing: 'border-box',
                                   width: '100%',
-                                  height: '100%'
+                                  height: '100%',
+                                  maxWidth: '100%',
+                                  maxHeight: '100%'
                                 }}>
                                   <div style={{
                                     width: '28px',
@@ -1678,7 +1676,8 @@ export default function ABTests() {
                                   <span style={{ 
                                     wordWrap: 'break-word', 
                                     overflowWrap: 'break-word',
-                                    flex: 1
+                                    flex: 1,
+                                    minWidth: 0
                                   }}>
                                     {widget.preview}
                                   </span>
@@ -1687,7 +1686,7 @@ export default function ABTests() {
                                 <div style={{
                                   background: '#F8FAFC',
                                   border: '1px solid #E5E7EB',
-                                  padding: '20px',
+                                  padding: '16px',
                                   borderRadius: '12px',
                                   fontSize: '18px',
                                   color: '#6B7280',
@@ -1700,7 +1699,9 @@ export default function ABTests() {
                                   height: '100%',
                                   display: 'flex',
                                   alignItems: 'center',
-                                  justifyContent: 'center'
+                                  justifyContent: 'center',
+                                  maxWidth: '100%',
+                                  maxHeight: '100%'
                                 }}>
                                   "{widget.preview}"
                                 </div>
@@ -1708,7 +1709,7 @@ export default function ABTests() {
                                 <div style={{
                                   background: '#F3F4F6',
                                   border: '1px solid #E5E7EB',
-                                  padding: '20px',
+                                  padding: '16px',
                                   borderRadius: '8px',
                                   fontSize: '16px',
                                   color: '#9F1239',
@@ -1720,7 +1721,9 @@ export default function ABTests() {
                                   overflowWrap: 'break-word',
                                   boxSizing: 'border-box',
                                   width: '100%',
-                                  height: '100%'
+                                  height: '100%',
+                                  maxWidth: '100%',
+                                  maxHeight: '100%'
                                 }}>
                                   <div style={{
                                     width: '28px',
@@ -1733,7 +1736,8 @@ export default function ABTests() {
                                   <span style={{ 
                                     wordWrap: 'break-word', 
                                     overflowWrap: 'break-word',
-                                    flex: 1
+                                    flex: 1,
+                                    minWidth: 0
                                   }}>
                                     {widget.preview}
                                   </span>
@@ -1742,7 +1746,7 @@ export default function ABTests() {
                             </div>
 
                             {/* Title and Description Section */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start', width: '100%' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start', width: '100%', boxSizing: 'border-box' }}>
                               {/* Title */}
                               <p style={{
                                 fontFamily: 'Geist, sans-serif',
@@ -1752,7 +1756,8 @@ export default function ABTests() {
                                 margin: 0,
                                 wordWrap: 'break-word',
                                 overflowWrap: 'break-word',
-                                width: '280px'
+                                width: '100%',
+                                boxSizing: 'border-box'
                               }}>
                                 {widget.utility}
                               </p>
@@ -1766,7 +1771,11 @@ export default function ABTests() {
                                 fontSize: '14px',
                                 fontWeight: '500',
                                 width: 'fit-content',
-                                border: '1px solid #E5E7EB'
+                                border: '1px solid #E5E7EB',
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                maxWidth: '100%',
+                                boxSizing: 'border-box'
                               }}>
                                 {widget.style}
                               </div>
@@ -1779,9 +1788,10 @@ export default function ABTests() {
                                 color: figmaColors.darkGray,
                                 margin: 0,
                                 lineHeight: '20px',
-                                width: '280px',
+                                width: '100%',
                                 wordWrap: 'break-word',
-                                overflowWrap: 'break-word'
+                                overflowWrap: 'break-word',
+                                boxSizing: 'border-box'
                               }}>
                                 {widget.rationale}
                               </p>
