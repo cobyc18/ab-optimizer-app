@@ -1136,7 +1136,7 @@ export default function ABTests() {
           }}>
             {/* Goal Selection Card - Left Side */}
             <div style={{
-              background: 'linear-gradient(to right, #7DD3FC, #BAE6FD)',
+              background: 'linear-gradient(to right, #0EA5E9, #38BDF8)',
               borderRadius: '16px',
               padding: '40px',
               width: '100%',
@@ -1151,7 +1151,7 @@ export default function ABTests() {
               {/* Title */}
               <p style={{
                 fontSize: '12px',
-                fontWeight: '500',
+                fontWeight: '700',
                 color: '#6B7280',
                 textTransform: 'uppercase',
                 letterSpacing: '0.5px',
@@ -1318,7 +1318,7 @@ export default function ABTests() {
                 }}>
                   <p style={{
                     fontSize: '12px',
-                    fontWeight: '500',
+                    fontWeight: '700',
                     color: '#6B7280',
                     textTransform: 'uppercase',
                     letterSpacing: '0.5px',
@@ -1339,13 +1339,12 @@ export default function ABTests() {
                       cursor: 'pointer'
                     }}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <path d="M15 18l-6-6 6-6" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M15 18l-6-6 6-6" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                     
                     {/* Right Arrow - Blue rounded rectangle with gray chevron */}
                     <div style={{
-                      border: '1px solid #3B82F6',
                       borderRadius: '6px',
                       width: '32px',
                       height: '32px',
@@ -1356,7 +1355,7 @@ export default function ABTests() {
                       backgroundColor: '#DBEAFE'
                     }}>
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M9 18l6-6-6-6" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M9 18l6-6-6-6" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                   </div>

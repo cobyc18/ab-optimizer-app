@@ -127,7 +127,7 @@ export default function AppLayout() {
               onClick={() => setSelectedNavItem(item.id)}
               onMouseEnter={(e) => {
                 if (selectedNavItem !== item.id) {
-                  e.currentTarget.style.backgroundColor = 'rgba(0, 56, 255, 0.1)';
+                  e.currentTarget.style.backgroundColor = 'rgba(191, 219, 254, 0.3)';
                   e.currentTarget.style.transform = 'scale(1.05)';
                   e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 56, 255, 0.2)';
                 }
