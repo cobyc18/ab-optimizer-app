@@ -95,6 +95,13 @@ export const loader = async ({ request }) => {
   }
 };
 
+// Figma Design Variables
+const figmaColors = {
+  gray: "#e6e6e6",
+  primaryBlue: "#0038ff",
+  darkGray: "#151515"
+};
+
 export default function ABTests() {
   const { themes, products, productTemplates, shop } = useLoaderData();
   const navigate = useNavigate();
@@ -1550,57 +1557,40 @@ export default function ABTests() {
 
                 <div style={{
                   position: 'relative',
-                  width: '240px',
+                  width: '280px',
                   margin: '0 auto',
                   flex: '0 0 auto',
                   boxSizing: 'border-box',
                   overflow: 'visible',
-                  minHeight: '650px',
+                  minHeight: '600px',
                   padding: '32px 0 120px 0'
                 }}>
-                  {/* Render stacked cards - show current + ALL widgets behind with fan effect */}
+                  {/* Render stacked cards - show current + ALL widgets behind */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
                     if (!widget) return null;
 
                     const isCurrent = stackIndex === 0;
                     // Higher z-index for cards on top
                     const zIndex = 100 - stackIndex;
-                    // Scale difference: 100%, 97%, 94% - less scaling so cards are more visible
+                    // Scale difference: 100%, 97%, 94%
                     const scale = 1 - (stackIndex * 0.03);
-                    // Base vertical offset: 0px, 16px, 32px - less offset
+                    // Base vertical offset: 0px, 16px, 32px
                     const baseTranslateY = stackIndex * 16;
-                    
-                    // Always apply rotation to cards behind - they should always be visible and rotated
-                    // Alternate rotation: odd stackIndex rotates right, even stackIndex rotates left
-                    let translateX = 0;
-                    let translateY = baseTranslateY;
-                    let rotation = 0;
                     
                     // Calculate drag offset for current card
                     let dragOffsetX = 0;
                     let dragOffsetY = 0;
-                    let dragRotation = 0;
                     
                     if (isCurrent && isDragging) {
                       dragOffsetX = dragCurrent.x - dragStart.x;
                       dragOffsetY = dragCurrent.y - dragStart.y;
-                      // Add rotation based on horizontal drag
-                      dragRotation = dragOffsetX * 0.1; // Rotate based on drag distance
                     }
                     
-                    if (stackIndex === 0) {
-                      // Current card - apply drag offset on top of base position
-                      translateX = dragOffsetX;
-                      translateY = baseTranslateY + dragOffsetY; // Add drag offset to base vertical offset
-                      rotation = dragRotation;
-                    } else {
-                      // All cards behind alternate: right, left, right, left, etc.
-                      const isOdd = stackIndex % 2 === 1;
-                      translateX = isOdd ? 25 : -25;
-                      rotation = isOdd ? 5 : -5;
-                    }
+                    // No rotation - just vertical stacking
+                    const translateY = baseTranslateY + (isCurrent ? dragOffsetY : 0);
+                    const translateX = isCurrent ? dragOffsetX : 0;
                     
-                    // Opacity: 100%, 90%, 80% - more visible
+                    // Opacity: 100%, 90%, 80%
                     const opacity = isCurrent ? 1 : Math.max(0.8, 1 - (stackIndex * 0.1));
 
                     return (
@@ -1612,8 +1602,9 @@ export default function ABTests() {
                           position: 'absolute',
                           top: 0,
                           left: 0,
-                          width: '240px',
-                          background: getWidgetBackgroundColor(widget.utility),
+                          width: '280px',
+                          backgroundColor: figmaColors.gray,
+                          border: `1px solid ${figmaColors.primaryBlue}`,
                           borderRadius: '24px',
                           padding: '40px',
                           margin: '0',
@@ -1621,10 +1612,8 @@ export default function ABTests() {
                           overflow: 'visible',
                           zIndex: zIndex,
                           opacity: opacity,
-                          transform: `scale(${scale}) translate(${translateX}px, ${translateY}px) rotate(${rotation}deg)`,
+                          transform: `scale(${scale}) translate(${translateX}px, ${translateY}px)`,
                           transformOrigin: 'center center',
-                          // Only transition opacity and position for cards behind, keep rotation constant
-                          // Disable transition during drag for smooth dragging
                           transition: isCurrent && !isDragging
                             ? 'all 0.3s ease' 
                             : !isCurrent 
@@ -1632,12 +1621,8 @@ export default function ABTests() {
                               : 'none',
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '32px',
-                          alignItems: 'center',
-                          boxShadow: isCurrent 
-                            ? '0 10px 30px rgba(0, 0, 0, 0.2)' 
-                            : `0 ${8 + stackIndex * 3}px ${15 + stackIndex * 5}px rgba(0, 0, 0, ${0.15 - stackIndex * 0.05})`,
-                          border: '1px solid rgba(0, 0, 0, 0.08)',
+                          gap: '20px',
+                          alignItems: 'flex-start',
                           cursor: isCurrent ? (isDragging ? 'grabbing' : 'grab') : 'default',
                           userSelect: 'none',
                           ...(isCurrent && isAnimating && swipeDirection === 'like' && {
@@ -1648,137 +1633,161 @@ export default function ABTests() {
                           })
                         }}
                       >
-                        {/* Widget Preview - First */}
-                        {widget.utility === 'Free Shipping Badge' ? (
-                        <div style={{
-                          background: '#F3F4F6',
-                          border: '1px solid #E5E7EB',
-                          padding: '20px',
-                          borderRadius: '8px',
-                          fontSize: '16px',
-                          color: '#1E3A8A',
-                          textAlign: 'left',
-                          display: 'flex',
-                          alignItems: 'center',
-                          gap: '12px',
-                          wordWrap: 'break-word',
-                          overflowWrap: 'break-word',
-                          boxSizing: 'border-box',
-                          width: '100%'
-                        }}>
-                          <div style={{
-                            width: '28px',
-                            height: '28px',
-                            flexShrink: 0
-                          }}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/>
-                              <path d="M1 8h15M16 8v8"/>
-                            </svg>
-                          </div>
-                          <span style={{ 
-                            wordWrap: 'break-word', 
-                            overflowWrap: 'break-word',
-                            flex: 1
-                          }}>
-                            {widget.preview}
-                          </span>
-                        </div>
-                        ) : widget.utility === 'Live Visitor Count' ? (
-                          <div style={{
-                            background: '#F8FAFC',
-                            border: '1px solid #E5E7EB',
-                            padding: '20px',
-                            borderRadius: '12px',
-                            fontSize: '18px',
-                            color: '#6B7280',
-                            fontStyle: 'italic',
-                            textAlign: 'center',
-                            wordWrap: 'break-word',
-                            overflowWrap: 'break-word',
-                            boxSizing: 'border-box',
-                            width: '100%'
-                          }}>
-                            "{widget.preview}"
-                          </div>
-                        ) : widget.utility === 'Stock Alert Badge' ? (
-                          <div style={{
-                            background: '#F3F4F6',
-                            border: '1px solid #E5E7EB',
-                            padding: '20px',
-                            borderRadius: '8px',
-                            fontSize: '16px',
-                            color: '#9F1239',
-                            textAlign: 'left',
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '12px',
-                            wordWrap: 'break-word',
-                            overflowWrap: 'break-word',
-                            boxSizing: 'border-box',
-                            width: '100%'
-                          }}>
-                            <div style={{
-                              width: '28px',
-                              height: '28px',
-                              flexShrink: 0,
-                              fontSize: '24px'
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'flex-start', width: '100%' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'flex-start', width: '100%' }}>
+                            {/* Widget Preview - Image Section */}
+                            <div style={{ 
+                              width: '280px', 
+                              height: '200px', 
+                              borderRadius: '10px', 
+                              overflow: 'hidden',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              padding: '20px',
+                              boxSizing: 'border-box'
                             }}>
-                              ⚡
+                              {widget.utility === 'Free Shipping Badge' ? (
+                                <div style={{
+                                  background: '#F3F4F6',
+                                  border: '1px solid #E5E7EB',
+                                  padding: '20px',
+                                  borderRadius: '8px',
+                                  fontSize: '16px',
+                                  color: '#1E3A8A',
+                                  textAlign: 'left',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '12px',
+                                  wordWrap: 'break-word',
+                                  overflowWrap: 'break-word',
+                                  boxSizing: 'border-box',
+                                  width: '100%',
+                                  height: '100%'
+                                }}>
+                                  <div style={{
+                                    width: '28px',
+                                    height: '28px',
+                                    flexShrink: 0
+                                  }}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                      <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/>
+                                      <path d="M1 8h15M16 8v8"/>
+                                    </svg>
+                                  </div>
+                                  <span style={{ 
+                                    wordWrap: 'break-word', 
+                                    overflowWrap: 'break-word',
+                                    flex: 1
+                                  }}>
+                                    {widget.preview}
+                                  </span>
+                                </div>
+                              ) : widget.utility === 'Live Visitor Count' ? (
+                                <div style={{
+                                  background: '#F8FAFC',
+                                  border: '1px solid #E5E7EB',
+                                  padding: '20px',
+                                  borderRadius: '12px',
+                                  fontSize: '18px',
+                                  color: '#6B7280',
+                                  fontStyle: 'italic',
+                                  textAlign: 'center',
+                                  wordWrap: 'break-word',
+                                  overflowWrap: 'break-word',
+                                  boxSizing: 'border-box',
+                                  width: '100%',
+                                  height: '100%',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center'
+                                }}>
+                                  "{widget.preview}"
+                                </div>
+                              ) : widget.utility === 'Stock Alert Badge' ? (
+                                <div style={{
+                                  background: '#F3F4F6',
+                                  border: '1px solid #E5E7EB',
+                                  padding: '20px',
+                                  borderRadius: '8px',
+                                  fontSize: '16px',
+                                  color: '#9F1239',
+                                  textAlign: 'left',
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  gap: '12px',
+                                  wordWrap: 'break-word',
+                                  overflowWrap: 'break-word',
+                                  boxSizing: 'border-box',
+                                  width: '100%',
+                                  height: '100%'
+                                }}>
+                                  <div style={{
+                                    width: '28px',
+                                    height: '28px',
+                                    flexShrink: 0,
+                                    fontSize: '24px'
+                                  }}>
+                                    ⚡
+                                  </div>
+                                  <span style={{ 
+                                    wordWrap: 'break-word', 
+                                    overflowWrap: 'break-word',
+                                    flex: 1
+                                  }}>
+                                    {widget.preview}
+                                  </span>
+                                </div>
+                              ) : null}
                             </div>
-                            <span style={{ 
-                              wordWrap: 'break-word', 
-                              overflowWrap: 'break-word',
-                              flex: 1
-                            }}>
-                              {widget.preview}
-                            </span>
+
+                            {/* Title and Description Section */}
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start', width: '100%' }}>
+                              {/* Title */}
+                              <p style={{
+                                fontFamily: 'Geist, sans-serif',
+                                fontWeight: 600,
+                                fontSize: '24px',
+                                color: figmaColors.darkGray,
+                                margin: 0,
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                width: '280px'
+                              }}>
+                                {widget.utility}
+                              </p>
+                              
+                              {/* Tag */}
+                              <div style={{
+                                background: '#FFFFFF',
+                                color: '#1E40AF',
+                                padding: '8px 16px',
+                                borderRadius: '16px',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                width: 'fit-content',
+                                border: '1px solid #E5E7EB'
+                              }}>
+                                {widget.style}
+                              </div>
+                              
+                              {/* Description */}
+                              <p style={{
+                                fontFamily: 'Inter, sans-serif',
+                                fontWeight: 500,
+                                fontSize: '14px',
+                                color: figmaColors.darkGray,
+                                margin: 0,
+                                lineHeight: '20px',
+                                width: '280px',
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word'
+                              }}>
+                                {widget.rationale}
+                              </p>
+                            </div>
                           </div>
-                        ) : null}
-
-                        {/* Title - Second - with more spacing from widget */}
-                        <h4 style={{
-                          fontSize: '24px',
-                          fontWeight: '700',
-                          color: '#1F2937',
-                          margin: '0',
-                          marginTop: '24px',
-                          wordWrap: 'break-word',
-                          overflowWrap: 'break-word',
-                          lineHeight: '1.3',
-                          textAlign: 'center',
-                          maxWidth: '180px'
-                        }}>
-                          {widget.utility}
-                        </h4>
-
-                        {/* Tag - Third */}
-                        <div style={{
-                          background: '#FFFFFF',
-                          color: '#1E40AF',
-                          padding: '8px 16px',
-                          borderRadius: '16px',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          width: 'fit-content',
-                          border: '1px solid #E5E7EB'
-                        }}>
-                          {widget.style}
                         </div>
-
-                        {/* Description - Fourth - narrower text */}
-                        <p style={{
-                          fontSize: '16px',
-                          color: '#374151',
-                          margin: 0,
-                          lineHeight: '1.6',
-                          wordWrap: 'break-word',
-                          overflowWrap: 'break-word',
-                          textAlign: 'center',
-                          maxWidth: '180px'
-                        }}>
-                          {widget.rationale}
-                        </p>
                       </div>
                     );
                   })}
