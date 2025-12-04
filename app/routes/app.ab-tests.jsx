@@ -1950,7 +1950,8 @@ export default function ABTests() {
               display: 'grid',
               gridTemplateColumns: '1fr 1fr',
               gap: '24px',
-              minHeight: '500px'
+              minHeight: '500px',
+              position: 'relative'
             }}>
               <div style={{
                 display: 'flex',
@@ -2040,7 +2041,8 @@ export default function ABTests() {
                   padding: '20px',
                   background: '#F8FAFC',
                   borderRadius: '12px',
-                  border: '1px solid #E5E7EB'
+                  border: '1px solid #E5E7EB',
+                  marginTop: '-10px'
                 }}>
                   {/* Toggle Switch */}
                   <div style={{
@@ -2132,6 +2134,53 @@ export default function ABTests() {
                   )}
                 </div>
               </div>
+            </div>
+            
+            {/* Next Button */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'flex-end',
+              marginTop: '24px',
+              paddingRight: '10px'
+            }}>
+              <button
+                onClick={() => {
+                  if (selectedProduct && (!isDevelopmentStore || wizardStorePassword.trim())) {
+                    setCurrentStep(2);
+                  }
+                }}
+                disabled={!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim())}
+                style={{
+                  padding: '12px 32px',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#FFFFFF',
+                  background: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim())) 
+                    ? '#D1D5DB' 
+                    : '#3B82F6',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim())) 
+                    ? 'not-allowed' 
+                    : 'pointer',
+                  transition: 'all 0.2s ease',
+                  opacity: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim())) 
+                    ? 0.6 
+                    : 1
+                }}
+                onMouseEnter={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.background = '#2563EB';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (!e.currentTarget.disabled) {
+                    e.currentTarget.style.background = '#3B82F6';
+                  }
+                }}
+              >
+                Next
+              </button>
             </div>
           </div>
         )}
