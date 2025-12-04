@@ -1032,11 +1032,10 @@ export default function ABTests() {
 
   return (
     <div style={{
-      height: '100vh',
+      minHeight: '100vh',
       background: '#e6e6e6',
       display: 'flex',
-      flexDirection: 'column',
-      overflow: 'hidden'
+      flexDirection: 'column'
     }}>
       {/* Main Content */}
       <div style={{
@@ -1045,8 +1044,7 @@ export default function ABTests() {
         maxWidth: '1200px',
         width: '100%',
         margin: '0 auto',
-        overflowY: 'auto',
-        overflowX: 'hidden'
+        paddingBottom: '32px'
       }}>
         {/* Progress Bar */}
         <div style={{
@@ -1381,16 +1379,13 @@ export default function ABTests() {
                         alignItems: 'center',
                         justifyContent: 'center',
                         cursor: 'pointer',
-                        backgroundColor: '#DBEAFE',
-                        transition: 'transform 0.2s ease, background-color 0.2s ease'
+                        transition: 'transform 0.2s ease'
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.transform = 'scale(1.1)';
-                        e.currentTarget.style.backgroundColor = '#BFDBFE';
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.transform = 'scale(1)';
-                        e.currentTarget.style.backgroundColor = '#DBEAFE';
                       }}
                     >
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
