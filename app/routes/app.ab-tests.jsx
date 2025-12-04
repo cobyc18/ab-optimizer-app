@@ -1323,13 +1323,12 @@ export default function ABTests() {
 
                 <div style={{
                   position: 'relative',
-                  width: '280px',
+                  width: '100%',
                   flex: '0 0 auto',
                   boxSizing: 'border-box',
                   overflow: 'visible',
                   minHeight: '500px',
-                  padding: '20px 0 0 0',
-                  margin: '0 auto'
+                  padding: '20px 0 0 0'
                 }}>
                   {/* Render stacked cards - show current + ALL widgets behind with fan effect */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
@@ -1385,7 +1384,10 @@ export default function ABTests() {
                           position: 'absolute',
                           top: 0,
                           left: 0,
-                          width: '280px',
+                          right: 0,
+                          width: '100%',
+                          maxWidth: '100%',
+                          minWidth: '280px',
                           background: getWidgetBackgroundColor(widget.utility),
                           borderRadius: '24px',
                           padding: '40px',
@@ -1406,7 +1408,6 @@ export default function ABTests() {
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '24px',
-                          alignItems: 'flex-start',
                           boxShadow: isCurrent 
                             ? '0 10px 30px rgba(0, 0, 0, 0.2)' 
                             : `0 ${8 + stackIndex * 3}px ${15 + stackIndex * 5}px rgba(0, 0, 0, ${0.15 - stackIndex * 0.05})`,
@@ -1514,8 +1515,7 @@ export default function ABTests() {
                           margin: 0,
                           wordWrap: 'break-word',
                           overflowWrap: 'break-word',
-                          lineHeight: '1.3',
-                          width: '100%'
+                          lineHeight: '1.3'
                         }}>
                           {widget.utility}
                         </h4>
@@ -1529,9 +1529,7 @@ export default function ABTests() {
                           fontSize: '14px',
                           fontWeight: '500',
                           width: 'fit-content',
-                          border: '1px solid #E5E7EB',
-                          wordWrap: 'break-word',
-                          overflowWrap: 'break-word'
+                          border: '1px solid #E5E7EB'
                         }}>
                           {widget.style}
                         </div>
@@ -1543,8 +1541,7 @@ export default function ABTests() {
                           margin: 0,
                           lineHeight: '1.6',
                           wordWrap: 'break-word',
-                          overflowWrap: 'break-word',
-                          width: '100%'
+                          overflowWrap: 'break-word'
                         }}>
                           {widget.rationale}
                         </p>
