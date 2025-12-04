@@ -1309,17 +1309,58 @@ export default function ABTests() {
                 overflow: 'visible',
                 boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
               }}>
-                {/* Title */}
-                <p style={{
-                  fontSize: '12px',
-                  fontWeight: '500',
-                  color: '#6B7280',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  margin: '0 0 16px 0'
+                {/* Title with Arrows */}
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '24px'
                 }}>
-                  CHOOSE YOUR CONVERSION PLAY
-                </p>
+                  <p style={{
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    color: '#6B7280',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.5px',
+                    margin: 0
+                  }}>
+                    CHOOSE YOUR CONVERSION PLAY
+                  </p>
+                  
+                  {/* Navigation Arrows */}
+                  <div style={{ display: 'flex', gap: '11px', alignItems: 'center' }}>
+                    {/* Left Arrow - Simple gray chevron */}
+                    <div style={{
+                      width: '24px',
+                      height: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer'
+                    }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <path d="M15 18l-6-6 6-6" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                    
+                    {/* Right Arrow - Blue rounded rectangle with gray chevron */}
+                    <div style={{
+                      border: '1px solid #3B82F6',
+                      borderRadius: '6px',
+                      width: '32px',
+                      height: '32px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      cursor: 'pointer',
+                      backgroundColor: '#DBEAFE'
+                    }}>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                        <path d="M9 18l6-6-6-6" stroke="#D1D5DB" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      </svg>
+                    </div>
+                  </div>
+                </div>
 
                 <div style={{
                   position: 'relative',
@@ -1328,7 +1369,7 @@ export default function ABTests() {
                   boxSizing: 'border-box',
                   overflow: 'visible',
                   minHeight: '500px',
-                  padding: '20px 0 0 0'
+                  padding: '32px 0 0 0'
                 }}>
                   {/* Render stacked cards - show current + ALL widgets behind with fan effect */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {

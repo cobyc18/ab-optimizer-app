@@ -125,6 +125,20 @@ export default function AppLayout() {
               key={item.id}
               to={item.href}
               onClick={() => setSelectedNavItem(item.id)}
+              onMouseEnter={(e) => {
+                if (selectedNavItem !== item.id) {
+                  e.currentTarget.style.backgroundColor = 'rgba(0, 56, 255, 0.1)';
+                  e.currentTarget.style.transform = 'scale(1.05)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 56, 255, 0.2)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (selectedNavItem !== item.id) {
+                  e.currentTarget.style.backgroundColor = 'transparent';
+                  e.currentTarget.style.transform = 'scale(1)';
+                  e.currentTarget.style.boxShadow = 'none';
+                }
+              }}
               style={{
                 backgroundColor: selectedNavItem === item.id ? figmaColors.blue : 'transparent',
                 display: 'flex',
@@ -137,18 +151,37 @@ export default function AppLayout() {
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 textDecoration: 'none',
-                position: 'relative'
+                position: 'relative',
+                transform: 'scale(1)'
               }}
               title={isCollapsed ? item.label : ''}
             >
-              <div style={{ width: '28px', height: '28px', flexShrink: 0 }}>
+              <div 
+                style={{ 
+                  width: '28px', 
+                  height: '28px', 
+                  flexShrink: 0,
+                  transition: 'transform 0.3s ease'
+                }}
+                onMouseEnter={(e) => {
+                  if (selectedNavItem !== item.id) {
+                    e.currentTarget.style.transform = 'scale(1.1)';
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  if (selectedNavItem !== item.id) {
+                    e.currentTarget.style.transform = 'scale(1)';
+                  }
+                }}
+              >
                 <img 
                   alt={item.label} 
                   src={item.icon} 
                   style={{ 
                     width: '100%', 
                     height: '100%',
-                    filter: selectedNavItem === item.id ? 'brightness(0) invert(1)' : 'none'
+                    filter: selectedNavItem === item.id ? 'brightness(0) invert(1)' : 'none',
+                    transition: 'filter 0.3s ease, transform 0.3s ease'
                   }} 
                 />
               </div>
