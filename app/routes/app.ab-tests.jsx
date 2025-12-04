@@ -1565,7 +1565,7 @@ export default function ABTests() {
                   minHeight: '600px',
                   padding: '32px 0 120px 0'
                 }}>
-                  {/* Render stacked cards - show cards behind */}
+                  {/* Render stacked cards - show cards behind when dragging */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
                     if (!widget) return null;
 
@@ -1576,18 +1576,43 @@ export default function ABTests() {
                     // Calculate drag offset for current card only
                     let dragOffsetX = 0;
                     let dragOffsetY = 0;
+                    let showNextWidget = false;
                     
                     if (isCurrent && isDragging) {
                       dragOffsetX = dragCurrent.x - dragStart.x;
                       dragOffsetY = dragCurrent.y - dragStart.y;
+                      // Show next/previous widget when dragging horizontally
+                      const deltaX = dragCurrent.x - dragStart.x;
+                      if (Math.abs(deltaX) > 20) {
+                        showNextWidget = true;
+                      }
                     }
                     
-                    // Perfect alignment - no offset for cards behind
+                    // Determine which widget to show behind when dragging
+                    let shouldShow = false;
+                    if (isCurrent) {
+                      shouldShow = true; // Always show current
+                    } else if (isDragging && showNextWidget) {
+                      // getVisibleCards puts widgets in order: current (0), next (1), next+1 (2), ..., prev (last)
+                      const deltaX = dragCurrent.x - dragStart.x;
+                      if (deltaX > 0) {
+                        // Dragging right - show next widget (which is at stackIndex 1)
+                        shouldShow = stackIndex === 1;
+                      } else if (deltaX < 0) {
+                        // Dragging left - show previous widget (which is at the last stackIndex)
+                        // Calculate total number of widgets
+                        const totalWidgets = abTestIdeas.length;
+                        const lastStackIndex = totalWidgets - 1; // Last widget is at this stackIndex
+                        shouldShow = stackIndex === lastStackIndex;
+                      }
+                    }
+                    
+                    // Perfect alignment - no offset for cards behind when not dragging
                     const translateX = isCurrent ? dragOffsetX : 0;
                     const translateY = isCurrent ? dragOffsetY : 0;
                     
-                    // Opacity: 100% for current, 0 for others (completely hidden)
-                    const opacity = isCurrent ? 1 : 0;
+                    // Opacity: 100% for current, 0 for others unless dragging
+                    const opacity = isCurrent ? 1 : (shouldShow ? 0.4 : 0);
 
                     return (
                       <div
@@ -1805,7 +1830,10 @@ export default function ABTests() {
                   justifyContent: 'center',
                   marginTop: '-10px',
                   paddingTop: '0px',
-                  paddingBottom: '0px'
+                  paddingBottom: '0px',
+                  position: 'relative',
+                  zIndex: 200,
+                  pointerEvents: 'auto'
                 }}>
                   {abTestIdeas.map((widget, index) => (
                     <button
@@ -1813,11 +1841,9 @@ export default function ABTests() {
                       onClick={(e) => {
                         e.preventDefault();
                         e.stopPropagation();
-                        if (index !== currentWidgetIndex) {
-                          setCurrentWidgetIndex(index);
-                          setIsAnimating(false);
-                          setSwipeDirection(null);
-                        }
+                        setCurrentWidgetIndex(index);
+                        setIsAnimating(false);
+                        setSwipeDirection(null);
                       }}
                       type="button"
                       style={{
@@ -1826,10 +1852,13 @@ export default function ABTests() {
                         borderRadius: '50%',
                         background: currentWidgetIndex === index ? '#3B82F6' : '#9CA3AF',
                         border: 'none',
-                        cursor: currentWidgetIndex === index ? 'default' : 'pointer',
+                        cursor: 'pointer',
                         padding: 0,
                         transition: 'all 0.3s ease',
-                        opacity: 1
+                        opacity: 1,
+                        position: 'relative',
+                        zIndex: 201,
+                        pointerEvents: 'auto'
                       }}
                       aria-label={`Go to widget ${index + 1}`}
                     />
