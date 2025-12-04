@@ -1033,85 +1033,10 @@ export default function ABTests() {
   return (
     <div style={{
       minHeight: '100vh',
-      background: '#F8FAFC',
+      background: '#e6e6e6',
       display: 'flex',
       flexDirection: 'column'
     }}>
-      {/* Progress Bar */}
-      <div style={{
-        background: '#e6e6e6',
-        padding: '24px 32px',
-        borderBottom: '1px solid #374151'
-      }}>
-        <div style={{
-          display: 'flex',
-          justifyContent: 'center',
-          alignItems: 'center',
-          gap: '8px',
-          maxWidth: '800px',
-          margin: '0 auto'
-        }}>
-          {[1, 2, 3, 4, 5].map((step) => {
-            const isActive = currentStep + 1 === step;
-            const isCompleted = currentStep + 1 > step;
-            
-            return (
-              <React.Fragment key={step}>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <div style={{
-                    width: '40px',
-                    height: '40px',
-                    borderRadius: '50%',
-                    background: isActive ? '#3B82F6' : '#374151',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'relative'
-                  }}>
-                    {isActive ? (
-                      <div style={{
-                        width: '12px',
-                        height: '12px',
-                        borderRadius: '50%',
-                        background: '#FFFFFF'
-                      }} />
-                    ) : (
-                      <span style={{
-                        fontSize: '16px',
-                        fontWeight: '500',
-                        color: '#FFFFFF'
-                      }}>
-                        {step}
-                      </span>
-                    )}
-                  </div>
-                </div>
-                {step < 5 && (
-                  <div style={{
-                    width: '60px',
-                    height: '1px',
-                    background: isCompleted ? '#3B82F6' : '#374151',
-                    margin: '0 4px'
-                  }} />
-                )}
-              </React.Fragment>
-            );
-          })}
-        </div>
-        <div style={{
-          fontSize: '14px',
-          color: '#374151',
-          textAlign: 'center',
-          marginTop: '16px'
-        }}>
-          Step {currentStep + 1} of 5
-        </div>
-      </div>
-
       {/* Main Content */}
       <div style={{
         flex: 1,
@@ -1120,6 +1045,81 @@ export default function ABTests() {
         width: '100%',
         margin: '0 auto'
       }}>
+        {/* Progress Bar */}
+        <div style={{
+          background: '#e6e6e6',
+          padding: '24px 32px',
+          marginBottom: '32px'
+        }}>
+          <div style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            gap: '8px',
+            maxWidth: '800px',
+            margin: '0 auto'
+          }}>
+            {[1, 2, 3, 4, 5].map((step) => {
+              const isActive = currentStep + 1 === step;
+              const isCompleted = currentStep + 1 > step;
+              
+              return (
+                <React.Fragment key={step}>
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '8px'
+                  }}>
+                    <div style={{
+                      width: '40px',
+                      height: '40px',
+                      borderRadius: '50%',
+                      background: isActive ? '#3B82F6' : '#374151',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      position: 'relative'
+                    }}>
+                      {isActive ? (
+                        <div style={{
+                          width: '12px',
+                          height: '12px',
+                          borderRadius: '50%',
+                          background: '#FFFFFF'
+                        }} />
+                      ) : (
+                        <span style={{
+                          fontSize: '16px',
+                          fontWeight: '500',
+                          color: '#FFFFFF'
+                        }}>
+                          {step}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  {step < 5 && (
+                    <div style={{
+                      width: '60px',
+                      height: '1px',
+                      background: isCompleted ? '#3B82F6' : '#374151',
+                      margin: '0 4px'
+                    }} />
+                  )}
+                </React.Fragment>
+              );
+            })}
+          </div>
+          <div style={{
+            fontSize: '14px',
+            color: '#374151',
+            textAlign: 'center',
+            marginTop: '16px'
+          }}>
+            Step {currentStep + 1} of 5
+          </div>
+        </div>
+
         {/* Step 0: Pick an Idea - Goal Selection */}
         {currentStep === 0 && (
           <div style={{
