@@ -1566,7 +1566,7 @@ export default function ABTests() {
                   boxSizing: 'border-box',
                   overflow: 'visible',
                   minHeight: '600px',
-                  padding: '32px 0 120px 0'
+                  padding: '32px 0 40px 0'
                 }}>
                   {/* Render stacked cards - show cards behind when dragging */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
@@ -1609,7 +1609,11 @@ export default function ABTests() {
                     
                     // Perfect alignment - no offset for cards behind when not dragging
                     // Center the card: left: 50% then translateX(-50%) to center, plus drag offset
-                    const translateX = isCurrent ? (-140 + dragOffsetX) : -140; // -140 is half of 280px to center
+                    // Use percentage for proper centering regardless of card width
+                    const baseTranslateX = '-50%';
+                    const translateX = isCurrent 
+                      ? `calc(${baseTranslateX} + ${dragOffsetX}px)` 
+                      : baseTranslateX;
                     const translateY = isCurrent ? dragOffsetY : 0;
                     
                     // Opacity: 100% for current, 0 for others unless dragging
@@ -1624,8 +1628,9 @@ export default function ABTests() {
                           position: 'absolute',
                           top: 0,
                           left: '50%',
-                          transform: `translate(${translateX}px, ${translateY}px)`,
+                          transform: `translate(${translateX}, ${translateY}px)`,
                           minWidth: '280px',
+                          width: '280px',
                           backgroundColor: figmaColors.gray,
                           border: `1px solid ${figmaColors.primaryBlue}`,
                           borderRadius: '24px',
@@ -1832,7 +1837,7 @@ export default function ABTests() {
                   gap: '8px',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '-30px',
+                  marginTop: '-20px',
                   paddingTop: '0px',
                   paddingBottom: '0px',
                   position: 'relative',
