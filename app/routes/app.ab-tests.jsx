@@ -1566,7 +1566,7 @@ export default function ABTests() {
                   boxSizing: 'border-box',
                   overflow: 'visible',
                   minHeight: '600px',
-                  padding: '32px 0 40px 0'
+                  padding: '32px 0 120px 0'
                 }}>
                   {/* Render stacked cards - show cards behind when dragging */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
@@ -1828,21 +1828,20 @@ export default function ABTests() {
                       </div>
                     );
                   })}
-                </div>
-
-                {/* Navigation Dots */}
-                <div style={{
-                  display: 'flex',
-                  gap: '8px',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  marginTop: '-20px',
-                  paddingTop: '0px',
-                  paddingBottom: '0px',
-                  position: 'relative',
-                  zIndex: 200,
-                  pointerEvents: 'auto'
-                }}>
+                  
+                  {/* Navigation Dots - positioned absolutely at bottom of cards */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    position: 'absolute',
+                    bottom: '80px',
+                    left: '50%',
+                    transform: 'translateX(-50%)',
+                    zIndex: 200,
+                    pointerEvents: 'auto'
+                  }}>
                   {abTestIdeas.map((widget, index) => (
                     <button
                       key={`dot-${index}`}
@@ -1871,6 +1870,7 @@ export default function ABTests() {
                       aria-label={`Go to widget ${index + 1}`}
                     />
                   ))}
+                  </div>
                 </div>
 
                 {/* Select Button */}
