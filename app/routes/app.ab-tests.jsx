@@ -1131,18 +1131,27 @@ export default function ABTests() {
             position: 'absolute',
             top: '24px',
             right: '32px',
-            background: 'transparent',
-            border: 'none',
+            background: '#FFFFFF',
+            border: '1px solid #1F2937',
+            borderRadius: '20px',
+            padding: '12px 32px',
             cursor: 'pointer',
-            padding: '8px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center'
+            fontSize: '16px',
+            fontWeight: '500',
+            color: '#1F2937',
+            transition: 'all 0.2s ease',
+            fontFamily: 'inherit'
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = '#1F2937';
+            e.currentTarget.style.color = '#FFFFFF';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = '#FFFFFF';
+            e.currentTarget.style.color = '#1F2937';
           }}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-            <path d="M18 6L6 18M6 6l12 12" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
+          Exit
         </button>
       </div>
       
@@ -1165,8 +1174,8 @@ export default function ABTests() {
           <div style={{
             backgroundColor: '#FFFFFF',
             borderRadius: '12px',
-            padding: '32px',
-            maxWidth: '400px',
+            padding: '40px',
+            maxWidth: '500px',
             width: '90%',
             boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)'
           }}
@@ -1186,7 +1195,7 @@ export default function ABTests() {
               margin: '0 0 24px 0',
               lineHeight: '1.5'
             }}>
-              This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+              This action cannot be undone. All changes will be discarded.
             </p>
             <div style={{
               display: 'flex',
