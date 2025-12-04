@@ -1550,12 +1550,13 @@ export default function ABTests() {
 
                 <div style={{
                   position: 'relative',
-                  width: '100%',
+                  width: '240px',
+                  margin: '0 auto',
                   flex: '0 0 auto',
                   boxSizing: 'border-box',
                   overflow: 'visible',
-                  minHeight: '500px',
-                  padding: '32px 0 0 0'
+                  minHeight: '650px',
+                  padding: '32px 0 120px 0'
                 }}>
                   {/* Render stacked cards - show current + ALL widgets behind with fan effect */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
@@ -1611,10 +1612,7 @@ export default function ABTests() {
                           position: 'absolute',
                           top: 0,
                           left: 0,
-                          right: 0,
-                          width: '100%',
-                          maxWidth: '100%',
-                          minWidth: '280px',
+                          width: '240px',
                           background: getWidgetBackgroundColor(widget.utility),
                           borderRadius: '24px',
                           padding: '40px',
@@ -1634,7 +1632,8 @@ export default function ABTests() {
                               : 'none',
                           display: 'flex',
                           flexDirection: 'column',
-                          gap: '24px',
+                          gap: '32px',
+                          alignItems: 'center',
                           boxShadow: isCurrent 
                             ? '0 10px 30px rgba(0, 0, 0, 0.2)' 
                             : `0 ${8 + stackIndex * 3}px ${15 + stackIndex * 5}px rgba(0, 0, 0, ${0.15 - stackIndex * 0.05})`,
@@ -1664,7 +1663,8 @@ export default function ABTests() {
                           gap: '12px',
                           wordWrap: 'break-word',
                           overflowWrap: 'break-word',
-                          boxSizing: 'border-box'
+                          boxSizing: 'border-box',
+                          width: '100%'
                         }}>
                           <div style={{
                             width: '28px',
@@ -1696,7 +1696,8 @@ export default function ABTests() {
                             textAlign: 'center',
                             wordWrap: 'break-word',
                             overflowWrap: 'break-word',
-                            boxSizing: 'border-box'
+                            boxSizing: 'border-box',
+                            width: '100%'
                           }}>
                             "{widget.preview}"
                           </div>
@@ -1714,7 +1715,8 @@ export default function ABTests() {
                             gap: '12px',
                             wordWrap: 'break-word',
                             overflowWrap: 'break-word',
-                            boxSizing: 'border-box'
+                            boxSizing: 'border-box',
+                            width: '100%'
                           }}>
                             <div style={{
                               width: '28px',
@@ -1734,15 +1736,18 @@ export default function ABTests() {
                           </div>
                         ) : null}
 
-                        {/* Title - Second */}
+                        {/* Title - Second - with more spacing from widget */}
                         <h4 style={{
-                          fontSize: '28px',
+                          fontSize: '24px',
                           fontWeight: '700',
                           color: '#1F2937',
-                          margin: 0,
+                          margin: '0',
+                          marginTop: '24px',
                           wordWrap: 'break-word',
                           overflowWrap: 'break-word',
-                          lineHeight: '1.3'
+                          lineHeight: '1.3',
+                          textAlign: 'center',
+                          maxWidth: '180px'
                         }}>
                           {widget.utility}
                         </h4>
@@ -1761,14 +1766,16 @@ export default function ABTests() {
                           {widget.style}
                         </div>
 
-                        {/* Description - Fourth */}
+                        {/* Description - Fourth - narrower text */}
                         <p style={{
-                          fontSize: '18px',
+                          fontSize: '16px',
                           color: '#374151',
                           margin: 0,
                           lineHeight: '1.6',
                           wordWrap: 'break-word',
-                          overflowWrap: 'break-word'
+                          overflowWrap: 'break-word',
+                          textAlign: 'center',
+                          maxWidth: '180px'
                         }}>
                           {widget.rationale}
                         </p>
@@ -1791,23 +1798,22 @@ export default function ABTests() {
                     <button
                       key={`dot-${index}`}
                       onClick={() => {
-                        if (!isAnimating && index !== currentWidgetIndex) {
+                        if (index !== currentWidgetIndex) {
                           setCurrentWidgetIndex(index);
                           setIsAnimating(false);
                           setSwipeDirection(null);
                         }
                       }}
-                      disabled={isAnimating}
                       style={{
                         width: currentWidgetIndex === index ? '10px' : '8px',
                         height: currentWidgetIndex === index ? '10px' : '8px',
                         borderRadius: '50%',
                         background: currentWidgetIndex === index ? '#3B82F6' : '#9CA3AF',
                         border: 'none',
-                        cursor: isAnimating || currentWidgetIndex === index ? 'default' : 'pointer',
+                        cursor: currentWidgetIndex === index ? 'default' : 'pointer',
                         padding: 0,
                         transition: 'all 0.3s ease',
-                        opacity: isAnimating && currentWidgetIndex !== index ? 0.5 : 1
+                        opacity: 1
                       }}
                       aria-label={`Go to widget ${index + 1}`}
                     />
