@@ -1032,10 +1032,11 @@ export default function ABTests() {
 
   return (
     <div style={{
-      minHeight: '100vh',
+      height: '100vh',
       background: '#e6e6e6',
       display: 'flex',
-      flexDirection: 'column'
+      flexDirection: 'column',
+      overflow: 'hidden'
     }}>
       {/* Main Content */}
       <div style={{
@@ -1043,7 +1044,9 @@ export default function ABTests() {
         padding: '32px',
         maxWidth: '1200px',
         width: '100%',
-        margin: '0 auto'
+        margin: '0 auto',
+        overflowY: 'auto',
+        overflowX: 'hidden'
       }}>
         {/* Progress Bar */}
         <div style={{
@@ -1330,30 +1333,66 @@ export default function ABTests() {
                   {/* Navigation Arrows */}
                   <div style={{ display: 'flex', gap: '11px', alignItems: 'center' }}>
                     {/* Left Arrow - Simple gray chevron */}
-                    <div style={{
-                      width: '24px',
-                      height: '24px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer'
-                    }}>
+                    <div 
+                      onClick={() => {
+                        setCurrentWidgetIndex(prevIndex => {
+                          if (prevIndex === 0) {
+                            return abTestIdeas.length - 1; // Wrap to last widget
+                          }
+                          return prevIndex - 1;
+                        });
+                      }}
+                      style={{
+                        width: '24px',
+                        height: '24px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        transition: 'transform 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.1)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }}
+                    >
                       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M15 18l-6-6 6-6" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                     
                     {/* Right Arrow - Blue rounded rectangle with gray chevron */}
-                    <div style={{
-                      borderRadius: '6px',
-                      width: '32px',
-                      height: '32px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      cursor: 'pointer',
-                      backgroundColor: '#DBEAFE'
-                    }}>
+                    <div 
+                      onClick={() => {
+                        setCurrentWidgetIndex(prevIndex => {
+                          if (prevIndex === abTestIdeas.length - 1) {
+                            return 0; // Wrap to first widget
+                          }
+                          return prevIndex + 1;
+                        });
+                      }}
+                      style={{
+                        borderRadius: '6px',
+                        width: '32px',
+                        height: '32px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        cursor: 'pointer',
+                        backgroundColor: '#DBEAFE',
+                        transition: 'transform 0.2s ease, background-color 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'scale(1.1)';
+                        e.currentTarget.style.backgroundColor = '#BFDBFE';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.backgroundColor = '#DBEAFE';
+                      }}
+                    >
                       <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
                         <path d="M9 18l6-6-6-6" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
@@ -2615,122 +2654,6 @@ export default function ABTests() {
         )}
       </div>
 
-      {/* Footer */}
-      <div style={{
-        background: '#FFFFFF',
-        padding: '24px 32px',
-        borderTop: '1px solid #E5E5E5',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        boxShadow: '0 -1px 3px rgba(0, 0, 0, 0.1)'
-      }}>
-        <button
-          onClick={() => navigate('/app')}
-          style={{
-            background: 'transparent',
-            border: '1px solid #D1D5DB',
-            borderRadius: '8px',
-            padding: '12px 24px',
-            cursor: 'pointer',
-            fontSize: '14px',
-            fontWeight: '500',
-            color: '#374151'
-          }}
-        >
-          Cancel
-        </button>
-        <div style={{ display: 'flex', gap: '12px' }}>
-          <button
-            onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-            disabled={currentStep === 0}
-            style={{
-              background: currentStep === 0 ? '#F3F4F6' : '#FFFFFF',
-              border: '1px solid #D1D5DB',
-              borderRadius: '8px',
-              padding: '12px 24px',
-              cursor: currentStep === 0 ? 'not-allowed' : 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: currentStep === 0 ? '#9CA3AF' : '#374151'
-            }}
-          >
-            Previous
-          </button>
-          <button
-            disabled={
-              (currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)) ||
-              (currentStep === 4 && (isLaunchingTest || !canLaunchTest))
-            }
-            onClick={async () => {
-              if (currentStep === 2) {
-                if (!wizardSelectedProductSnapshot) {
-                  alert('Please select a product before continuing.');
-                  return;
-                }
-                const result = await createVariantTemplate();
-                if (!result?.success) {
-                  if (result?.error && result.error !== 'request_in_flight') {
-                    const errorCopy = typeof result.error === 'string' ? result.error : '';
-                    const friendlyErrorMap = {
-                      no_product_selected: 'Please select a product before continuing.',
-                      request_in_flight: 'We are still working on the previous request.',
-                      variant_template_creation_failed: 'Shopify did not allow us to duplicate the template. Please try again in a few seconds.',
-                      no_product_selected_for_variant_template: 'Please select a product before continuing.'
-                    };
-                    const friendlyMessage = friendlyErrorMap[errorCopy] || errorCopy || 'Please try again in a few seconds.';
-                    alert(`We couldn't duplicate the template yet. ${friendlyMessage}`);
-                  }
-                  return;
-                }
-                setCurrentStep(2);
-                return;
-              }
-
-              if (currentStep < 4) {
-                setWizardLaunchError(null);
-                setWizardLaunchSuccess(null);
-                setCurrentStep(prev => Math.min(prev + 1, 4));
-              } else {
-                await handleLaunchTest();
-              }
-            }}
-            style={{
-              background:
-                currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)
-                  ? '#818CF8'
-                  : currentStep === 4 && (isLaunchingTest || !canLaunchTest)
-                    ? '#818CF8'
-                    : '#4F46E5',
-              border: 'none',
-              borderRadius: '8px',
-              padding: '12px 24px',
-              cursor:
-                currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)
-                  ? 'not-allowed'
-                  : currentStep === 4 && (isLaunchingTest || !canLaunchTest)
-                    ? 'not-allowed'
-                    : 'pointer',
-              fontSize: '14px',
-              fontWeight: '500',
-              color: '#FFFFFF',
-              opacity:
-                (currentStep === 2 && (isVariantRequestInFlight || !wizardSelectedProductSnapshot)) ||
-                (currentStep === 4 && (isLaunchingTest || !canLaunchTest))
-                  ? 0.8
-                  : 1
-            }}
-          >
-            {currentStep === 2 && isVariantRequestInFlight
-              ? 'Duplicating...'
-              : currentStep === 4 && isLaunchingTest
-                ? 'Launching...'
-                : currentStep === 4
-                  ? 'Launch Test'
-                  : 'Next'}
-          </button>
-        </div>
-      </div>
     </div>
   );
 }
