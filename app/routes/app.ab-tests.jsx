@@ -1568,11 +1568,6 @@ export default function ABTests() {
                   minHeight: '600px',
                   padding: '32px 0 120px 0'
                 }}>
-                  <div style={{
-                    position: 'relative',
-                    width: '280px',
-                    boxSizing: 'border-box'
-                  }}>
                   {/* Render stacked cards - show cards behind when dragging */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
                     if (!widget) return null;
@@ -1585,6 +1580,10 @@ export default function ABTests() {
                     let dragOffsetX = 0;
                     let dragOffsetY = 0;
                     
+                    // Calculate deltaX for showing widget behind during drag
+                    const deltaX = isDragging ? (dragCurrent.x - dragStart.x) : 0;
+                    const showNextWidget = isDragging && Math.abs(deltaX) > 20;
+                    
                     if (isCurrent && isDragging) {
                       dragOffsetX = dragCurrent.x - dragStart.x;
                       dragOffsetY = dragCurrent.y - dragStart.y;
@@ -1594,31 +1593,27 @@ export default function ABTests() {
                     let shouldShow = false;
                     if (isCurrent) {
                       shouldShow = true; // Always show current
-                    } else if (isDragging) {
-                      // Calculate deltaX to determine drag direction
-                      const deltaX = dragCurrent.x - dragStart.x;
-                      // Show widget behind when dragging horizontally (threshold of 20px)
-                      if (Math.abs(deltaX) > 20) {
-                        // getVisibleCards puts widgets in order: current (0), next (1), next+1 (2), ..., prev (last)
-                        if (deltaX > 0) {
-                          // Dragging right - show next widget (which is at stackIndex 1)
-                          shouldShow = stackIndex === 1;
-                        } else if (deltaX < 0) {
-                          // Dragging left - show previous widget (which is at the last stackIndex)
-                          // Calculate total number of widgets
-                          const totalWidgets = abTestIdeas.length;
-                          const lastStackIndex = totalWidgets - 1; // Last widget is at this stackIndex
-                          shouldShow = stackIndex === lastStackIndex;
-                        }
+                    } else if (showNextWidget) {
+                      // getVisibleCards puts widgets in order: current (0), next (1), next+1 (2), ..., prev (last)
+                      if (deltaX > 0) {
+                        // Dragging right - show next widget (which is at stackIndex 1)
+                        shouldShow = stackIndex === 1;
+                      } else if (deltaX < 0) {
+                        // Dragging left - show previous widget (which is at the last stackIndex)
+                        // Calculate total number of widgets
+                        const totalWidgets = abTestIdeas.length;
+                        const lastStackIndex = totalWidgets - 1; // Last widget is at this stackIndex
+                        shouldShow = stackIndex === lastStackIndex;
                       }
                     }
                     
                     // Perfect alignment - no offset for cards behind when not dragging
-                    const translateX = isCurrent ? dragOffsetX : 0;
+                    // Center the card: left: 50% then translateX(-50%) to center, plus drag offset
+                    const translateX = isCurrent ? (-140 + dragOffsetX) : -140; // -140 is half of 280px to center
                     const translateY = isCurrent ? dragOffsetY : 0;
                     
                     // Opacity: 100% for current, 0 for others unless dragging
-                    const opacity = isCurrent ? 1 : (shouldShow ? 0.6 : 0);
+                    const opacity = isCurrent ? 1 : (shouldShow ? 0.4 : 0);
 
                     return (
                       <div
@@ -1628,7 +1623,8 @@ export default function ABTests() {
                         style={{
                           position: 'absolute',
                           top: 0,
-                          left: 0,
+                          left: '50%',
+                          transform: `translate(${translateX}px, ${translateY}px)`,
                           minWidth: '280px',
                           backgroundColor: figmaColors.gray,
                           border: `1px solid ${figmaColors.primaryBlue}`,
@@ -1639,19 +1635,16 @@ export default function ABTests() {
                           overflow: 'hidden',
                           zIndex: zIndex,
                           opacity: opacity,
-                          transform: `translate(${translateX}px, ${translateY}px)`,
                           transformOrigin: 'center center',
                           transition: isCurrent && !isDragging
                             ? 'all 0.3s ease' 
-                            : !isCurrent && isDragging
-                              ? 'opacity 0.1s ease' // Fast transition when dragging
-                              : !isCurrent
-                                ? `opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)`
-                                : 'none',
+                            : !isCurrent 
+                              ? `opacity 0.1s ease` // Fast transition when dragging
+                              : 'none',
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '20px',
-                          alignItems: 'flex-start',
+                          alignItems: 'center',
                           cursor: isCurrent ? (isDragging ? 'grabbing' : 'grab') : 'default',
                           userSelect: 'none',
                           ...(isCurrent && isAnimating && swipeDirection === 'like' && {
@@ -1662,11 +1655,11 @@ export default function ABTests() {
                           })
                         }}
                       >
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'flex-start', width: '100%', boxSizing: 'border-box' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'flex-start', width: '100%', boxSizing: 'border-box' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
                             {/* Widget Preview - Image Section */}
                             <div style={{ 
-                              width: '100%', 
+                              width: '280px', 
                               height: '200px', 
                               borderRadius: '10px', 
                               overflow: 'hidden',
@@ -1773,7 +1766,7 @@ export default function ABTests() {
                             </div>
 
                             {/* Title and Description Section */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start', width: '100%', boxSizing: 'border-box' }}>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
                               {/* Title */}
                               <p style={{
                                 fontFamily: 'Geist, sans-serif',
@@ -1784,7 +1777,8 @@ export default function ABTests() {
                                 wordWrap: 'break-word',
                                 overflowWrap: 'break-word',
                                 width: '100%',
-                                boxSizing: 'border-box'
+                                boxSizing: 'border-box',
+                                textAlign: 'center'
                               }}>
                                 {widget.utility}
                               </p>
@@ -1802,7 +1796,8 @@ export default function ABTests() {
                                 wordWrap: 'break-word',
                                 overflowWrap: 'break-word',
                                 maxWidth: '100%',
-                                boxSizing: 'border-box'
+                                boxSizing: 'border-box',
+                                margin: '0 auto'
                               }}>
                                 {widget.style}
                               </div>
@@ -1818,7 +1813,8 @@ export default function ABTests() {
                                 width: '100%',
                                 wordWrap: 'break-word',
                                 overflowWrap: 'break-word',
-                                boxSizing: 'border-box'
+                                boxSizing: 'border-box',
+                                textAlign: 'center'
                               }}>
                                 {widget.rationale}
                               </p>
@@ -1828,7 +1824,6 @@ export default function ABTests() {
                       </div>
                     );
                   })}
-                  </div>
                 </div>
 
                 {/* Navigation Dots */}
@@ -1837,7 +1832,7 @@ export default function ABTests() {
                   gap: '8px',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '0px',
+                  marginTop: '-30px',
                   paddingTop: '0px',
                   paddingBottom: '0px',
                   position: 'relative',
