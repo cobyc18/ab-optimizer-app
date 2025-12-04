@@ -1137,7 +1137,7 @@ export default function ABTests() {
           }}>
             {/* Goal Selection Card - Left Side */}
             <div style={{
-              background: 'linear-gradient(to right, #0EA5E9, #38BDF8)',
+              background: 'linear-gradient(135deg, rgb(126, 200, 227) 0%, rgb(91, 168, 212) 50%, rgb(74, 148, 196) 100%)',
               borderRadius: '16px',
               padding: '40px',
               width: '100%',
@@ -1361,7 +1361,7 @@ export default function ABTests() {
                       </svg>
                     </div>
                     
-                    {/* Right Arrow - Blue rounded rectangle with gray chevron */}
+                    {/* Right Arrow - Same size as left */}
                     <div 
                       onClick={() => {
                         setCurrentWidgetIndex(prevIndex => {
@@ -1372,9 +1372,8 @@ export default function ABTests() {
                         });
                       }}
                       style={{
-                        borderRadius: '6px',
-                        width: '32px',
-                        height: '32px',
+                        width: '24px',
+                        height: '24px',
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'center',
@@ -1388,7 +1387,7 @@ export default function ABTests() {
                         e.currentTarget.style.transform = 'scale(1)';
                       }}
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <path d="M9 18l6-6-6-6" stroke="#D1D5DB" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
