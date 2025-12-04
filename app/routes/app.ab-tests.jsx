@@ -1558,13 +1558,21 @@ export default function ABTests() {
                 <div style={{
                   position: 'relative',
                   minWidth: '280px',
-                  margin: '0 auto',
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'center',
+                  alignItems: 'flex-start',
                   flex: '0 0 auto',
                   boxSizing: 'border-box',
                   overflow: 'visible',
                   minHeight: '600px',
                   padding: '32px 0 120px 0'
                 }}>
+                  <div style={{
+                    position: 'relative',
+                    width: '280px',
+                    boxSizing: 'border-box'
+                  }}>
                   {/* Render stacked cards - show cards behind when dragging */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
                     if (!widget) return null;
@@ -1576,34 +1584,32 @@ export default function ABTests() {
                     // Calculate drag offset for current card only
                     let dragOffsetX = 0;
                     let dragOffsetY = 0;
-                    let showNextWidget = false;
                     
                     if (isCurrent && isDragging) {
                       dragOffsetX = dragCurrent.x - dragStart.x;
                       dragOffsetY = dragCurrent.y - dragStart.y;
-                      // Show next/previous widget when dragging horizontally
-                      const deltaX = dragCurrent.x - dragStart.x;
-                      if (Math.abs(deltaX) > 20) {
-                        showNextWidget = true;
-                      }
                     }
                     
                     // Determine which widget to show behind when dragging
                     let shouldShow = false;
                     if (isCurrent) {
                       shouldShow = true; // Always show current
-                    } else if (isDragging && showNextWidget) {
-                      // getVisibleCards puts widgets in order: current (0), next (1), next+1 (2), ..., prev (last)
+                    } else if (isDragging) {
+                      // Calculate deltaX to determine drag direction
                       const deltaX = dragCurrent.x - dragStart.x;
-                      if (deltaX > 0) {
-                        // Dragging right - show next widget (which is at stackIndex 1)
-                        shouldShow = stackIndex === 1;
-                      } else if (deltaX < 0) {
-                        // Dragging left - show previous widget (which is at the last stackIndex)
-                        // Calculate total number of widgets
-                        const totalWidgets = abTestIdeas.length;
-                        const lastStackIndex = totalWidgets - 1; // Last widget is at this stackIndex
-                        shouldShow = stackIndex === lastStackIndex;
+                      // Show widget behind when dragging horizontally (threshold of 20px)
+                      if (Math.abs(deltaX) > 20) {
+                        // getVisibleCards puts widgets in order: current (0), next (1), next+1 (2), ..., prev (last)
+                        if (deltaX > 0) {
+                          // Dragging right - show next widget (which is at stackIndex 1)
+                          shouldShow = stackIndex === 1;
+                        } else if (deltaX < 0) {
+                          // Dragging left - show previous widget (which is at the last stackIndex)
+                          // Calculate total number of widgets
+                          const totalWidgets = abTestIdeas.length;
+                          const lastStackIndex = totalWidgets - 1; // Last widget is at this stackIndex
+                          shouldShow = stackIndex === lastStackIndex;
+                        }
                       }
                     }
                     
@@ -1612,7 +1618,7 @@ export default function ABTests() {
                     const translateY = isCurrent ? dragOffsetY : 0;
                     
                     // Opacity: 100% for current, 0 for others unless dragging
-                    const opacity = isCurrent ? 1 : (shouldShow ? 0.4 : 0);
+                    const opacity = isCurrent ? 1 : (shouldShow ? 0.6 : 0);
 
                     return (
                       <div
@@ -1623,7 +1629,7 @@ export default function ABTests() {
                           position: 'absolute',
                           top: 0,
                           left: 0,
-                          minWidth: '280px',
+                          width: '280px',
                           backgroundColor: figmaColors.gray,
                           border: `1px solid ${figmaColors.primaryBlue}`,
                           borderRadius: '24px',
@@ -1637,9 +1643,11 @@ export default function ABTests() {
                           transformOrigin: 'center center',
                           transition: isCurrent && !isDragging
                             ? 'all 0.3s ease' 
-                            : !isCurrent 
-                              ? `opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)`
-                              : 'none',
+                            : !isCurrent && isDragging
+                              ? 'opacity 0.1s ease' // Fast transition when dragging
+                              : !isCurrent
+                                ? `opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)`
+                                : 'none',
                           display: 'flex',
                           flexDirection: 'column',
                           gap: '20px',
@@ -1658,7 +1666,7 @@ export default function ABTests() {
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'flex-start', width: '100%', boxSizing: 'border-box' }}>
                             {/* Widget Preview - Image Section */}
                             <div style={{ 
-                              width: '280px', 
+                              width: '100%', 
                               height: '200px', 
                               borderRadius: '10px', 
                               overflow: 'hidden',
@@ -1820,6 +1828,7 @@ export default function ABTests() {
                       </div>
                     );
                   })}
+                  </div>
                 </div>
 
                 {/* Navigation Dots */}
@@ -1828,7 +1837,7 @@ export default function ABTests() {
                   gap: '8px',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '-10px',
+                  marginTop: '4px',
                   paddingTop: '0px',
                   paddingBottom: '0px',
                   position: 'relative',
