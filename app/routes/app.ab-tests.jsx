@@ -1582,12 +1582,12 @@ export default function ABTests() {
                       dragOffsetY = dragCurrent.y - dragStart.y;
                     }
                     
-                    // Slight offset for cards behind to make them visible
-                    const translateX = isCurrent ? dragOffsetX : (stackIndex * 2);
-                    const translateY = isCurrent ? dragOffsetY : (stackIndex * 2);
+                    // Perfect alignment - no offset for cards behind
+                    const translateX = isCurrent ? dragOffsetX : 0;
+                    const translateY = isCurrent ? dragOffsetY : 0;
                     
-                    // Opacity: 100% for current, visible for others
-                    const opacity = isCurrent ? 1 : 0.6;
+                    // Opacity: 100% for current, 0 for others (completely hidden)
+                    const opacity = isCurrent ? 1 : 0;
 
                     return (
                       <div
@@ -1810,13 +1810,16 @@ export default function ABTests() {
                   {abTestIdeas.map((widget, index) => (
                     <button
                       key={`dot-${index}`}
-                      onClick={() => {
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
                         if (index !== currentWidgetIndex) {
                           setCurrentWidgetIndex(index);
                           setIsAnimating(false);
                           setSwipeDirection(null);
                         }
                       }}
+                      type="button"
                       style={{
                         width: currentWidgetIndex === index ? '10px' : '8px',
                         height: currentWidgetIndex === index ? '10px' : '8px',
