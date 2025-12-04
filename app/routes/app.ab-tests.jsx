@@ -1557,7 +1557,7 @@ export default function ABTests() {
 
                 <div style={{
                   position: 'relative',
-                  minWidth: '280px',
+                  minWidth: '320px',
                   width: '100%',
                   display: 'flex',
                   justifyContent: 'center',
@@ -1629,8 +1629,7 @@ export default function ABTests() {
                           top: 0,
                           left: '50%',
                           transform: `translate(${translateX}, ${translateY}px)`,
-                          minWidth: '280px',
-                          width: '280px',
+                          minWidth: '320px',
                           backgroundColor: figmaColors.gray,
                           border: `1px solid ${figmaColors.primaryBlue}`,
                           borderRadius: '24px',
