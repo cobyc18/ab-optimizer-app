@@ -135,6 +135,7 @@ export default function ABTests() {
   const [wizardScreenshotLoading, setWizardScreenshotLoading] = useState(false);
   const [wizardStorePassword, setWizardStorePassword] = useState('');
   const [storePassword, setStorePassword] = useState('');
+  const [isDevelopmentStore, setIsDevelopmentStore] = useState(false);
   
   // Exit modal state
   const [showExitModal, setShowExitModal] = useState(false);
@@ -1942,7 +1943,7 @@ export default function ABTests() {
               color: '#6B7280',
               marginBottom: '24px'
             }}>
-              Select a product and enter your store password
+              Select a product to test
             </p>
 
             <div style={{
@@ -1957,7 +1958,7 @@ export default function ABTests() {
                 gap: '16px'
               }}>
                 <div style={{
-                  maxHeight: '450px',
+                  maxHeight: '600px',
                   overflowY: 'auto',
                   padding: '10px',
                   border: '1px solid #E5E7EB',
@@ -1973,10 +1974,10 @@ export default function ABTests() {
                         background: selectedProduct?.id === product.id ? '#F0F9FF' : '#FFFFFF',
                         border: selectedProduct?.id === product.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
                         borderRadius: '12px',
-                        padding: '16px',
+                        padding: '12px',
                         cursor: 'pointer',
                         transition: 'all 0.2s ease',
-                        marginBottom: '12px',
+                        marginBottom: '8px',
                         transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)'
                       }}
                     >
@@ -1990,28 +1991,35 @@ export default function ABTests() {
                             src={product.featuredImage.url}
                             alt={product.title}
                             style={{
-                              width: '60px',
-                              height: '60px',
+                              width: '50px',
+                              height: '50px',
                               objectFit: 'cover',
-                              borderRadius: '8px'
+                              borderRadius: '8px',
+                              flexShrink: 0
                             }}
                           />
                         )}
-                        <div style={{ flex: 1 }}>
+                        <div style={{ flex: 1, minWidth: 0 }}>
                           <h4 style={{
-                            fontSize: '16px',
+                            fontSize: '14px',
                             fontWeight: '600',
                             color: '#1F2937',
-                            margin: '0 0 4px 0'
+                            margin: '0 0 4px 0',
+                            overflow: 'hidden',
+                            textOverflow: 'ellipsis',
+                            whiteSpace: 'nowrap'
                           }}>
                             {product.title}
                           </h4>
                           {product.templateSuffix && (
                             <p style={{
-                              fontSize: '12px',
+                              fontSize: '11px',
                               color: '#10B981',
-                              margin: '4px 0 0 0',
-                              fontWeight: '500'
+                              margin: '2px 0 0 0',
+                              fontWeight: '500',
+                              overflow: 'hidden',
+                              textOverflow: 'ellipsis',
+                              whiteSpace: 'nowrap'
                             }}>
                               Template: product.{product.templateSuffix}.liquid
                             </p>
@@ -2034,35 +2042,94 @@ export default function ABTests() {
                   borderRadius: '12px',
                   border: '1px solid #E5E7EB'
                 }}>
-                  <h4 style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    margin: '0 0 8px 0'
+                  {/* Toggle Switch */}
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    marginBottom: isDevelopmentStore ? '16px' : '0'
                   }}>
-                    Store Password
-                  </h4>
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#6B7280',
-                    margin: '0 0 16px 0'
-                  }}>
-                    Enter your store password
-                  </p>
-                  <input
-                    type="password"
-                    value={wizardStorePassword}
-                    onChange={(e) => setWizardStorePassword(e.target.value)}
-                    placeholder="Enter store password..."
-                    style={{
-                      width: '100%',
-                      padding: '12px 16px',
-                      border: '1px solid #D1D5DB',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      background: '#FFFFFF'
-                    }}
-                  />
+                    <h4 style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      margin: 0
+                    }}>
+                      {isDevelopmentStore ? 'Store Password' : 'Development Store'}
+                    </h4>
+                    <label style={{
+                      position: 'relative',
+                      display: 'inline-block',
+                      width: '48px',
+                      height: '24px'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={isDevelopmentStore}
+                        onChange={(e) => setIsDevelopmentStore(e.target.checked)}
+                        style={{
+                          opacity: 0,
+                          width: 0,
+                          height: 0
+                        }}
+                      />
+                      <span style={{
+                        position: 'absolute',
+                        cursor: 'pointer',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: isDevelopmentStore ? '#3B82F6' : '#D1D5DB',
+                        borderRadius: '24px',
+                        transition: '0.3s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '2px'
+                      }}>
+                        <span style={{
+                          content: '""',
+                          position: 'absolute',
+                          height: '20px',
+                          width: '20px',
+                          left: isDevelopmentStore ? '26px' : '2px',
+                          backgroundColor: '#FFFFFF',
+                          borderRadius: '50%',
+                          transition: '0.3s',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                        }} />
+                      </span>
+                    </label>
+                  </div>
+                  
+                  {/* Password Input - Only shown when toggle is on */}
+                  {isDevelopmentStore && (
+                    <div style={{
+                      marginTop: '16px'
+                    }}>
+                      <p style={{
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        margin: '0 0 12px 0'
+                      }}>
+                        Please enter your development store's password
+                      </p>
+                      <input
+                        type="password"
+                        value={wizardStorePassword}
+                        onChange={(e) => setWizardStorePassword(e.target.value)}
+                        placeholder="Enter store password..."
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          border: '1px solid #D1D5DB',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          background: '#FFFFFF'
+                        }}
+                      />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
