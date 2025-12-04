@@ -271,6 +271,26 @@ export default function AppLayout() {
         {/* Collapse/Expand Toggle Button */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
+          onMouseEnter={(e) => {
+            const icon = e.currentTarget.querySelector('.toggle-icon') as HTMLElement;
+            if (icon) {
+              icon.style.opacity = '0';
+            }
+            const arrow = e.currentTarget.querySelector('.toggle-arrow') as HTMLElement;
+            if (arrow) {
+              arrow.style.opacity = '1';
+            }
+          }}
+          onMouseLeave={(e) => {
+            const icon = e.currentTarget.querySelector('.toggle-icon') as HTMLElement;
+            if (icon) {
+              icon.style.opacity = '1';
+            }
+            const arrow = e.currentTarget.querySelector('.toggle-arrow') as HTMLElement;
+            if (arrow) {
+              arrow.style.opacity = '0';
+            }
+          }}
           style={{
             position: 'absolute',
             top: isCollapsed ? '20px' : '67.39px',
@@ -290,10 +310,52 @@ export default function AppLayout() {
           }}
           title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
         >
+          {/* Hamburger Menu Icon */}
+          <div 
+            className="toggle-icon"
+            style={{ 
+              position: 'absolute',
+              width: '20px',
+              height: '16px',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: 'opacity 0.3s ease',
+              opacity: 1
+            }}
+          >
+            <div style={{
+              width: '100%',
+              height: '3px',
+              backgroundColor: '#151515',
+              borderRadius: '2px'
+            }} />
+            <div style={{
+              width: '100%',
+              height: '3px',
+              backgroundColor: '#151515',
+              borderRadius: '2px'
+            }} />
+            <div style={{
+              width: '100%',
+              height: '3px',
+              backgroundColor: '#151515',
+              borderRadius: '2px'
+            }} />
+          </div>
+          
+          {/* Arrow Icon (shown on hover) */}
           <img 
+            className="toggle-arrow"
             src={isCollapsed ? imgChevronRight : imgChevronLeft} 
             alt={isCollapsed ? 'Expand' : 'Collapse'} 
-            style={{ width: '20px', height: '20px' }} 
+            style={{ 
+              width: '20px', 
+              height: '20px',
+              position: 'absolute',
+              transition: 'opacity 0.3s ease',
+              opacity: 0
+            }} 
           />
         </button>
       </div>

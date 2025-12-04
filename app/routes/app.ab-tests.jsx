@@ -1067,6 +1067,7 @@ export default function ABTests() {
             {[1, 2, 3, 4, 5].map((step) => {
               const isActive = currentStep + 1 === step;
               const isCompleted = currentStep + 1 > step;
+              const stepIndex = step - 1; // Convert to 0-indexed
               
               return (
                 <React.Fragment key={step}>
@@ -1075,16 +1076,36 @@ export default function ABTests() {
                     alignItems: 'center',
                     gap: '8px'
                   }}>
-                    <div style={{
-                      width: '40px',
-                      height: '40px',
-                      borderRadius: '50%',
-                      background: isActive ? '#3B82F6' : '#374151',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      position: 'relative'
-                    }}>
+                    <button
+                      onClick={() => setCurrentStep(stepIndex)}
+                      style={{
+                        width: '40px',
+                        height: '40px',
+                        borderRadius: '50%',
+                        background: isActive ? '#3B82F6' : '#374151',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        position: 'relative',
+                        border: 'none',
+                        cursor: 'pointer',
+                        padding: 0,
+                        transition: 'all 0.2s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.transform = 'scale(1.1)';
+                          e.currentTarget.style.background = isCompleted ? '#3B82F6' : '#4B5563';
+                        }
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) {
+                          e.currentTarget.style.transform = 'scale(1)';
+                          e.currentTarget.style.background = '#374151';
+                        }
+                      }}
+                      title={`Go to step ${step}`}
+                    >
                       {isActive ? (
                         <div style={{
                           width: '12px',
@@ -1101,7 +1122,7 @@ export default function ABTests() {
                           {step}
                         </span>
                       )}
-                    </div>
+                    </button>
                   </div>
                   {step < 5 && (
                     <div style={{
@@ -1762,7 +1783,7 @@ export default function ABTests() {
                   gap: '8px',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '2px',
+                  marginTop: '-10px',
                   paddingTop: '0px',
                   paddingBottom: '0px'
                 }}>
