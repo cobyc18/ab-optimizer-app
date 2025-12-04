@@ -1557,15 +1557,15 @@ export default function ABTests() {
 
                 <div style={{
                   position: 'relative',
-                  width: '280px',
+                  minWidth: '280px',
                   margin: '0 auto',
                   flex: '0 0 auto',
                   boxSizing: 'border-box',
-                  overflow: 'hidden',
+                  overflow: 'visible',
                   minHeight: '600px',
                   padding: '32px 0 120px 0'
                 }}>
-                  {/* Render stacked cards - all cards exactly behind each other */}
+                  {/* Render stacked cards - show cards behind */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
                     if (!widget) return null;
 
@@ -1582,12 +1582,12 @@ export default function ABTests() {
                       dragOffsetY = dragCurrent.y - dragStart.y;
                     }
                     
-                    // No stacking offsets - all cards in exact same position
-                    const translateX = isCurrent ? dragOffsetX : 0;
-                    const translateY = isCurrent ? dragOffsetY : 0;
+                    // Slight offset for cards behind to make them visible
+                    const translateX = isCurrent ? dragOffsetX : (stackIndex * 2);
+                    const translateY = isCurrent ? dragOffsetY : (stackIndex * 2);
                     
-                    // Opacity: 100% for current, lower for others
-                    const opacity = isCurrent ? 1 : 0.3;
+                    // Opacity: 100% for current, visible for others
+                    const opacity = isCurrent ? 1 : 0.6;
 
                     return (
                       <div
@@ -1598,7 +1598,7 @@ export default function ABTests() {
                           position: 'absolute',
                           top: 0,
                           left: 0,
-                          width: '280px',
+                          minWidth: '280px',
                           backgroundColor: figmaColors.gray,
                           border: `1px solid ${figmaColors.primaryBlue}`,
                           borderRadius: '24px',
@@ -1613,7 +1613,7 @@ export default function ABTests() {
                           transition: isCurrent && !isDragging
                             ? 'all 0.3s ease' 
                             : !isCurrent 
-                              ? `opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1)`
+                              ? `opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1), transform 0.4s cubic-bezier(0.4, 0, 0.2, 1)`
                               : 'none',
                           display: 'flex',
                           flexDirection: 'column',
@@ -1637,17 +1637,13 @@ export default function ABTests() {
                               height: '200px', 
                               borderRadius: '10px', 
                               overflow: 'hidden',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              padding: '20px',
                               boxSizing: 'border-box'
                             }}>
                               {widget.utility === 'Free Shipping Badge' ? (
                                 <div style={{
                                   background: '#F3F4F6',
                                   border: '1px solid #E5E7EB',
-                                  padding: '16px',
+                                  padding: '20px',
                                   borderRadius: '8px',
                                   fontSize: '16px',
                                   color: '#1E3A8A',
@@ -1660,8 +1656,7 @@ export default function ABTests() {
                                   boxSizing: 'border-box',
                                   width: '100%',
                                   height: '100%',
-                                  maxWidth: '100%',
-                                  maxHeight: '100%'
+                                  minHeight: '200px'
                                 }}>
                                   <div style={{
                                     width: '28px',
@@ -1686,7 +1681,7 @@ export default function ABTests() {
                                 <div style={{
                                   background: '#F8FAFC',
                                   border: '1px solid #E5E7EB',
-                                  padding: '16px',
+                                  padding: '20px',
                                   borderRadius: '12px',
                                   fontSize: '18px',
                                   color: '#6B7280',
@@ -1700,8 +1695,7 @@ export default function ABTests() {
                                   display: 'flex',
                                   alignItems: 'center',
                                   justifyContent: 'center',
-                                  maxWidth: '100%',
-                                  maxHeight: '100%'
+                                  minHeight: '200px'
                                 }}>
                                   "{widget.preview}"
                                 </div>
@@ -1709,7 +1703,7 @@ export default function ABTests() {
                                 <div style={{
                                   background: '#F3F4F6',
                                   border: '1px solid #E5E7EB',
-                                  padding: '16px',
+                                  padding: '20px',
                                   borderRadius: '8px',
                                   fontSize: '16px',
                                   color: '#9F1239',
@@ -1722,16 +1716,16 @@ export default function ABTests() {
                                   boxSizing: 'border-box',
                                   width: '100%',
                                   height: '100%',
-                                  maxWidth: '100%',
-                                  maxHeight: '100%'
+                                  minHeight: '200px'
                                 }}>
                                   <div style={{
-                                    width: '28px',
-                                    height: '28px',
+                                    display: 'flex',
+                                    gap: '4px',
                                     flexShrink: 0,
-                                    fontSize: '24px'
+                                    fontSize: '24px',
+                                    color: '#FCD34D'
                                   }}>
-                                    ⚡
+                                    ⚡⚡
                                   </div>
                                   <span style={{ 
                                     wordWrap: 'break-word', 
@@ -1739,7 +1733,7 @@ export default function ABTests() {
                                     flex: 1,
                                     minWidth: 0
                                   }}>
-                                    {widget.preview}
+                                    {widget.preview.replace('⚡ ', '')}
                                   </span>
                                 </div>
                               ) : null}
