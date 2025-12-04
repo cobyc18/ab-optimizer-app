@@ -129,6 +129,9 @@ export default function ABTests() {
   const [wizardStorePassword, setWizardStorePassword] = useState('');
   const [storePassword, setStorePassword] = useState('');
   
+  // Exit modal state
+  const [showExitModal, setShowExitModal] = useState(false);
+  
   // Wizard variant state
   const [wizardVariantName, setWizardVariantName] = useState('');
   const [wizardVariantProductId, setWizardVariantProductId] = useState(null);
@@ -1050,7 +1053,8 @@ export default function ABTests() {
         <div style={{
           background: '#e6e6e6',
           padding: '24px 32px',
-          marginBottom: '32px'
+          marginBottom: '32px',
+          position: 'relative'
         }}>
           <div style={{
             display: 'flex',
@@ -1111,15 +1115,134 @@ export default function ABTests() {
               );
             })}
           </div>
+        <div style={{
+          fontSize: '14px',
+          color: '#374151',
+          textAlign: 'center',
+          marginTop: '16px'
+        }}>
+          Step {currentStep + 1} of 5
+        </div>
+        
+        {/* Exit Button */}
+        <button
+          onClick={() => setShowExitModal(true)}
+          style={{
+            position: 'absolute',
+            top: '24px',
+            right: '32px',
+            background: 'transparent',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '8px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center'
+          }}
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M18 6L6 18M6 6l12 12" stroke="#374151" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </button>
+      </div>
+      
+      {/* Exit Modal */}
+      {showExitModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}
+        onClick={() => setShowExitModal(false)}
+        >
           <div style={{
-            fontSize: '14px',
-            color: '#374151',
-            textAlign: 'center',
-            marginTop: '16px'
-          }}>
-            Step {currentStep + 1} of 5
+            backgroundColor: '#FFFFFF',
+            borderRadius: '12px',
+            padding: '32px',
+            maxWidth: '400px',
+            width: '90%',
+            boxShadow: '0 10px 40px rgba(0, 0, 0, 0.2)'
+          }}
+          onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{
+              fontSize: '20px',
+              fontWeight: '700',
+              color: '#000000',
+              margin: '0 0 16px 0'
+            }}>
+              Are you absolutely sure?
+            </h3>
+            <p style={{
+              fontSize: '14px',
+              color: '#6B7280',
+              margin: '0 0 24px 0',
+              lineHeight: '1.5'
+            }}>
+              This action cannot be undone. This will permanently delete your account and remove your data from our servers.
+            </p>
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end'
+            }}>
+              <button
+                onClick={() => setShowExitModal(false)}
+                style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #D1D5DB',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#374151',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#F9FAFB';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#FFFFFF';
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => {
+                  navigate('/app');
+                }}
+                style={{
+                  background: '#ef9362',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '10px 20px',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#FFFFFF',
+                  transition: 'all 0.2s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#e67e52';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ef9362';
+                }}
+              >
+                Exit
+              </button>
+            </div>
           </div>
         </div>
+      )}
 
         {/* Step 0: Pick an Idea - Goal Selection */}
         {currentStep === 0 && (
@@ -1272,8 +1395,9 @@ export default function ABTests() {
                         margin: 0,
                         fontSize: '18px',
                         fontWeight: '600',
-                        color: '#1F2937',
-                        marginBottom: '6px'
+                        color: selectedGoal && !isSelected ? '#FFFFFF' : '#1F2937',
+                        marginBottom: '6px',
+                        transition: 'color 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}>
                         {goal}
                       </p>
@@ -1281,7 +1405,7 @@ export default function ABTests() {
                         margin: 0,
                         fontSize: '15px',
                         fontWeight: '400',
-                        color: selectedGoal && !isSelected ? 'rgba(107, 114, 128, 0.6)' : '#6B7280',
+                        color: selectedGoal && !isSelected ? '#FFFFFF' : '#6B7280',
                         lineHeight: '1.4',
                         transition: 'color 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
                       }}>
