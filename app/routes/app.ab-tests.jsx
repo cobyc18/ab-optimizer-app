@@ -2144,27 +2144,43 @@ export default function ABTests() {
               paddingRight: '10px'
             }}>
               <button
-                onClick={() => {
+                onClick={async () => {
                   if (selectedProduct && (!isDevelopmentStore || wizardStorePassword.trim())) {
-                    setCurrentStep(2);
+                    // Trigger template duplication when moving to step 2
+                    const result = await createVariantTemplate();
+                    if (result?.success) {
+                      setCurrentStep(2);
+                    } else {
+                      if (result?.error && result.error !== 'request_in_flight') {
+                        const errorCopy = typeof result.error === 'string' ? result.error : '';
+                        const friendlyErrorMap = {
+                          no_product_selected: 'Please select a product before continuing.',
+                          request_in_flight: 'We are still working on the previous request.',
+                          variant_template_creation_failed: 'Shopify did not allow us to duplicate the template. Please try again in a few seconds.',
+                          no_product_selected_for_variant_template: 'Please select a product before continuing.'
+                        };
+                        const friendlyMessage = friendlyErrorMap[errorCopy] || errorCopy || 'Please try again in a few seconds.';
+                        alert(`We couldn't duplicate the template yet. ${friendlyMessage}`);
+                      }
+                    }
                   }
                 }}
-                disabled={!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim())}
+                disabled={!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim()) || isVariantRequestInFlight}
                 style={{
                   padding: '12px 32px',
                   fontSize: '16px',
                   fontWeight: '600',
                   color: '#FFFFFF',
-                  background: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim())) 
+                  background: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim()) || isVariantRequestInFlight) 
                     ? '#D1D5DB' 
                     : '#3B82F6',
                   border: 'none',
                   borderRadius: '8px',
-                  cursor: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim())) 
+                  cursor: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim()) || isVariantRequestInFlight) 
                     ? 'not-allowed' 
                     : 'pointer',
                   transition: 'all 0.2s ease',
-                  opacity: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim())) 
+                  opacity: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim()) || isVariantRequestInFlight) 
                     ? 0.6 
                     : 1
                 }}
@@ -2179,7 +2195,7 @@ export default function ABTests() {
                   }
                 }}
               >
-                Next
+                {isVariantRequestInFlight ? 'Duplicating Template...' : 'Next'}
               </button>
             </div>
           </div>
