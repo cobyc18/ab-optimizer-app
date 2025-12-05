@@ -3002,7 +3002,7 @@ export default function ABTests() {
             opacity: 1
           }}>
             <h3 style={{
-              fontSize: '24px',
+              fontSize: '36px',
               fontWeight: '700',
               color: '#1F2937',
               marginBottom: '32px'
@@ -3022,7 +3022,7 @@ export default function ABTests() {
               {/* Test Summary Section */}
               <div style={{ marginBottom: '40px', paddingBottom: '32px', borderBottom: '1px solid #E5E7EB' }}>
                 <h4 style={{
-                  fontSize: '16px',
+                  fontSize: '32px',
                   fontWeight: '600',
                   color: '#3B82F6',
                   marginBottom: '16px'
@@ -3255,7 +3255,7 @@ export default function ABTests() {
               {/* Variants Section */}
               <div style={{ marginBottom: '40px', paddingBottom: '32px', borderBottom: '1px solid #E5E7EB' }}>
                 <h4 style={{
-                  fontSize: '16px',
+                  fontSize: '32px',
                   fontWeight: '600',
                   color: '#3B82F6',
                   marginBottom: '16px'
