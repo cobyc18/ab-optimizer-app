@@ -3031,28 +3031,28 @@ export default function ABTests() {
                 </h4>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: '16px'
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '20px'
                 }}>
                   {/* Product Name Card */}
                   <div style={{
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
-                    padding: '16px',
+                    padding: '28px',
                     borderTop: '3px solid #e6e6e6'
                   }}>
                     <label style={{
                       display: 'block',
-                      fontSize: '12px',
+                      fontSize: '14px',
                       fontWeight: '500',
                       color: '#6B7280',
-                      marginBottom: '8px'
+                      marginBottom: '12px'
                     }}>
                       Product Name
                     </label>
                     <p style={{
-                      fontSize: '14px',
+                      fontSize: '16px',
                       fontWeight: '600',
                       color: '#1F2937',
                       margin: 0
@@ -3066,20 +3066,20 @@ export default function ABTests() {
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
-                    padding: '16px',
+                    padding: '28px',
                     borderTop: '3px solid #e6e6e6'
                   }}>
                     <label style={{
                       display: 'block',
-                      fontSize: '12px',
+                      fontSize: '14px',
                       fontWeight: '500',
                       color: '#6B7280',
-                      marginBottom: '8px'
+                      marginBottom: '12px'
                     }}>
                       Widget Name
                     </label>
                     <p style={{
-                      fontSize: '14px',
+                      fontSize: '16px',
                       fontWeight: '600',
                       color: '#1F2937',
                       margin: 0
@@ -3093,15 +3093,15 @@ export default function ABTests() {
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
-                    padding: '16px',
+                    padding: '28px',
                     borderTop: '3px solid #ef9362'
                   }}>
                     <label style={{
                       display: 'block',
-                      fontSize: '12px',
+                      fontSize: '14px',
                       fontWeight: '500',
                       color: '#6B7280',
-                      marginBottom: '8px'
+                      marginBottom: '12px'
                     }}>
                       Test Name
                     </label>
@@ -3119,10 +3119,10 @@ export default function ABTests() {
                         autoFocus
                         style={{
                           width: '100%',
-                          padding: '4px 8px',
+                          padding: '6px 12px',
                           border: '1px solid #3B82F6',
                           borderRadius: '4px',
-                          fontSize: '14px',
+                          fontSize: '16px',
                           fontWeight: '600',
                           color: '#1F2937',
                           outline: 'none'
@@ -3132,7 +3132,7 @@ export default function ABTests() {
                       <p
                         onClick={() => setIsEditingTestName(true)}
                         style={{
-                          fontSize: '14px',
+                          fontSize: '16px',
                           fontWeight: '600',
                           color: '#1F2937',
                           margin: 0,
@@ -3149,20 +3149,20 @@ export default function ABTests() {
                     background: manualMode ? '#E0F2FE' : '#F9FAFB',
                     border: manualMode ? '1px solid #3B82F6' : '1px solid #E5E7EB',
                     borderRadius: '8px',
-                    padding: '16px',
+                    padding: '28px',
                     transition: 'all 0.2s ease'
                   }}>
                     <label style={{
                       display: 'block',
-                      fontSize: '12px',
+                      fontSize: '14px',
                       fontWeight: '500',
                       color: '#6B7280',
-                      marginBottom: '8px'
+                      marginBottom: '12px'
                     }}>
                       Traffic Split
                     </label>
                     {manualMode ? (
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
                         <input
                           type="number"
                           min="0"
@@ -3174,18 +3174,18 @@ export default function ABTests() {
                             setTrafficSplitB(100 - Math.min(100, Math.max(0, val)));
                           }}
                           style={{
-                            width: '60px',
-                            padding: '4px 8px',
+                            width: '80px',
+                            padding: '8px 12px',
                             border: '1px solid #3B82F6',
-                            borderRadius: '4px',
-                            fontSize: '14px',
+                            borderRadius: '6px',
+                            fontSize: '16px',
                             fontWeight: '600',
                             color: '#1F2937',
                             outline: 'none',
                             background: '#FFFFFF'
                           }}
                         />
-                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#3B82F6' }}>-</span>
+                        <span style={{ fontSize: '16px', fontWeight: '600', color: '#3B82F6' }}>-</span>
                         <input
                           type="number"
                           min="0"
@@ -3197,11 +3197,11 @@ export default function ABTests() {
                             setTrafficSplitA(100 - Math.min(100, Math.max(0, val)));
                           }}
                           style={{
-                            width: '60px',
-                            padding: '4px 8px',
+                            width: '80px',
+                            padding: '8px 12px',
                             border: '1px solid #3B82F6',
-                            borderRadius: '4px',
-                            fontSize: '14px',
+                            borderRadius: '6px',
+                            fontSize: '16px',
                             fontWeight: '600',
                             color: '#1F2937',
                             outline: 'none',
@@ -3211,7 +3211,7 @@ export default function ABTests() {
                       </div>
                     ) : (
                       <p style={{
-                        fontSize: '14px',
+                        fontSize: '16px',
                         fontWeight: '600',
                         color: '#1F2937',
                         margin: 0
@@ -3236,18 +3236,18 @@ export default function ABTests() {
                 <div style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(2, 1fr)',
-                  gap: '16px'
+                  gap: '20px'
                 }}>
                   {/* Control Card */}
                   <div style={{
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
-                    padding: '20px',
+                    padding: '28px',
                     borderLeft: '4px solid #e6e6e6'
                   }}>
                     <h5 style={{
-                      fontSize: '14px',
+                      fontSize: '16px',
                       fontWeight: '600',
                       color: '#374151',
                       margin: '0 0 12px 0'
@@ -3255,7 +3255,7 @@ export default function ABTests() {
                       Control
                     </h5>
                     <p style={{
-                      fontSize: '12px',
+                      fontSize: '14px',
                       color: '#6B7280',
                       margin: 0,
                       lineHeight: '1.5'
@@ -3269,11 +3269,11 @@ export default function ABTests() {
                     background: '#E0F2FE',
                     border: '1px solid #3B82F6',
                     borderRadius: '8px',
-                    padding: '20px',
+                    padding: '28px',
                     borderLeft: '4px solid #3B82F6'
                   }}>
                     <h5 style={{
-                      fontSize: '14px',
+                      fontSize: '16px',
                       fontWeight: '600',
                       color: '#3B82F6',
                       margin: '0 0 12px 0'
@@ -3281,7 +3281,7 @@ export default function ABTests() {
                       Variant
                     </h5>
                     <p style={{
-                      fontSize: '12px',
+                      fontSize: '14px',
                       color: '#1E40AF',
                       margin: 0,
                       lineHeight: '1.5'
