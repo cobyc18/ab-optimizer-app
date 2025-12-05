@@ -136,6 +136,7 @@ export default function ABTests() {
   const [wizardStorePassword, setWizardStorePassword] = useState('');
   const [storePassword, setStorePassword] = useState('');
   const [isDevelopmentStore, setIsDevelopmentStore] = useState(false);
+  const [productSearchQuery, setProductSearchQuery] = useState('');
   
   // Exit modal state
   const [showExitModal, setShowExitModal] = useState(false);
@@ -1931,119 +1932,178 @@ export default function ABTests() {
             opacity: 1
           }}>
             <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
+              fontSize: '24px',
+              fontWeight: '700',
               color: '#1F2937',
               marginBottom: '8px'
             }}>
-              Choose Product to Test
+              Select a product to test
             </h3>
             <p style={{
               fontSize: '14px',
               color: '#6B7280',
               marginBottom: '24px'
             }}>
-              Select a product to test
+              Choose a high-traffic product page from your store.
             </p>
 
+            {/* Search Bar */}
             <div style={{
-              display: 'grid',
-              gridTemplateColumns: '1fr 1fr',
-              gap: '24px',
-              minHeight: '500px',
-              position: 'relative'
+              position: 'relative',
+              marginBottom: '24px'
             }}>
               <div style={{
+                position: 'absolute',
+                left: '16px',
+                top: '50%',
+                transform: 'translateY(-50%)',
                 display: 'flex',
-                flexDirection: 'column',
-                gap: '16px'
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: '20px',
+                height: '20px'
               }}>
-                <div style={{
-                  maxHeight: '600px',
-                  overflowY: 'auto',
-                  padding: '10px',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '12px'
-                }}>
-                  {products.map((product) => (
-                    <div
-                      key={product.id}
-                      onClick={() => {
-                        handleProductSelection(product);
-                      }}
-                      style={{
-                        background: selectedProduct?.id === product.id ? '#F0F9FF' : '#FFFFFF',
-                        border: selectedProduct?.id === product.id ? '2px solid #3B82F6' : '1px solid #E5E5E5',
-                        borderRadius: '12px',
-                        padding: '12px',
-                        cursor: 'pointer',
-                        transition: 'all 0.2s ease',
-                        marginBottom: '8px',
-                        transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)'
-                      }}
-                    >
-                      <div style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '12px'
-                      }}>
-                        {product.featuredImage && (
-                          <img
-                            src={product.featuredImage.url}
-                            alt={product.title}
-                            style={{
-                              width: '50px',
-                              height: '50px',
-                              objectFit: 'cover',
-                              borderRadius: '8px',
-                              flexShrink: 0
-                            }}
-                          />
-                        )}
-                        <div style={{ flex: 1, minWidth: 0 }}>
-                          <h4 style={{
-                            fontSize: '14px',
-                            fontWeight: '600',
-                            color: '#1F2937',
-                            margin: '0 0 4px 0',
-                            overflow: 'hidden',
-                            textOverflow: 'ellipsis',
-                            whiteSpace: 'nowrap'
-                          }}>
-                            {product.title}
-                          </h4>
-                          {product.templateSuffix && (
-                            <p style={{
-                              fontSize: '11px',
-                              color: '#10B981',
-                              margin: '2px 0 0 0',
-                              fontWeight: '500',
-                              overflow: 'hidden',
-                              textOverflow: 'ellipsis',
-                              whiteSpace: 'nowrap'
-                            }}>
-                              Template: product.{product.templateSuffix}.liquid
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <circle cx="11" cy="11" r="8"/>
+                  <path d="m21 21-4.35-4.35"/>
+                </svg>
               </div>
-
-              <div style={{
-                display: 'flex',
-                flexDirection: 'column',
-                gap: '20px'
-              }}>
-                <div style={{
-                  padding: '20px',
-                  background: '#F8FAFC',
-                  borderRadius: '12px',
+              <input
+                type="text"
+                value={productSearchQuery}
+                onChange={(e) => setProductSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                style={{
+                  width: '100%',
+                  padding: '12px 16px 12px 48px',
                   border: '1px solid #E5E7EB',
-                  marginTop: '-10px'
-                }}>
+                  borderRadius: '12px',
+                  fontSize: '14px',
+                  background: '#FFFFFF',
+                  outline: 'none',
+                  transition: 'border-color 0.2s ease',
+                  boxSizing: 'border-box'
+                }}
+                onFocus={(e) => {
+                  e.target.style.borderColor = '#3B82F6';
+                }}
+                onBlur={(e) => {
+                  e.target.style.borderColor = '#E5E7EB';
+                }}
+              />
+            </div>
+
+            {/* Filtered Products Grid */}
+            <div style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(4, 1fr)',
+              gap: '20px',
+              marginBottom: '32px'
+            }}>
+              {products
+                .filter(product => 
+                  product.title.toLowerCase().includes(productSearchQuery.toLowerCase())
+                )
+                .map((product) => (
+                  <div
+                    key={product.id}
+                    onClick={() => {
+                      handleProductSelection(product);
+                    }}
+                    style={{
+                      background: '#FFFFFF',
+                      border: selectedProduct?.id === product.id ? '2px solid #3B82F6' : '1px solid #E5E7EB',
+                      borderRadius: '12px',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                      overflow: 'hidden',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      boxShadow: selectedProduct?.id === product.id ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 1px 3px rgba(0, 0, 0, 0.1)',
+                      transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)'
+                    }}
+                    onMouseEnter={(e) => {
+                      if (selectedProduct?.id !== product.id) {
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.15)';
+                        e.currentTarget.style.transform = 'translateY(-2px)';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (selectedProduct?.id !== product.id) {
+                        e.currentTarget.style.boxShadow = '0 1px 3px rgba(0, 0, 0, 0.1)';
+                        e.currentTarget.style.transform = 'scale(1)';
+                      }
+                    }}
+                  >
+                    {/* Product Image */}
+                    <div style={{
+                      width: '100%',
+                      aspectRatio: '1',
+                      background: '#F3F4F6',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      overflow: 'hidden',
+                      position: 'relative'
+                    }}>
+                      {product.featuredImage ? (
+                        <img
+                          src={product.featuredImage.url}
+                          alt={product.title}
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                      ) : (
+                        <div style={{
+                          width: '100%',
+                          height: '100%',
+                          background: '#E5E7EB',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#9CA3AF',
+                          fontSize: '14px'
+                        }}>
+                          No Image
+                        </div>
+                      )}
+                    </div>
+                    
+                    {/* Product Title */}
+                    <div style={{
+                      padding: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px'
+                    }}>
+                      <h4 style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        margin: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        lineHeight: '1.4'
+                      }}>
+                        {product.title}
+                      </h4>
+                    </div>
+                  </div>
+                ))}
+            </div>
+
+            {/* Development Store Toggle - Moved below products */}
+            <div style={{
+              padding: '20px',
+              background: '#F8FAFC',
+              borderRadius: '12px',
+              border: '1px solid #E5E7EB',
+              marginBottom: '24px'
+            }}>
                   {/* Toggle Switch */}
                   <div style={{
                     display: 'flex',
@@ -2133,8 +2193,6 @@ export default function ABTests() {
                     </div>
                   )}
                 </div>
-              </div>
-            </div>
             
             {/* Next Button */}
             <div style={{
