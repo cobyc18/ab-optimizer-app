@@ -174,6 +174,8 @@ export default function ABTests() {
   const [requireMinimumDays, setRequireMinimumDays] = useState(7);
   const [autoPushWinner, setAutoPushWinner] = useState(false);
   const [goalMetric, setGoalMetric] = useState('Add to Cart');
+  const [endOnImpressionsEnabled, setEndOnImpressionsEnabled] = useState(false);
+  const [impressionsThreshold, setImpressionsThreshold] = useState('');
   
   // Widget settings state (for simple-text-badge)
   const [widgetSettings, setWidgetSettings] = useState({
@@ -3008,388 +3010,561 @@ export default function ABTests() {
               Review & launch
             </h3>
 
-            {/* Test Summary Section */}
-            <div style={{ marginBottom: '32px' }}>
-              <h4 style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#1F2937',
-                marginBottom: '16px'
-              }}>
-                Test Summary
-              </h4>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(4, 1fr)',
-                gap: '16px'
-              }}>
-                {/* Product Name Card */}
-                <div style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px',
-                  padding: '16px',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-                }}>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    color: '#6B7280',
-                    marginBottom: '8px'
-                  }}>
-                    Product Name
-                  </label>
-                  <p style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    margin: 0
-                  }}>
-                    {wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Not selected'}
-                  </p>
-                </div>
-
-                {/* Widget Name Card */}
-                <div style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px',
-                  padding: '16px',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-                }}>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    color: '#6B7280',
-                    marginBottom: '8px'
-                  }}>
-                    Widget Name
-                  </label>
-                  <p style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    margin: 0
-                  }}>
-                    {selectedIdea?.utility || 'Not selected'}
-                  </p>
-                </div>
-
-                {/* Test Name Card */}
-                <div style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px',
-                  padding: '16px',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-                }}>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    color: '#6B7280',
-                    marginBottom: '8px'
-                  }}>
-                    Test Name
-                  </label>
-                  {isEditingTestName ? (
-                    <input
-                      type="text"
-                      value={wizardTestName}
-                      onChange={(e) => setWizardTestName(e.target.value)}
-                      onBlur={() => setIsEditingTestName(false)}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
-                          setIsEditingTestName(false);
-                        }
-                      }}
-                      autoFocus
-                      style={{
-                        width: '100%',
-                        padding: '4px 8px',
-                        border: '1px solid #3B82F6',
-                        borderRadius: '4px',
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        outline: 'none'
-                      }}
-                    />
-                  ) : (
-                    <p
-                      onClick={() => setIsEditingTestName(true)}
-                      style={{
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#1F2937',
-                        margin: 0,
-                        cursor: 'text'
-                      }}
-                    >
-                      {wizardTestName || `${wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Product'} - ${selectedIdea?.utility || 'Widget'}`}
-                    </p>
-                  )}
-                </div>
-
-                {/* Traffic Split Card */}
-                <div style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px',
-                  padding: '16px',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-                }}>
-                  <label style={{
-                    display: 'block',
-                    fontSize: '12px',
-                    fontWeight: '500',
-                    color: '#6B7280',
-                    marginBottom: '8px'
-                  }}>
-                    Traffic Split
-                  </label>
-                  <p style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    margin: 0
-                  }}>
-                    50 - 50
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* Variants Section */}
-            <div style={{ marginBottom: '32px' }}>
-              <h4 style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#1F2937',
-                marginBottom: '16px'
-              }}>
-                Variants
-              </h4>
-              <div style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '16px'
-              }}>
-                {/* Control Card */}
-                <div style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px',
-                  padding: '20px',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-                }}>
-                  <h5 style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    margin: '0 0 12px 0'
-                  }}>
-                    Control
-                  </h5>
-                  <p style={{
-                    fontSize: '12px',
-                    color: '#6B7280',
-                    margin: 0,
-                    lineHeight: '1.5'
-                  }}>
-                    Product Selected before widget
-                  </p>
-                </div>
-
-                {/* Variant Card */}
-                <div style={{
-                  background: '#FFFFFF',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '8px',
-                  padding: '20px',
-                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
-                }}>
-                  <h5 style={{
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    margin: '0 0 12px 0'
-                  }}>
-                    Variant
-                  </h5>
-                  <p style={{
-                    fontSize: '12px',
-                    color: '#6B7280',
-                    margin: 0,
-                    lineHeight: '1.5'
-                  }}>
-                    Product Selected with widget added
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            {/* AutoPilot Mode and Manual Mode */}
+            {/* Main White Card Container */}
             <div style={{
               background: '#FFFFFF',
               border: '1px solid #E5E7EB',
-              borderRadius: '8px',
-              padding: '24px',
-              marginBottom: '32px',
-              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+              borderRadius: '12px',
+              padding: '40px',
+              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+              marginBottom: '32px'
             }}>
-              {/* Autopilot Mode Toggle */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between',
-                marginBottom: '24px'
-              }}>
-                <div>
-                  <label style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    marginBottom: '4px',
-                    display: 'block'
-                  }}>
-                    Autopilot Mode
-                  </label>
-                  <p style={{
-                    fontSize: '12px',
-                    color: '#6B7280',
-                    margin: 0
-                  }}>
-                    Auto-stop at significance
-                  </p>
-                </div>
-                <label style={{
-                  position: 'relative',
-                  display: 'inline-block',
-                  width: '48px',
-                  height: '24px'
+              {/* Test Summary Section */}
+              <div style={{ marginBottom: '40px', paddingBottom: '32px', borderBottom: '1px solid #E5E7EB' }}>
+                <h4 style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#1F2937',
+                  marginBottom: '16px'
                 }}>
-                  <input
-                    type="checkbox"
-                    checked={autopilotOn}
-                    onChange={(e) => {
-                      const newValue = e.target.checked;
-                      setAutopilotOn(newValue);
-                      if (newValue) {
-                        setManualMode(false);
-                      }
-                    }}
-                    style={{
-                      opacity: 0,
-                      width: 0,
-                      height: 0
-                    }}
-                  />
-                  <span style={{
-                    position: 'absolute',
-                    cursor: 'pointer',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: autopilotOn ? '#3B82F6' : '#D1D5DB',
-                    borderRadius: '24px',
-                    transition: '0.3s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '2px'
+                  Test Summary
+                </h4>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(4, 1fr)',
+                  gap: '16px'
+                }}>
+                  {/* Product Name Card */}
+                  <div style={{
+                    background: '#F9FAFB',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '8px',
+                    padding: '16px'
                   }}>
-                    <span style={{
-                      content: '""',
-                      position: 'absolute',
-                      height: '20px',
-                      width: '20px',
-                      left: autopilotOn ? '26px' : '2px',
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: '50%',
-                      transition: '0.3s',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                    }} />
-                  </span>
-                </label>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#6B7280',
+                      marginBottom: '8px'
+                    }}>
+                      Product Name
+                    </label>
+                    <p style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      margin: 0
+                    }}>
+                      {wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Not selected'}
+                    </p>
+                  </div>
+
+                  {/* Widget Name Card */}
+                  <div style={{
+                    background: '#F9FAFB',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '8px',
+                    padding: '16px'
+                  }}>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#6B7280',
+                      marginBottom: '8px'
+                    }}>
+                      Widget Name
+                    </label>
+                    <p style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      margin: 0
+                    }}>
+                      {selectedIdea?.utility || 'Not selected'}
+                    </p>
+                  </div>
+
+                  {/* Test Name Card */}
+                  <div style={{
+                    background: '#F9FAFB',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '8px',
+                    padding: '16px'
+                  }}>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#6B7280',
+                      marginBottom: '8px'
+                    }}>
+                      Test Name
+                    </label>
+                    {isEditingTestName ? (
+                      <input
+                        type="text"
+                        value={wizardTestName}
+                        onChange={(e) => setWizardTestName(e.target.value)}
+                        onBlur={() => setIsEditingTestName(false)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            setIsEditingTestName(false);
+                          }
+                        }}
+                        autoFocus
+                        style={{
+                          width: '100%',
+                          padding: '4px 8px',
+                          border: '1px solid #3B82F6',
+                          borderRadius: '4px',
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          outline: 'none'
+                        }}
+                      />
+                    ) : (
+                      <p
+                        onClick={() => setIsEditingTestName(true)}
+                        style={{
+                          fontSize: '14px',
+                          fontWeight: '600',
+                          color: '#1F2937',
+                          margin: 0,
+                          cursor: 'text'
+                        }}
+                      >
+                        {wizardTestName || `${wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Product'} - ${selectedIdea?.utility || 'Widget'}`}
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Traffic Split Card */}
+                  <div style={{
+                    background: '#F9FAFB',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '8px',
+                    padding: '16px'
+                  }}>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '12px',
+                      fontWeight: '500',
+                      color: '#6B7280',
+                      marginBottom: '8px'
+                    }}>
+                      Traffic Split
+                    </label>
+                    {manualMode ? (
+                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={trafficSplitA}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value) || 0;
+                            setTrafficSplitA(Math.min(100, Math.max(0, val)));
+                            setTrafficSplitB(100 - Math.min(100, Math.max(0, val)));
+                          }}
+                          style={{
+                            width: '60px',
+                            padding: '4px 8px',
+                            border: '1px solid #D1D5DB',
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#1F2937',
+                            outline: 'none'
+                          }}
+                        />
+                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#1F2937' }}>-</span>
+                        <input
+                          type="number"
+                          min="0"
+                          max="100"
+                          value={trafficSplitB}
+                          onChange={(e) => {
+                            const val = parseInt(e.target.value) || 0;
+                            setTrafficSplitB(Math.min(100, Math.max(0, val)));
+                            setTrafficSplitA(100 - Math.min(100, Math.max(0, val)));
+                          }}
+                          style={{
+                            width: '60px',
+                            padding: '4px 8px',
+                            border: '1px solid #D1D5DB',
+                            borderRadius: '4px',
+                            fontSize: '14px',
+                            fontWeight: '600',
+                            color: '#1F2937',
+                            outline: 'none'
+                          }}
+                        />
+                      </div>
+                    ) : (
+                      <p style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        margin: 0
+                      }}>
+                        {trafficSplitA} - {trafficSplitB}
+                      </p>
+                    )}
+                  </div>
+                </div>
               </div>
 
-              {/* Manual Mode Toggle */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'space-between'
-              }}>
-                <div>
+              {/* Variants Section */}
+              <div style={{ marginBottom: '40px', paddingBottom: '32px', borderBottom: '1px solid #E5E7EB' }}>
+                <h4 style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#1F2937',
+                  marginBottom: '16px'
+                }}>
+                  Variants
+                </h4>
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gap: '16px'
+                }}>
+                  {/* Control Card */}
+                  <div style={{
+                    background: '#F9FAFB',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '8px',
+                    padding: '20px'
+                  }}>
+                    <h5 style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      margin: '0 0 12px 0'
+                    }}>
+                      Control
+                    </h5>
+                    <p style={{
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      margin: 0,
+                      lineHeight: '1.5'
+                    }}>
+                      Product Selected before widget
+                    </p>
+                  </div>
+
+                  {/* Variant Card */}
+                  <div style={{
+                    background: '#F9FAFB',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '8px',
+                    padding: '20px'
+                  }}>
+                    <h5 style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      margin: '0 0 12px 0'
+                    }}>
+                      Variant
+                    </h5>
+                    <p style={{
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      margin: 0,
+                      lineHeight: '1.5'
+                    }}>
+                      Product Selected with widget added
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* AutoPilot Mode and Manual Mode */}
+              <div style={{ marginBottom: manualMode ? '40px' : '0', paddingBottom: manualMode ? '32px' : '0', borderBottom: manualMode ? '1px solid #E5E7EB' : 'none' }}>
+                {/* Autopilot Mode Toggle */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  marginBottom: '24px'
+                }}>
+                  <div>
+                    <label style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '4px',
+                      display: 'block'
+                    }}>
+                      Autopilot Mode
+                    </label>
+                    <p style={{
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      margin: 0
+                    }}>
+                      Auto-stop at significance
+                    </p>
+                  </div>
                   <label style={{
+                    position: 'relative',
+                    display: 'inline-block',
+                    width: '48px',
+                    height: '24px'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={autopilotOn}
+                      onChange={(e) => {
+                        const newValue = e.target.checked;
+                        setAutopilotOn(newValue);
+                        if (newValue) {
+                          setManualMode(false);
+                        }
+                      }}
+                      style={{
+                        opacity: 0,
+                        width: 0,
+                        height: 0
+                      }}
+                    />
+                    <span style={{
+                      position: 'absolute',
+                      cursor: 'pointer',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: autopilotOn ? '#3B82F6' : '#D1D5DB',
+                      borderRadius: '24px',
+                      transition: '0.3s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '2px'
+                    }}>
+                      <span style={{
+                        content: '""',
+                        position: 'absolute',
+                        height: '20px',
+                        width: '20px',
+                        left: autopilotOn ? '26px' : '2px',
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: '50%',
+                        transition: '0.3s',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                      }} />
+                    </span>
+                  </label>
+                </div>
+
+                {/* Manual Mode Toggle */}
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between'
+                }}>
+                  <div>
+                    <label style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '4px',
+                      display: 'block'
+                    }}>
+                      Manual Mode
+                    </label>
+                    <p style={{
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      margin: 0
+                    }}>
+                      Set end conditions manually
+                    </p>
+                  </div>
+                  <label style={{
+                    position: 'relative',
+                    display: 'inline-block',
+                    width: '48px',
+                    height: '24px'
+                  }}>
+                    <input
+                      type="checkbox"
+                      checked={manualMode}
+                      onChange={(e) => {
+                        const newValue = e.target.checked;
+                        setManualMode(newValue);
+                        if (newValue) {
+                          setAutopilotOn(false);
+                        }
+                      }}
+                      style={{
+                        opacity: 0,
+                        width: 0,
+                        height: 0
+                      }}
+                    />
+                    <span style={{
+                      position: 'absolute',
+                      cursor: 'pointer',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
+                      backgroundColor: manualMode ? '#3B82F6' : '#D1D5DB',
+                      borderRadius: '24px',
+                      transition: '0.3s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '2px'
+                    }}>
+                      <span style={{
+                        content: '""',
+                        position: 'absolute',
+                        height: '20px',
+                        width: '20px',
+                        left: manualMode ? '26px' : '2px',
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: '50%',
+                        transition: '0.3s',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                      }} />
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              {/* End Test Section - Only shown when Manual Mode is ON */}
+              {manualMode && (
+                <div style={{ marginBottom: '0' }}>
+                  <h4 style={{
                     fontSize: '16px',
                     fontWeight: '600',
                     color: '#1F2937',
-                    marginBottom: '4px',
-                    display: 'block'
+                    marginBottom: '16px'
                   }}>
-                    Manual Mode
-                  </label>
-                  <p style={{
-                    fontSize: '12px',
-                    color: '#6B7280',
-                    margin: 0
-                  }}>
-                    Set end conditions manually
-                  </p>
-                </div>
-                <label style={{
-                  position: 'relative',
-                  display: 'inline-block',
-                  width: '48px',
-                  height: '24px'
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={manualMode}
-                    onChange={(e) => {
-                      const newValue = e.target.checked;
-                      setManualMode(newValue);
-                      if (newValue) {
-                        setAutopilotOn(false);
-                      }
-                    }}
-                    style={{
-                      opacity: 0,
-                      width: 0,
-                      height: 0
-                    }}
-                  />
-                  <span style={{
-                    position: 'absolute',
-                    cursor: 'pointer',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: manualMode ? '#3B82F6' : '#D1D5DB',
-                    borderRadius: '24px',
-                    transition: '0.3s',
+                    End Test
+                  </h4>
+                  
+                  {/* Impressions Toggle */}
+                  <div style={{
                     display: 'flex',
                     alignItems: 'center',
-                    padding: '2px'
+                    justifyContent: 'space-between',
+                    marginBottom: '16px'
                   }}>
-                    <span style={{
-                      content: '""',
-                      position: 'absolute',
-                      height: '20px',
-                      width: '20px',
-                      left: manualMode ? '26px' : '2px',
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: '50%',
-                      transition: '0.3s',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                    }} />
-                  </span>
-                </label>
-              </div>
+                    <div>
+                      <label style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        marginBottom: '4px',
+                        display: 'block'
+                      }}>
+                        Impressions
+                      </label>
+                      <p style={{
+                        fontSize: '12px',
+                        color: '#6B7280',
+                        margin: 0
+                      }}>
+                        End test when impression count is met for either variant
+                      </p>
+                    </div>
+                    <label style={{
+                      position: 'relative',
+                      display: 'inline-block',
+                      width: '48px',
+                      height: '24px'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={endOnImpressionsEnabled}
+                        onChange={(e) => setEndOnImpressionsEnabled(e.target.checked)}
+                        style={{
+                          opacity: 0,
+                          width: 0,
+                          height: 0
+                        }}
+                      />
+                      <span style={{
+                        position: 'absolute',
+                        cursor: 'pointer',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        backgroundColor: endOnImpressionsEnabled ? '#3B82F6' : '#D1D5DB',
+                        borderRadius: '24px',
+                        transition: '0.3s',
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '2px'
+                      }}>
+                        <span style={{
+                          content: '""',
+                          position: 'absolute',
+                          height: '20px',
+                          width: '20px',
+                          left: endOnImpressionsEnabled ? '26px' : '2px',
+                          backgroundColor: '#FFFFFF',
+                          borderRadius: '50%',
+                          transition: '0.3s',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                        }} />
+                      </span>
+                    </label>
+                  </div>
+
+                  {/* Impressions Input - Only shown when toggle is ON */}
+                  {endOnImpressionsEnabled && (
+                    <div style={{
+                      background: '#F9FAFB',
+                      border: '1px solid #E5E7EB',
+                      borderRadius: '8px',
+                      padding: '16px'
+                    }}>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '12px',
+                        fontWeight: '500',
+                        color: '#6B7280',
+                        marginBottom: '8px'
+                      }}>
+                        Impression Threshold
+                      </label>
+                      <input
+                        type="number"
+                        min="1"
+                        value={impressionsThreshold}
+                        onChange={(e) => setImpressionsThreshold(e.target.value)}
+                        placeholder="Enter number of impressions"
+                        style={{
+                          width: '100%',
+                          maxWidth: '300px',
+                          padding: '8px 12px',
+                          border: '1px solid #D1D5DB',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          color: '#1F2937',
+                          outline: 'none'
+                        }}
+                      />
+                      <p style={{
+                        fontSize: '12px',
+                        color: '#6B7280',
+                        margin: '8px 0 0 0'
+                      }}>
+                        Test will end and declare a winner when either Control or Variant reaches this impression count.
+                      </p>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             {/* Validation Notices */}
