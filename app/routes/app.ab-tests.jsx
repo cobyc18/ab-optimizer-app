@@ -137,6 +137,7 @@ export default function ABTests() {
   const [storePassword, setStorePassword] = useState('');
   const [isDevelopmentStore, setIsDevelopmentStore] = useState(false);
   const [productSearchQuery, setProductSearchQuery] = useState('');
+  const [currentProductPage, setCurrentProductPage] = useState(1);
   
   // Exit modal state
   const [showExitModal, setShowExitModal] = useState(false);
@@ -1950,61 +1951,86 @@ export default function ABTests() {
             {/* Search Bar */}
             <div style={{
               position: 'relative',
-              marginBottom: '24px'
+              marginBottom: '24px',
+              display: 'flex',
+              justifyContent: 'flex-start'
             }}>
               <div style={{
-                position: 'absolute',
-                left: '16px',
-                top: '50%',
-                transform: 'translateY(-50%)',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                width: '20px',
-                height: '20px'
+                position: 'relative',
+                width: '400px',
+                maxWidth: '100%'
               }}>
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <circle cx="11" cy="11" r="8"/>
-                  <path d="m21 21-4.35-4.35"/>
-                </svg>
+                <div style={{
+                  position: 'absolute',
+                  left: '16px',
+                  top: '50%',
+                  transform: 'translateY(-50%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  width: '20px',
+                  height: '20px',
+                  zIndex: 1
+                }}>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9CA3AF" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="11" cy="11" r="8"/>
+                    <path d="m21 21-4.35-4.35"/>
+                  </svg>
+                </div>
+                <input
+                  type="text"
+                  value={productSearchQuery}
+                  onChange={(e) => {
+                    setProductSearchQuery(e.target.value);
+                    setCurrentProductPage(1); // Reset to page 1 when searching
+                  }}
+                  placeholder="Search products..."
+                  style={{
+                    width: '100%',
+                    padding: '12px 16px 12px 48px',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '12px',
+                    fontSize: '14px',
+                    background: '#FFFFFF',
+                    outline: 'none',
+                    transition: 'border-color 0.2s ease',
+                    boxSizing: 'border-box'
+                  }}
+                  onFocus={(e) => {
+                    e.target.style.borderColor = '#3B82F6';
+                  }}
+                  onBlur={(e) => {
+                    e.target.style.borderColor = '#E5E7EB';
+                  }}
+                />
               </div>
-              <input
-                type="text"
-                value={productSearchQuery}
-                onChange={(e) => setProductSearchQuery(e.target.value)}
-                placeholder="Search products..."
-                style={{
-                  width: '100%',
-                  padding: '12px 16px 12px 48px',
-                  border: '1px solid #E5E7EB',
-                  borderRadius: '12px',
-                  fontSize: '14px',
-                  background: '#FFFFFF',
-                  outline: 'none',
-                  transition: 'border-color 0.2s ease',
-                  boxSizing: 'border-box'
-                }}
-                onFocus={(e) => {
-                  e.target.style.borderColor = '#3B82F6';
-                }}
-                onBlur={(e) => {
-                  e.target.style.borderColor = '#E5E7EB';
-                }}
-              />
             </div>
 
             {/* Filtered Products Grid */}
-            <div style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(4, 1fr)',
-              gap: '20px',
-              marginBottom: '32px'
-            }}>
-              {products
-                .filter(product => 
-                  product.title.toLowerCase().includes(productSearchQuery.toLowerCase())
-                )
-                .map((product) => (
+            {(() => {
+              const filteredProducts = products.filter(product => 
+                product.title.toLowerCase().includes(productSearchQuery.toLowerCase())
+              );
+              const productsPerPage = 12; // 3 rows × 4 columns
+              const totalPages = Math.ceil(filteredProducts.length / productsPerPage);
+              const startIndex = (currentProductPage - 1) * productsPerPage;
+              const endIndex = startIndex + productsPerPage;
+              const currentPageProducts = filteredProducts.slice(startIndex, endIndex);
+              
+              // Reset to page 1 if current page is out of bounds
+              if (currentProductPage > totalPages && totalPages > 0) {
+                setCurrentProductPage(1);
+              }
+              
+              return (
+                <>
+                  <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(4, 1fr)',
+                    gap: '20px',
+                    marginBottom: '32px'
+                  }}>
+                    {currentPageProducts.map((product) => (
                   <div
                     key={product.id}
                     onClick={() => {
@@ -2093,106 +2119,207 @@ export default function ABTests() {
                       </h4>
                     </div>
                   </div>
-                ))}
-            </div>
+                    ))}
+                  </div>
+                  
+                  {/* Pagination Controls */}
+                  {totalPages > 1 && (
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      gap: '16px',
+                      marginBottom: '32px'
+                    }}>
+                      {/* Left Arrow */}
+                      <button
+                        onClick={() => {
+                          if (currentProductPage > 1) {
+                            setCurrentProductPage(currentProductPage - 1);
+                          }
+                        }}
+                        disabled={currentProductPage === 1}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '32px',
+                          border: '1px solid #E5E7EB',
+                          borderRadius: '8px',
+                          background: currentProductPage === 1 ? '#F3F4F6' : '#FFFFFF',
+                          cursor: currentProductPage === 1 ? 'not-allowed' : 'pointer',
+                          opacity: currentProductPage === 1 ? 0.5 : 1,
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (currentProductPage > 1) {
+                            e.currentTarget.style.borderColor = '#3B82F6';
+                            e.currentTarget.style.background = '#F0F9FF';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (currentProductPage > 1) {
+                            e.currentTarget.style.borderColor = '#E5E7EB';
+                            e.currentTarget.style.background = '#FFFFFF';
+                          }
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={currentProductPage === 1 ? '#9CA3AF' : '#374151'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M15 18l-6-6 6-6"/>
+                        </svg>
+                      </button>
+                      
+                      {/* Page Number */}
+                      <span style={{
+                        fontSize: '16px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        minWidth: '40px',
+                        textAlign: 'center'
+                      }}>
+                        {currentProductPage}
+                      </span>
+                      
+                      {/* Right Arrow */}
+                      <button
+                        onClick={() => {
+                          if (currentProductPage < totalPages) {
+                            setCurrentProductPage(currentProductPage + 1);
+                          }
+                        }}
+                        disabled={currentProductPage === totalPages}
+                        style={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          width: '32px',
+                          height: '32px',
+                          border: '1px solid #E5E7EB',
+                          borderRadius: '8px',
+                          background: currentProductPage === totalPages ? '#F3F4F6' : '#FFFFFF',
+                          cursor: currentProductPage === totalPages ? 'not-allowed' : 'pointer',
+                          opacity: currentProductPage === totalPages ? 0.5 : 1,
+                          transition: 'all 0.2s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          if (currentProductPage < totalPages) {
+                            e.currentTarget.style.borderColor = '#3B82F6';
+                            e.currentTarget.style.background = '#F0F9FF';
+                          }
+                        }}
+                        onMouseLeave={(e) => {
+                          if (currentProductPage < totalPages) {
+                            e.currentTarget.style.borderColor = '#E5E7EB';
+                            e.currentTarget.style.background = '#FFFFFF';
+                          }
+                        }}
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={currentProductPage === totalPages ? '#9CA3AF' : '#374151'} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                          <path d="M9 18l6-6-6-6"/>
+                        </svg>
+                      </button>
+                    </div>
+                  )}
+                </>
+              );
+            })()}
 
             {/* Development Store Toggle - Moved below products */}
             <div style={{
-              padding: '20px',
-              background: '#F8FAFC',
-              borderRadius: '12px',
-              border: '1px solid #E5E7EB',
               marginBottom: '24px'
             }}>
-                  {/* Toggle Switch */}
-                  <div style={{
+              {/* Toggle Switch */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                marginBottom: isDevelopmentStore ? '16px' : '0'
+              }}>
+                <h4 style={{
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  color: '#1F2937',
+                  margin: 0
+                }}>
+                  Using a Development Store?
+                </h4>
+                <label style={{
+                  position: 'relative',
+                  display: 'inline-block',
+                  width: '48px',
+                  height: '24px',
+                  flexShrink: 0
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={isDevelopmentStore}
+                    onChange={(e) => setIsDevelopmentStore(e.target.checked)}
+                    style={{
+                      opacity: 0,
+                      width: 0,
+                      height: 0
+                    }}
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    cursor: 'pointer',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: isDevelopmentStore ? '#3B82F6' : '#D1D5DB',
+                    borderRadius: '24px',
+                    transition: '0.3s',
                     display: 'flex',
                     alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: isDevelopmentStore ? '16px' : '0'
+                    padding: '2px'
                   }}>
-                    <h4 style={{
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      margin: 0
-                    }}>
-                      {isDevelopmentStore ? 'Store Password' : 'Development Store'}
-                    </h4>
-                    <label style={{
-                      position: 'relative',
-                      display: 'inline-block',
-                      width: '48px',
-                      height: '24px'
-                    }}>
-                      <input
-                        type="checkbox"
-                        checked={isDevelopmentStore}
-                        onChange={(e) => setIsDevelopmentStore(e.target.checked)}
-                        style={{
-                          opacity: 0,
-                          width: 0,
-                          height: 0
-                        }}
-                      />
-                      <span style={{
-                        position: 'absolute',
-                        cursor: 'pointer',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: isDevelopmentStore ? '#3B82F6' : '#D1D5DB',
-                        borderRadius: '24px',
-                        transition: '0.3s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '2px'
-                      }}>
-                        <span style={{
-                          content: '""',
-                          position: 'absolute',
-                          height: '20px',
-                          width: '20px',
-                          left: isDevelopmentStore ? '26px' : '2px',
-                          backgroundColor: '#FFFFFF',
-                          borderRadius: '50%',
-                          transition: '0.3s',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                        }} />
-                      </span>
-                    </label>
-                  </div>
-                  
-                  {/* Password Input - Only shown when toggle is on */}
-                  {isDevelopmentStore && (
-                    <div style={{
-                      marginTop: '16px'
-                    }}>
-                      <p style={{
-                        fontSize: '14px',
-                        color: '#6B7280',
-                        margin: '0 0 12px 0'
-                      }}>
-                        Please enter your development store's password
-                      </p>
-                      <input
-                        type="password"
-                        value={wizardStorePassword}
-                        onChange={(e) => setWizardStorePassword(e.target.value)}
-                        placeholder="Enter store password..."
-                        style={{
-                          width: '100%',
-                          padding: '12px 16px',
-                          border: '1px solid #D1D5DB',
-                          borderRadius: '8px',
-                          fontSize: '14px',
-                          background: '#FFFFFF'
-                        }}
-                      />
-                    </div>
-                  )}
+                    <span style={{
+                      content: '""',
+                      position: 'absolute',
+                      height: '20px',
+                      width: '20px',
+                      left: isDevelopmentStore ? '26px' : '2px',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '50%',
+                      transition: '0.3s',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }} />
+                  </span>
+                </label>
+              </div>
+              
+              {/* Password Input - Only shown when toggle is on */}
+              {isDevelopmentStore && (
+                <div style={{
+                  marginTop: '16px'
+                }}>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    margin: '0 0 12px 0'
+                  }}>
+                    Please enter your development store's password
+                  </p>
+                  <input
+                    type="password"
+                    value={wizardStorePassword}
+                    onChange={(e) => setWizardStorePassword(e.target.value)}
+                    placeholder="Enter store password..."
+                    style={{
+                      width: '400px',
+                      maxWidth: '100%',
+                      padding: '12px 16px',
+                      border: '1px solid #D1D5DB',
+                      borderRadius: '8px',
+                      fontSize: '14px',
+                      background: '#FFFFFF'
+                    }}
+                  />
                 </div>
+              )}
+            </div>
             
             {/* Next Button */}
             <div style={{
