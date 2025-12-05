@@ -3016,7 +3016,7 @@ export default function ABTests() {
               border: '1px solid #E5E7EB',
               borderRadius: '12px',
               padding: '40px',
-              boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+              boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)',
               marginBottom: '32px'
             }}>
               {/* Test Summary Section */}
@@ -3024,7 +3024,7 @@ export default function ABTests() {
                 <h4 style={{
                   fontSize: '16px',
                   fontWeight: '600',
-                  color: '#1F2937',
+                  color: '#3B82F6',
                   marginBottom: '16px'
                 }}>
                   Test Summary
@@ -3039,7 +3039,8 @@ export default function ABTests() {
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
-                    padding: '16px'
+                    padding: '16px',
+                    borderTop: '3px solid #e6e6e6'
                   }}>
                     <label style={{
                       display: 'block',
@@ -3065,7 +3066,8 @@ export default function ABTests() {
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
-                    padding: '16px'
+                    padding: '16px',
+                    borderTop: '3px solid #e6e6e6'
                   }}>
                     <label style={{
                       display: 'block',
@@ -3091,7 +3093,8 @@ export default function ABTests() {
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
-                    padding: '16px'
+                    padding: '16px',
+                    borderTop: '3px solid #ef9362'
                   }}>
                     <label style={{
                       display: 'block',
@@ -3143,10 +3146,11 @@ export default function ABTests() {
 
                   {/* Traffic Split Card */}
                   <div style={{
-                    background: '#F9FAFB',
-                    border: '1px solid #E5E7EB',
+                    background: manualMode ? '#E0F2FE' : '#F9FAFB',
+                    border: manualMode ? '1px solid #3B82F6' : '1px solid #E5E7EB',
                     borderRadius: '8px',
-                    padding: '16px'
+                    padding: '16px',
+                    transition: 'all 0.2s ease'
                   }}>
                     <label style={{
                       display: 'block',
@@ -3172,15 +3176,16 @@ export default function ABTests() {
                           style={{
                             width: '60px',
                             padding: '4px 8px',
-                            border: '1px solid #D1D5DB',
+                            border: '1px solid #3B82F6',
                             borderRadius: '4px',
                             fontSize: '14px',
                             fontWeight: '600',
                             color: '#1F2937',
-                            outline: 'none'
+                            outline: 'none',
+                            background: '#FFFFFF'
                           }}
                         />
-                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#1F2937' }}>-</span>
+                        <span style={{ fontSize: '14px', fontWeight: '600', color: '#3B82F6' }}>-</span>
                         <input
                           type="number"
                           min="0"
@@ -3194,12 +3199,13 @@ export default function ABTests() {
                           style={{
                             width: '60px',
                             padding: '4px 8px',
-                            border: '1px solid #D1D5DB',
+                            border: '1px solid #3B82F6',
                             borderRadius: '4px',
                             fontSize: '14px',
                             fontWeight: '600',
                             color: '#1F2937',
-                            outline: 'none'
+                            outline: 'none',
+                            background: '#FFFFFF'
                           }}
                         />
                       </div>
@@ -3222,7 +3228,7 @@ export default function ABTests() {
                 <h4 style={{
                   fontSize: '16px',
                   fontWeight: '600',
-                  color: '#1F2937',
+                  color: '#3B82F6',
                   marginBottom: '16px'
                 }}>
                   Variants
@@ -3237,12 +3243,13 @@ export default function ABTests() {
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
                     borderRadius: '8px',
-                    padding: '20px'
+                    padding: '20px',
+                    borderLeft: '4px solid #e6e6e6'
                   }}>
                     <h5 style={{
                       fontSize: '14px',
                       fontWeight: '600',
-                      color: '#1F2937',
+                      color: '#374151',
                       margin: '0 0 12px 0'
                     }}>
                       Control
@@ -3259,22 +3266,23 @@ export default function ABTests() {
 
                   {/* Variant Card */}
                   <div style={{
-                    background: '#F9FAFB',
-                    border: '1px solid #E5E7EB',
+                    background: '#E0F2FE',
+                    border: '1px solid #3B82F6',
                     borderRadius: '8px',
-                    padding: '20px'
+                    padding: '20px',
+                    borderLeft: '4px solid #3B82F6'
                   }}>
                     <h5 style={{
                       fontSize: '14px',
                       fontWeight: '600',
-                      color: '#1F2937',
+                      color: '#3B82F6',
                       margin: '0 0 12px 0'
                     }}>
                       Variant
                     </h5>
                     <p style={{
                       fontSize: '12px',
-                      color: '#6B7280',
+                      color: '#1E40AF',
                       margin: 0,
                       lineHeight: '1.5'
                     }}>
@@ -3285,21 +3293,24 @@ export default function ABTests() {
               </div>
 
               {/* AutoPilot Mode and Manual Mode */}
-              <div style={{ marginBottom: manualMode ? '40px' : '0', paddingBottom: manualMode ? '32px' : '0', borderBottom: manualMode ? '1px solid #E5E7EB' : 'none' }}>
+              <div style={{ marginBottom: '0' }}>
                 {/* Autopilot Mode Toggle */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  marginBottom: '24px'
+                  marginBottom: '24px',
+                  paddingBottom: '24px',
+                  borderBottom: '1px solid #E5E7EB'
                 }}>
                   <div>
                     <label style={{
                       fontSize: '16px',
                       fontWeight: '600',
-                      color: '#1F2937',
+                      color: autopilotOn ? '#3B82F6' : '#1F2937',
                       marginBottom: '4px',
-                      display: 'block'
+                      display: 'block',
+                      transition: 'color 0.2s ease'
                     }}>
                       Autopilot Mode
                     </label>
@@ -3366,15 +3377,19 @@ export default function ABTests() {
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between'
+                  justifyContent: 'space-between',
+                  marginBottom: manualMode ? '24px' : '0',
+                  paddingBottom: manualMode ? '24px' : '0',
+                  borderBottom: manualMode ? '1px solid #E5E7EB' : 'none'
                 }}>
                   <div>
                     <label style={{
                       fontSize: '16px',
                       fontWeight: '600',
-                      color: '#1F2937',
+                      color: manualMode ? '#3B82F6' : '#1F2937',
                       marginBottom: '4px',
-                      display: 'block'
+                      display: 'block',
+                      transition: 'color 0.2s ease'
                     }}>
                       Manual Mode
                     </label>
@@ -3440,16 +3455,16 @@ export default function ABTests() {
 
               {/* End Test Section - Only shown when Manual Mode is ON */}
               {manualMode && (
-                <div style={{ marginBottom: '0' }}>
-                  <h4 style={{
-                    fontSize: '16px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    marginBottom: '16px'
-                  }}>
-                    End Test
-                  </h4>
-                  
+                <div style={{ 
+                  marginLeft: '24px',
+                  marginTop: '16px',
+                  paddingLeft: '24px',
+                  borderLeft: '3px solid #3B82F6',
+                  background: '#F0F9FF',
+                  borderRadius: '8px',
+                  padding: '20px',
+                  marginBottom: '0'
+                }}>
                   {/* Impressions Toggle */}
                   <div style={{
                     display: 'flex',
@@ -3461,7 +3476,7 @@ export default function ABTests() {
                       <label style={{
                         fontSize: '14px',
                         fontWeight: '600',
-                        color: '#1F2937',
+                        color: '#3B82F6',
                         marginBottom: '4px',
                         display: 'block'
                       }}>
@@ -3523,16 +3538,17 @@ export default function ABTests() {
                   {/* Impressions Input - Only shown when toggle is ON */}
                   {endOnImpressionsEnabled && (
                     <div style={{
-                      background: '#F9FAFB',
-                      border: '1px solid #E5E7EB',
+                      background: '#FFFFFF',
+                      border: '1px solid #3B82F6',
                       borderRadius: '8px',
-                      padding: '16px'
+                      padding: '16px',
+                      marginTop: '16px'
                     }}>
                       <label style={{
                         display: 'block',
                         fontSize: '12px',
                         fontWeight: '500',
-                        color: '#6B7280',
+                        color: '#3B82F6',
                         marginBottom: '8px'
                       }}>
                         Impression Threshold
@@ -3547,11 +3563,12 @@ export default function ABTests() {
                           width: '100%',
                           maxWidth: '300px',
                           padding: '8px 12px',
-                          border: '1px solid #D1D5DB',
+                          border: '1px solid #3B82F6',
                           borderRadius: '6px',
                           fontSize: '14px',
                           color: '#1F2937',
-                          outline: 'none'
+                          outline: 'none',
+                          background: '#F9FAFB'
                         }}
                       />
                       <p style={{
