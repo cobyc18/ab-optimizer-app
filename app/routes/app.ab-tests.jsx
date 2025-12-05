@@ -163,6 +163,8 @@ export default function ABTests() {
   const [autopilotMode, setAutopilotMode] = useState('balanced'); // 'faster', 'balanced', 'extra-careful'
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [autopilotOff, setAutopilotOff] = useState(false);
+  const [autopilotOn, setAutopilotOn] = useState(true); // Default ON
+  const [manualMode, setManualMode] = useState(false); // Default OFF
   const [trafficSplitA, setTrafficSplitA] = useState(50);
   const [trafficSplitB, setTrafficSplitB] = useState(50);
   const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 16));
@@ -3001,744 +3003,393 @@ export default function ABTests() {
               fontSize: '24px',
               fontWeight: '700',
               color: '#1F2937',
-              marginBottom: '24px'
+              marginBottom: '32px'
             }}>
               Review & launch
             </h3>
 
-            {/* Summary Card */}
+            {/* Test Summary Section */}
+            <div style={{ marginBottom: '32px' }}>
+              <h4 style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#1F2937',
+                marginBottom: '16px'
+              }}>
+                Test Summary
+              </h4>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(4, 1fr)',
+                gap: '16px'
+              }}>
+                {/* Product Name Card */}
+                <div style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    color: '#6B7280',
+                    marginBottom: '8px'
+                  }}>
+                    Product Name
+                  </label>
+                  <p style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    margin: 0
+                  }}>
+                    {wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Not selected'}
+                  </p>
+                </div>
+
+                {/* Widget Name Card */}
+                <div style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    color: '#6B7280',
+                    marginBottom: '8px'
+                  }}>
+                    Widget Name
+                  </label>
+                  <p style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    margin: 0
+                  }}>
+                    {selectedIdea?.utility || 'Not selected'}
+                  </p>
+                </div>
+
+                {/* Test Name Card */}
+                <div style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    color: '#6B7280',
+                    marginBottom: '8px'
+                  }}>
+                    Test Name
+                  </label>
+                  {isEditingTestName ? (
+                    <input
+                      type="text"
+                      value={wizardTestName}
+                      onChange={(e) => setWizardTestName(e.target.value)}
+                      onBlur={() => setIsEditingTestName(false)}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter') {
+                          setIsEditingTestName(false);
+                        }
+                      }}
+                      autoFocus
+                      style={{
+                        width: '100%',
+                        padding: '4px 8px',
+                        border: '1px solid #3B82F6',
+                        borderRadius: '4px',
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        outline: 'none'
+                      }}
+                    />
+                  ) : (
+                    <p
+                      onClick={() => setIsEditingTestName(true)}
+                      style={{
+                        fontSize: '14px',
+                        fontWeight: '600',
+                        color: '#1F2937',
+                        margin: 0,
+                        cursor: 'text'
+                      }}
+                    >
+                      {wizardTestName || `${wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Product'} - ${selectedIdea?.utility || 'Widget'}`}
+                    </p>
+                  )}
+                </div>
+
+                {/* Traffic Split Card */}
+                <div style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '8px',
+                  padding: '16px',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                }}>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '12px',
+                    fontWeight: '500',
+                    color: '#6B7280',
+                    marginBottom: '8px'
+                  }}>
+                    Traffic Split
+                  </label>
+                  <p style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    margin: 0
+                  }}>
+                    50 - 50
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Variants Section */}
+            <div style={{ marginBottom: '32px' }}>
+              <h4 style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#1F2937',
+                marginBottom: '16px'
+              }}>
+                Variants
+              </h4>
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, 1fr)',
+                gap: '16px'
+              }}>
+                {/* Control Card */}
+                <div style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '8px',
+                  padding: '20px',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                }}>
+                  <h5 style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    margin: '0 0 12px 0'
+                  }}>
+                    Control
+                  </h5>
+                  <p style={{
+                    fontSize: '12px',
+                    color: '#6B7280',
+                    margin: 0,
+                    lineHeight: '1.5'
+                  }}>
+                    Product Selected before widget
+                  </p>
+                </div>
+
+                {/* Variant Card */}
+                <div style={{
+                  background: '#FFFFFF',
+                  border: '1px solid #E5E7EB',
+                  borderRadius: '8px',
+                  padding: '20px',
+                  boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
+                }}>
+                  <h5 style={{
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    margin: '0 0 12px 0'
+                  }}>
+                    Variant
+                  </h5>
+                  <p style={{
+                    fontSize: '12px',
+                    color: '#6B7280',
+                    margin: 0,
+                    lineHeight: '1.5'
+                  }}>
+                    Product Selected with widget added
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* AutoPilot Mode and Manual Mode */}
             <div style={{
               background: '#FFFFFF',
               border: '1px solid #E5E7EB',
-              borderRadius: '12px',
-              padding: '32px',
-              marginBottom: '24px',
-              boxShadow: '0 1px 3px rgba(0, 0, 0, 0.1)'
+              borderRadius: '8px',
+              padding: '24px',
+              marginBottom: '32px',
+              boxShadow: '0 1px 2px rgba(0, 0, 0, 0.05)'
             }}>
-              {/* Test Name - Inline Editable */}
-              <div style={{ marginBottom: '24px' }}>
+              {/* Autopilot Mode Toggle */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                marginBottom: '24px'
+              }}>
+                <div>
+                  <label style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '4px',
+                    display: 'block'
+                  }}>
+                    Autopilot Mode
+                  </label>
+                  <p style={{
+                    fontSize: '12px',
+                    color: '#6B7280',
+                    margin: 0
+                  }}>
+                    Auto-stop at significance
+                  </p>
+                </div>
                 <label style={{
-                  display: 'block',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#6B7280',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  marginBottom: '8px'
+                  position: 'relative',
+                  display: 'inline-block',
+                  width: '48px',
+                  height: '24px'
                 }}>
-                  Test name (auto)
-                </label>
-                {isEditingTestName ? (
                   <input
-                    type="text"
-                    value={wizardTestName}
-                    onChange={(e) => setWizardTestName(e.target.value)}
-                    onBlur={() => setIsEditingTestName(false)}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        setIsEditingTestName(false);
+                    type="checkbox"
+                    checked={autopilotOn}
+                    onChange={(e) => {
+                      const newValue = e.target.checked;
+                      setAutopilotOn(newValue);
+                      if (newValue) {
+                        setManualMode(false);
                       }
                     }}
-                    autoFocus
                     style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #3B82F6',
-                      borderRadius: '6px',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      outline: 'none'
+                      opacity: 0,
+                      width: 0,
+                      height: 0
                     }}
                   />
-                ) : (
-                  <div
-                    onClick={() => setIsEditingTestName(true)}
-                    style={{
-                      padding: '8px 12px',
-                      fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      cursor: 'text',
-                      border: '1px solid transparent',
-                      borderRadius: '6px',
-                      minHeight: '36px',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#F9FAFB';
-                      e.currentTarget.style.borderColor = '#E5E7EB';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.borderColor = 'transparent';
-                    }}
-                  >
-                    {wizardTestName || `${selectedIdea?.utility || 'Widget'} on ${wizardSelectedProductSnapshot?.title || 'Product'}`}
-                  </div>
-                )}
-              </div>
-
-              {/* Hypothesis - Inline Editable */}
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#6B7280',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  marginBottom: '8px'
-                }}>
-                  Hypothesis (auto)
-                </label>
-                {isEditingHypothesis ? (
-                  <textarea
-                    value={testHypothesis}
-                    onChange={(e) => setTestHypothesis(e.target.value)}
-                    onBlur={() => setIsEditingHypothesis(false)}
-                    rows={2}
-                    style={{
-                      width: '100%',
-                      padding: '8px 12px',
-                      border: '1px solid #3B82F6',
-                      borderRadius: '6px',
-                      fontSize: '14px',
-                      color: '#1F2937',
-                      outline: 'none',
-                      resize: 'vertical',
-                      fontFamily: 'inherit'
-                    }}
-                  />
-                ) : (
-                  <div
-                    onClick={() => setIsEditingHypothesis(true)}
-                    style={{
-                      padding: '8px 12px',
-                      fontSize: '14px',
-                      color: '#1F2937',
-                      cursor: 'text',
-                      border: '1px solid transparent',
-                      borderRadius: '6px',
-                      minHeight: '48px',
-                      display: 'flex',
-                      alignItems: 'center'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.background = '#F9FAFB';
-                      e.currentTarget.style.borderColor = '#E5E7EB';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.background = 'transparent';
-                      e.currentTarget.style.borderColor = 'transparent';
-                    }}
-                  >
-                    {testHypothesis || `Adding a ${selectedIdea?.utility || 'widget'} near the product page will increase **Add to Cart**.`}
-                  </div>
-                )}
-              </div>
-
-              {/* Variants */}
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#6B7280',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  marginBottom: '12px'
-                }}>
-                  Variants
-                </label>
-                <div style={{
-                  display: 'flex',
-                  gap: '16px',
-                  alignItems: 'center'
-                }}>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '8px 12px',
-                    background: '#F9FAFB',
-                    borderRadius: '8px',
-                    border: '1px solid #E5E7EB'
-                  }}>
-                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#1F2937' }}>A:</span>
-                    <span style={{ fontSize: '14px', color: '#6B7280' }}>Control</span>
-                  </div>
-                  <span style={{ color: '#9CA3AF' }}>|</span>
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '8px',
-                    padding: '8px 12px',
-                    background: '#F9FAFB',
-                    borderRadius: '8px',
-                    border: '1px solid #E5E7EB'
-                  }}>
-                    <span style={{ fontSize: '14px', fontWeight: '600', color: '#1F2937' }}>B:</span>
-                    <span style={{ fontSize: '14px', color: '#1F2937' }}>
-                      {selectedIdea?.utility || 'Widget'} (Style S‑01)
-                    </span>
-                    {selectedIdea && (
-                      <div style={{
-                        width: '32px',
-                        height: '32px',
-                        borderRadius: '4px',
-                        background: '#F3F4F6',
-                        border: '1px solid #E5E7EB',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontSize: '12px',
-                        color: '#6B7280'
-                      }}>
-                        {selectedIdea.utility?.charAt(0) || 'W'}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Traffic Split */}
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#6B7280',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  marginBottom: '8px'
-                }}>
-                  Traffic split
-                </label>
-                {!showAdvanced ? (
-                  <div style={{
-                    padding: '8px 12px',
-                    fontSize: '14px',
-                    color: '#1F2937',
-                    display: 'inline-block',
-                    background: '#F9FAFB',
-                    borderRadius: '6px'
-                  }}>
-                    50 / 50
-                  </div>
-                ) : (
-                  <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={trafficSplitA}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        setTrafficSplitA(val);
-                        setTrafficSplitB(100 - val);
-                      }}
-                      style={{
-                        width: '80px',
-                        padding: '8px 12px',
-                        border: '1px solid #D1D5DB',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    />
-                    <span>/</span>
-                    <input
-                      type="number"
-                      min="0"
-                      max="100"
-                      value={trafficSplitB}
-                      onChange={(e) => {
-                        const val = parseInt(e.target.value) || 0;
-                        setTrafficSplitB(val);
-                        setTrafficSplitA(100 - val);
-                      }}
-                      style={{
-                        width: '80px',
-                        padding: '8px 12px',
-                        border: '1px solid #D1D5DB',
-                        borderRadius: '6px',
-                        fontSize: '14px'
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Goal Metric */}
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#6B7280',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  marginBottom: '8px'
-                }}>
-                  Goal metric
-                </label>
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#1F2937' }}>
-                    Add to Cart
-                  </span>
-                  <span style={{ fontSize: '12px', color: '#6B7280', fontStyle: 'italic' }}>
-                    (recommended for PDP changes)
-                  </span>
-                </div>
-                <p style={{
-                  fontSize: '12px',
-                  color: '#9CA3AF',
-                  margin: '4px 0 0 0'
-                }}>
-                  You can change this later.
-                </p>
-              </div>
-
-              {/* Autopilot Mode */}
-              <div style={{ marginBottom: '24px' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  color: '#6B7280',
-                  textTransform: 'uppercase',
-                  letterSpacing: '0.5px',
-                  marginBottom: '12px'
-                }}>
-                  Autopilot Mode
-                </label>
-                <div style={{
-                  display: 'flex',
-                  gap: '8px',
-                  marginBottom: '8px'
-                }}>
-                  {['faster', 'balanced', 'extra-careful'].map((mode) => (
-                    <button
-                      key={mode}
-                      onClick={() => setAutopilotMode(mode)}
-                      style={{
-                        padding: '8px 16px',
-                        border: `1px solid ${autopilotMode === mode ? '#3B82F6' : '#D1D5DB'}`,
-                        borderRadius: '8px',
-                        background: autopilotMode === mode ? '#3B82F6' : '#FFFFFF',
-                        color: autopilotMode === mode ? '#FFFFFF' : '#1F2937',
-                        fontSize: '14px',
-                        fontWeight: '500',
-                        cursor: 'pointer',
-                        textTransform: 'capitalize',
-                        transition: 'all 0.2s ease'
-                      }}
-                    >
-                      {mode === 'extra-careful' ? 'Extra careful' : mode}
-                    </button>
-                  ))}
-                </div>
-                <p style={{
-                  fontSize: '12px',
-                  color: '#6B7280',
-                  margin: 0
-                }}>
-                  Most stores see a clear result in ~2 weeks with <strong>Balanced</strong>.
-                </p>
-              </div>
-
-              {/* Advanced Link */}
-              <div style={{ marginBottom: '16px' }}>
-                <button
-                  onClick={() => setShowAdvanced(!showAdvanced)}
-                  style={{
-                    background: 'none',
-                    border: 'none',
-                    color: '#3B82F6',
-                    fontSize: '14px',
+                  <span style={{
+                    position: 'absolute',
                     cursor: 'pointer',
-                    padding: 0,
-                    textDecoration: 'underline'
-                  }}
-                >
-                  {showAdvanced ? 'Hide' : 'Adjust configurations manually'}
-                </button>
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: autopilotOn ? '#3B82F6' : '#D1D5DB',
+                    borderRadius: '24px',
+                    transition: '0.3s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '2px'
+                  }}>
+                    <span style={{
+                      content: '""',
+                      position: 'absolute',
+                      height: '20px',
+                      width: '20px',
+                      left: autopilotOn ? '26px' : '2px',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '50%',
+                      transition: '0.3s',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }} />
+                  </span>
+                </label>
               </div>
 
-              {/* Advanced Section */}
-              {showAdvanced && (
-                <div style={{
-                  marginTop: '24px',
-                  paddingTop: '24px',
-                  borderTop: '1px solid #E5E7EB'
-                }}>
-                  {/* Traffic Split (Advanced) */}
-                  <div style={{ marginBottom: '24px' }}>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      color: '#6B7280',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                      marginBottom: '12px'
-                    }}>
-                      Traffic split
-                    </label>
-                    <div style={{ display: 'flex', gap: '16px', alignItems: 'center', marginBottom: '8px' }}>
-                      <div style={{ flex: 1 }}>
-                        <input
-                          type="range"
-                          min="0"
-                          max="100"
-                          value={trafficSplitA}
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value);
-                            setTrafficSplitA(val);
-                            setTrafficSplitB(100 - val);
-                          }}
-                          style={{ width: '100%' }}
-                        />
-                      </div>
-                      <div style={{ display: 'flex', gap: '8px', alignItems: 'center', minWidth: '180px' }}>
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={trafficSplitA}
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value) || 0;
-                            setTrafficSplitA(Math.min(100, Math.max(0, val)));
-                            setTrafficSplitB(100 - Math.min(100, Math.max(0, val)));
-                          }}
-                          style={{
-                            width: '60px',
-                            padding: '6px 8px',
-                            border: '1px solid #D1D5DB',
-                            borderRadius: '6px',
-                            fontSize: '14px'
-                          }}
-                        />
-                        <span>/</span>
-                        <input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={trafficSplitB}
-                          onChange={(e) => {
-                            const val = parseInt(e.target.value) || 0;
-                            setTrafficSplitB(Math.min(100, Math.max(0, val)));
-                            setTrafficSplitA(100 - Math.min(100, Math.max(0, val)));
-                          }}
-                          style={{
-                            width: '60px',
-                            padding: '6px 8px',
-                            border: '1px solid #D1D5DB',
-                            borderRadius: '6px',
-                            fontSize: '14px'
-                          }}
-                        />
-                      </div>
-                    </div>
-                    <p style={{ fontSize: '12px', color: '#9CA3AF', margin: '4px 0 0 0' }}>
-                      Must total 100%
-                    </p>
-                  </div>
-
-                  {/* Schedule */}
-                  <div style={{ marginBottom: '24px' }}>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      color: '#6B7280',
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.5px',
-                      marginBottom: '8px'
-                    }}>
-                      Schedule
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={startDate}
-                      onChange={(e) => setStartDate(e.target.value)}
-                      style={{
-                        padding: '8px 12px',
-                        border: '1px solid #D1D5DB',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        width: '100%',
-                        maxWidth: '300px'
-                      }}
-                    />
-                  </div>
-
-                  {/* Autopilot Off Toggle */}
-                  <div style={{ marginBottom: '24px' }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      marginBottom: '12px'
-                    }}>
-                      <label style={{
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#1F2937'
-                      }}>
-                        Autopilot off
-                      </label>
-                      <label style={{
-                        position: 'relative',
-                        display: 'inline-block',
-                        width: '48px',
-                        height: '24px'
-                      }}>
-                        <input
-                          type="checkbox"
-                          checked={autopilotOff}
-                          onChange={(e) => setAutopilotOff(e.target.checked)}
-                          style={{
-                            opacity: 0,
-                            width: 0,
-                            height: 0
-                          }}
-                        />
-                        <span style={{
-                          position: 'absolute',
-                          cursor: 'pointer',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          backgroundColor: autopilotOff ? '#3B82F6' : '#D1D5DB',
-                          borderRadius: '24px',
-                          transition: '0.3s',
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '2px'
-                        }}>
-                          <span style={{
-                            content: '""',
-                            position: 'absolute',
-                            height: '20px',
-                            width: '20px',
-                            left: autopilotOff ? '26px' : '2px',
-                            backgroundColor: '#FFFFFF',
-                            borderRadius: '50%',
-                            transition: '0.3s',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                          }} />
-                        </span>
-                      </label>
-                    </div>
-                    {autopilotOff && (
-                      <div style={{
-                        background: '#FEF3C7',
-                        border: '1px solid #F59E0B',
-                        borderRadius: '8px',
-                        padding: '12px',
-                        marginTop: '12px'
-                      }}>
-                        <p style={{
-                          fontSize: '12px',
-                          color: '#92400E',
-                          margin: 0
-                        }}>
-                          Manual ends can increase false wins.
-                        </p>
-                      </div>
-                    )}
-                  </div>
-
-                  {/* End Conditions (only when Autopilot Off) */}
-                  {autopilotOff && (
-                    <div style={{ marginBottom: '24px' }}>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '12px',
-                        fontWeight: '600',
-                        color: '#6B7280',
-                        textTransform: 'uppercase',
-                        letterSpacing: '0.5px',
-                        marginBottom: '12px'
-                      }}>
-                        End conditions
-                      </label>
-                      
-                      {/* End on date */}
-                      <div style={{ marginBottom: '16px' }}>
-                        <label style={{
-                          display: 'block',
-                          fontSize: '14px',
-                          color: '#1F2937',
-                          marginBottom: '8px'
-                        }}>
-                          End on date
-                        </label>
-                        <input
-                          type="datetime-local"
-                          value={endOnDate}
-                          onChange={(e) => setEndOnDate(e.target.value)}
-                          style={{
-                            padding: '8px 12px',
-                            border: '1px solid #D1D5DB',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            width: '100%',
-                            maxWidth: '300px'
-                          }}
-                        />
-                      </div>
-
-                      {/* End at impressions */}
-                      <div style={{ marginBottom: '16px' }}>
-                        <label style={{
-                          display: 'block',
-                          fontSize: '14px',
-                          color: '#1F2937',
-                          marginBottom: '8px'
-                        }}>
-                          End at impressions per variant
-                        </label>
-                        <input
-                          type="number"
-                          value={endOnImpressions}
-                          onChange={(e) => setEndOnImpressions(e.target.value)}
-                          placeholder="Enter number"
-                          style={{
-                            padding: '8px 12px',
-                            border: '1px solid #D1D5DB',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            width: '100%',
-                            maxWidth: '300px'
-                          }}
-                        />
-                      </div>
-
-                      {/* End at conversions */}
-                      <div style={{ marginBottom: '16px' }}>
-                        <label style={{
-                          display: 'block',
-                          fontSize: '14px',
-                          color: '#1F2937',
-                          marginBottom: '8px'
-                        }}>
-                          End at conversions
-                        </label>
-                        <input
-                          type="number"
-                          value={endOnConversions}
-                          onChange={(e) => setEndOnConversions(e.target.value)}
-                          placeholder="Enter number"
-                          style={{
-                            padding: '8px 12px',
-                            border: '1px solid #D1D5DB',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            width: '100%',
-                            maxWidth: '300px'
-                          }}
-                        />
-                      </div>
-
-                      {/* Require minimum days */}
-                      <div style={{ marginBottom: '16px' }}>
-                        <label style={{
-                          display: 'block',
-                          fontSize: '14px',
-                          color: '#1F2937',
-                          marginBottom: '8px'
-                        }}>
-                          Require minimum days
-                        </label>
-                        <input
-                          type="number"
-                          min="1"
-                          value={requireMinimumDays}
-                          onChange={(e) => setRequireMinimumDays(parseInt(e.target.value) || 7)}
-                          style={{
-                            padding: '8px 12px',
-                            border: '1px solid #D1D5DB',
-                            borderRadius: '6px',
-                            fontSize: '14px',
-                            width: '100%',
-                            maxWidth: '300px'
-                          }}
-                        />
-                      </div>
-                    </div>
-                  )}
-
-                  {/* Auto-push winner */}
-                  <div style={{ marginBottom: '24px' }}>
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between'
-                    }}>
-                      <label style={{
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#1F2937'
-                      }}>
-                        Auto‑push winner
-                      </label>
-                      <label style={{
-                        position: 'relative',
-                        display: 'inline-block',
-                        width: '48px',
-                        height: '24px'
-                      }}>
-                        <input
-                          type="checkbox"
-                          checked={autoPushWinner}
-                          onChange={(e) => setAutoPushWinner(e.target.checked)}
-                          disabled={!autopilotOff}
-                          style={{
-                            opacity: 0,
-                            width: 0,
-                            height: 0
-                          }}
-                        />
-                        <span style={{
-                          position: 'absolute',
-                          cursor: autoPushWinner ? 'pointer' : 'not-allowed',
-                          top: 0,
-                          left: 0,
-                          right: 0,
-                          bottom: 0,
-                          backgroundColor: autoPushWinner ? '#3B82F6' : '#D1D5DB',
-                          borderRadius: '24px',
-                          transition: '0.3s',
-                          display: 'flex',
-                          alignItems: 'center',
-                          padding: '2px',
-                          opacity: !autopilotOff ? 0.5 : 1
-                        }}>
-                          <span style={{
-                            content: '""',
-                            position: 'absolute',
-                            height: '20px',
-                            width: '20px',
-                            left: autoPushWinner ? '26px' : '2px',
-                            backgroundColor: '#FFFFFF',
-                            borderRadius: '50%',
-                            transition: '0.3s',
-                            boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                          }} />
-                        </span>
-                      </label>
-                    </div>
-                  </div>
+              {/* Manual Mode Toggle */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between'
+              }}>
+                <div>
+                  <label style={{
+                    fontSize: '16px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    marginBottom: '4px',
+                    display: 'block'
+                  }}>
+                    Manual Mode
+                  </label>
+                  <p style={{
+                    fontSize: '12px',
+                    color: '#6B7280',
+                    margin: 0
+                  }}>
+                    Set end conditions manually
+                  </p>
                 </div>
-              )}
+                <label style={{
+                  position: 'relative',
+                  display: 'inline-block',
+                  width: '48px',
+                  height: '24px'
+                }}>
+                  <input
+                    type="checkbox"
+                    checked={manualMode}
+                    onChange={(e) => {
+                      const newValue = e.target.checked;
+                      setManualMode(newValue);
+                      if (newValue) {
+                        setAutopilotOn(false);
+                      }
+                    }}
+                    style={{
+                      opacity: 0,
+                      width: 0,
+                      height: 0
+                    }}
+                  />
+                  <span style={{
+                    position: 'absolute',
+                    cursor: 'pointer',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    backgroundColor: manualMode ? '#3B82F6' : '#D1D5DB',
+                    borderRadius: '24px',
+                    transition: '0.3s',
+                    display: 'flex',
+                    alignItems: 'center',
+                    padding: '2px'
+                  }}>
+                    <span style={{
+                      content: '""',
+                      position: 'absolute',
+                      height: '20px',
+                      width: '20px',
+                      left: manualMode ? '26px' : '2px',
+                      backgroundColor: '#FFFFFF',
+                      borderRadius: '50%',
+                      transition: '0.3s',
+                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                    }} />
+                  </span>
+                </label>
+              </div>
             </div>
 
             {/* Validation Notices */}
@@ -3768,20 +3419,21 @@ export default function ABTests() {
               </div>
             )}
 
-            {/* Launch Test Button */}
+            {/* Launch Test Button - Bottom Right */}
             <div style={{
               display: 'flex',
-              justifyContent: 'center',
+              justifyContent: 'flex-end',
               marginTop: '32px'
             }}>
               <button
                 onClick={handleLaunchTest}
                 disabled={isLaunchingTest || !canLaunchTest}
                 style={{
-                  width: '100%',
-                  maxWidth: '600px',
-                  padding: '16px 32px',
-                  background: (isLaunchingTest || !canLaunchTest) ? '#D1D5DB' : '#3B82F6',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                  padding: '14px 28px',
+                  background: (isLaunchingTest || !canLaunchTest) ? '#D1D5DB' : '#10B981',
                   color: '#FFFFFF',
                   border: 'none',
                   borderRadius: '8px',
@@ -3789,19 +3441,28 @@ export default function ABTests() {
                   fontWeight: '600',
                   cursor: (isLaunchingTest || !canLaunchTest) ? 'not-allowed' : 'pointer',
                   transition: 'all 0.2s ease',
-                  opacity: (isLaunchingTest || !canLaunchTest) ? 0.6 : 1
+                  opacity: (isLaunchingTest || !canLaunchTest) ? 0.6 : 1,
+                  boxShadow: (isLaunchingTest || !canLaunchTest) ? 'none' : '0 2px 4px rgba(16, 185, 129, 0.3)'
                 }}
                 onMouseEnter={(e) => {
                   if (!e.currentTarget.disabled) {
-                    e.currentTarget.style.background = '#2563EB';
+                    e.currentTarget.style.background = '#059669';
+                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(16, 185, 129, 0.4)';
                   }
                 }}
                 onMouseLeave={(e) => {
                   if (!e.currentTarget.disabled) {
-                    e.currentTarget.style.background = '#3B82F6';
+                    e.currentTarget.style.background = '#10B981';
+                    e.currentTarget.style.boxShadow = '0 2px 4px rgba(16, 185, 129, 0.3)';
                   }
                 }}
               >
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+                  <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+                  <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+                  <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+                </svg>
                 {isLaunchingTest ? 'Launching Test...' : 'Launch Test'}
               </button>
             </div>
