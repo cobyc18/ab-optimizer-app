@@ -3038,9 +3038,13 @@ export default function ABTests() {
                   <div style={{
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    padding: '28px',
-                    borderTop: '3px solid #e6e6e6'
+                    borderRadius: '12px',
+                    padding: '32px',
+                    borderTop: '3px solid #e6e6e6',
+                    minHeight: '180px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxSizing: 'border-box'
                   }}>
                     <label style={{
                       display: 'block',
@@ -3055,7 +3059,10 @@ export default function ABTests() {
                       fontSize: '16px',
                       fontWeight: '600',
                       color: '#1F2937',
-                      margin: 0
+                      margin: 0,
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word',
+                      flex: 1
                     }}>
                       {wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Not selected'}
                     </p>
@@ -3065,9 +3072,13 @@ export default function ABTests() {
                   <div style={{
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    padding: '28px',
-                    borderTop: '3px solid #e6e6e6'
+                    borderRadius: '12px',
+                    padding: '32px',
+                    borderTop: '3px solid #e6e6e6',
+                    minHeight: '180px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxSizing: 'border-box'
                   }}>
                     <label style={{
                       display: 'block',
@@ -3082,7 +3093,10 @@ export default function ABTests() {
                       fontSize: '16px',
                       fontWeight: '600',
                       color: '#1F2937',
-                      margin: 0
+                      margin: 0,
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word',
+                      flex: 1
                     }}>
                       {selectedIdea?.utility || 'Not selected'}
                     </p>
@@ -3092,9 +3106,13 @@ export default function ABTests() {
                   <div style={{
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    padding: '28px',
-                    borderTop: '3px solid #ef9362'
+                    borderRadius: '12px',
+                    padding: '32px',
+                    borderTop: '3px solid #ef9362',
+                    minHeight: '180px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxSizing: 'border-box'
                   }}>
                     <label style={{
                       display: 'block',
@@ -3125,7 +3143,8 @@ export default function ABTests() {
                           fontSize: '16px',
                           fontWeight: '600',
                           color: '#1F2937',
-                          outline: 'none'
+                          outline: 'none',
+                          boxSizing: 'border-box'
                         }}
                       />
                     ) : (
@@ -3136,7 +3155,10 @@ export default function ABTests() {
                           fontWeight: '600',
                           color: '#1F2937',
                           margin: 0,
-                          cursor: 'text'
+                          cursor: 'text',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word',
+                          flex: 1
                         }}
                       >
                         {wizardTestName || `${wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Product'} - ${selectedIdea?.utility || 'Widget'}`}
@@ -3148,9 +3170,13 @@ export default function ABTests() {
                   <div style={{
                     background: manualMode ? '#E0F2FE' : '#F9FAFB',
                     border: manualMode ? '1px solid #3B82F6' : '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    padding: '28px',
-                    transition: 'all 0.2s ease'
+                    borderRadius: '12px',
+                    padding: '32px',
+                    transition: 'all 0.2s ease',
+                    minHeight: '180px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxSizing: 'border-box'
                   }}>
                     <label style={{
                       display: 'block',
@@ -3214,7 +3240,10 @@ export default function ABTests() {
                         fontSize: '16px',
                         fontWeight: '600',
                         color: '#1F2937',
-                        margin: 0
+                        margin: 0,
+                        flex: 1,
+                        display: 'flex',
+                        alignItems: 'center'
                       }}>
                         {trafficSplitA} - {trafficSplitB}
                       </p>
@@ -3242,9 +3271,13 @@ export default function ABTests() {
                   <div style={{
                     background: '#F9FAFB',
                     border: '1px solid #E5E7EB',
-                    borderRadius: '8px',
-                    padding: '28px',
-                    borderLeft: '4px solid #e6e6e6'
+                    borderRadius: '12px',
+                    padding: '32px',
+                    borderLeft: '4px solid #e6e6e6',
+                    minHeight: '180px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxSizing: 'border-box'
                   }}>
                     <h5 style={{
                       fontSize: '16px',
@@ -3258,7 +3291,10 @@ export default function ABTests() {
                       fontSize: '14px',
                       color: '#6B7280',
                       margin: 0,
-                      lineHeight: '1.5'
+                      lineHeight: '1.5',
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word',
+                      flex: 1
                     }}>
                       Product Selected before widget
                     </p>
@@ -3268,9 +3304,13 @@ export default function ABTests() {
                   <div style={{
                     background: '#E0F2FE',
                     border: '1px solid #3B82F6',
-                    borderRadius: '8px',
-                    padding: '28px',
-                    borderLeft: '4px solid #3B82F6'
+                    borderRadius: '12px',
+                    padding: '32px',
+                    borderLeft: '4px solid #3B82F6',
+                    minHeight: '180px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    boxSizing: 'border-box'
                   }}>
                     <h5 style={{
                       fontSize: '16px',
@@ -3284,7 +3324,10 @@ export default function ABTests() {
                       fontSize: '14px',
                       color: '#1E40AF',
                       margin: 0,
-                      lineHeight: '1.5'
+                      lineHeight: '1.5',
+                      wordWrap: 'break-word',
+                      overflowWrap: 'break-word',
+                      flex: 1
                     }}>
                       Product Selected with widget added
                     </p>
@@ -3334,8 +3377,12 @@ export default function ABTests() {
                       onChange={(e) => {
                         const newValue = e.target.checked;
                         setAutopilotOn(newValue);
+                        // If autopilot is turned on, manual mode must be off
                         if (newValue) {
                           setManualMode(false);
+                        } else {
+                          // If autopilot is turned off, manual mode must be on (mutually exclusive)
+                          setManualMode(true);
                         }
                       }}
                       style={{
@@ -3413,8 +3460,12 @@ export default function ABTests() {
                       onChange={(e) => {
                         const newValue = e.target.checked;
                         setManualMode(newValue);
+                        // If manual mode is turned on, autopilot must be off
                         if (newValue) {
                           setAutopilotOn(false);
+                        } else {
+                          // If manual mode is turned off, autopilot must be on (mutually exclusive)
+                          setAutopilotOn(true);
                         }
                       }}
                       style={{
