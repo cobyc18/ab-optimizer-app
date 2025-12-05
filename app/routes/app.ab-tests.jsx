@@ -3048,7 +3048,7 @@ export default function ABTests() {
                   }}>
                     <label style={{
                       display: 'block',
-                      fontSize: '14px',
+                      fontSize: '18px',
                       fontWeight: '500',
                       color: '#6B7280',
                       marginBottom: '12px'
@@ -3056,7 +3056,7 @@ export default function ABTests() {
                       Product Name
                     </label>
                     <p style={{
-                      fontSize: '16px',
+                      fontSize: '22px',
                       fontWeight: '600',
                       color: '#1F2937',
                       margin: 0,
@@ -3082,7 +3082,7 @@ export default function ABTests() {
                   }}>
                     <label style={{
                       display: 'block',
-                      fontSize: '14px',
+                      fontSize: '18px',
                       fontWeight: '500',
                       color: '#6B7280',
                       marginBottom: '12px'
@@ -3090,7 +3090,7 @@ export default function ABTests() {
                       Widget Name
                     </label>
                     <p style={{
-                      fontSize: '16px',
+                      fontSize: '22px',
                       fontWeight: '600',
                       color: '#1F2937',
                       margin: 0,
@@ -3116,7 +3116,7 @@ export default function ABTests() {
                   }}>
                     <label style={{
                       display: 'block',
-                      fontSize: '14px',
+                      fontSize: '18px',
                       fontWeight: '500',
                       color: '#6B7280',
                       marginBottom: '12px'
@@ -3137,10 +3137,10 @@ export default function ABTests() {
                         autoFocus
                         style={{
                           width: '100%',
-                          padding: '6px 12px',
+                          padding: '8px 14px',
                           border: '1px solid #3B82F6',
                           borderRadius: '4px',
-                          fontSize: '16px',
+                          fontSize: '22px',
                           fontWeight: '600',
                           color: '#1F2937',
                           outline: 'none',
@@ -3151,7 +3151,7 @@ export default function ABTests() {
                       <p
                         onClick={() => setIsEditingTestName(true)}
                         style={{
-                          fontSize: '16px',
+                          fontSize: '22px',
                           fontWeight: '600',
                           color: '#1F2937',
                           margin: 0,
@@ -3180,7 +3180,7 @@ export default function ABTests() {
                   }}>
                     <label style={{
                       display: 'block',
-                      fontSize: '14px',
+                      fontSize: '18px',
                       fontWeight: '500',
                       color: '#6B7280',
                       marginBottom: '12px'
@@ -3204,14 +3204,14 @@ export default function ABTests() {
                             padding: '8px 12px',
                             border: '1px solid #3B82F6',
                             borderRadius: '6px',
-                            fontSize: '16px',
+                            fontSize: '22px',
                             fontWeight: '600',
                             color: '#1F2937',
                             outline: 'none',
                             background: '#FFFFFF'
                           }}
                         />
-                        <span style={{ fontSize: '16px', fontWeight: '600', color: '#3B82F6' }}>-</span>
+                        <span style={{ fontSize: '22px', fontWeight: '600', color: '#3B82F6' }}>-</span>
                         <input
                           type="number"
                           min="0"
@@ -3227,7 +3227,7 @@ export default function ABTests() {
                             padding: '8px 12px',
                             border: '1px solid #3B82F6',
                             borderRadius: '6px',
-                            fontSize: '16px',
+                            fontSize: '22px',
                             fontWeight: '600',
                             color: '#1F2937',
                             outline: 'none',
@@ -3237,7 +3237,7 @@ export default function ABTests() {
                       </div>
                     ) : (
                       <p style={{
-                        fontSize: '16px',
+                        fontSize: '22px',
                         fontWeight: '600',
                         color: '#1F2937',
                         margin: 0,
@@ -3280,7 +3280,7 @@ export default function ABTests() {
                     boxSizing: 'border-box'
                   }}>
                     <h5 style={{
-                      fontSize: '16px',
+                      fontSize: '20px',
                       fontWeight: '600',
                       color: '#374151',
                       margin: '0 0 12px 0'
@@ -3288,7 +3288,7 @@ export default function ABTests() {
                       Control
                     </h5>
                     <p style={{
-                      fontSize: '14px',
+                      fontSize: '18px',
                       color: '#6B7280',
                       margin: 0,
                       lineHeight: '1.5',
@@ -3313,7 +3313,7 @@ export default function ABTests() {
                     boxSizing: 'border-box'
                   }}>
                     <h5 style={{
-                      fontSize: '16px',
+                      fontSize: '20px',
                       fontWeight: '600',
                       color: '#3B82F6',
                       margin: '0 0 12px 0'
@@ -3321,7 +3321,7 @@ export default function ABTests() {
                       Variant
                     </h5>
                     <p style={{
-                      fontSize: '14px',
+                      fontSize: '18px',
                       color: '#1E40AF',
                       margin: 0,
                       lineHeight: '1.5',
