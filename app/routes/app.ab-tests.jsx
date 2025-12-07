@@ -1796,9 +1796,7 @@ export default function ABTests() {
                               height: '200px', 
                               borderRadius: '10px', 
                               overflow: 'hidden',
-                              boxSizing: 'border-box',
-                              backgroundColor: widget.utility === 'Free Shipping Badge' ? '#FFFFFF' : 'transparent',
-                              position: 'relative'
+                              boxSizing: 'border-box'
                             }}>
                               {widget.utility === 'Free Shipping Badge' ? (
                                 <img 
@@ -1808,9 +1806,7 @@ export default function ABTests() {
                                     width: '100%',
                                     height: '100%',
                                     objectFit: 'contain',
-                                    display: 'block',
-                                    mixBlendMode: 'lighten',
-                                    filter: 'brightness(1.1)'
+                                    display: 'block'
                                   }}
                                 />
                               ) : widget.utility === 'Live Visitor Count' ? (
