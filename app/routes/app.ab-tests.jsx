@@ -3,6 +3,7 @@ import { useLoaderData, useNavigate } from "@remix-run/react";
 import React, { useState, useEffect, useCallback } from "react";
 import { authenticate } from "../shopify.server.js";
 import freeShippingBadgeImage from "../assets/free-shipping-badge.png";
+import moneyBackGuaranteeImage from "../assets/money-back-guarantee.png";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
@@ -240,10 +241,10 @@ export default function ABTests() {
     },
     {
       id: 3,
-      utility: 'Stock Alert Badge',
-      rationale: 'Creates urgency by showing limited inventory, encouraging faster purchase decisions',
-      style: 'Create Urgency',
-      preview: '⚡ Only 3 left in stock - Order soon!',
+      utility: 'Returns Guarantee Badge',
+      rationale: 'Displaying a refund guarantee builds trust by letting customers know they can shop without risk',
+      style: 'Increase Trust',
+      preview: 'Returns Guarantee Badge',
       blockId: 'simple-text-badge',
       appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
     }
@@ -254,7 +255,7 @@ export default function ABTests() {
     const colorMap = {
       'Free Shipping Badge': '#DBEAFE', // Brighter baby blue
       'Live Visitor Count': '#FEF08A', // Brighter yellow/amber
-      'Stock Alert Badge': '#FBCFE8' // Brighter pink
+      'Returns Guarantee Badge': '#DBEAFE' // Brighter baby blue (same as Free Shipping Badge)
     };
     return colorMap[utility] || '#F3F4F6'; // Default gray
   };
@@ -529,6 +530,45 @@ export default function ABTests() {
           border_radius: 8,
           border_thickness: 0,
           hover_effect: false,
+          drop_shadow: 0,
+          header_color: '#0f172a',
+          textColor: '#121212',
+          backgroundColor: '#f2f2f2',
+          border_color: '#d4d4d8'
+        });
+      }
+      
+      // Auto-populate settings for Returns Guarantee Badge
+      if (selectedWidget.id === 3 && selectedWidget.utility === 'Returns Guarantee Badge') {
+        setWidgetSettings({
+          enable_step_2: false,
+          headerText: '',
+          header_font: 'system',
+          header_font_size: 24,
+          header_underline: false,
+          bodyText: '<p><strong>90-Day Money-Back Guarantee</strong> Not totally thrilled with your purchase? No sweat! Shoot us a message within 90 days, and we\'ll hustle to set things right.</p>',
+          body_font: 'system',
+          body_font_size: 12,
+          body_underline: false,
+          header_body_spacing: 6,
+          icon_text_spacing: 10,
+          inner_padding_horizontal: 12,
+          inner_padding_vertical: 13,
+          inner_padding_horizontal_mobile: 16,
+          inner_padding_vertical_mobile: 12,
+          outer_padding_horizontal: 0,
+          outer_padding_vertical: 0,
+          outer_padding_horizontal_mobile: 0,
+          outer_padding_vertical_mobile: 0,
+          icon_choice: 'none',
+          icon_custom: '',
+          icon_blink: false,
+          icon_blink_intensity: 50,
+          icon_size: 18,
+          icon_size_mobile: 30,
+          border_radius: 8,
+          border_thickness: 0,
+          hover_effect: true,
           drop_shadow: 0,
           header_color: '#0f172a',
           textColor: '#121212',
@@ -1831,43 +1871,17 @@ export default function ABTests() {
                                 }}>
                                   "{widget.preview}"
                                 </div>
-                              ) : widget.utility === 'Stock Alert Badge' ? (
-                                <div style={{
-                                  background: '#F3F4F6',
-                                  border: '1px solid #E5E7EB',
-                                  padding: '20px',
-                                  borderRadius: '8px',
-                                  fontSize: '16px',
-                                  color: '#9F1239',
-                                  textAlign: 'left',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '12px',
-                                  wordWrap: 'break-word',
-                                  overflowWrap: 'break-word',
-                                  boxSizing: 'border-box',
-                                  width: '100%',
-                                  height: '100%',
-                                  minHeight: '200px'
-                                }}>
-                                  <div style={{
-                                    display: 'flex',
-                                    gap: '4px',
-                                    flexShrink: 0,
-                                    fontSize: '24px',
-                                    color: '#FCD34D'
-                                  }}>
-                                    ⚡⚡
-                                  </div>
-                                  <span style={{ 
-                                    wordWrap: 'break-word', 
-                                    overflowWrap: 'break-word',
-                                    flex: 1,
-                                    minWidth: 0
-                                  }}>
-                                    {widget.preview.replace('⚡ ', '')}
-                                  </span>
-                                </div>
+                              ) : widget.utility === 'Returns Guarantee Badge' ? (
+                                <img 
+                                  src={moneyBackGuaranteeImage} 
+                                  alt="Returns Guarantee Badge"
+                                  style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'contain',
+                                    display: 'block'
+                                  }}
+                                />
                               ) : null}
                             </div>
 
