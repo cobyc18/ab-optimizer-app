@@ -40,98 +40,7 @@
   function init() {
     refreshBadges();
     registerConfigListener();
-    observeDataAttributeChanges();
-  }
-
-  function observeDataAttributeChanges() {
-    if (window.__badgeMutationObserver) return; // Already initialized
-    
-    // Use MutationObserver to watch for data attribute changes
-    // This handles cases where settings are updated via API without theme editor events
-    var observer = new MutationObserver(function(mutations) {
-      var shouldRefresh = false;
-      mutations.forEach(function(mutation) {
-        if (mutation.type === 'attributes') {
-          var target = mutation.target;
-          if (target.classList && target.classList.contains('simple-text-badge-widget')) {
-            // Any data attribute change on a badge widget should trigger refresh
-            if (mutation.attributeName && mutation.attributeName.startsWith('data-')) {
-              shouldRefresh = true;
-            }
-          }
-        } else if (mutation.type === 'childList') {
-          // Check if a badge widget was added or removed
-          mutation.addedNodes.forEach(function(node) {
-            if (node.nodeType === 1 && 
-                node.classList && 
-                node.classList.contains('simple-text-badge-widget')) {
-              shouldRefresh = true;
-            }
-          });
-          mutation.removedNodes.forEach(function(node) {
-            if (node.nodeType === 1 && 
-                node.classList && 
-                node.classList.contains('simple-text-badge-widget')) {
-              shouldRefresh = true;
-            }
-          });
-        }
-      });
-      if (shouldRefresh) {
-        // Debounce rapid changes
-        clearTimeout(window.__badgeRefreshTimeout);
-        window.__badgeRefreshTimeout = setTimeout(function() {
-          refreshBadges();
-        }, 150);
-      }
-    });
-
-    // Observe all existing badge containers for attribute changes
-    function observeBadge(badge) {
-      observer.observe(badge, {
-        attributes: true,
-        attributeFilter: ['data-header-text', 'data-body-text', 'data-text-color', 
-                          'data-background-color', 'data-border-color', 'data-icon-choice',
-                          'data-icon-url', 'data-icon-text-spacing', 'data-header-body-spacing',
-                          'data-inner-padding-x', 'data-inner-padding-y', 'data-border-radius',
-                          'data-border-thickness', 'data-hover-effect', 'data-drop-shadow',
-                          'data-header-font', 'data-header-font-size', 'data-header-underline',
-                          'data-body-font', 'data-body-font-size', 'data-body-underline',
-                          'data-header-color', 'data-icon-size', 'data-icon-size-mobile',
-                          'data-inner-padding-x-mobile', 'data-inner-padding-y-mobile',
-                          'data-outer-padding-x', 'data-outer-padding-y',
-                          'data-outer-padding-x-mobile', 'data-outer-padding-y-mobile',
-                          'data-icon-blink', 'data-icon-blink-intensity', 'data-enable-step-2']
-      });
-    }
-
-    // Observe existing badges
-    document.querySelectorAll('.simple-text-badge-widget').forEach(observeBadge);
-
-    // Also observe the document for new badge containers that might be added dynamically
-    var documentObserver = new MutationObserver(function(mutations) {
-      mutations.forEach(function(mutation) {
-        mutation.addedNodes.forEach(function(node) {
-          if (node.nodeType === 1) { // Element node
-            var newBadges = [];
-            if (node.classList && node.classList.contains('simple-text-badge-widget')) {
-              newBadges = [node];
-            } else if (node.querySelectorAll) {
-              newBadges = Array.from(node.querySelectorAll('.simple-text-badge-widget'));
-            }
-            newBadges.forEach(observeBadge);
-          }
-        });
-      });
-    });
-
-    documentObserver.observe(document.body, {
-      childList: true,
-      subtree: true
-    });
-
-    window.__badgeMutationObserver = observer;
-    window.__badgeDocumentObserver = documentObserver;
+    registerThemeEditorListeners();
   }
 
   function refreshBadges() {
@@ -146,6 +55,32 @@
     if (window.__simpleTextBadgeConfigListenerAdded) return;
     window.addEventListener('abTestWidgetConfigUpdate', refreshBadges);
     window.__simpleTextBadgeConfigListenerAdded = true;
+  }
+
+  function registerThemeEditorListeners() {
+    // Prevent duplicate listeners
+    if (window.__simpleTextBadgeThemeEditorListenersAdded) return;
+    
+    // Listen for section load events (fires when section is added/re-rendered)
+    // This is the standard Shopify way to handle theme editor updates
+    document.addEventListener('shopify:section:load', function(event) {
+      // Re-execute JavaScript as if page just loaded
+      // This fixes alignment issues when settings are updated via API
+      refreshBadges();
+    });
+
+    // Also listen for block select (when merchant selects the block in editor)
+    document.addEventListener('shopify:block:select', function(event) {
+      // Refresh badges when block is selected to ensure latest settings are displayed
+      refreshBadges();
+    });
+
+    // Listen for block deselect to ensure settings are synced
+    document.addEventListener('shopify:block:deselect', function(event) {
+      refreshBadges();
+    });
+
+    window.__simpleTextBadgeThemeEditorListenersAdded = true;
   }
 
   function renderBadge(container) {
@@ -472,22 +407,6 @@
 
     return null;
   }
-
-  // Theme editor event listeners - refresh widget when section/block is updated
-  document.addEventListener('shopify:section:load', function(event) {
-    // Re-initialize all badges when section loads/re-renders
-    refreshBadges();
-  });
-
-  document.addEventListener('shopify:block:select', function(event) {
-    // Refresh badges when block is selected to ensure latest settings are displayed
-    refreshBadges();
-  });
-
-  document.addEventListener('shopify:block:deselect', function(event) {
-    // Refresh badges when block is deselected to ensure settings are synced
-    refreshBadges();
-  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
