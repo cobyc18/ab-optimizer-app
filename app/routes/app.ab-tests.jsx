@@ -1758,43 +1758,16 @@ export default function ABTests() {
                               boxSizing: 'border-box'
                             }}>
                               {widget.utility === 'Free Shipping Badge' ? (
-                                <div style={{
-                                  background: '#F3F4F6',
-                                  border: '1px solid #E5E7EB',
-                                  padding: '20px',
-                                  borderRadius: '8px',
-                                  fontSize: '16px',
-                                  color: '#1E3A8A',
-                                  textAlign: 'left',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  gap: '12px',
-                                  wordWrap: 'break-word',
-                                  overflowWrap: 'break-word',
-                                  boxSizing: 'border-box',
-                                  width: '100%',
-                                  height: '100%',
-                                  minHeight: '200px'
-                                }}>
-                                  <div style={{
-                                    width: '28px',
-                                    height: '28px',
-                                    flexShrink: 0
-                                  }}>
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#1E3A8A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                      <path d="M1 3h15v13H1zM16 8h4l3 3v5h-7z"/>
-                                      <path d="M1 8h15M16 8v8"/>
-                                    </svg>
-                                  </div>
-                                  <span style={{ 
-                                    wordWrap: 'break-word', 
-                                    overflowWrap: 'break-word',
-                                    flex: 1,
-                                    minWidth: 0
-                                  }}>
-                                    {widget.preview}
-                                  </span>
-                                </div>
+                                <img 
+                                  src="/screenshots/free-shipping-badge.png" 
+                                  alt="Free Shipping Badge"
+                                  style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'contain',
+                                    display: 'block'
+                                  }}
+                                />
                               ) : widget.utility === 'Live Visitor Count' ? (
                                 <div style={{
                                   background: '#F8FAFC',
