@@ -2,6 +2,7 @@ import { json } from "@remix-run/node";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import React, { useState, useEffect, useCallback } from "react";
 import { authenticate } from "../shopify.server.js";
+import freeShippingBadgeImage from "../assets/free-shipping-badge.png";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
@@ -1755,43 +1756,19 @@ export default function ABTests() {
                               height: '200px', 
                               borderRadius: '10px', 
                               overflow: 'hidden',
-                              boxSizing: 'border-box',
-                              display: 'flex',
-                              alignItems: 'center',
-                              justifyContent: 'center',
-                              backgroundColor: '#FFFFFF',
-                              position: 'relative'
+                              boxSizing: 'border-box'
                             }}>
                               {widget.utility === 'Free Shipping Badge' ? (
-                                <div style={{
-                                  width: '100%',
-                                  height: '100%',
-                                  position: 'relative',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  backgroundColor: '#FFFFFF'
-                                }}>
-                                  <img 
-                                    src="/screenshots/free-shipping-badge.png" 
-                                    alt="Free Shipping Badge"
-                                    style={{
-                                      maxWidth: '100%',
-                                      maxHeight: '100%',
-                                      width: 'auto',
-                                      height: 'auto',
-                                      objectFit: 'contain',
-                                      display: 'block',
-                                      borderRadius: '10px',
-                                      mixBlendMode: 'screen',
-                                      filter: 'brightness(1) contrast(1)'
-                                    }}
-                                    onError={(e) => {
-                                      console.error('Image failed to load:', e.target.src);
-                                      e.target.style.display = 'none';
-                                    }}
-                                  />
-                                </div>
+                                <img 
+                                  src={freeShippingBadgeImage} 
+                                  alt="Free Shipping Badge"
+                                  style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'contain',
+                                    display: 'block'
+                                  }}
+                                />
                               ) : widget.utility === 'Live Visitor Count' ? (
                                 <div style={{
                                   background: '#F8FAFC',
