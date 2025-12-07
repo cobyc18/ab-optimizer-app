@@ -64,20 +64,35 @@
     // Listen for section load events (fires when section is added/re-rendered)
     // This is the standard Shopify way to handle theme editor updates
     document.addEventListener('shopify:section:load', function(event) {
-      // Re-execute JavaScript as if page just loaded
-      // This fixes alignment issues when settings are updated via API
-      refreshBadges();
+      // Use requestAnimationFrame to ensure DOM has updated with new data attributes
+      // This is critical when settings are updated via API - the event fires before DOM updates
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          // Double RAF ensures we're after the browser's layout/paint cycle
+          // This fixes alignment issues when settings are updated via API
+          refreshBadges();
+        });
+      });
     });
 
     // Also listen for block select (when merchant selects the block in editor)
     document.addEventListener('shopify:block:select', function(event) {
-      // Refresh badges when block is selected to ensure latest settings are displayed
-      refreshBadges();
+      // Use requestAnimationFrame to ensure DOM has updated
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          // Refresh badges when block is selected to ensure latest settings are displayed
+          refreshBadges();
+        });
+      });
     });
 
     // Listen for block deselect to ensure settings are synced
     document.addEventListener('shopify:block:deselect', function(event) {
-      refreshBadges();
+      requestAnimationFrame(function() {
+        requestAnimationFrame(function() {
+          refreshBadges();
+        });
+      });
     });
 
     window.__simpleTextBadgeThemeEditorListenersAdded = true;
