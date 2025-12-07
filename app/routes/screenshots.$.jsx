@@ -10,8 +10,24 @@ export async function loader({ params, request }) {
   }
 
   try {
-    const filePath = join(process.cwd(), "public", "screenshots", filename);
-    const fileBuffer = await readFile(filePath);
+    // Try app/assets first (for production), then fallback to public/screenshots
+    const appAssetsPath = join(process.cwd(), "app", "assets", filename);
+    const publicScreenshotsPath = join(process.cwd(), "public", "screenshots", filename);
+    
+    let filePath;
+    let fileBuffer;
+    
+    try {
+      fileBuffer = await readFile(appAssetsPath);
+      filePath = appAssetsPath;
+    } catch (appError) {
+      try {
+        fileBuffer = await readFile(publicScreenshotsPath);
+        filePath = publicScreenshotsPath;
+      } catch (publicError) {
+        throw new Error(`File not found in app/assets or public/screenshots: ${filename}`);
+      }
+    }
     
     // Determine content type based on file extension
     const contentType = filename.endsWith(".png") 
