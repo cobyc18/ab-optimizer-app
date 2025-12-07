@@ -497,6 +497,46 @@ export default function ABTests() {
     
     if (direction === 'like') {
       const selectedWidget = abTestIdeas[currentWidgetIndex];
+      
+      // Auto-populate settings for Free Shipping Badge
+      if (selectedWidget.id === 2 && selectedWidget.utility === 'Free Shipping Badge') {
+        setWidgetSettings({
+          enable_step_2: false,
+          headerText: '',
+          header_font: 'system',
+          header_font_size: 24,
+          header_underline: false,
+          bodyText: 'Ships free - no surprises at checkout',
+          body_font: 'system',
+          body_font_size: 13,
+          body_underline: false,
+          header_body_spacing: 6,
+          icon_text_spacing: 10,
+          inner_padding_horizontal: 12,
+          inner_padding_vertical: 13,
+          inner_padding_horizontal_mobile: 13,
+          inner_padding_vertical_mobile: 12,
+          outer_padding_horizontal: 0,
+          outer_padding_vertical: 0,
+          outer_padding_horizontal_mobile: 0,
+          outer_padding_vertical_mobile: 0,
+          icon_choice: 'none',
+          icon_custom: 'shopify://shop_images/039-delivery.png',
+          icon_blink: false,
+          icon_blink_intensity: 50,
+          icon_size: 18,
+          icon_size_mobile: 18,
+          border_radius: 8,
+          border_thickness: 0,
+          hover_effect: false,
+          drop_shadow: 0,
+          header_color: '#0f172a',
+          textColor: '#121212',
+          backgroundColor: '#f2f2f2',
+          border_color: '#d4d4d8'
+        });
+      }
+      
       applyWidgetIdeaSelection(selectedWidget);
       setTimeout(() => {
         setCurrentStep(1);
@@ -1756,7 +1796,9 @@ export default function ABTests() {
                               height: '200px', 
                               borderRadius: '10px', 
                               overflow: 'hidden',
-                              boxSizing: 'border-box'
+                              boxSizing: 'border-box',
+                              backgroundColor: widget.utility === 'Free Shipping Badge' ? '#FFFFFF' : 'transparent',
+                              position: 'relative'
                             }}>
                               {widget.utility === 'Free Shipping Badge' ? (
                                 <img 
@@ -1766,7 +1808,9 @@ export default function ABTests() {
                                     width: '100%',
                                     height: '100%',
                                     objectFit: 'contain',
-                                    display: 'block'
+                                    display: 'block',
+                                    mixBlendMode: 'lighten',
+                                    filter: 'brightness(1.1)'
                                   }}
                                 />
                               ) : widget.utility === 'Live Visitor Count' ? (
@@ -2656,31 +2700,34 @@ export default function ABTests() {
                 </h4>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#374151',
-                      marginBottom: '8px'
-                    }}>
-                      Header Text
-                    </label>
-                    <input
-                      type="text"
-                      value={widgetSettings.headerText}
-                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, headerText: e.target.value }))}
-                      placeholder="Enter header text..."
-                      style={{
-                        width: '100%',
-                        padding: '12px 16px',
-                        border: '1px solid #D1D5DB',
-                        borderRadius: '8px',
+                  {/* Header Text - Only show if headerText is not empty */}
+                  {widgetSettings.headerText && widgetSettings.headerText.trim() !== '' && (
+                    <div>
+                      <label style={{
+                        display: 'block',
                         fontSize: '14px',
-                        background: '#FFFFFF'
-                      }}
-                    />
-                  </div>
+                        fontWeight: '500',
+                        color: '#374151',
+                        marginBottom: '8px'
+                      }}>
+                        Header Text
+                      </label>
+                      <input
+                        type="text"
+                        value={widgetSettings.headerText}
+                        onChange={(e) => setWidgetSettings(prev => ({ ...prev, headerText: e.target.value }))}
+                        placeholder="Enter header text..."
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          border: '1px solid #D1D5DB',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          background: '#FFFFFF'
+                        }}
+                      />
+                    </div>
+                  )}
 
                   <div>
                     <label style={{
