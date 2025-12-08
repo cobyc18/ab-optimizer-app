@@ -73,44 +73,27 @@
     const bodyElement = badge.querySelector('.badge-body');
     if (!bodyElement) return;
     
-    // Extract the current count from the body text (look for numbers)
-    const bodyText = bodyElement.textContent || bodyElement.innerText || '';
-    const countMatch = bodyText.match(/\d+/);
-    if (!countMatch) return;
-    
     const minCount = parseInt(container.dataset.countMin) || 40;
     const maxCount = parseInt(container.dataset.countMax) || 60;
+    
     const validMin = Math.min(minCount, maxCount);
     const validMax = Math.max(minCount, maxCount);
     
-    // Get the initial count from the text
-    const initialCount = parseInt(countMatch[0]);
+    // Extract the current count from the body text (look for numbers)
+    const bodyText = bodyElement.textContent || bodyElement.innerText || '';
+    const countMatch = bodyText.match(/\d+/);
     
-    // If the text shows 0, start from a random value within the range
-    // Otherwise, use the number found, clamped to the valid range
+    // If no number found or it's 0, start from middle of range
     let currentCount;
-    if (initialCount === 0) {
-      // Start from a random value within the range
-      currentCount = Math.floor(Math.random() * (validMax - validMin + 1)) + validMin;
+    if (!countMatch || parseInt(countMatch[0]) === 0) {
+      currentCount = Math.floor((validMin + validMax) / 2);
+      // Update the display immediately if starting from 0
+      if (countMatch && parseInt(countMatch[0]) === 0) {
+        const countRegex = new RegExp('\\b0\\b', 'g');
+        bodyElement.innerHTML = bodyElement.innerHTML.replace(countRegex, String(currentCount));
+      }
     } else {
-      // Use the found number, clamped to the valid range
-      currentCount = Math.max(validMin, Math.min(validMax, initialCount));
-    }
-    
-    // Store the original HTML content
-    const originalHTML = bodyElement.innerHTML;
-    const countPlaceholder = countMatch[0];
-    
-    // Create regex to find and replace the number (including 0)
-    // Use word boundary to match whole numbers only
-    const countRegex = new RegExp('\\b' + countPlaceholder + '\\b', 'g');
-    
-    // If starting from 0, immediately update to the initial random value
-    if (initialCount === 0) {
-      setTimeout(function() {
-        const updatedHTML = bodyElement.innerHTML.replace(countRegex, String(currentCount));
-        bodyElement.innerHTML = updatedHTML;
-      }, 100);
+      currentCount = Math.max(validMin, Math.min(validMax, parseInt(countMatch[0]) || validMin));
     }
     
     function updateVisitorCount() {
@@ -122,12 +105,16 @@
         bodyElement.classList.add('updating');
         currentCount = newCount;
         
-        setTimeout(function() {
-          // Replace the number in the HTML while preserving structure
-          const updatedHTML = bodyElement.innerHTML.replace(countRegex, String(currentCount));
-          bodyElement.innerHTML = updatedHTML;
-          bodyElement.classList.remove('updating');
-        }, 150);
+        // Find and replace any number in the body text
+        const currentText = bodyElement.textContent || bodyElement.innerText || '';
+        const numberMatch = currentText.match(/\d+/);
+        if (numberMatch) {
+          const numberRegex = new RegExp('\\b' + numberMatch[0] + '\\b', 'g');
+          setTimeout(function() {
+            bodyElement.innerHTML = bodyElement.innerHTML.replace(numberRegex, String(currentCount));
+            bodyElement.classList.remove('updating');
+          }, 150);
+        }
       }
     }
     
@@ -139,7 +126,6 @@
       }, delay);
     }
     
-    // Start the update cycle
     scheduleNextUpdate();
   }
 
