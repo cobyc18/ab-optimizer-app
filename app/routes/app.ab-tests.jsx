@@ -213,7 +213,9 @@ export default function ABTests() {
     header_color: '#0f172a',
     textColor: '#1a5f5f',
     backgroundColor: '#f5f5f0',
-    border_color: '#d4d4d8'
+    border_color: '#d4d4d8',
+    count_min: 40,
+    count_max: 60
   });
   const [isVariantTemplateReady, setIsVariantTemplateReady] = useState(false);
   const [isVariantRequestInFlight, setIsVariantRequestInFlight] = useState(false);
@@ -534,7 +536,9 @@ export default function ABTests() {
           header_color: '#0f172a',
           textColor: '#1a5f5f',
           backgroundColor: '#f5f5f0',
-          border_color: '#d4d4d8'
+          border_color: '#d4d4d8',
+          count_min: 40,
+          count_max: 60
         });
       }
       
@@ -1076,8 +1080,8 @@ export default function ABTests() {
         // If this is Live Visitor Count, add the conversion play type and count settings
         if (selectedIdea?.utility === 'Live Visitor Count') {
           finalBlockSettings.conversion_play_type = 'live-visitor-count';
-          finalBlockSettings.count_min = 40;
-          finalBlockSettings.count_max = 60;
+          finalBlockSettings.count_min = widgetSettings.count_min || 40;
+          finalBlockSettings.count_max = widgetSettings.count_max || 60;
         }
 
         const updateBlockSettings = async (attempt = 1, maxAttempts = 5) => {
@@ -2812,6 +2816,89 @@ export default function ABTests() {
                       }}
                     />
                   </div>
+
+                  {/* Visitor Count Range - Only show for Live Visitor Count */}
+                  {selectedIdea?.utility === 'Live Visitor Count' && (
+                    <>
+                      <div>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#374151',
+                          marginBottom: '8px'
+                        }}>
+                          Minimum Visitor Count
+                        </label>
+                        <input
+                          type="number"
+                          value={widgetSettings.count_min}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value, 10);
+                            if (!isNaN(value) && value >= 0) {
+                              setWidgetSettings(prev => ({ ...prev, count_min: value }));
+                            }
+                          }}
+                          placeholder="40"
+                          min="0"
+                          style={{
+                            width: '100%',
+                            padding: '12px 16px',
+                            border: '1px solid #D1D5DB',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            background: '#FFFFFF'
+                          }}
+                        />
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '4px 0 0 0'
+                        }}>
+                          The minimum number for the visitor count fluctuation
+                        </p>
+                      </div>
+
+                      <div>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#374151',
+                          marginBottom: '8px'
+                        }}>
+                          Maximum Visitor Count
+                        </label>
+                        <input
+                          type="number"
+                          value={widgetSettings.count_max}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value, 10);
+                            if (!isNaN(value) && value >= 0) {
+                              setWidgetSettings(prev => ({ ...prev, count_max: value }));
+                            }
+                          }}
+                          placeholder="60"
+                          min="0"
+                          style={{
+                            width: '100%',
+                            padding: '12px 16px',
+                            border: '1px solid #D1D5DB',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            background: '#FFFFFF'
+                          }}
+                        />
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '4px 0 0 0'
+                        }}>
+                          The maximum number for the visitor count fluctuation
+                        </p>
+                      </div>
+                    </>
+                  )}
 
                   <div>
                     <label style={{
