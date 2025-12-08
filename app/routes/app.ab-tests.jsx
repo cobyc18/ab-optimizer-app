@@ -137,9 +137,7 @@ export default function ABTests() {
   // Wizard screenshot state
   const [wizardScreenshot, setWizardScreenshot] = useState(null);
   const [wizardScreenshotLoading, setWizardScreenshotLoading] = useState(false);
-  const [wizardStorePassword, setWizardStorePassword] = useState('');
   const [storePassword, setStorePassword] = useState('');
-  const [isDevelopmentStore, setIsDevelopmentStore] = useState(false);
   const [productSearchQuery, setProductSearchQuery] = useState('');
   const [currentProductPage, setCurrentProductPage] = useState(1);
   
@@ -2476,102 +2474,6 @@ export default function ABTests() {
               );
             })()}
 
-            {/* Development Store Toggle - Moved below products */}
-            <div style={{
-              marginBottom: '24px'
-            }}>
-              {/* Toggle Switch */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: '12px',
-                marginBottom: isDevelopmentStore ? '16px' : '0'
-              }}>
-                <h4 style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#1F2937',
-                  margin: 0
-                }}>
-                  Using a Development Store?
-                </h4>
-                <label style={{
-                  position: 'relative',
-                  display: 'inline-block',
-                  width: '48px',
-                  height: '24px',
-                  flexShrink: 0
-                }}>
-                  <input
-                    type="checkbox"
-                    checked={isDevelopmentStore}
-                    onChange={(e) => setIsDevelopmentStore(e.target.checked)}
-                    style={{
-                      opacity: 0,
-                      width: 0,
-                      height: 0
-                    }}
-                  />
-                  <span style={{
-                    position: 'absolute',
-                    cursor: 'pointer',
-                    top: 0,
-                    left: 0,
-                    right: 0,
-                    bottom: 0,
-                    backgroundColor: isDevelopmentStore ? '#3B82F6' : '#D1D5DB',
-                    borderRadius: '24px',
-                    transition: '0.3s',
-                    display: 'flex',
-                    alignItems: 'center',
-                    padding: '2px'
-                  }}>
-                    <span style={{
-                      content: '""',
-                      position: 'absolute',
-                      height: '20px',
-                      width: '20px',
-                      left: isDevelopmentStore ? '26px' : '2px',
-                      backgroundColor: '#FFFFFF',
-                      borderRadius: '50%',
-                      transition: '0.3s',
-                      boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                    }} />
-                  </span>
-                </label>
-              </div>
-              
-              {/* Password Input - Only shown when toggle is on */}
-              {isDevelopmentStore && (
-                <div style={{
-                  marginTop: '16px'
-                }}>
-                  <p style={{
-                    fontSize: '14px',
-                    color: '#6B7280',
-                    margin: '0 0 12px 0'
-                  }}>
-                    Please enter your development store's password
-                  </p>
-                  <input
-                    type="password"
-                    value={wizardStorePassword}
-                    onChange={(e) => setWizardStorePassword(e.target.value)}
-                    placeholder="Enter store password..."
-                    style={{
-                      width: '400px',
-                      maxWidth: '100%',
-                      padding: '12px 16px',
-                      border: '1px solid #D1D5DB',
-                      borderRadius: '8px',
-                      fontSize: '14px',
-                      background: '#FFFFFF'
-                    }}
-                  />
-                </div>
-              )}
-            </div>
-            
             {/* Next Button */}
             <div style={{
               display: 'flex',
@@ -2581,7 +2483,7 @@ export default function ABTests() {
             }}>
               <button
                 onClick={async () => {
-                  if (selectedProduct && (!isDevelopmentStore || wizardStorePassword.trim())) {
+                  if (selectedProduct) {
                     // Trigger template duplication when moving to step 2
                     const result = await createVariantTemplate();
                     if (result?.success) {
@@ -2601,22 +2503,22 @@ export default function ABTests() {
                     }
                   }
                 }}
-                disabled={!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim()) || isVariantRequestInFlight}
+                disabled={!selectedProduct || isVariantRequestInFlight}
                 style={{
                   padding: '12px 32px',
                   fontSize: '16px',
                   fontWeight: '600',
                   color: '#FFFFFF',
-                  background: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim()) || isVariantRequestInFlight) 
+                  background: (!selectedProduct || isVariantRequestInFlight) 
                     ? '#D1D5DB' 
                     : '#3B82F6',
                   border: 'none',
                   borderRadius: '8px',
-                  cursor: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim()) || isVariantRequestInFlight) 
+                  cursor: (!selectedProduct || isVariantRequestInFlight) 
                     ? 'not-allowed' 
                     : 'pointer',
                   transition: 'all 0.2s ease',
-                  opacity: (!selectedProduct || (isDevelopmentStore && !wizardStorePassword.trim()) || isVariantRequestInFlight) 
+                  opacity: (!selectedProduct || isVariantRequestInFlight) 
                     ? 0.6 
                     : 1
                 }}
@@ -2637,127 +2539,235 @@ export default function ABTests() {
           </div>
         )}
 
-        {/* Step 2: Save Widget & Configure Settings */}
+        {/* Step 3: Install your widget */}
         {currentStep === 2 && (
           <div style={{
             animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             transform: 'translateX(0)',
-            opacity: 1
+            opacity: 1,
+            maxWidth: '800px',
+            margin: '0 auto'
           }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
+            <h2 style={{
+              fontSize: '32px',
+              fontWeight: '700',
               color: '#1F2937',
-              marginBottom: '8px'
+              marginBottom: '12px'
             }}>
-              Save Widget & Configure Settings
-            </h3>
+              Install your widget
+            </h2>
             <p style={{
-              fontSize: '14px',
+              fontSize: '16px',
               color: '#6B7280',
-              marginBottom: '24px'
+              marginBottom: '40px'
             }}>
-              First, save the empty widget in the theme editor, then configure your widget settings below
+              TryLab has already inserted your widget into your product template. Just click Save in Shopify.
             </p>
 
+            {/* Step 1: Open Shopify Theme Editor */}
             <div style={{
-              background: '#FEF3C7',
-              padding: '20px',
-              borderRadius: '12px',
-              border: '1px solid #F59E0B',
-              marginBottom: '24px'
+              marginBottom: '32px'
             }}>
-              <h4 style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#92400E',
-                margin: '0 0 12px 0',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}>
-                <span style={{ 
-                  background: '#F59E0B', 
-                  color: 'white', 
-                  borderRadius: '50%', 
-                  width: '20px', 
-                  height: '20px', 
-                  display: 'flex', 
-                  alignItems: 'center', 
-                  justifyContent: 'center', 
-                  fontSize: '12px', 
-                  fontWeight: 'bold' 
-                }}>1</span>
-                Save Empty Widget in Theme Editor
-              </h4>
-              <p style={{
-                fontSize: '14px',
-                color: '#92400E',
-                margin: '0 0 16px 0'
-              }}>
-                Click the button below to open the theme editor, then save the template to add the empty widget. Close the tab and return here to configure the widget settings.
-              </p>
               <div style={{
                 display: 'flex',
-                flexDirection: 'column',
-                alignItems: 'center',
-                gap: '12px'
+                alignItems: 'flex-start',
+                gap: '16px',
+                marginBottom: '16px'
               }}>
-                <button
-                  onClick={openVariantInThemeEditor}
-                  disabled={!canOpenThemeEditor}
-                  style={{
-                    padding: '12px 24px',
-                    background: canOpenThemeEditor ? '#F59E0B' : '#9CA3AF',
-                    color: '#FFFFFF',
-                    borderRadius: '8px',
-                    border: `1px solid ${canOpenThemeEditor ? '#F59E0B' : '#9CA3AF'}`,
-                    cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
-                    opacity: canOpenThemeEditor ? 1 : 0.7,
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#3B82F6',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  flexShrink: 0
+                }}>
+                  1
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    margin: '0 0 8px 0'
+                  }}>
+                    Open Shopify Theme Editor
+                  </h3>
+                  <p style={{
                     fontSize: '14px',
-                    fontWeight: '600'
-                  }}
-                >
-                  {isVariantRequestInFlight && !isVariantTemplateReady ? 'Preparing Theme Editor…' : 'Open in Theme Editor'}
-                </button>
-                <span style={{ fontSize: '12px', color: '#92400E', textAlign: 'center' }}>
-                  Opens template <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>
-                  {wizardVariantProductHandle ? `, previewing /products/${wizardVariantProductHandle}${wizardVariantName ? `?view=${wizardVariantName}` : ''}` : ''}
-                </span>
+                    color: '#6B7280',
+                    margin: '0 0 16px 0',
+                    lineHeight: '1.5'
+                  }}>
+                    This opens your product template with the TryLab widget pre-added.
+                  </p>
+                  <button
+                    onClick={openVariantInThemeEditor}
+                    disabled={!canOpenThemeEditor}
+                    style={{
+                      padding: '12px 24px',
+                      background: canOpenThemeEditor ? '#3B82F6' : '#9CA3AF',
+                      color: '#FFFFFF',
+                      borderRadius: '8px',
+                      border: 'none',
+                      cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '8px'
+                    }}
+                  >
+                    {isVariantRequestInFlight && !isVariantTemplateReady ? 'Preparing Theme Editor…' : 'Open Theme Editor'}
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                      <path d="M10 8H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </button>
+                </div>
               </div>
             </div>
 
+            {/* Step 2: Press Save in Shopify */}
             <div style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              justifyContent: 'center',
-              padding: '20px',
-              background: '#F3F4F6',
-              borderRadius: '12px',
-              border: '1px solid #D1D5DB',
-              marginBottom: '24px'
+              marginBottom: '32px'
             }}>
-              <p style={{
-                fontSize: '16px',
-                color: '#374151',
-                margin: '0 0 16px 0',
-                textAlign: 'center',
-                fontWeight: '500'
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '16px',
+                marginBottom: '16px'
               }}>
-                After saving in the theme editor, click below to verify the widget was saved:
-              </p>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#9CA3AF',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  flexShrink: 0
+                }}>
+                  2
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    margin: '0 0 8px 0'
+                  }}>
+                    Press Save in Shopify
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    margin: '0 0 16px 0',
+                    lineHeight: '1.5'
+                  }}>
+                    Look for the green Save button in the top-right corner of your theme editor.
+                  </p>
+                  <div style={{
+                    background: '#F3F4F6',
+                    border: '1px solid #E5E7EB',
+                    borderRadius: '8px',
+                    padding: '16px',
+                    display: 'inline-block'
+                  }}>
+                    <button style={{
+                      padding: '8px 16px',
+                      background: '#10B981',
+                      color: '#FFFFFF',
+                      borderRadius: '6px',
+                      border: 'none',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      cursor: 'default'
+                    }}>
+                      Save
+                    </button>
+                    <p style={{
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      margin: '8px 0 0 0',
+                      textAlign: 'center'
+                    }}>
+                      Click the green Save button
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Step 3: Return here */}
+            <div style={{
+              marginBottom: '32px'
+            }}>
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-start',
+                gap: '16px',
+                marginBottom: '24px'
+              }}>
+                <div style={{
+                  width: '32px',
+                  height: '32px',
+                  borderRadius: '50%',
+                  background: '#9CA3AF',
+                  color: '#FFFFFF',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '16px',
+                  fontWeight: '600',
+                  flexShrink: 0
+                }}>
+                  3
+                </div>
+                <div style={{ flex: 1 }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    margin: '0 0 8px 0'
+                  }}>
+                    Return here
+                  </h3>
+                  <p style={{
+                    fontSize: '14px',
+                    color: '#6B7280',
+                    margin: 0,
+                    lineHeight: '1.5'
+                  }}>
+                    We'll verify your installation automatically.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* I've saved in Shopify button */}
+            <div style={{
+              marginBottom: '40px'
+            }}>
               <button
                 onClick={checkIfBlockSaved}
                 disabled={isCheckingBlockSaved}
                 style={{
-                  padding: '12px 24px',
-                  background: isCheckingBlockSaved ? '#9CA3AF' : '#10B981',
+                  padding: '12px 32px',
+                  background: isCheckingBlockSaved ? '#9CA3AF' : '#3B82F6',
                   color: '#FFFFFF',
                   borderRadius: '8px',
-                  border: `1px solid ${isCheckingBlockSaved ? '#9CA3AF' : '#10B981'}`,
+                  border: 'none',
                   cursor: isCheckingBlockSaved ? 'not-allowed' : 'pointer',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   fontWeight: '600',
                   display: 'flex',
                   alignItems: 'center',
@@ -2778,7 +2788,7 @@ export default function ABTests() {
                   </>
                 ) : (
                   <>
-                    {isBlockSaved ? '✅ Widget Saved' : 'Check if Saved'}
+                    I've saved in Shopify
                   </>
                 )}
               </button>
@@ -2787,65 +2797,103 @@ export default function ABTests() {
                   fontSize: '14px',
                   color: '#059669',
                   margin: '12px 0 0 0',
-                  textAlign: 'center',
                   fontWeight: '500'
                 }}>
-                  ✅ Widget successfully saved! You can now configure the settings below.
+                  ✅ Installation verified! You can proceed to the next step.
                 </p>
               )}
             </div>
 
-            {selectedIdea?.blockId === 'simple-text-badge' && !isBlockSaved && (
-              <div style={{
-                padding: '20px',
-                background: '#FEF3C7',
-                borderRadius: '8px',
-                border: '1px solid #F59E0B',
-                textAlign: 'center',
-                marginBottom: '24px'
-              }}>
-                <p style={{
+            {/* Back button */}
+            <div style={{
+              marginTop: '40px'
+            }}>
+              <button
+                onClick={() => setCurrentStep(1)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#6B7280',
                   fontSize: '14px',
-                  color: '#92400E',
-                  margin: 0,
-                  fontWeight: '500'
-                }}>
-                  ⚠️ Please save the widget in the theme editor first, then click "Check if Saved" to enable widget configuration.
-                </p>
-              </div>
-            )}
-            
-            {selectedIdea?.blockId === 'simple-text-badge' && isBlockSaved && (
-              <div style={{
-                background: '#F0F9FF',
-                padding: '20px',
-                borderRadius: '12px',
-                border: '1px solid #0EA5E9',
-                marginBottom: '24px'
-              }}>
-                <h4 style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#0C4A6E',
-                  margin: '0 0 16px 0',
+                  cursor: 'pointer',
+                  padding: '8px 0',
                   display: 'flex',
                   alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <span style={{ 
-                    background: '#0EA5E9', 
-                    color: 'white', 
-                    borderRadius: '50%', 
-                    width: '20px', 
-                    height: '20px', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    fontSize: '12px', 
-                    fontWeight: 'bold' 
-                  }}>2</span>
-                  Configure Widget Settings
-                </h4>
+                  gap: '4px'
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Back
+              </button>
+            </div>
+
+            {/* Next button - only enabled when saved */}
+            {isBlockSaved && (
+              <div style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginTop: '24px'
+              }}>
+                <button
+                  onClick={() => setCurrentStep(3)}
+                  style={{
+                    padding: '12px 32px',
+                    background: '#3B82F6',
+                    color: '#FFFFFF',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '16px',
+                    fontWeight: '600'
+                  }}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Step 4: Widget Settings Config */}
+        {currentStep === 3 && selectedIdea?.blockId === 'simple-text-badge' && (
+          <div style={{
+            animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
+            transform: 'translateX(0)',
+            opacity: 1
+          }}>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#1F2937',
+              marginBottom: '8px'
+            }}>
+              Configure Widget Settings
+            </h3>
+            <p style={{
+              fontSize: '14px',
+              color: '#6B7280',
+              marginBottom: '24px'
+            }}>
+              Customize your widget appearance and behavior
+            </p>
+
+            <div style={{
+              background: '#F0F9FF',
+              padding: '20px',
+              borderRadius: '12px',
+              border: '1px solid #0EA5E9',
+              marginBottom: '24px'
+            }}>
+              <h4 style={{
+                fontSize: '16px',
+                fontWeight: '600',
+                color: '#0C4A6E',
+                margin: '0 0 16px 0'
+              }}>
+                Widget Configuration
+              </h4>
                 
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                   {/* Header Text - Only show if headerText is not empty */}
@@ -3859,7 +3907,6 @@ export default function ABTests() {
                   </div>
                 </div>
               </div>
-            )}
 
             {isBlockSaved && (
               <div style={{
@@ -3953,11 +4000,54 @@ export default function ABTests() {
                 </div>
               </div>
             )}
+
+            {/* Navigation buttons */}
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginTop: '40px'
+            }}>
+              <button
+                onClick={() => setCurrentStep(2)}
+                style={{
+                  background: 'transparent',
+                  border: 'none',
+                  color: '#6B7280',
+                  fontSize: '14px',
+                  cursor: 'pointer',
+                  padding: '8px 0',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '4px'
+                }}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Back
+              </button>
+              <button
+                onClick={() => setCurrentStep(4)}
+                style={{
+                  padding: '12px 32px',
+                  background: '#3B82F6',
+                  color: '#FFFFFF',
+                  borderRadius: '8px',
+                  border: 'none',
+                  cursor: 'pointer',
+                  fontSize: '16px',
+                  fontWeight: '600'
+                }}
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
 
-        {/* Step 3: Configure Test */}
-        {currentStep === 3 && (
+        {/* Step 3: Configure Test - OLD STEP, KEEPING FOR REFERENCE BUT NOT USED */}
+        {false && currentStep === 999 && (
           <div style={{
             animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             transform: 'translateX(0)',
