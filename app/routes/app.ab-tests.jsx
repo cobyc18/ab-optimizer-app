@@ -535,36 +535,36 @@ export default function ABTests() {
           header_font: 'system',
           header_font_size: 24,
           header_underline: false,
-          bodyText: '<span style="display: inline-flex; align-items: center; margin-right: 6px;"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><rect x="4" y="6" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 6V4C6 3.44772 6.44772 3 7 3H13C13.5523 3 14 3.44772 14 4V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M7 3C7 2.44772 7.44772 2 8 2H12C12.5523 2 13 2.44772 13 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M5 8L4.5 7.5C4.22386 7.5 4 7.72386 4 8V8.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.7"/></svg></span>0 people have this item in their cart right now',
+          bodyText: '<p><em><strong> 0</strong></em> <strong>people</strong> &nbsp;currently have this in their carts.</p>',
           body_font: 'system',
-          body_font_size: 16,
+          body_font_size: 14,
           body_underline: false,
           header_body_spacing: 6,
-          icon_text_spacing: 20,
-          inner_padding_horizontal: 24,
-          inner_padding_vertical: 16,
+          icon_text_spacing: 16,
+          inner_padding_horizontal: 16,
+          inner_padding_vertical: 10,
           inner_padding_horizontal_mobile: 16,
           inner_padding_vertical_mobile: 12,
           outer_padding_horizontal: 0,
           outer_padding_vertical: 0,
           outer_padding_horizontal_mobile: 0,
           outer_padding_vertical_mobile: 0,
-          icon_choice: 'none',
-          icon_custom: '',
+          icon_choice: 'star',
+          icon_custom: 'shopify://shop_images/007-shopping-bag.png',
           icon_blink: false,
           icon_blink_intensity: 50,
-          icon_size: 36,
-          icon_size_mobile: 30,
-          border_radius: 8,
-          border_thickness: 1,
+          icon_size: 16,
+          icon_size_mobile: 14,
+          border_radius: 4,
+          border_thickness: 0,
           hover_effect: true,
-          drop_shadow: 10,
+          drop_shadow: 0,
           header_color: '#0f172a',
           textColor: '#1a5f5f',
-          backgroundColor: '#f5f5f0',
+          backgroundColor: '#e6e6e6',
           border_color: '#d4d4d8',
-          count_min: 40,
-          count_max: 60
+          count_min: 4,
+          count_max: 13
         });
       }
       
@@ -1106,8 +1106,8 @@ export default function ABTests() {
         // If this is How Many in Cart, add the conversion play type and count settings
         if (selectedIdea?.utility === 'How Many in Cart') {
           finalBlockSettings.conversion_play_type = 'how-many-in-cart';
-          finalBlockSettings.count_min = widgetSettings.count_min || 40;
-          finalBlockSettings.count_max = widgetSettings.count_max || 60;
+          finalBlockSettings.count_min = widgetSettings.count_min || 4;
+          finalBlockSettings.count_max = widgetSettings.count_max || 13;
         }
 
         const updateBlockSettings = async (attempt = 1, maxAttempts = 5) => {
