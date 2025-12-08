@@ -4025,174 +4025,378 @@ export default function ABTests() {
                             />
                           </div>
 
-                  {/* Inner Padding Vertical */}
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#374151',
-                      marginBottom: '8px'
-                    }}>
-                      Inner Vertical Padding (px): {widgetSettings.inner_padding_vertical}
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="1"
-                      value={widgetSettings.inner_padding_vertical}
-                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_vertical: parseInt(e.target.value) }))}
-                      style={{
-                        width: '100%'
-                      }}
-                    />
-                  </div>
+                          {/* Inner Padding Vertical */}
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                              <label style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#1F2937'
+                              }}>
+                                Vertical Padding
+                              </label>
+                              <span style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#3B82F6',
+                                background: '#EFF6FF',
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                minWidth: '45px',
+                                textAlign: 'center'
+                              }}>
+                                {widgetSettings.inner_padding_vertical}px
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="1"
+                              value={widgetSettings.inner_padding_vertical}
+                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_vertical: parseInt(e.target.value) }))}
+                              style={{
+                                width: '100%',
+                                maxWidth: '100%',
+                                height: '6px',
+                                borderRadius: '3px',
+                                background: '#E5E7EB',
+                                outline: 'none',
+                                cursor: 'pointer',
+                                WebkitAppearance: 'none',
+                                appearance: 'none'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
 
-                  {/* Inner Padding Horizontal Mobile */}
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#374151',
-                      marginBottom: '8px'
-                    }}>
-                      Inner Horizontal Padding Mobile (px): {widgetSettings.inner_padding_horizontal_mobile}
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="80"
-                      step="1"
-                      value={widgetSettings.inner_padding_horizontal_mobile}
-                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_horizontal_mobile: parseInt(e.target.value) }))}
-                      style={{
-                        width: '100%'
-                      }}
-                    />
-                  </div>
+                      {/* Inner Padding Mobile Section */}
+                      <div style={{
+                        background: '#F9FAFB',
+                        borderRadius: '10px',
+                        padding: '20px',
+                        border: '1px solid #E5E7EB',
+                        marginTop: '24px'
+                      }}>
+                        <h4 style={{
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          color: '#6B7280',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          margin: '0 0 16px 0'
+                        }}>
+                          Inner Padding (Mobile)
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                          {/* Inner Padding Horizontal Mobile */}
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                              <label style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#1F2937'
+                              }}>
+                                Horizontal Padding
+                              </label>
+                              <span style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#3B82F6',
+                                background: '#EFF6FF',
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                minWidth: '45px',
+                                textAlign: 'center'
+                              }}>
+                                {widgetSettings.inner_padding_horizontal_mobile}px
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="80"
+                              step="1"
+                              value={widgetSettings.inner_padding_horizontal_mobile}
+                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_horizontal_mobile: parseInt(e.target.value) }))}
+                              style={{
+                                width: '100%',
+                                maxWidth: '100%',
+                                height: '6px',
+                                borderRadius: '3px',
+                                background: '#E5E7EB',
+                                outline: 'none',
+                                cursor: 'pointer',
+                                WebkitAppearance: 'none',
+                                appearance: 'none'
+                              }}
+                            />
+                          </div>
 
-                  {/* Inner Padding Vertical Mobile */}
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#374151',
-                      marginBottom: '8px'
-                    }}>
-                      Inner Vertical Padding Mobile (px): {widgetSettings.inner_padding_vertical_mobile}
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="80"
-                      step="1"
-                      value={widgetSettings.inner_padding_vertical_mobile}
-                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_vertical_mobile: parseInt(e.target.value) }))}
-                      style={{
-                        width: '100%'
-                      }}
-                    />
-                  </div>
+                          {/* Inner Padding Vertical Mobile */}
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                              <label style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#1F2937'
+                              }}>
+                                Vertical Padding
+                              </label>
+                              <span style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#3B82F6',
+                                background: '#EFF6FF',
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                minWidth: '45px',
+                                textAlign: 'center'
+                              }}>
+                                {widgetSettings.inner_padding_vertical_mobile}px
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="80"
+                              step="1"
+                              value={widgetSettings.inner_padding_vertical_mobile}
+                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_vertical_mobile: parseInt(e.target.value) }))}
+                              style={{
+                                width: '100%',
+                                maxWidth: '100%',
+                                height: '6px',
+                                borderRadius: '3px',
+                                background: '#E5E7EB',
+                                outline: 'none',
+                                cursor: 'pointer',
+                                WebkitAppearance: 'none',
+                                appearance: 'none'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
 
-                  {/* Outer Padding Horizontal */}
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#374151',
-                      marginBottom: '8px'
-                    }}>
-                      Outer Horizontal Padding (px): {widgetSettings.outer_padding_horizontal}
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="1"
-                      value={widgetSettings.outer_padding_horizontal}
-                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_horizontal: parseInt(e.target.value) }))}
-                      style={{
-                        width: '100%'
-                      }}
-                    />
-                  </div>
+                      {/* Outer Padding Section */}
+                      <div style={{
+                        background: '#F9FAFB',
+                        borderRadius: '10px',
+                        padding: '20px',
+                        border: '1px solid #E5E7EB',
+                        marginTop: '24px'
+                      }}>
+                        <h4 style={{
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          color: '#6B7280',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          margin: '0 0 16px 0'
+                        }}>
+                          Outer Padding (Desktop)
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                          {/* Outer Padding Horizontal */}
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                              <label style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#1F2937'
+                              }}>
+                                Horizontal Padding
+                              </label>
+                              <span style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#3B82F6',
+                                background: '#EFF6FF',
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                minWidth: '45px',
+                                textAlign: 'center'
+                              }}>
+                                {widgetSettings.outer_padding_horizontal}px
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="1"
+                              value={widgetSettings.outer_padding_horizontal}
+                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_horizontal: parseInt(e.target.value) }))}
+                              style={{
+                                width: '100%',
+                                maxWidth: '100%',
+                                height: '6px',
+                                borderRadius: '3px',
+                                background: '#E5E7EB',
+                                outline: 'none',
+                                cursor: 'pointer',
+                                WebkitAppearance: 'none',
+                                appearance: 'none'
+                              }}
+                            />
+                          </div>
 
-                  {/* Outer Padding Vertical */}
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#374151',
-                      marginBottom: '8px'
-                    }}>
-                      Outer Vertical Padding (px): {widgetSettings.outer_padding_vertical}
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="1"
-                      value={widgetSettings.outer_padding_vertical}
-                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_vertical: parseInt(e.target.value) }))}
-                      style={{
-                        width: '100%'
-                      }}
-                    />
-                  </div>
+                          {/* Outer Padding Vertical */}
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                              <label style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#1F2937'
+                              }}>
+                                Vertical Padding
+                              </label>
+                              <span style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#3B82F6',
+                                background: '#EFF6FF',
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                minWidth: '45px',
+                                textAlign: 'center'
+                              }}>
+                                {widgetSettings.outer_padding_vertical}px
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="1"
+                              value={widgetSettings.outer_padding_vertical}
+                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_vertical: parseInt(e.target.value) }))}
+                              style={{
+                                width: '100%',
+                                maxWidth: '100%',
+                                height: '6px',
+                                borderRadius: '3px',
+                                background: '#E5E7EB',
+                                outline: 'none',
+                                cursor: 'pointer',
+                                WebkitAppearance: 'none',
+                                appearance: 'none'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
 
-                  {/* Outer Padding Horizontal Mobile */}
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#374151',
-                      marginBottom: '8px'
-                    }}>
-                      Outer Horizontal Padding Mobile (px): {widgetSettings.outer_padding_horizontal_mobile}
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="1"
-                      value={widgetSettings.outer_padding_horizontal_mobile}
-                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_horizontal_mobile: parseInt(e.target.value) }))}
-                      style={{
-                        width: '100%'
-                      }}
-                    />
-                  </div>
+                      {/* Outer Padding Mobile Section */}
+                      <div style={{
+                        background: '#F9FAFB',
+                        borderRadius: '10px',
+                        padding: '20px',
+                        border: '1px solid #E5E7EB',
+                        marginTop: '24px'
+                      }}>
+                        <h4 style={{
+                          fontSize: '13px',
+                          fontWeight: '600',
+                          color: '#6B7280',
+                          textTransform: 'uppercase',
+                          letterSpacing: '0.5px',
+                          margin: '0 0 16px 0'
+                        }}>
+                          Outer Padding (Mobile)
+                        </h4>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                          {/* Outer Padding Horizontal Mobile */}
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                              <label style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#1F2937'
+                              }}>
+                                Horizontal Padding
+                              </label>
+                              <span style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#3B82F6',
+                                background: '#EFF6FF',
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                minWidth: '45px',
+                                textAlign: 'center'
+                              }}>
+                                {widgetSettings.outer_padding_horizontal_mobile}px
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="1"
+                              value={widgetSettings.outer_padding_horizontal_mobile}
+                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_horizontal_mobile: parseInt(e.target.value) }))}
+                              style={{
+                                width: '100%',
+                                maxWidth: '100%',
+                                height: '6px',
+                                borderRadius: '3px',
+                                background: '#E5E7EB',
+                                outline: 'none',
+                                cursor: 'pointer',
+                                WebkitAppearance: 'none',
+                                appearance: 'none'
+                              }}
+                            />
+                          </div>
 
-                  {/* Outer Padding Vertical Mobile */}
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#374151',
-                      marginBottom: '8px'
-                    }}>
-                      Outer Vertical Padding Mobile (px): {widgetSettings.outer_padding_vertical_mobile}
-                    </label>
-                    <input
-                      type="range"
-                      min="0"
-                      max="100"
-                      step="1"
-                      value={widgetSettings.outer_padding_vertical_mobile}
-                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_vertical_mobile: parseInt(e.target.value) }))}
-                      style={{
-                        width: '100%',
-                        maxWidth: '100%'
-                      }}
-                    />
-                  </div>
+                          {/* Outer Padding Vertical Mobile */}
+                          <div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                              <label style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#1F2937'
+                              }}>
+                                Vertical Padding
+                              </label>
+                              <span style={{
+                                fontSize: '13px',
+                                fontWeight: '600',
+                                color: '#3B82F6',
+                                background: '#EFF6FF',
+                                padding: '4px 10px',
+                                borderRadius: '6px',
+                                minWidth: '45px',
+                                textAlign: 'center'
+                              }}>
+                                {widgetSettings.outer_padding_vertical_mobile}px
+                              </span>
+                            </div>
+                            <input
+                              type="range"
+                              min="0"
+                              max="100"
+                              step="1"
+                              value={widgetSettings.outer_padding_vertical_mobile}
+                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_vertical_mobile: parseInt(e.target.value) }))}
+                              style={{
+                                width: '100%',
+                                maxWidth: '100%',
+                                height: '6px',
+                                borderRadius: '3px',
+                                background: '#E5E7EB',
+                                outline: 'none',
+                                cursor: 'pointer',
+                                WebkitAppearance: 'none',
+                                appearance: 'none'
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
                     </>
                   )}
 
