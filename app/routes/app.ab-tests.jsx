@@ -1854,7 +1854,12 @@ export default function ABTests() {
                           // Only handle click if not dragging and it's the current card
                           if (isCurrent && !isDragging && !isAnimating) {
                             e.stopPropagation();
-                            setSelectedConversionPlayIndex(index);
+                            // Toggle selection: if already selected, deselect; otherwise select
+                            if (selectedConversionPlayIndex === index) {
+                              setSelectedConversionPlayIndex(null);
+                            } else {
+                              setSelectedConversionPlayIndex(index);
+                            }
                           }
                         }}
                         style={{
@@ -1863,13 +1868,13 @@ export default function ABTests() {
                           left: '50%',
                           transform: `translate(${translateX}, ${translateY}px)`,
                           minWidth: '320px',
-                          backgroundColor: isSelected ? '#EFF6FF' : figmaColors.gray,
+                          backgroundColor: figmaColors.gray,
                           border: isSelected ? `3px solid ${figmaColors.primaryBlue}` : `1px solid ${figmaColors.primaryBlue}`,
                           borderRadius: '24px',
                           padding: '40px',
                           margin: '0',
                           boxSizing: 'border-box',
-                          overflow: 'hidden',
+                          overflow: 'visible',
                           zIndex: zIndex,
                           opacity: opacity,
                           transformOrigin: 'center center',
@@ -1884,7 +1889,6 @@ export default function ABTests() {
                           alignItems: 'center',
                           cursor: isCurrent ? (isDragging ? 'grabbing' : 'pointer') : 'default',
                           userSelect: 'none',
-                          boxShadow: isSelected ? '0 4px 12px rgba(59, 130, 246, 0.3)' : 'none',
                           ...(isCurrent && isAnimating && swipeDirection === 'like' && {
                             animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
                           }),
@@ -1893,7 +1897,40 @@ export default function ABTests() {
                           })
                         }}
                       >
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
+                        {/* Checkmark icon - top right */}
+                        {isSelected && (
+                          <div style={{
+                            position: 'absolute',
+                            top: '12px',
+                            right: '12px',
+                            width: '28px',
+                            height: '28px',
+                            borderRadius: '50%',
+                            backgroundColor: '#2563EB',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            zIndex: 1000,
+                            boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
+                          }}>
+                            <svg
+                              width="16"
+                              height="16"
+                              viewBox="0 0 16 16"
+                              fill="none"
+                              xmlns="http://www.w3.org/2000/svg"
+                            >
+                              <path
+                                d="M13.3333 4L6 11.3333L2.66667 8"
+                                stroke="white"
+                                strokeWidth="2"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          </div>
+                        )}
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box', position: 'relative' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
                             {/* Widget Preview - Image Section */}
                             <div style={{ 
