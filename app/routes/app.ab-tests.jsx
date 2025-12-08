@@ -179,6 +179,9 @@ export default function ABTests() {
   const [endOnImpressionsEnabled, setEndOnImpressionsEnabled] = useState(false);
   const [impressionsThreshold, setImpressionsThreshold] = useState('');
   
+  // Widget settings config tab state
+  const [activeSettingsTab, setActiveSettingsTab] = useState('Text Content');
+  
   // Widget settings state (for simple-text-badge)
   const [widgetSettings, setWidgetSettings] = useState({
     enable_step_2: false,
@@ -3022,41 +3025,73 @@ export default function ABTests() {
             transform: 'translateX(0)',
             opacity: 1
           }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
+            <h2 style={{
+              fontSize: '32px',
+              fontWeight: '700',
               color: '#1F2937',
-              marginBottom: '8px'
+              marginBottom: '8px',
+              textAlign: 'center'
             }}>
-              Configure Widget Settings
-            </h3>
+              Customize your widget
+            </h2>
             <p style={{
-              fontSize: '14px',
+              fontSize: '16px',
               color: '#6B7280',
-              marginBottom: '24px'
+              marginBottom: '40px',
+              textAlign: 'center'
             }}>
-              Customize your widget appearance and behavior
+              Make it match your brand perfectly.
             </p>
 
+            {/* Main Container - Two Columns */}
             <div style={{
-              background: '#F0F9FF',
-              padding: '20px',
-              borderRadius: '12px',
-              border: '1px solid #0EA5E9',
-              marginBottom: '24px'
+              display: 'flex',
+              gap: '24px',
+              alignItems: 'flex-start'
             }}>
-              <h4 style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: '#0C4A6E',
-                margin: '0 0 16px 0'
+              {/* Left Side - Settings with Tabs */}
+              <div style={{
+                flex: 1,
+                background: '#FFFFFF',
+                borderRadius: '12px',
+                padding: '24px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
               }}>
-                Widget Configuration
-              </h4>
-                
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                  {/* Header Text - Only show if headerText is not empty */}
-                  {widgetSettings.headerText && widgetSettings.headerText.trim() !== '' && (
+                {/* Tabs */}
+                <div style={{
+                  display: 'flex',
+                  gap: '8px',
+                  marginBottom: '24px',
+                  borderBottom: '1px solid #E5E7EB'
+                }}>
+                  {['Text Content', 'Padding', 'Icons & Effects', 'Border'].map((tab) => (
+                    <button
+                      key={tab}
+                      onClick={() => setActiveSettingsTab(tab)}
+                      style={{
+                        padding: '12px 20px',
+                        background: 'transparent',
+                        border: 'none',
+                        borderBottom: activeSettingsTab === tab ? '2px solid #3B82F6' : '2px solid transparent',
+                        color: activeSettingsTab === tab ? '#3B82F6' : '#6B7280',
+                        fontSize: '14px',
+                        fontWeight: activeSettingsTab === tab ? '600' : '500',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease'
+                      }}
+                    >
+                      {tab}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Tab Content */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '600px', overflowY: 'auto' }}>
+                  {/* Text Content Tab */}
+                  {activeSettingsTab === 'Text Content' && (
+                    <>
+                      {/* Header Text - Only show if headerText is not empty */}
+                      {widgetSettings.headerText && widgetSettings.headerText.trim() !== '' && (
                     <div>
                       <label style={{
                         display: 'block',
@@ -3426,7 +3461,8 @@ export default function ABTests() {
                       value={widgetSettings.header_font_size}
                       onChange={(e) => setWidgetSettings(prev => ({ ...prev, header_font_size: parseInt(e.target.value) }))}
                       style={{
-                        width: '100%'
+                        width: '100%',
+                        maxWidth: '100%'
                       }}
                     />
                   </div>
@@ -3522,7 +3558,8 @@ export default function ABTests() {
                       value={widgetSettings.body_font_size}
                       onChange={(e) => setWidgetSettings(prev => ({ ...prev, body_font_size: parseInt(e.target.value) }))}
                       style={{
-                        width: '100%'
+                        width: '100%',
+                        maxWidth: '100%'
                       }}
                     />
                   </div>
@@ -3568,7 +3605,8 @@ export default function ABTests() {
                       value={widgetSettings.header_body_spacing}
                       onChange={(e) => setWidgetSettings(prev => ({ ...prev, header_body_spacing: parseInt(e.target.value) }))}
                       style={{
-                        width: '100%'
+                        width: '100%',
+                        maxWidth: '100%'
                       }}
                     />
                   </div>
@@ -3592,11 +3630,17 @@ export default function ABTests() {
                       value={widgetSettings.icon_text_spacing}
                       onChange={(e) => setWidgetSettings(prev => ({ ...prev, icon_text_spacing: parseInt(e.target.value) }))}
                       style={{
-                        width: '100%'
+                        width: '100%',
+                        maxWidth: '100%'
                       }}
                     />
                   </div>
+                    </>
+                  )}
 
+                  {/* Padding Tab */}
+                  {activeSettingsTab === 'Padding' && (
+                    <>
                   {/* Inner Padding Horizontal */}
                   <div>
                     <label style={{
@@ -3784,11 +3828,17 @@ export default function ABTests() {
                       value={widgetSettings.outer_padding_vertical_mobile}
                       onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_vertical_mobile: parseInt(e.target.value) }))}
                       style={{
-                        width: '100%'
+                        width: '100%',
+                        maxWidth: '100%'
                       }}
                     />
                   </div>
+                    </>
+                  )}
 
+                  {/* Icons & Effects Tab */}
+                  {activeSettingsTab === 'Icons & Effects' && (
+                    <>
                   {/* Icon Choice */}
                   <div>
                     <label style={{
@@ -3944,11 +3994,17 @@ export default function ABTests() {
                       value={widgetSettings.icon_size_mobile}
                       onChange={(e) => setWidgetSettings(prev => ({ ...prev, icon_size_mobile: parseInt(e.target.value) }))}
                       style={{
-                        width: '100%'
+                        width: '100%',
+                        maxWidth: '100%'
                       }}
                     />
                   </div>
+                    </>
+                  )}
 
+                  {/* Border Tab */}
+                  {activeSettingsTab === 'Border' && (
+                    <>
                   {/* Border Radius */}
                   <div>
                     <label style={{
@@ -4038,41 +4094,74 @@ export default function ABTests() {
                       value={widgetSettings.drop_shadow}
                       onChange={(e) => setWidgetSettings(prev => ({ ...prev, drop_shadow: parseInt(e.target.value) }))}
                       style={{
-                        width: '100%'
+                        width: '100%',
+                        maxWidth: '100%'
                       }}
                     />
                   </div>
-
-                  {/* Enable Step 2 */}
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <input
-                      type="checkbox"
-                      checked={widgetSettings.enable_step_2}
-                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, enable_step_2: e.target.checked }))}
-                      style={{
-                        width: '18px',
-                        height: '18px',
-                        cursor: 'pointer'
-                      }}
-                    />
-                    <label style={{
-                      fontSize: '14px',
-                      fontWeight: '500',
-                      color: '#374151',
-                      cursor: 'pointer'
-                    }}>
-                      Enable Step 2 (Changes text to 'Free Shipping', icon to trophy, and background to red)
-                    </label>
-                  </div>
+                    </>
+                  )}
                 </div>
               </div>
 
+              {/* Right Side - Live Preview */}
+              <div style={{
+                flex: 1,
+                background: '#FFFFFF',
+                borderRadius: '12px',
+                padding: '24px',
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                minHeight: '600px',
+                display: 'flex',
+                flexDirection: 'column'
+              }}>
+                <div style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  marginBottom: '24px'
+                }}>
+                  <h3 style={{
+                    fontSize: '18px',
+                    fontWeight: '600',
+                    color: '#1F2937',
+                    margin: 0
+                  }}>
+                    Live Preview
+                  </h3>
+                  <span style={{
+                    background: '#3B82F6',
+                    color: '#FFFFFF',
+                    padding: '4px 12px',
+                    borderRadius: '12px',
+                    fontSize: '12px',
+                    fontWeight: '500'
+                  }}>
+                    Updates in real-time
+                  </span>
+                </div>
+                <div style={{
+                  flex: 1,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  color: '#9CA3AF',
+                  fontSize: '18px',
+                  fontWeight: '500'
+                }}>
+                  Coming soon
+                </div>
+              </div>
+            </div>
+
+            {/* Preview Buttons Section - Keep at bottom */}
             {isBlockSaved && (
               <div style={{
                 background: '#F0FDF4',
                 padding: '20px',
                 borderRadius: '12px',
-                border: '1px solid #22C55E'
+                border: '1px solid #22C55E',
+                marginTop: '24px'
               }}>
                 <h4 style={{
                   fontSize: '16px',
@@ -4106,56 +4195,50 @@ export default function ABTests() {
                 </p>
                 <div style={{
                   display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: '12px'
+                  gap: '12px',
+                  alignItems: 'center'
                 }}>
-                  <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                    <button
-                      onClick={openVariantInThemeEditor}
-                      disabled={!canOpenThemeEditor}
-                      style={{
-                        padding: '12px 24px',
-                        background: canOpenThemeEditor ? '#22C55E' : '#9CA3AF',
-                        color: '#FFFFFF',
-                        borderRadius: '8px',
-                        border: `1px solid ${canOpenThemeEditor ? '#22C55E' : '#9CA3AF'}`,
-                        cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
-                        opacity: canOpenThemeEditor ? 1 : 0.7,
-                        fontSize: '14px',
-                        fontWeight: '600'
-                      }}
-                    >
-                      Preview in Theme Editor
-                    </button>
-                    <button
-                      onClick={() => {
-                        if (shop && wizardVariantProductHandle && wizardVariantName) {
-                          const storefrontUrl = `https://${shop}/products/${wizardVariantProductHandle}?view=${wizardVariantName}`;
-                          window.open(storefrontUrl, '_blank');
-                        } else {
-                          alert('Missing information to generate storefront preview URL.');
-                        }
-                      }}
-                      disabled={!canOpenThemeEditor || !wizardVariantProductHandle || !wizardVariantName}
-                      style={{
-                        padding: '12px 24px',
-                        background: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF',
-                        color: '#FFFFFF',
-                        borderRadius: '8px',
-                        border: `1px solid ${(canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF'}`,
-                        cursor: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 'pointer' : 'not-allowed',
-                        opacity: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 1 : 0.7,
-                        fontSize: '14px',
-                        fontWeight: '600'
-                      }}
-                    >
-                      Preview in Storefront
-                    </button>
-                  </div>
-                  <span style={{ fontSize: '12px', color: '#15803D', textAlign: 'center' }}>
-                    Preview in theme editor or live storefront with updated widget settings
-                  </span>
+                  <button
+                    onClick={openVariantInThemeEditor}
+                    disabled={!canOpenThemeEditor}
+                    style={{
+                      padding: '12px 24px',
+                      background: canOpenThemeEditor ? '#22C55E' : '#9CA3AF',
+                      color: '#FFFFFF',
+                      borderRadius: '8px',
+                      border: `1px solid ${canOpenThemeEditor ? '#22C55E' : '#9CA3AF'}`,
+                      cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
+                      opacity: canOpenThemeEditor ? 1 : 0.7,
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}
+                  >
+                    Preview in Theme Editor
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (shop && wizardVariantProductHandle && wizardVariantName) {
+                        const storefrontUrl = `https://${shop}/products/${wizardVariantProductHandle}?view=${wizardVariantName}`;
+                        window.open(storefrontUrl, '_blank');
+                      } else {
+                        alert('Missing information to generate storefront preview URL.');
+                      }
+                    }}
+                    disabled={!canOpenThemeEditor || !wizardVariantProductHandle || !wizardVariantName}
+                    style={{
+                      padding: '12px 24px',
+                      background: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF',
+                      color: '#FFFFFF',
+                      borderRadius: '8px',
+                      border: `1px solid ${(canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF'}`,
+                      cursor: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 'pointer' : 'not-allowed',
+                      opacity: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 1 : 0.7,
+                      fontSize: '14px',
+                      fontWeight: '600'
+                    }}
+                  >
+                    Preview in Storefront
+                  </button>
                 </div>
               </div>
             )}
@@ -4163,29 +4246,10 @@ export default function ABTests() {
             {/* Navigation buttons */}
             <div style={{
               display: 'flex',
-              justifyContent: 'space-between',
+              justifyContent: 'flex-end',
               alignItems: 'center',
               marginTop: '40px'
             }}>
-              <button
-                onClick={() => setCurrentStep(2)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#6B7280',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  padding: '8px 0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Back
-              </button>
               <button
                 onClick={() => setCurrentStep(4)}
                 style={{
@@ -4199,7 +4263,7 @@ export default function ABTests() {
                   fontWeight: '600'
                 }}
               >
-                Next
+                Review
               </button>
             </div>
           </div>
