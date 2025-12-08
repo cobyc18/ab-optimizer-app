@@ -182,6 +182,7 @@ export default function ABTests() {
   // Widget settings state (for simple-text-badge)
   const [widgetSettings, setWidgetSettings] = useState({
     enable_step_2: false,
+    placement: 'default',
     headerText: '',
     header_font: 'system',
     header_font_size: 24,
@@ -503,6 +504,7 @@ export default function ABTests() {
       if (selectedWidget.id === 2 && selectedWidget.utility === 'Free Shipping Badge') {
         setWidgetSettings({
           enable_step_2: false,
+          placement: 'default',
           headerText: '',
           header_font: 'system',
           header_font_size: 24,
@@ -542,6 +544,7 @@ export default function ABTests() {
       if (selectedWidget.id === 3 && selectedWidget.utility === 'Returns Guarantee Badge') {
         setWidgetSettings({
           enable_step_2: false,
+          placement: 'default',
           headerText: '',
           header_font: 'system',
           header_font_size: 24,
@@ -1000,6 +1003,7 @@ export default function ABTests() {
         
         const finalBlockSettings = {
           enable_step_2: widgetSettings.enable_step_2 || false,
+          placement: widgetSettings.placement || 'default',
           header_text: formatText(widgetSettings.headerText),
           header_font: widgetSettings.header_font || 'system',
           header_font_size: widgetSettings.header_font_size || 24,

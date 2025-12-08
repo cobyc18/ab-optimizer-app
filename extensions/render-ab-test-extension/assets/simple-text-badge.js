@@ -48,6 +48,10 @@
       // Debug: Log the container's HTML to see what data attributes are present
       console.log('🔍 Container HTML:', container.outerHTML.substring(0, 500));
       renderBadge(container);
+      // Position widget after a brief delay to ensure DOM is updated
+      setTimeout(function() {
+        positionWidget(container);
+      }, 0);
     });
   }
 
@@ -390,6 +394,180 @@
 
   function escapeAttribute(value) {
     return value.replace(/"/g, '&quot;');
+  }
+
+  function positionWidget(container) {
+    var placement = container.dataset.placement || container.getAttribute('data-placement') || 'default';
+    
+    // Reset any previous positioning
+    container.style.position = '';
+    container.style.top = '';
+    container.style.bottom = '';
+    container.style.left = '';
+    container.style.right = '';
+    container.style.width = '';
+    container.style.zIndex = '';
+    
+    if (placement === 'default') {
+      // Normal block order - no special positioning
+      return;
+    }
+    
+    // Find target element based on placement
+    var targetElement = null;
+    var positionType = null;
+    
+    switch(placement) {
+      case 'above_image':
+        targetElement = findProductImage();
+        positionType = 'above';
+        break;
+      case 'below_image':
+        targetElement = findProductImage();
+        positionType = 'below';
+        break;
+      case 'below_price':
+        targetElement = findPriceElement();
+        positionType = 'below';
+        break;
+      case 'below_title':
+        targetElement = findTitleElement();
+        positionType = 'below';
+        break;
+      case 'overlay_image':
+        targetElement = findProductImage();
+        positionType = 'overlay';
+        break;
+    }
+    
+    if (targetElement && positionType) {
+      applyPositioning(container, targetElement, positionType);
+    } else if (positionType) {
+      console.warn('Simple Text Badge: Could not find target element for placement:', placement);
+    }
+  }
+
+  function findProductImage() {
+    // Try common selectors for product images/media
+    var selectors = [
+      '.product__media-wrapper',
+      '.product-media',
+      '.product-image',
+      '.product__media',
+      '[data-product-image]',
+      '.product-single__media',
+      '.product-single__photos',
+      'img[alt*="product" i]',
+      '.product-gallery',
+      '.product-photos'
+    ];
+    
+    for (var i = 0; i < selectors.length; i++) {
+      var element = document.querySelector(selectors[i]);
+      if (element) {
+        console.log('Simple Text Badge: Found product image using selector:', selectors[i]);
+        return element;
+      }
+    }
+    
+    return null;
+  }
+
+  function findPriceElement() {
+    // Try common selectors for price
+    var selectors = [
+      '.product__price',
+      '.price',
+      '.product-price',
+      '[data-product-price]',
+      '.product-single__price',
+      '.product__price-wrapper',
+      '.price-wrapper'
+    ];
+    
+    for (var i = 0; i < selectors.length; i++) {
+      var element = document.querySelector(selectors[i]);
+      if (element) {
+        console.log('Simple Text Badge: Found price element using selector:', selectors[i]);
+        return element;
+      }
+    }
+    
+    return null;
+  }
+
+  function findTitleElement() {
+    // Try common selectors for product title
+    var selectors = [
+      '.product__title',
+      '.product-title',
+      'h1.product__title',
+      '.product-single__title',
+      '[data-product-title]',
+      'h1[class*="product"]'
+    ];
+    
+    for (var i = 0; i < selectors.length; i++) {
+      var element = document.querySelector(selectors[i]);
+      if (element) {
+        console.log('Simple Text Badge: Found title element using selector:', selectors[i]);
+        return element;
+      }
+    }
+    
+    return null;
+  }
+
+  function applyPositioning(widget, target, positionType) {
+    // Ensure we have a positioned parent container
+    var targetParent = target.parentElement;
+    var needsRelativeParent = positionType === 'overlay' || positionType === 'above' || positionType === 'below';
+    
+    if (needsRelativeParent && targetParent) {
+      var parentStyle = window.getComputedStyle(targetParent);
+      if (parentStyle.position === 'static') {
+        targetParent.style.position = 'relative';
+        console.log('Simple Text Badge: Set parent to relative positioning');
+      }
+    }
+    
+    // Position the widget
+    widget.style.position = 'absolute';
+    
+    if (positionType === 'above') {
+      // Use requestAnimationFrame to ensure layout is complete
+      requestAnimationFrame(function() {
+        var targetRect = target.getBoundingClientRect();
+        var parentRect = targetParent ? targetParent.getBoundingClientRect() : { top: 0, left: 0 };
+        var widgetHeight = widget.offsetHeight || 50; // Fallback if not yet rendered
+        
+        widget.style.top = (targetRect.top - parentRect.top - widgetHeight - 10) + 'px';
+        widget.style.left = '0';
+        widget.style.width = '100%';
+        widget.style.zIndex = '10';
+        console.log('Simple Text Badge: Positioned above target element');
+      });
+    } else if (positionType === 'below') {
+      // Use requestAnimationFrame to ensure layout is complete
+      requestAnimationFrame(function() {
+        var targetRect = target.getBoundingClientRect();
+        var parentRect = targetParent ? targetParent.getBoundingClientRect() : { top: 0, left: 0 };
+        
+        widget.style.top = (targetRect.bottom - parentRect.top + 10) + 'px';
+        widget.style.left = '0';
+        widget.style.width = '100%';
+        widget.style.zIndex = '10';
+        console.log('Simple Text Badge: Positioned below target element');
+      });
+    } else if (positionType === 'overlay') {
+      widget.style.top = '10px';
+      widget.style.right = '10px';
+      widget.style.left = 'auto';
+      widget.style.width = 'auto';
+      widget.style.maxWidth = '300px';
+      widget.style.zIndex = '10';
+      console.log('Simple Text Badge: Positioned as overlay on image');
+    }
   }
 
   function decodeConfigValue(value) {
