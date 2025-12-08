@@ -2573,7 +2573,7 @@ export default function ABTests() {
 
             {/* Step 1: Open Shopify Theme Editor */}
             <div style={{
-              marginBottom: '0'
+              marginBottom: '48px'
             }}>
               <div style={{
                 display: 'flex',
@@ -2604,9 +2604,9 @@ export default function ABTests() {
                   {/* Progress line */}
                   <div style={{
                     width: '2px',
-                    height: '40px',
-                    background: '#E5E7EB',
-                    marginTop: '8px'
+                    height: '60px',
+                    background: '#374151',
+                    marginTop: '12px'
                   }}></div>
                 </div>
                 <div style={{ flex: 1 }}>
@@ -2655,7 +2655,7 @@ export default function ABTests() {
 
             {/* Step 2: Press Save in Shopify */}
             <div style={{
-              marginBottom: '0'
+              marginBottom: '48px'
             }}>
               <div style={{
                 display: 'flex',
@@ -2686,9 +2686,9 @@ export default function ABTests() {
                   {/* Progress line */}
                   <div style={{
                     width: '2px',
-                    height: '40px',
-                    background: '#E5E7EB',
-                    marginTop: '8px'
+                    height: '60px',
+                    background: '#374151',
+                    marginTop: '12px'
                   }}></div>
                 </div>
                 <div style={{ flex: 1 }}>
@@ -2725,7 +2725,7 @@ export default function ABTests() {
                       fontWeight: '600',
                       cursor: 'default'
                     }}>
-                      black
+                      Save
                     </button>
                     <p style={{
                       fontSize: '12px',
@@ -2833,11 +2833,14 @@ export default function ABTests() {
               {isBlockSaved && (
                 <p style={{
                   fontSize: '14px',
-                  color: '#059669',
+                  color: '#3B82F6',
                   margin: '12px 0 0 0',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px'
                 }}>
-                  ✅ Installation verified! You can proceed to the next step.
+                  <span style={{ color: '#3B82F6' }}>✅</span> Installation verified! You can proceed to the next step.
                 </p>
               )}
             </div>
@@ -2872,129 +2875,140 @@ export default function ABTests() {
             {selectedIdea && (
               <div style={{
                 flex: 1,
-                maxWidth: '400px',
+                maxWidth: '450px',
                 position: 'sticky',
                 top: '20px'
               }}>
                 <div style={{
-                  background: '#FFFFFF',
-                  borderRadius: '16px',
-                  padding: '24px',
-                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  backgroundColor: figmaColors.gray,
+                  border: `1px solid ${figmaColors.primaryBlue}`,
+                  borderRadius: '24px',
+                  padding: '40px',
+                  margin: '0',
+                  boxSizing: 'border-box',
+                  overflow: 'visible',
                   display: 'flex',
                   flexDirection: 'column',
-                  gap: '20px'
+                  gap: '20px',
+                  alignItems: 'center',
+                  minHeight: '650px'
                 }}>
-                  {/* Widget Preview */}
-                  <div style={{ 
-                    width: '100%', 
-                    height: '200px', 
-                    borderRadius: '10px', 
-                    overflow: 'hidden',
-                    boxSizing: 'border-box',
-                    background: getWidgetBackgroundColor(selectedIdea.utility)
-                  }}>
-                    {selectedIdea.utility === 'Free Shipping Badge' ? (
-                      <img 
-                        src={freeShippingBadgeImage} 
-                        alt="Free Shipping Badge"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain',
-                          display: 'block'
-                        }}
-                      />
-                    ) : selectedIdea.utility === 'How Many in Cart' ? (
-                      <img 
-                        src={addToCartImage} 
-                        alt="How Many in Cart"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain',
-                          display: 'block'
-                        }}
-                      />
-                    ) : selectedIdea.utility === 'Returns Guarantee Badge' ? (
-                      <img 
-                        src={moneyBackGuaranteeImage} 
-                        alt="Returns Guarantee Badge"
-                        style={{
-                          width: '100%',
-                          height: '100%',
-                          objectFit: 'contain',
-                          display: 'block'
-                        }}
-                      />
-                    ) : null}
-                  </div>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box', position: 'relative' }}>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
+                      {/* Widget Preview - Image Section */}
+                      <div style={{ 
+                        width: '350px', 
+                        height: '280px', 
+                        borderRadius: '10px', 
+                        overflow: 'hidden',
+                        boxSizing: 'border-box'
+                      }}>
+                        {selectedIdea.utility === 'Free Shipping Badge' ? (
+                          <img 
+                            src={freeShippingBadgeImage} 
+                            alt="Free Shipping Badge"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              display: 'block'
+                            }}
+                          />
+                        ) : selectedIdea.utility === 'How Many in Cart' ? (
+                          <img 
+                            src={addToCartImage} 
+                            alt="How Many in Cart"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              display: 'block'
+                            }}
+                          />
+                        ) : selectedIdea.utility === 'Returns Guarantee Badge' ? (
+                          <img 
+                            src={moneyBackGuaranteeImage} 
+                            alt="Returns Guarantee Badge"
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'contain',
+                              display: 'block'
+                            }}
+                          />
+                        ) : null}
+                      </div>
 
-                  {/* Title */}
-                  <p style={{
-                    fontFamily: 'Geist, sans-serif',
-                    fontWeight: 600,
-                    fontSize: '20px',
-                    color: figmaColors.darkGray,
-                    margin: 0,
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word',
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    textAlign: 'center'
-                  }}>
-                    {selectedIdea.utility}
-                  </p>
-                  
-                  {/* Tags */}
-                  <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    flexWrap: 'wrap',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '100%',
-                    boxSizing: 'border-box'
-                  }}>
-                    {(Array.isArray(selectedIdea.style) ? selectedIdea.style : [selectedIdea.style]).map((tag, tagIndex) => (
-                      <div
-                        key={tagIndex}
-                        style={{
-                          background: '#FFFFFF',
-                          color: '#1E40AF',
-                          padding: '8px 16px',
-                          borderRadius: '16px',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          width: 'fit-content',
-                          border: '1px solid #E5E7EB',
+                      {/* Title and Description Section */}
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
+                        {/* Title */}
+                        <p style={{
+                          fontFamily: 'Geist, sans-serif',
+                          fontWeight: 600,
+                          fontSize: '20px',
+                          color: figmaColors.darkGray,
+                          margin: 0,
                           wordWrap: 'break-word',
                           overflowWrap: 'break-word',
-                          maxWidth: '100%',
+                          width: '100%',
+                          boxSizing: 'border-box',
+                          textAlign: 'center'
+                        }}>
+                          {selectedIdea.utility}
+                        </p>
+                        
+                        {/* Tags */}
+                        <div style={{
+                          display: 'flex',
+                          gap: '8px',
+                          flexWrap: 'wrap',
+                          justifyContent: 'center',
+                          alignItems: 'center',
+                          width: '100%',
                           boxSizing: 'border-box'
-                        }}
-                      >
-                        {tag}
+                        }}>
+                          {(Array.isArray(selectedIdea.style) ? selectedIdea.style : [selectedIdea.style]).map((tag, tagIndex) => (
+                            <div
+                              key={tagIndex}
+                              style={{
+                                background: '#FFFFFF',
+                                color: '#1E40AF',
+                                padding: '8px 16px',
+                                borderRadius: '16px',
+                                fontSize: '14px',
+                                fontWeight: '500',
+                                width: 'fit-content',
+                                border: '1px solid #E5E7EB',
+                                wordWrap: 'break-word',
+                                overflowWrap: 'break-word',
+                                maxWidth: '100%',
+                                boxSizing: 'border-box'
+                              }}
+                            >
+                              {tag}
+                            </div>
+                          ))}
+                        </div>
+                        
+                        {/* Description */}
+                        <p style={{
+                          fontFamily: 'Inter, sans-serif',
+                          fontWeight: 500,
+                          fontSize: '14px',
+                          color: figmaColors.darkGray,
+                          margin: 0,
+                          lineHeight: '20px',
+                          width: '100%',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word',
+                          boxSizing: 'border-box',
+                          textAlign: 'center'
+                        }}>
+                          {selectedIdea.rationale}
+                        </p>
                       </div>
-                    ))}
+                    </div>
                   </div>
-                  
-                  {/* Description */}
-                  <p style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    color: figmaColors.darkGray,
-                    margin: 0,
-                    lineHeight: '20px',
-                    width: '100%',
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word',
-                    boxSizing: 'border-box',
-                    textAlign: 'center'
-                  }}>
-                    {selectedIdea.rationale}
-                  </p>
                 </div>
               </div>
             )}
