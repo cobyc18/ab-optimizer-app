@@ -3205,8 +3205,8 @@ export default function ABTests() {
                     />
                   </div>
 
-                  {/* Cart Count Range - Only show for How Many in Cart */}
-                  {selectedIdea?.utility === 'How Many in Cart' && (
+                  {/* Cart Count Range - Only show for How Many in Cart conversion play */}
+                  {activeSettingsTab === 'Text Content' && selectedIdea?.utility === 'How Many in Cart' && (
                     <>
                       <div>
                         <label style={{
