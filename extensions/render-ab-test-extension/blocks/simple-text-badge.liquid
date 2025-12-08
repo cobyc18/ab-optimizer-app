@@ -400,14 +400,16 @@
       "id": "count_min",
       "label": "Minimum Count",
       "default": 40,
-      "info": "Minimum number for live visitor count (internal use)"
+      "info": "Minimum number for live visitor count (internal use)",
+      "visible_if": "{{ block.settings.conversion_play_type == 'live-visitor-count' }}"
     },
     {
       "type": "number",
       "id": "count_max",
       "label": "Maximum Count",
       "default": 60,
-      "info": "Maximum number for live visitor count (internal use)"
+      "info": "Maximum number for live visitor count (internal use)",
+      "visible_if": "{{ block.settings.conversion_play_type == 'live-visitor-count' }}"
     }
   ]
 }

@@ -122,6 +122,7 @@ export default function ABTests() {
   const [currentWidgetIndex, setCurrentWidgetIndex] = useState(0);
   const [swipeDirection, setSwipeDirection] = useState(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [selectedConversionPlayIndex, setSelectedConversionPlayIndex] = useState(null);
   
   // Drag state
   const [isDragging, setIsDragging] = useState(false);
@@ -1243,6 +1244,11 @@ export default function ABTests() {
     }
   }, [selectedIdea, wizardSelectedProductSnapshot, testHypothesis]);
 
+  // Clear selection when navigating to a different widget
+  useEffect(() => {
+    setSelectedConversionPlayIndex(null);
+  }, [currentWidgetIndex]);
+
   const previewProductTitle = wizardVariantProductTitle || wizardSelectedProductSnapshot?.title || selectedProduct?.title || '';
   const previewProductHandle = wizardVariantProductHandle || wizardSelectedProductSnapshot?.handle || selectedProduct?.handle || '';
   const previewProductId = wizardVariantProductId || wizardSelectedProductSnapshot?.id || '';
@@ -1837,20 +1843,28 @@ export default function ABTests() {
                     
                     // Opacity: 100% for current, 0 for others unless dragging
                     const opacity = isCurrent ? 1 : (shouldShow ? 0.4 : 0);
+                    const isSelected = isCurrent && selectedConversionPlayIndex === index;
 
                     return (
                       <div
                         key={`stack-${index}-${stackIndex}`}
                         onMouseDown={isCurrent ? handleDragStart : undefined}
                         onTouchStart={isCurrent ? handleDragStart : undefined}
+                        onClick={(e) => {
+                          // Only handle click if not dragging and it's the current card
+                          if (isCurrent && !isDragging && !isAnimating) {
+                            e.stopPropagation();
+                            setSelectedConversionPlayIndex(index);
+                          }
+                        }}
                         style={{
                           position: 'absolute',
                           top: 0,
                           left: '50%',
                           transform: `translate(${translateX}, ${translateY}px)`,
                           minWidth: '320px',
-                          backgroundColor: figmaColors.gray,
-                          border: `1px solid ${figmaColors.primaryBlue}`,
+                          backgroundColor: isSelected ? '#EFF6FF' : figmaColors.gray,
+                          border: isSelected ? `3px solid ${figmaColors.primaryBlue}` : `1px solid ${figmaColors.primaryBlue}`,
                           borderRadius: '24px',
                           padding: '40px',
                           margin: '0',
@@ -1868,8 +1882,9 @@ export default function ABTests() {
                           flexDirection: 'column',
                           gap: '20px',
                           alignItems: 'center',
-                          cursor: isCurrent ? (isDragging ? 'grabbing' : 'grab') : 'default',
+                          cursor: isCurrent ? (isDragging ? 'grabbing' : 'pointer') : 'default',
                           userSelect: 'none',
+                          boxShadow: isSelected ? '0 4px 12px rgba(59, 130, 246, 0.3)' : 'none',
                           ...(isCurrent && isAnimating && swipeDirection === 'like' && {
                             animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
                           }),
@@ -1941,7 +1956,7 @@ export default function ABTests() {
                               <p style={{
                                 fontFamily: 'Geist, sans-serif',
                                 fontWeight: 600,
-                                fontSize: '24px',
+                                fontSize: '20px',
                                 color: figmaColors.darkGray,
                                 margin: 0,
                                 wordWrap: 'break-word',
@@ -2039,7 +2054,7 @@ export default function ABTests() {
                   </div>
                 </div>
 
-                {/* Select Button */}
+                {/* Select/Next Button */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
@@ -2050,13 +2065,13 @@ export default function ABTests() {
                 }}>
                   <button
                     onClick={() => handleSwipe('like')}
-                    disabled={isAnimating}
+                    disabled={isAnimating || selectedConversionPlayIndex === null}
                     style={{
                       background: '#FFFFFF',
                       border: '1px solid #2563EB',
                       borderRadius: '20px',
                       padding: '12px 32px',
-                      cursor: isAnimating ? 'not-allowed' : 'pointer',
+                      cursor: (isAnimating || selectedConversionPlayIndex === null) ? 'not-allowed' : 'pointer',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -2064,23 +2079,23 @@ export default function ABTests() {
                       fontWeight: '500',
                       color: '#2563EB',
                       transition: 'all 0.2s ease',
-                      opacity: isAnimating ? 0.5 : 1,
+                      opacity: (isAnimating || selectedConversionPlayIndex === null) ? 0.5 : 1,
                       fontFamily: 'inherit'
                     }}
                     onMouseEnter={(e) => {
-                      if (!isAnimating) {
+                      if (!isAnimating && selectedConversionPlayIndex !== null) {
                         e.currentTarget.style.background = '#2563EB';
                         e.currentTarget.style.color = '#FFFFFF';
                       }
                     }}
                     onMouseLeave={(e) => {
-                      if (!isAnimating) {
+                      if (!isAnimating && selectedConversionPlayIndex !== null) {
                         e.currentTarget.style.background = '#FFFFFF';
                         e.currentTarget.style.color = '#2563EB';
                       }
                     }}
                   >
-                    SELECT
+                    {selectedConversionPlayIndex !== null ? 'NEXT' : 'SELECT'}
                   </button>
                 </div>
               </div>
