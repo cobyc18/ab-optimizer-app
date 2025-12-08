@@ -224,6 +224,8 @@ export default function ABTests() {
   const [isVariantRequestInFlight, setIsVariantRequestInFlight] = useState(false);
   const [isBlockSaved, setIsBlockSaved] = useState(false);
   const [isCheckingBlockSaved, setIsCheckingBlockSaved] = useState(false);
+  const [isCheckingProductInTest, setIsCheckingProductInTest] = useState(false);
+  const [productInTestError, setProductInTestError] = useState(null);
 
   const abTestIdeas = [
     {
@@ -840,6 +842,7 @@ export default function ABTests() {
     }
     setWizardLaunchError(null);
     setWizardLaunchSuccess(null);
+    setProductInTestError(null); // Clear product in test error when selecting a new product
   };
 
   // Create variant template
@@ -2564,6 +2567,22 @@ export default function ABTests() {
               );
             })()}
 
+            {/* Product In Test Error Message */}
+            {productInTestError && (
+              <div style={{
+                marginTop: '24px',
+                padding: '12px 16px',
+                background: '#FEF2F2',
+                border: '1px solid #FCA5A5',
+                borderRadius: '8px',
+                color: '#991B1B',
+                fontSize: '14px',
+                lineHeight: '1.5'
+              }}>
+                {productInTestError}
+              </div>
+            )}
+
             {/* Next Button */}
             <div style={{
               display: 'flex',
@@ -2574,6 +2593,35 @@ export default function ABTests() {
               <button
                 onClick={async () => {
                   if (selectedProduct) {
+                    // First, check if product is already in a running test
+                    setIsCheckingProductInTest(true);
+                    setProductInTestError(null);
+                    
+                    try {
+                      const checkResponse = await fetch('/api/check-product-in-test', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                          productId: selectedProduct.id
+                        })
+                      });
+                      
+                      const checkResult = await checkResponse.json();
+                      
+                      if (checkResult.inUse) {
+                        setProductInTestError(
+                          `This product is already being used in a running A/B test: "${checkResult.testName}". Please select a different product.`
+                        );
+                        setIsCheckingProductInTest(false);
+                        return;
+                      }
+                    } catch (checkError) {
+                      console.error('Error checking if product is in test:', checkError);
+                      // Continue anyway if check fails - don't block user
+                    }
+                    
+                    setIsCheckingProductInTest(false);
+                    
                     // Trigger template duplication when moving to step 2
                     const result = await createVariantTemplate();
                     if (result?.success) {
@@ -2593,22 +2641,22 @@ export default function ABTests() {
                     }
                   }
                 }}
-                disabled={!selectedProduct || isVariantRequestInFlight}
+                disabled={!selectedProduct || isVariantRequestInFlight || isCheckingProductInTest}
                 style={{
                   padding: '12px 32px',
                   fontSize: '16px',
                   fontWeight: '600',
                   color: '#FFFFFF',
-                  background: (!selectedProduct || isVariantRequestInFlight) 
+                  background: (!selectedProduct || isVariantRequestInFlight || isCheckingProductInTest) 
                     ? '#D1D5DB' 
                     : '#3B82F6',
                   border: 'none',
                   borderRadius: '8px',
-                  cursor: (!selectedProduct || isVariantRequestInFlight) 
+                  cursor: (!selectedProduct || isVariantRequestInFlight || isCheckingProductInTest) 
                     ? 'not-allowed' 
                     : 'pointer',
                   transition: 'all 0.2s ease',
-                  opacity: (!selectedProduct || isVariantRequestInFlight) 
+                  opacity: (!selectedProduct || isVariantRequestInFlight || isCheckingProductInTest) 
                     ? 0.6 
                     : 1
                 }}
@@ -2623,7 +2671,11 @@ export default function ABTests() {
                   }
                 }}
               >
-                {isVariantRequestInFlight ? 'Duplicating Template...' : 'Next'}
+                {isCheckingProductInTest 
+                  ? 'Checking...' 
+                  : isVariantRequestInFlight 
+                    ? 'Duplicating Template...' 
+                    : 'Next'}
               </button>
             </div>
           </div>
