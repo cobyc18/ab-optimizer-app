@@ -1019,9 +1019,49 @@ export default function ABTests() {
         return;
       }
 
+      // CRITICAL: Ensure template is assigned to product before opening editor
+      // Shopify's theme editor uses the product's templateSuffix assignment, not just the URL parameter
+      if (wizardVariantProductId && wizardVariantName) {
+        try {
+          // First, assign the template to the product
+          const assignResponse = await fetch('/api/assign-product-template', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              productId: wizardVariantProductId,
+              templateSuffix: wizardVariantName
+            })
+          });
+          const assignResult = await assignResponse.json();
+          
+          if (!assignResponse.ok || !assignResult.success) {
+            console.error('❌ Failed to assign template to product:', assignResult.error);
+            alert(`Failed to assign template to product. Please try again. Error: ${assignResult.error || 'Unknown error'}`);
+            return;
+          }
+          
+          // Wait a bit for Shopify to propagate the assignment
+          // This is important - Shopify needs time to update the product's template assignment
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          
+          console.log('✅ Template assigned successfully:', { 
+            productId: wizardVariantProductId, 
+            templateSuffix: wizardVariantName 
+          });
+        } catch (assignError) {
+          console.error('❌ Error assigning template before opening editor:', assignError);
+          alert('Failed to assign template to product. Please try again.');
+          return;
+        }
+      }
+
       const productHandleForPreview = wizardVariantProductHandle;
+      // For OS 2.0 JSON templates, the template param should be: product.<suffix>
+      // This tells Shopify which template file to load in the editor
       const templateParam = `product.${wizardVariantName}`;
 
+      // The previewPath must include ?view=<suffix> to ensure Shopify uses the correct template
+      // This is critical - without it, Shopify will use the product's default template assignment
       const previewParams = new URLSearchParams();
       if (wizardVariantName) {
         previewParams.set('view', wizardVariantName);
