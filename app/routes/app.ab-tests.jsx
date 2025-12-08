@@ -3144,229 +3144,149 @@ export default function ABTests() {
                 </div>
 
                 {/* Tab Content */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px', flex: 1, overflowY: 'auto', minHeight: 0, paddingRight: '4px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, overflowY: 'auto', minHeight: 0 }}>
                   {/* Text Content Tab */}
                   {activeSettingsTab === 'Text Content' && (
                     <>
-                      {/* Content Section */}
-                      <div style={{
-                        background: '#F9FAFB',
-                        borderRadius: '10px',
-                        padding: '20px',
-                        border: '1px solid #E5E7EB'
+                      {/* Header Text - Only show if headerText is not empty */}
+                      {widgetSettings.headerText && widgetSettings.headerText.trim() !== '' && (
+                    <div>
+                      <label style={{
+                        display: 'block',
+                        fontSize: '14px',
+                        fontWeight: '500',
+                        color: '#374151',
+                        marginBottom: '8px'
                       }}>
-                        <h4 style={{
-                          fontSize: '13px',
-                          fontWeight: '600',
-                          color: '#6B7280',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          margin: '0 0 16px 0'
-                        }}>
-                          Content
-                        </h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                          {/* Header Text - Only show if headerText is not empty */}
-                          {widgetSettings.headerText && widgetSettings.headerText.trim() !== '' && (
-                            <div>
-                              <label style={{
-                                display: 'block',
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937',
-                                marginBottom: '8px'
-                              }}>
-                                Header Text
-                              </label>
-                              <input
-                                type="text"
-                                value={widgetSettings.headerText}
-                                onChange={(e) => setWidgetSettings(prev => ({ ...prev, headerText: e.target.value }))}
-                                placeholder="Enter header text..."
-                                style={{
-                                  width: '100%',
-                                  padding: '10px 14px',
-                                  border: '1px solid #D1D5DB',
-                                  borderRadius: '8px',
-                                  fontSize: '14px',
-                                  background: '#FFFFFF',
-                                  transition: 'all 0.2s ease',
-                                  boxSizing: 'border-box'
-                                }}
-                                onFocus={(e) => {
-                                  e.target.style.borderColor = '#3B82F6';
-                                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                                }}
-                                onBlur={(e) => {
-                                  e.target.style.borderColor = '#D1D5DB';
-                                  e.target.style.boxShadow = 'none';
-                                }}
-                              />
-                            </div>
-                          )}
+                        Header Text
+                      </label>
+                      <input
+                        type="text"
+                        value={widgetSettings.headerText}
+                        onChange={(e) => setWidgetSettings(prev => ({ ...prev, headerText: e.target.value }))}
+                        placeholder="Enter header text..."
+                        style={{
+                          width: '100%',
+                          padding: '12px 16px',
+                          border: '1px solid #D1D5DB',
+                          borderRadius: '8px',
+                          fontSize: '14px',
+                          background: '#FFFFFF'
+                        }}
+                      />
+                    </div>
+                  )}
 
-                          <div>
-                            <label style={{
-                              display: 'block',
-                              fontSize: '13px',
-                              fontWeight: '600',
-                              color: '#1F2937',
-                              marginBottom: '8px'
-                            }}>
-                              Body Text
-                            </label>
-                            <textarea
-                              value={widgetSettings.bodyText}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, bodyText: e.target.value }))}
-                              placeholder="Enter body text..."
-                              rows={3}
-                              style={{
-                                width: '100%',
-                                padding: '10px 14px',
-                                border: '1px solid #D1D5DB',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                background: '#FFFFFF',
-                                resize: 'vertical',
-                                fontFamily: 'inherit',
-                                transition: 'all 0.2s ease',
-                                boxSizing: 'border-box'
-                              }}
-                              onFocus={(e) => {
-                                e.target.style.borderColor = '#3B82F6';
-                                e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                              }}
-                              onBlur={(e) => {
-                                e.target.style.borderColor = '#D1D5DB';
-                                e.target.style.boxShadow = 'none';
-                              }}
-                            />
-                          </div>
-                        </div>
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Body Text
+                    </label>
+                    <textarea
+                      value={widgetSettings.bodyText}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, bodyText: e.target.value }))}
+                      placeholder="Enter body text..."
+                      rows={3}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        background: '#FFFFFF',
+                        resize: 'vertical',
+                        fontFamily: 'inherit'
+                      }}
+                    />
+                  </div>
+
+                  {/* Cart Count Range - Only show for How Many in Cart */}
+                  {selectedIdea?.utility === 'How Many in Cart' && (
+                    <>
+                      <div>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#374151',
+                          marginBottom: '8px'
+                        }}>
+                          Minimum Visitor Count
+                        </label>
+                        <input
+                          type="number"
+                          value={widgetSettings.count_min}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value, 10);
+                            if (!isNaN(value) && value >= 0) {
+                              setWidgetSettings(prev => ({ ...prev, count_min: value }));
+                            }
+                          }}
+                          placeholder="40"
+                          min="0"
+                          style={{
+                            width: '100%',
+                            padding: '12px 16px',
+                            border: '1px solid #D1D5DB',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            background: '#FFFFFF'
+                          }}
+                        />
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '4px 0 0 0'
+                        }}>
+                          The minimum number for the visitor count fluctuation
+                        </p>
                       </div>
 
-                      {/* Count Range - Only show for How Many in Cart */}
-                      {selectedIdea?.utility === 'How Many in Cart' && (
-                        <div style={{
-                          background: '#F9FAFB',
-                          borderRadius: '10px',
-                          padding: '20px',
-                          border: '1px solid #E5E7EB',
-                          marginTop: '24px'
+                      <div>
+                        <label style={{
+                          display: 'block',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          color: '#374151',
+                          marginBottom: '8px'
                         }}>
-                          <h4 style={{
-                            fontSize: '13px',
-                            fontWeight: '600',
-                            color: '#6B7280',
-                            textTransform: 'uppercase',
-                            letterSpacing: '0.5px',
-                            margin: '0 0 16px 0'
-                          }}>
-                            Count Range
-                          </h4>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                            <div>
-                              <label style={{
-                                display: 'block',
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937',
-                                marginBottom: '8px'
-                              }}>
-                                Minimum Count
-                              </label>
-                              <input
-                                type="number"
-                                value={widgetSettings.count_min}
-                                onChange={(e) => {
-                                  const value = parseInt(e.target.value, 10);
-                                  if (!isNaN(value) && value >= 0) {
-                                    setWidgetSettings(prev => ({ ...prev, count_min: value }));
-                                  }
-                                }}
-                                placeholder="40"
-                                min="0"
-                                style={{
-                                  width: '100%',
-                                  padding: '10px 14px',
-                                  border: '1px solid #D1D5DB',
-                                  borderRadius: '8px',
-                                  fontSize: '14px',
-                                  background: '#FFFFFF',
-                                  transition: 'all 0.2s ease',
-                                  boxSizing: 'border-box'
-                                }}
-                                onFocus={(e) => {
-                                  e.target.style.borderColor = '#3B82F6';
-                                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                                }}
-                                onBlur={(e) => {
-                                  e.target.style.borderColor = '#D1D5DB';
-                                  e.target.style.boxShadow = 'none';
-                                }}
-                              />
-                              <p style={{
-                                fontSize: '12px',
-                                color: '#6B7280',
-                                margin: '6px 0 0 0',
-                                lineHeight: '1.4'
-                              }}>
-                                Minimum number for count fluctuation
-                              </p>
-                            </div>
-
-                            <div>
-                              <label style={{
-                                display: 'block',
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937',
-                                marginBottom: '8px'
-                              }}>
-                                Maximum Count
-                              </label>
-                              <input
-                                type="number"
-                                value={widgetSettings.count_max}
-                                onChange={(e) => {
-                                  const value = parseInt(e.target.value, 10);
-                                  if (!isNaN(value) && value >= 0) {
-                                    setWidgetSettings(prev => ({ ...prev, count_max: value }));
-                                  }
-                                }}
-                                placeholder="60"
-                                min="0"
-                                style={{
-                                  width: '100%',
-                                  padding: '10px 14px',
-                                  border: '1px solid #D1D5DB',
-                                  borderRadius: '8px',
-                                  fontSize: '14px',
-                                  background: '#FFFFFF',
-                                  transition: 'all 0.2s ease',
-                                  boxSizing: 'border-box'
-                                }}
-                                onFocus={(e) => {
-                                  e.target.style.borderColor = '#3B82F6';
-                                  e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                                }}
-                                onBlur={(e) => {
-                                  e.target.style.borderColor = '#D1D5DB';
-                                  e.target.style.boxShadow = 'none';
-                                }}
-                              />
-                              <p style={{
-                                fontSize: '12px',
-                                color: '#6B7280',
-                                margin: '6px 0 0 0',
-                                lineHeight: '1.4'
-                              }}>
-                                Maximum number for count fluctuation
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                      )}
+                          Maximum Visitor Count
+                        </label>
+                        <input
+                          type="number"
+                          value={widgetSettings.count_max}
+                          onChange={(e) => {
+                            const value = parseInt(e.target.value, 10);
+                            if (!isNaN(value) && value >= 0) {
+                              setWidgetSettings(prev => ({ ...prev, count_max: value }));
+                            }
+                          }}
+                          placeholder="60"
+                          min="0"
+                          style={{
+                            width: '100%',
+                            padding: '12px 16px',
+                            border: '1px solid #D1D5DB',
+                            borderRadius: '8px',
+                            fontSize: '14px',
+                            background: '#FFFFFF'
+                          }}
+                        />
+                        <p style={{
+                          fontSize: '12px',
+                          color: '#6B7280',
+                          margin: '4px 0 0 0'
+                        }}>
+                          The maximum number for the visitor count fluctuation
+                        </p>
+                      </div>
+                    </>
+                  )}
 
                   <div>
                     <label style={{
@@ -3530,59 +3450,29 @@ export default function ABTests() {
                     </div>
                   </div>
 
-                      {/* Typography Section */}
-                      <div style={{
-                        background: '#F9FAFB',
-                        borderRadius: '10px',
-                        padding: '20px',
-                        border: '1px solid #E5E7EB',
-                        marginTop: '24px'
-                      }}>
-                        <h4 style={{
-                          fontSize: '13px',
-                          fontWeight: '600',
-                          color: '#6B7280',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          margin: '0 0 16px 0'
-                        }}>
-                          Typography
-                        </h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                          {/* Header Font */}
-                          <div>
-                            <label style={{
-                              display: 'block',
-                              fontSize: '13px',
-                              fontWeight: '600',
-                              color: '#1F2937',
-                              marginBottom: '8px'
-                            }}>
-                              Header Font
-                            </label>
-                            <select
-                              value={widgetSettings.header_font}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, header_font: e.target.value }))}
-                              style={{
-                                width: '100%',
-                                padding: '10px 14px',
-                                border: '1px solid #D1D5DB',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                background: '#FFFFFF',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                boxSizing: 'border-box'
-                              }}
-                              onFocus={(e) => {
-                                e.target.style.borderColor = '#3B82F6';
-                                e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                              }}
-                              onBlur={(e) => {
-                                e.target.style.borderColor = '#D1D5DB';
-                                e.target.style.boxShadow = 'none';
-                              }}
-                            >
+                  {/* Header Font */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Header Font
+                    </label>
+                    <select
+                      value={widgetSettings.header_font}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, header_font: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        background: '#FFFFFF'
+                      }}
+                    >
                       <option value="system">System default</option>
                       <option value="poppins">Poppins</option>
                       <option value="inter">Inter</option>
@@ -3610,128 +3500,76 @@ export default function ABTests() {
                     </select>
                   </div>
 
-                          {/* Header Font Size */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Header Font Size
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.header_font_size}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="12"
-                              max="64"
-                              step="1"
-                              value={widgetSettings.header_font_size}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, header_font_size: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
+                  {/* Header Font Size */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Header Font Size (px): {widgetSettings.header_font_size}
+                    </label>
+                    <input
+                      type="range"
+                      min="12"
+                      max="64"
+                      step="1"
+                      value={widgetSettings.header_font_size}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, header_font_size: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%',
+                        maxWidth: '100%'
+                      }}
+                    />
+                  </div>
 
-                          {/* Header Underline */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            padding: '12px',
-                            background: '#FFFFFF',
-                            borderRadius: '8px',
-                            border: '1px solid #E5E7EB',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onClick={() => setWidgetSettings(prev => ({ ...prev, header_underline: !prev.header_underline }))}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = '#D1D5DB';
-                            e.currentTarget.style.background = '#F9FAFB';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = '#E5E7EB';
-                            e.currentTarget.style.background = '#FFFFFF';
-                          }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={widgetSettings.header_underline}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, header_underline: e.target.checked }))}
-                              style={{
-                                width: '18px',
-                                height: '18px',
-                                cursor: 'pointer',
-                                accentColor: '#3B82F6'
-                              }}
-                            />
-                            <label style={{
-                              fontSize: '13px',
-                              fontWeight: '600',
-                              color: '#1F2937',
-                              cursor: 'pointer',
-                              flex: 1
-                            }}>
-                              Header Underline
-                            </label>
-                          </div>
+                  {/* Header Underline */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={widgetSettings.header_underline}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, header_underline: e.target.checked }))}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <label style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      cursor: 'pointer'
+                    }}>
+                      Header Underline
+                    </label>
+                  </div>
 
-                          {/* Body Font */}
-                          <div>
-                            <label style={{
-                              display: 'block',
-                              fontSize: '13px',
-                              fontWeight: '600',
-                              color: '#1F2937',
-                              marginBottom: '8px'
-                            }}>
-                              Body Font
-                            </label>
-                            <select
-                              value={widgetSettings.body_font}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, body_font: e.target.value }))}
-                              style={{
-                                width: '100%',
-                                padding: '10px 14px',
-                                border: '1px solid #D1D5DB',
-                                borderRadius: '8px',
-                                fontSize: '14px',
-                                background: '#FFFFFF',
-                                cursor: 'pointer',
-                                transition: 'all 0.2s ease',
-                                boxSizing: 'border-box'
-                              }}
-                              onFocus={(e) => {
-                                e.target.style.borderColor = '#3B82F6';
-                                e.target.style.boxShadow = '0 0 0 3px rgba(59, 130, 246, 0.1)';
-                              }}
-                              onBlur={(e) => {
-                                e.target.style.borderColor = '#D1D5DB';
-                                e.target.style.boxShadow = 'none';
-                              }}
-                            >
+                  {/* Body Font */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Body Font
+                    </label>
+                    <select
+                      value={widgetSettings.body_font}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, body_font: e.target.value }))}
+                      style={{
+                        width: '100%',
+                        padding: '12px 16px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '8px',
+                        fontSize: '14px',
+                        background: '#FFFFFF'
+                      }}
+                    >
                       <option value="system">System default</option>
                       <option value="poppins">Poppins</option>
                       <option value="inter">Inter</option>
@@ -3759,644 +3597,300 @@ export default function ABTests() {
                     </select>
                   </div>
 
-                          {/* Body Font Size */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Body Font Size
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.body_font_size}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="10"
-                              max="36"
-                              step="1"
-                              value={widgetSettings.body_font_size}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, body_font_size: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
+                  {/* Body Font Size */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Body Font Size (px): {widgetSettings.body_font_size}
+                    </label>
+                    <input
+                      type="range"
+                      min="10"
+                      max="36"
+                      step="1"
+                      value={widgetSettings.body_font_size}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, body_font_size: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%',
+                        maxWidth: '100%'
+                      }}
+                    />
+                  </div>
 
-                          {/* Body Underline */}
-                          <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            padding: '12px',
-                            background: '#FFFFFF',
-                            borderRadius: '8px',
-                            border: '1px solid #E5E7EB',
-                            cursor: 'pointer',
-                            transition: 'all 0.2s ease'
-                          }}
-                          onClick={() => setWidgetSettings(prev => ({ ...prev, body_underline: !prev.body_underline }))}
-                          onMouseEnter={(e) => {
-                            e.currentTarget.style.borderColor = '#D1D5DB';
-                            e.currentTarget.style.background = '#F9FAFB';
-                          }}
-                          onMouseLeave={(e) => {
-                            e.currentTarget.style.borderColor = '#E5E7EB';
-                            e.currentTarget.style.background = '#FFFFFF';
-                          }}
-                          >
-                            <input
-                              type="checkbox"
-                              checked={widgetSettings.body_underline}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, body_underline: e.target.checked }))}
-                              style={{
-                                width: '18px',
-                                height: '18px',
-                                cursor: 'pointer',
-                                accentColor: '#3B82F6'
-                              }}
-                            />
-                            <label style={{
-                              fontSize: '13px',
-                              fontWeight: '600',
-                              color: '#1F2937',
-                              cursor: 'pointer',
-                              flex: 1
-                            }}>
-                              Body Underline
-                            </label>
-                          </div>
-                        </div>
-                      </div>
+                  {/* Body Underline */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <input
+                      type="checkbox"
+                      checked={widgetSettings.body_underline}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, body_underline: e.target.checked }))}
+                      style={{
+                        width: '18px',
+                        height: '18px',
+                        cursor: 'pointer'
+                      }}
+                    />
+                    <label style={{
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      cursor: 'pointer'
+                    }}>
+                      Body Underline
+                    </label>
+                  </div>
 
-                      {/* Spacing Section */}
-                      <div style={{
-                        background: '#F9FAFB',
-                        borderRadius: '10px',
-                        padding: '20px',
-                        border: '1px solid #E5E7EB',
-                        marginTop: '24px'
-                      }}>
-                        <h4 style={{
-                          fontSize: '13px',
-                          fontWeight: '600',
-                          color: '#6B7280',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          margin: '0 0 16px 0'
-                        }}>
-                          Spacing
-                        </h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                          {/* Header to Body Spacing */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Header to Body Spacing
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.header_body_spacing}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="40"
-                              step="2"
-                              value={widgetSettings.header_body_spacing}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, header_body_spacing: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
+                  {/* Header to Body Spacing */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Header to Body Spacing (px): {widgetSettings.header_body_spacing}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="40"
+                      step="2"
+                      value={widgetSettings.header_body_spacing}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, header_body_spacing: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%',
+                        maxWidth: '100%'
+                      }}
+                    />
+                  </div>
 
-                          {/* Icon to Text Spacing */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Icon to Text Spacing
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.icon_text_spacing}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="60"
-                              step="2"
-                              value={widgetSettings.icon_text_spacing}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, icon_text_spacing: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
+                  {/* Icon to Text Spacing */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Icon to Text Spacing (px): {widgetSettings.icon_text_spacing}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="60"
+                      step="2"
+                      value={widgetSettings.icon_text_spacing}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, icon_text_spacing: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%',
+                        maxWidth: '100%'
+                      }}
+                    />
+                  </div>
                     </>
                   )}
 
                   {/* Padding Tab */}
                   {activeSettingsTab === 'Padding' && (
                     <>
-                      {/* Inner Padding Section */}
-                      <div style={{
-                        background: '#F9FAFB',
-                        borderRadius: '10px',
-                        padding: '20px',
-                        border: '1px solid #E5E7EB'
-                      }}>
-                        <h4 style={{
-                          fontSize: '13px',
-                          fontWeight: '600',
-                          color: '#6B7280',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          margin: '0 0 16px 0'
-                        }}>
-                          Inner Padding (Desktop)
-                        </h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                          {/* Inner Padding Horizontal */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Horizontal Padding
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.inner_padding_horizontal}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              step="1"
-                              value={widgetSettings.inner_padding_horizontal}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_horizontal: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
+                  {/* Inner Padding Horizontal */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Inner Horizontal Padding (px): {widgetSettings.inner_padding_horizontal}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={widgetSettings.inner_padding_horizontal}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_horizontal: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%'
+                      }}
+                    />
+                  </div>
 
-                          {/* Inner Padding Vertical */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Vertical Padding
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.inner_padding_vertical}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              step="1"
-                              value={widgetSettings.inner_padding_vertical}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_vertical: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
+                  {/* Inner Padding Vertical */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Inner Vertical Padding (px): {widgetSettings.inner_padding_vertical}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={widgetSettings.inner_padding_vertical}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_vertical: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%'
+                      }}
+                    />
+                  </div>
 
-                      {/* Inner Padding Mobile Section */}
-                      <div style={{
-                        background: '#F9FAFB',
-                        borderRadius: '10px',
-                        padding: '20px',
-                        border: '1px solid #E5E7EB',
-                        marginTop: '24px'
-                      }}>
-                        <h4 style={{
-                          fontSize: '13px',
-                          fontWeight: '600',
-                          color: '#6B7280',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          margin: '0 0 16px 0'
-                        }}>
-                          Inner Padding (Mobile)
-                        </h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                          {/* Inner Padding Horizontal Mobile */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Horizontal Padding
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.inner_padding_horizontal_mobile}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="80"
-                              step="1"
-                              value={widgetSettings.inner_padding_horizontal_mobile}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_horizontal_mobile: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
+                  {/* Inner Padding Horizontal Mobile */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Inner Horizontal Padding Mobile (px): {widgetSettings.inner_padding_horizontal_mobile}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="80"
+                      step="1"
+                      value={widgetSettings.inner_padding_horizontal_mobile}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_horizontal_mobile: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%'
+                      }}
+                    />
+                  </div>
 
-                          {/* Inner Padding Vertical Mobile */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Vertical Padding
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.inner_padding_vertical_mobile}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="80"
-                              step="1"
-                              value={widgetSettings.inner_padding_vertical_mobile}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_vertical_mobile: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
+                  {/* Inner Padding Vertical Mobile */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Inner Vertical Padding Mobile (px): {widgetSettings.inner_padding_vertical_mobile}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="80"
+                      step="1"
+                      value={widgetSettings.inner_padding_vertical_mobile}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, inner_padding_vertical_mobile: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%'
+                      }}
+                    />
+                  </div>
 
-                      {/* Outer Padding Section */}
-                      <div style={{
-                        background: '#F9FAFB',
-                        borderRadius: '10px',
-                        padding: '20px',
-                        border: '1px solid #E5E7EB',
-                        marginTop: '24px'
-                      }}>
-                        <h4 style={{
-                          fontSize: '13px',
-                          fontWeight: '600',
-                          color: '#6B7280',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          margin: '0 0 16px 0'
-                        }}>
-                          Outer Padding (Desktop)
-                        </h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                          {/* Outer Padding Horizontal */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Horizontal Padding
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.outer_padding_horizontal}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              step="1"
-                              value={widgetSettings.outer_padding_horizontal}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_horizontal: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
+                  {/* Outer Padding Horizontal */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Outer Horizontal Padding (px): {widgetSettings.outer_padding_horizontal}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={widgetSettings.outer_padding_horizontal}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_horizontal: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%'
+                      }}
+                    />
+                  </div>
 
-                          {/* Outer Padding Vertical */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Vertical Padding
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.outer_padding_vertical}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              step="1"
-                              value={widgetSettings.outer_padding_vertical}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_vertical: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
+                  {/* Outer Padding Vertical */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Outer Vertical Padding (px): {widgetSettings.outer_padding_vertical}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={widgetSettings.outer_padding_vertical}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_vertical: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%'
+                      }}
+                    />
+                  </div>
 
-                      {/* Outer Padding Mobile Section */}
-                      <div style={{
-                        background: '#F9FAFB',
-                        borderRadius: '10px',
-                        padding: '20px',
-                        border: '1px solid #E5E7EB',
-                        marginTop: '24px'
-                      }}>
-                        <h4 style={{
-                          fontSize: '13px',
-                          fontWeight: '600',
-                          color: '#6B7280',
-                          textTransform: 'uppercase',
-                          letterSpacing: '0.5px',
-                          margin: '0 0 16px 0'
-                        }}>
-                          Outer Padding (Mobile)
-                        </h4>
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
-                          {/* Outer Padding Horizontal Mobile */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Horizontal Padding
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.outer_padding_horizontal_mobile}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              step="1"
-                              value={widgetSettings.outer_padding_horizontal_mobile}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_horizontal_mobile: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
+                  {/* Outer Padding Horizontal Mobile */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Outer Horizontal Padding Mobile (px): {widgetSettings.outer_padding_horizontal_mobile}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={widgetSettings.outer_padding_horizontal_mobile}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_horizontal_mobile: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%'
+                      }}
+                    />
+                  </div>
 
-                          {/* Outer Padding Vertical Mobile */}
-                          <div>
-                            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                              <label style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#1F2937'
-                              }}>
-                                Vertical Padding
-                              </label>
-                              <span style={{
-                                fontSize: '13px',
-                                fontWeight: '600',
-                                color: '#3B82F6',
-                                background: '#EFF6FF',
-                                padding: '4px 10px',
-                                borderRadius: '6px',
-                                minWidth: '45px',
-                                textAlign: 'center'
-                              }}>
-                                {widgetSettings.outer_padding_vertical_mobile}px
-                              </span>
-                            </div>
-                            <input
-                              type="range"
-                              min="0"
-                              max="100"
-                              step="1"
-                              value={widgetSettings.outer_padding_vertical_mobile}
-                              onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_vertical_mobile: parseInt(e.target.value) }))}
-                              style={{
-                                width: '100%',
-                                maxWidth: '100%',
-                                height: '6px',
-                                borderRadius: '3px',
-                                background: '#E5E7EB',
-                                outline: 'none',
-                                cursor: 'pointer',
-                                WebkitAppearance: 'none',
-                                appearance: 'none'
-                              }}
-                            />
-                          </div>
-                        </div>
-                      </div>
+                  {/* Outer Padding Vertical Mobile */}
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '500',
+                      color: '#374151',
+                      marginBottom: '8px'
+                    }}>
+                      Outer Vertical Padding Mobile (px): {widgetSettings.outer_padding_vertical_mobile}
+                    </label>
+                    <input
+                      type="range"
+                      min="0"
+                      max="100"
+                      step="1"
+                      value={widgetSettings.outer_padding_vertical_mobile}
+                      onChange={(e) => setWidgetSettings(prev => ({ ...prev, outer_padding_vertical_mobile: parseInt(e.target.value) }))}
+                      style={{
+                        width: '100%',
+                        maxWidth: '100%'
+                      }}
+                    />
+                  </div>
                     </>
                   )}
 
