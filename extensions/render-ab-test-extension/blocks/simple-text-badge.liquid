@@ -33,20 +33,22 @@
      data-icon-choice="{{ block.settings.icon_choice | default: 'star' }}"
     data-icon-blink="{{ block.settings.icon_blink | default: false }}"
     data-icon-blink-intensity="{{ block.settings.icon_blink_intensity | default: 50 }}"
-     data-icon-size="{{ block.settings.icon_size | default: 36 }}"
+    data-icon-size="{{ block.settings.icon_size | default: 36 }}"
      data-icon-size-mobile="{{ block.settings.icon_size_mobile | default: 30 }}"
      data-border-radius="{{ block.settings.border_radius | default: 8 }}"
      data-border-thickness="{{ block.settings.border_thickness | default: 1 }}"
      data-hover-effect="{{ block.settings.hover_effect | default: false }}"
      data-drop-shadow="{{ block.settings.drop_shadow | default: 10 }}"
-     data-placement="{{ block.settings.placement | default: 'default' }}"
      {% if block.settings.icon_custom %}
      data-icon-url="{{ block.settings.icon_custom | image_url: width: 120 }}"
      data-icon-alt="{{ block.settings.icon_custom.alt | default: 'Badge icon' }}"
      {% else %}
      data-icon-url=""
      data-icon-alt="Badge icon"
-     {% endif %}>
+     {% endif %}
+     data-conversion-play-type="{{ block.settings.conversion_play_type | default: '' }}"
+     data-count-min="{{ block.settings.count_min | default: 40 }}"
+     data-count-max="{{ block.settings.count_max | default: 60 }}">
 </div>
 
 {% schema %}
@@ -62,25 +64,6 @@
       "label": "Enable Step 2",
       "default": false,
       "info": "When enabled, changes text to 'Free Shipping', icon to trophy, and background to red"
-    },
-    {
-      "type": "header",
-      "content": "Positioning"
-    },
-    {
-      "type": "select",
-      "id": "placement",
-      "label": "Widget Placement",
-      "options": [
-        { "value": "default", "label": "Default (Block Order)" },
-        { "value": "above_image", "label": "Above Product Image" },
-        { "value": "below_image", "label": "Below Product Image" },
-        { "value": "below_price", "label": "Below Price" },
-        { "value": "below_title", "label": "Below Title" },
-        { "value": "overlay_image", "label": "Overlay on Image (Top Right)" }
-      ],
-      "default": "default",
-      "info": "Choose where to position the widget. 'Default' uses normal block order."
     },
     {
       "type": "header",
@@ -405,6 +388,26 @@
       "id": "border_color",
       "label": "Border color",
       "default": "#d4d4d8"
+    },
+    {
+      "type": "text",
+      "id": "conversion_play_type",
+      "label": "Conversion Play Type",
+      "info": "Internal setting to identify widget behavior type"
+    },
+    {
+      "type": "number",
+      "id": "count_min",
+      "label": "Minimum Count",
+      "default": 40,
+      "info": "Minimum number for live visitor count (internal use)"
+    },
+    {
+      "type": "number",
+      "id": "count_max",
+      "label": "Maximum Count",
+      "default": 60,
+      "info": "Maximum number for live visitor count (internal use)"
     }
   ]
 }

@@ -182,7 +182,6 @@ export default function ABTests() {
   // Widget settings state (for simple-text-badge)
   const [widgetSettings, setWidgetSettings] = useState({
     enable_step_2: false,
-    placement: 'default',
     headerText: '',
     header_font: 'system',
     header_font_size: 24,
@@ -504,7 +503,6 @@ export default function ABTests() {
       if (selectedWidget.id === 2 && selectedWidget.utility === 'Free Shipping Badge') {
         setWidgetSettings({
           enable_step_2: false,
-          placement: 'default',
           headerText: '',
           header_font: 'system',
           header_font_size: 24,
@@ -544,7 +542,6 @@ export default function ABTests() {
       if (selectedWidget.id === 3 && selectedWidget.utility === 'Returns Guarantee Badge') {
         setWidgetSettings({
           enable_step_2: false,
-          placement: 'default',
           headerText: '',
           header_font: 'system',
           header_font_size: 24,
@@ -1003,7 +1000,6 @@ export default function ABTests() {
         
         const finalBlockSettings = {
           enable_step_2: widgetSettings.enable_step_2 || false,
-          placement: widgetSettings.placement || 'default',
           header_text: formatText(widgetSettings.headerText),
           header_font: widgetSettings.header_font || 'system',
           header_font_size: widgetSettings.header_font_size || 24,
@@ -1037,6 +1033,13 @@ export default function ABTests() {
           background_color: widgetSettings.backgroundColor || '#f5f5f0',
           border_color: widgetSettings.border_color || '#d4d4d8'
         };
+        
+        // If this is Live Visitor Count, add the conversion play type and count settings
+        if (selectedIdea?.utility === 'Live Visitor Count') {
+          finalBlockSettings.conversion_play_type = 'live-visitor-count';
+          finalBlockSettings.count_min = 40;
+          finalBlockSettings.count_max = 60;
+        }
 
         const updateBlockSettings = async (attempt = 1, maxAttempts = 5) => {
           try {

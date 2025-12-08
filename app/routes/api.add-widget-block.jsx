@@ -130,72 +130,6 @@ function escapeControlCharacters(input) {
   return result;
 }
 
-/**
- * Finds the media/image block in the main product section
- * Uses multiple strategies to reliably identify the media block across different themes
- * @param {Object} mainSection - The main product section object
- * @returns {Object} - { blockId: string, index: number } or null if not found
- */
-function findMediaBlock(mainSection) {
-  const blocks = mainSection.blocks || {};
-  const blockOrder = mainSection.block_order || [];
-  
-  // Common media block types (check block.type property)
-  const mediaBlockTypes = [
-    'product-media',
-    'product-medias', 
-    'media',
-    'gallery',
-    'product-media-gallery',
-    'product-image',
-    'image'
-  ];
-  
-  // Common media block IDs (check block_order array)
-  const mediaBlockIds = [
-    'media',
-    'medias',
-    'product-media',
-    'product-medias',
-    'gallery',
-    'product-gallery',
-    'image',
-    'product-image'
-  ];
-  
-  // Strategy 1: Find by block type (most reliable)
-  for (const blockId of blockOrder) {
-    const block = blocks[blockId];
-    if (block && block.type) {
-      const blockType = String(block.type).toLowerCase();
-      if (mediaBlockTypes.some(type => blockType.includes(type))) {
-        const index = blockOrder.indexOf(blockId);
-        console.log('✅ Found media block by type:', { blockId, blockType, index });
-        return { blockId, index };
-      }
-    }
-  }
-  
-  // Strategy 2: Find by common block IDs
-  for (const mediaBlockId of mediaBlockIds) {
-    const index = blockOrder.indexOf(mediaBlockId);
-    if (index !== -1) {
-      console.log('✅ Found media block by ID:', { blockId: mediaBlockId, index });
-      return { blockId: mediaBlockId, index };
-    }
-  }
-  
-  // Strategy 3: Fallback - use first block (often media is first)
-  if (blockOrder.length > 0) {
-    const firstBlockId = blockOrder[0];
-    console.log('⚠️ Using first block as media fallback:', { blockId: firstBlockId, index: 0 });
-    return { blockId: firstBlockId, index: 0 };
-  }
-  
-  console.warn('⚠️ No media block found');
-  return null;
-}
-
 export const action = async ({ request }) => {
   try {
     console.log('🔧 Add widget block API called');
@@ -397,30 +331,15 @@ export const action = async ({ request }) => {
           settings: formattedSettings
         };
 
-        // Add to block_order relative to media block
+        // Add to block_order after "price" block if not already there
         if (!mainSection.block_order.includes(blockInstanceId)) {
-          const mediaBlock = findMediaBlock(mainSection);
-          if (mediaBlock) {
-            // Insert BELOW the media block (after it)
-            // To place ABOVE, change to: mediaBlock.index
-            const insertIndex = mediaBlock.index + 1;
-            mainSection.block_order.splice(insertIndex, 0, blockInstanceId);
-            console.log('✅ Positioned widget below media block:', {
-              blockInstanceId,
-              mediaBlockId: mediaBlock.blockId,
-              insertIndex,
-              blockOrder: mainSection.block_order
-            });
+          const priceIndex = mainSection.block_order.indexOf('price');
+          if (priceIndex !== -1) {
+            // Insert after price block
+            mainSection.block_order.splice(priceIndex + 1, 0, blockInstanceId);
           } else {
-            // Fallback: try price block, then add to end
-            const priceIndex = mainSection.block_order.indexOf('price');
-            if (priceIndex !== -1) {
-              mainSection.block_order.splice(priceIndex + 1, 0, blockInstanceId);
-              console.log('⚠️ Media block not found, using price block as fallback');
-            } else {
-              mainSection.block_order.push(blockInstanceId);
-              console.log('⚠️ Media and price blocks not found, added to end');
-            }
+            // Fallback: add to end if price block not found
+            mainSection.block_order.push(blockInstanceId);
           }
         }
 
@@ -547,30 +466,15 @@ export const action = async ({ request }) => {
             settings: appliedBlockSettings
           };
 
-          // Add to block_order relative to media block
+          // Add to block_order after "price" block if not already there
           if (!mainSection.block_order.includes(blockInstanceId)) {
-            const mediaBlock = findMediaBlock(mainSection);
-            if (mediaBlock) {
-              // Insert BELOW the media block (after it)
-              // To place ABOVE, change to: mediaBlock.index
-              const insertIndex = mediaBlock.index + 1;
-              mainSection.block_order.splice(insertIndex, 0, blockInstanceId);
-              console.log('✅ Positioned widget below media block (Liquid):', {
-                blockInstanceId,
-                mediaBlockId: mediaBlock.blockId,
-                insertIndex,
-                blockOrder: mainSection.block_order
-              });
+            const priceIndex = mainSection.block_order.indexOf('price');
+            if (priceIndex !== -1) {
+              // Insert after price block
+              mainSection.block_order.splice(priceIndex + 1, 0, blockInstanceId);
             } else {
-              // Fallback: try price block, then add to end
-              const priceIndex = mainSection.block_order.indexOf('price');
-              if (priceIndex !== -1) {
-                mainSection.block_order.splice(priceIndex + 1, 0, blockInstanceId);
-                console.log('⚠️ Media block not found, using price block as fallback (Liquid)');
-              } else {
-                mainSection.block_order.push(blockInstanceId);
-                console.log('⚠️ Media and price blocks not found, added to end (Liquid)');
-              }
+              // Fallback: add to end if price block not found
+              mainSection.block_order.push(blockInstanceId);
             }
           }
 
