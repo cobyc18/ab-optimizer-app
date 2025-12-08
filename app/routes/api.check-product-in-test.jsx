@@ -27,11 +27,24 @@ export const action = async ({ request }) => {
       }, { status: 401 });
     }
 
+    // Normalize productId - extract numeric ID from Shopify GID format
+    // Shopify GID format: gid://shopify/Product/123456789
+    // Database stores: 123456789 (just the numeric part)
+    const productNumericId = typeof productId === "string"
+      ? (productId.match(/Product\/(\d+)/)?.[1] || productId)
+      : productId;
+
+    console.log('🔍 Checking product in test:', {
+      originalProductId: productId,
+      normalizedProductId: productNumericId,
+      shop: session.shop
+    });
+
     // Check if there's a running test for this product
     const runningTest = await prisma.aBTest.findFirst({
       where: {
         shop: session.shop,
-        productId: productId,
+        productId: productNumericId,
         status: 'running'
       },
       select: {
@@ -40,6 +53,12 @@ export const action = async ({ request }) => {
         status: true,
         startDate: true
       }
+    });
+
+    console.log('🔍 Check result:', {
+      found: !!runningTest,
+      testName: runningTest?.name,
+      testId: runningTest?.id
     });
 
     if (runningTest) {

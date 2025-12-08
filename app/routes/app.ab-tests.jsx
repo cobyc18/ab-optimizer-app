@@ -5,6 +5,7 @@ import { authenticate } from "../shopify.server.js";
 import freeShippingBadgeImage from "../assets/free-shipping-badge.png";
 import moneyBackGuaranteeImage from "../assets/money-back-guarantee.png";
 import addToCartImage from "../assets/add-to-cart.png";
+import WidgetLivePreview from "../components/WidgetLivePreview.jsx";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
@@ -2606,21 +2607,39 @@ export default function ABTests() {
                         })
                       });
                       
-                      const checkResult = await checkResponse.json();
-                      
-                      if (checkResult.inUse) {
+                      if (!checkResponse.ok) {
+                        console.error('❌ Check product API returned error:', checkResponse.status, checkResponse.statusText);
+                        // On API errors, show warning but allow continuation (fail open)
                         setProductInTestError(
-                          `This product is already being used in a running A/B test: "${checkResult.testName}". Please select a different product.`
+                          'Unable to verify if this product is available. Please try again or contact support if this persists.'
                         );
                         setIsCheckingProductInTest(false);
-                        return;
+                        // Don't return - allow continuation on errors
+                      } else {
+                        const checkResult = await checkResponse.json();
+                        
+                        if (checkResult.inUse) {
+                          // Product is in use - BLOCK progression
+                          setProductInTestError(
+                            `This product is already being used in a running A/B test: "${checkResult.testName}". Please select a different product.`
+                          );
+                          setIsCheckingProductInTest(false);
+                          return; // Block here
+                        }
+                        
+                        // Product is available - clear any previous errors and continue
+                        setProductInTestError(null);
+                        setIsCheckingProductInTest(false);
                       }
                     } catch (checkError) {
-                      console.error('Error checking if product is in test:', checkError);
-                      // Continue anyway if check fails - don't block user
+                      console.error('❌ Error checking if product is in test:', checkError);
+                      // Network errors - show warning but allow continuation (fail open)
+                      setProductInTestError(
+                        'Unable to verify if this product is available. Please check your connection and try again.'
+                      );
+                      setIsCheckingProductInTest(false);
+                      // Don't return - allow continuation on network errors
                     }
-                    
-                    setIsCheckingProductInTest(false);
                     
                     // Trigger template duplication when moving to step 2
                     const result = await createVariantTemplate();
@@ -4298,53 +4317,18 @@ export default function ABTests() {
               </div>
 
               {/* Right Side - Live Preview */}
-              <div style={{
-                flex: 1,
-                background: '#FFFFFF',
-                borderRadius: '12px',
-                padding: '24px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                height: '600px',
-                display: 'flex',
-                flexDirection: 'column'
-              }}>
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  marginBottom: '24px'
-                }}>
-                  <h3 style={{
-                    fontSize: '18px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    margin: 0
-                  }}>
-                    Live Preview
-                  </h3>
-                  <span style={{
-                    background: '#3B82F6',
-                    color: '#FFFFFF',
-                    padding: '4px 12px',
-                    borderRadius: '12px',
-                    fontSize: '12px',
-                    fontWeight: '500'
-                  }}>
-                    Updates in real-time
-                  </span>
-                </div>
-                <div style={{
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  color: '#9CA3AF',
-                  fontSize: '18px',
-                  fontWeight: '500'
-                }}>
-                  Coming soon
-                </div>
-              </div>
+              <WidgetLivePreview
+                widgetSettings={widgetSettings}
+                conversionPlayType={
+                  selectedIdea?.utility === 'How Many in Cart' 
+                    ? 'how-many-in-cart' 
+                    : selectedIdea?.utility === 'Free Shipping Badge' || selectedIdea?.utility === 'Returns Guarantee Badge'
+                    ? ''
+                    : ''
+                }
+                countMin={widgetSettings.count_min || 40}
+                countMax={widgetSettings.count_max || 60}
+              />
             </div>
 
             {/* Navigation buttons */}
