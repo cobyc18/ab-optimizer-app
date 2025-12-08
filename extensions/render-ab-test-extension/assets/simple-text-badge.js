@@ -53,9 +53,9 @@
       
       renderBadge(container);
       
-      // Check if this is a live visitor count widget
+      // Check if this is a live visitor count or how many in cart widget
       const conversionPlayType = container.dataset.conversionPlayType;
-      if (conversionPlayType === 'live-visitor-count') {
+      if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
         initLiveVisitorCount(container);
       }
     });

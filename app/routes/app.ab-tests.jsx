@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback } from "react";
 import { authenticate } from "../shopify.server.js";
 import freeShippingBadgeImage from "../assets/free-shipping-badge.png";
 import moneyBackGuaranteeImage from "../assets/money-back-guarantee.png";
+import addToCartImage from "../assets/add-to-cart.png";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
@@ -226,12 +227,13 @@ export default function ABTests() {
   const abTestIdeas = [
     {
       id: 1,
-      utility: 'Live Visitor Count',
-      rationale: 'Shows real-time visitor activity, creates urgency and social proof',
-      style: 'Dynamic',
+      utility: 'How Many in Cart',
+      rationale: 'Displaying an in-cart count highlights demand and motivates customers to act before the item sells out',
+      style: ['Urgency', 'Social Proof'], // Array of tags
       preview: '👁️ 76 people viewing this page',
       blockId: 'simple-text-badge',
-      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
+      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4',
+      availableForGoals: ['Social Proof', 'Urgency'] // Goals this conversion play is available for
     },
     {
       id: 2,
@@ -257,38 +259,62 @@ export default function ABTests() {
   const getWidgetBackgroundColor = (utility) => {
     const colorMap = {
       'Free Shipping Badge': '#DBEAFE', // Brighter baby blue
-      'Live Visitor Count': '#FEF08A', // Brighter yellow/amber
+      'How Many in Cart': '#FEF08A', // Brighter yellow/amber
       'Returns Guarantee Badge': '#DBEAFE' // Brighter baby blue (same as Free Shipping Badge)
     };
     return colorMap[utility] || '#F3F4F6'; // Default gray
   };
 
+  // Filter conversion plays based on selected goal
+  const getFilteredConversionPlays = () => {
+    if (!selectedGoal) return [];
+    
+    return abTestIdeas.filter(widget => {
+      // If widget has availableForGoals, check if selectedGoal is in the array
+      if (widget.availableForGoals) {
+        return widget.availableForGoals.includes(selectedGoal);
+      }
+      // For widgets without availableForGoals, show them for all goals (backward compatibility)
+      // But "How Many in Cart" should only show for Social Proof and Urgency
+      if (widget.utility === 'How Many in Cart') {
+        return ['Social Proof', 'Urgency'].includes(selectedGoal);
+      }
+      // For other widgets (Free Shipping, Returns Guarantee), show for Trust goal
+      return selectedGoal === 'Trust';
+    });
+  };
+
   // Get visible cards in stack (current + ALL other widgets behind in circular order)
   const getVisibleCards = () => {
+    const filteredWidgets = getFilteredConversionPlays();
+    if (filteredWidgets.length === 0) return [];
+    
+    // Map currentWidgetIndex to the filtered array
+    const actualIndex = Math.min(currentWidgetIndex, filteredWidgets.length - 1);
     const cards = [];
     
     // First, add the current card (stackIndex 0)
     cards.push({
-      index: currentWidgetIndex,
-      widget: abTestIdeas[currentWidgetIndex],
+      index: actualIndex,
+      widget: filteredWidgets[actualIndex],
       stackIndex: 0
     });
     
     // Then add all other widgets in circular order (starting from next, wrapping around)
     let stackIndex = 1;
     // Add widgets after current
-    for (let i = currentWidgetIndex + 1; i < abTestIdeas.length; i++) {
+    for (let i = actualIndex + 1; i < filteredWidgets.length; i++) {
       cards.push({
         index: i,
-        widget: abTestIdeas[i],
+        widget: filteredWidgets[i],
         stackIndex: stackIndex++
       });
     }
     // Add widgets before current (wrapping around)
-    for (let i = 0; i < currentWidgetIndex; i++) {
+    for (let i = 0; i < actualIndex; i++) {
       cards.push({
         index: i,
-        widget: abTestIdeas[i],
+        widget: filteredWidgets[i],
         stackIndex: stackIndex++
       });
     }
@@ -502,15 +528,15 @@ export default function ABTests() {
     if (direction === 'like') {
       const selectedWidget = abTestIdeas[currentWidgetIndex];
       
-      // Auto-populate settings for Live Visitor Count
-      if (selectedWidget.id === 1 && selectedWidget.utility === 'Live Visitor Count') {
+      // Auto-populate settings for How Many in Cart
+      if (selectedWidget.id === 1 && selectedWidget.utility === 'How Many in Cart') {
         setWidgetSettings({
           enable_step_2: false,
           headerText: '',
           header_font: 'system',
           header_font_size: 24,
           header_underline: false,
-          bodyText: 'There are currently 0 people currently looking at this product',
+          bodyText: '🛒 0 people have this item in their cart right now',
           body_font: 'system',
           body_font_size: 16,
           body_underline: false,
@@ -1078,9 +1104,9 @@ export default function ABTests() {
           border_color: widgetSettings.border_color || '#d4d4d8'
         };
         
-        // If this is Live Visitor Count, add the conversion play type and count settings
-        if (selectedIdea?.utility === 'Live Visitor Count') {
-          finalBlockSettings.conversion_play_type = 'live-visitor-count';
+        // If this is How Many in Cart, add the conversion play type and count settings
+        if (selectedIdea?.utility === 'How Many in Cart') {
+          finalBlockSettings.conversion_play_type = 'how-many-in-cart';
           finalBlockSettings.count_min = widgetSettings.count_min || 40;
           finalBlockSettings.count_max = widgetSettings.count_max || 60;
         }
@@ -1248,6 +1274,12 @@ export default function ABTests() {
   useEffect(() => {
     setSelectedConversionPlayIndex(null);
   }, [currentWidgetIndex]);
+
+  // Reset widget index when goal changes
+  useEffect(() => {
+    setCurrentWidgetIndex(0);
+    setSelectedConversionPlayIndex(null);
+  }, [selectedGoal]);
 
   const previewProductTitle = wizardVariantProductTitle || wizardSelectedProductSnapshot?.title || selectedProduct?.title || '';
   const previewProductHandle = wizardVariantProductHandle || wizardSelectedProductSnapshot?.handle || selectedProduct?.handle || '';
@@ -1719,9 +1751,10 @@ export default function ABTests() {
                     {/* Left Arrow - Simple gray chevron */}
                     <div 
                       onClick={() => {
+                        const filteredWidgets = getFilteredConversionPlays();
                         setCurrentWidgetIndex(prevIndex => {
                           if (prevIndex === 0) {
-                            return abTestIdeas.length - 1; // Wrap to last widget
+                            return filteredWidgets.length - 1; // Wrap to last widget
                           }
                           return prevIndex - 1;
                         });
@@ -1750,8 +1783,9 @@ export default function ABTests() {
                     {/* Right Arrow - Same size as left */}
                     <div 
                       onClick={() => {
+                        const filteredWidgets = getFilteredConversionPlays();
                         setCurrentWidgetIndex(prevIndex => {
-                          if (prevIndex === abTestIdeas.length - 1) {
+                          if (prevIndex === filteredWidgets.length - 1) {
                             return 0; // Wrap to first widget
                           }
                           return prevIndex + 1;
@@ -1951,28 +1985,17 @@ export default function ABTests() {
                                     display: 'block'
                                   }}
                                 />
-                              ) : widget.utility === 'Live Visitor Count' ? (
-                                <div style={{
-                                  background: '#F8FAFC',
-                                  border: '1px solid #E5E7EB',
-                                  padding: '20px',
-                                  borderRadius: '12px',
-                                  fontSize: '18px',
-                                  color: '#6B7280',
-                                  fontStyle: 'italic',
-                                  textAlign: 'center',
-                                  wordWrap: 'break-word',
-                                  overflowWrap: 'break-word',
-                                  boxSizing: 'border-box',
-                                  width: '100%',
-                                  height: '100%',
-                                  display: 'flex',
-                                  alignItems: 'center',
-                                  justifyContent: 'center',
-                                  minHeight: '200px'
-                                }}>
-                                  "{widget.preview}"
-                                </div>
+                              ) : widget.utility === 'How Many in Cart' ? (
+                                <img 
+                                  src={addToCartImage} 
+                                  alt="How Many in Cart"
+                                  style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'contain',
+                                    display: 'block'
+                                  }}
+                                />
                               ) : widget.utility === 'Returns Guarantee Badge' ? (
                                 <img 
                                   src={moneyBackGuaranteeImage} 
@@ -2005,23 +2028,37 @@ export default function ABTests() {
                                 {widget.utility}
                               </p>
                               
-                              {/* Tag */}
+                              {/* Tags */}
                               <div style={{
-                                background: '#FFFFFF',
-                                color: '#1E40AF',
-                                padding: '8px 16px',
-                                borderRadius: '16px',
-                                fontSize: '14px',
-                                fontWeight: '500',
-                                width: 'fit-content',
-                                border: '1px solid #E5E7EB',
-                                wordWrap: 'break-word',
-                                overflowWrap: 'break-word',
-                                maxWidth: '100%',
-                                boxSizing: 'border-box',
-                                margin: '0 auto'
+                                display: 'flex',
+                                gap: '8px',
+                                flexWrap: 'wrap',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                                width: '100%',
+                                boxSizing: 'border-box'
                               }}>
-                                {widget.style}
+                                {(Array.isArray(widget.style) ? widget.style : [widget.style]).map((tag, tagIndex) => (
+                                  <div
+                                    key={tagIndex}
+                                    style={{
+                                      background: '#FFFFFF',
+                                      color: '#1E40AF',
+                                      padding: '8px 16px',
+                                      borderRadius: '16px',
+                                      fontSize: '14px',
+                                      fontWeight: '500',
+                                      width: 'fit-content',
+                                      border: '1px solid #E5E7EB',
+                                      wordWrap: 'break-word',
+                                      overflowWrap: 'break-word',
+                                      maxWidth: '100%',
+                                      boxSizing: 'border-box'
+                                    }}
+                                  >
+                                    {tag}
+                                  </div>
+                                ))}
                               </div>
                               
                               {/* Description */}
@@ -2060,7 +2097,7 @@ export default function ABTests() {
                     zIndex: 200,
                     pointerEvents: 'auto'
                   }}>
-                  {abTestIdeas.map((widget, index) => (
+                  {getFilteredConversionPlays().map((widget, index) => (
                     <button
                       key={`dot-${index}`}
                       onClick={(e) => {
@@ -2869,8 +2906,8 @@ export default function ABTests() {
                     />
                   </div>
 
-                  {/* Visitor Count Range - Only show for Live Visitor Count */}
-                  {selectedIdea?.utility === 'Live Visitor Count' && (
+                  {/* Cart Count Range - Only show for How Many in Cart */}
+                  {selectedIdea?.utility === 'How Many in Cart' && (
                     <>
                       <div>
                         <label style={{
