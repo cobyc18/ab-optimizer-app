@@ -3043,6 +3043,58 @@ export default function ABTests() {
               Make it match your brand perfectly.
             </p>
 
+            {/* Preview Buttons - Above backgrounds */}
+            {isBlockSaved && (
+              <div style={{
+                display: 'flex',
+                gap: '12px',
+                alignItems: 'center',
+                marginBottom: '24px'
+              }}>
+                <button
+                  onClick={openVariantInThemeEditor}
+                  disabled={!canOpenThemeEditor}
+                  style={{
+                    padding: '12px 24px',
+                    background: canOpenThemeEditor ? '#22C55E' : '#9CA3AF',
+                    color: '#FFFFFF',
+                    borderRadius: '8px',
+                    border: `1px solid ${canOpenThemeEditor ? '#22C55E' : '#9CA3AF'}`,
+                    cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
+                    opacity: canOpenThemeEditor ? 1 : 0.7,
+                    fontSize: '14px',
+                    fontWeight: '600'
+                  }}
+                >
+                  Save and Preview in Theme Editor
+                </button>
+                <button
+                  onClick={() => {
+                    if (shop && wizardVariantProductHandle && wizardVariantName) {
+                      const storefrontUrl = `https://${shop}/products/${wizardVariantProductHandle}?view=${wizardVariantName}`;
+                      window.open(storefrontUrl, '_blank');
+                    } else {
+                      alert('Missing information to generate storefront preview URL.');
+                    }
+                  }}
+                  disabled={!canOpenThemeEditor || !wizardVariantProductHandle || !wizardVariantName}
+                  style={{
+                    padding: '12px 24px',
+                    background: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF',
+                    color: '#FFFFFF',
+                    borderRadius: '8px',
+                    border: `1px solid ${(canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF'}`,
+                    cursor: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 'pointer' : 'not-allowed',
+                    opacity: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 1 : 0.7,
+                    fontSize: '14px',
+                    fontWeight: '600'
+                  }}
+                >
+                  Preview in Storefront
+                </button>
+              </div>
+            )}
+
             {/* Main Container - Two Columns */}
             <div style={{
               display: 'flex',
@@ -3055,14 +3107,19 @@ export default function ABTests() {
                 background: '#FFFFFF',
                 borderRadius: '12px',
                 padding: '24px',
-                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)'
+                boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
+                height: '600px',
+                display: 'flex',
+                flexDirection: 'column'
               }}>
                 {/* Tabs */}
                 <div style={{
                   display: 'flex',
                   gap: '8px',
                   marginBottom: '24px',
-                  borderBottom: '1px solid #E5E7EB'
+                  background: '#F3F4F6',
+                  padding: '4px',
+                  borderRadius: '8px'
                 }}>
                   {['Text Content', 'Padding', 'Icons & Effects', 'Border'].map((tab) => (
                     <button
@@ -3070,14 +3127,15 @@ export default function ABTests() {
                       onClick={() => setActiveSettingsTab(tab)}
                       style={{
                         padding: '12px 20px',
-                        background: 'transparent',
+                        background: activeSettingsTab === tab ? '#FFFFFF' : 'transparent',
                         border: 'none',
-                        borderBottom: activeSettingsTab === tab ? '2px solid #3B82F6' : '2px solid transparent',
+                        borderRadius: '6px',
                         color: activeSettingsTab === tab ? '#3B82F6' : '#6B7280',
                         fontSize: '14px',
                         fontWeight: activeSettingsTab === tab ? '600' : '500',
                         cursor: 'pointer',
-                        transition: 'all 0.2s ease'
+                        transition: 'all 0.2s ease',
+                        boxShadow: activeSettingsTab === tab ? '0 1px 3px rgba(0, 0, 0, 0.1)' : 'none'
                       }}
                     >
                       {tab}
@@ -3086,7 +3144,7 @@ export default function ABTests() {
                 </div>
 
                 {/* Tab Content */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', maxHeight: '600px', overflowY: 'auto' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', flex: 1, overflowY: 'auto', minHeight: 0 }}>
                   {/* Text Content Tab */}
                   {activeSettingsTab === 'Text Content' && (
                     <>
@@ -4111,7 +4169,7 @@ export default function ABTests() {
                 borderRadius: '12px',
                 padding: '24px',
                 boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-                minHeight: '600px',
+                height: '600px',
                 display: 'flex',
                 flexDirection: 'column'
               }}>
@@ -4153,95 +4211,6 @@ export default function ABTests() {
                 </div>
               </div>
             </div>
-
-            {/* Preview Buttons Section - Keep at bottom */}
-            {isBlockSaved && (
-              <div style={{
-                background: '#F0FDF4',
-                padding: '20px',
-                borderRadius: '12px',
-                border: '1px solid #22C55E',
-                marginTop: '24px'
-              }}>
-                <h4 style={{
-                  fontSize: '16px',
-                  fontWeight: '600',
-                  color: '#15803D',
-                  margin: '0 0 12px 0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px'
-                }}>
-                  <span style={{ 
-                    background: '#22C55E', 
-                    color: 'white', 
-                    borderRadius: '50%', 
-                    width: '20px', 
-                    height: '20px', 
-                    display: 'flex', 
-                    alignItems: 'center', 
-                    justifyContent: 'center', 
-                    fontSize: '12px', 
-                    fontWeight: 'bold' 
-                  }}>3</span>
-                  Preview Updated Widget
-                </h4>
-                <p style={{
-                  fontSize: '14px',
-                  color: '#15803D',
-                  margin: '0 0 16px 0'
-                }}>
-                  Click below to preview your configured widget settings in the theme editor
-                </p>
-                <div style={{
-                  display: 'flex',
-                  gap: '12px',
-                  alignItems: 'center'
-                }}>
-                  <button
-                    onClick={openVariantInThemeEditor}
-                    disabled={!canOpenThemeEditor}
-                    style={{
-                      padding: '12px 24px',
-                      background: canOpenThemeEditor ? '#22C55E' : '#9CA3AF',
-                      color: '#FFFFFF',
-                      borderRadius: '8px',
-                      border: `1px solid ${canOpenThemeEditor ? '#22C55E' : '#9CA3AF'}`,
-                      cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
-                      opacity: canOpenThemeEditor ? 1 : 0.7,
-                      fontSize: '14px',
-                      fontWeight: '600'
-                    }}
-                  >
-                    Preview in Theme Editor
-                  </button>
-                  <button
-                    onClick={() => {
-                      if (shop && wizardVariantProductHandle && wizardVariantName) {
-                        const storefrontUrl = `https://${shop}/products/${wizardVariantProductHandle}?view=${wizardVariantName}`;
-                        window.open(storefrontUrl, '_blank');
-                      } else {
-                        alert('Missing information to generate storefront preview URL.');
-                      }
-                    }}
-                    disabled={!canOpenThemeEditor || !wizardVariantProductHandle || !wizardVariantName}
-                    style={{
-                      padding: '12px 24px',
-                      background: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF',
-                      color: '#FFFFFF',
-                      borderRadius: '8px',
-                      border: `1px solid ${(canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF'}`,
-                      cursor: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 'pointer' : 'not-allowed',
-                      opacity: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 1 : 0.7,
-                      fontSize: '14px',
-                      fontWeight: '600'
-                    }}
-                  >
-                    Preview in Storefront
-                  </button>
-                </div>
-              </div>
-            )}
 
             {/* Navigation buttons */}
             <div style={{
