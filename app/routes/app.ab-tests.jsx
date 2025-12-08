@@ -762,13 +762,13 @@ export default function ABTests() {
   const checkIfBlockSaved = async () => {
     if (!wizardVariantName || !themes?.length) {
       alert('Template information not available. Please ensure the template has been duplicated.');
-      return;
+      return false;
     }
 
     const mainTheme = themes.find(t => t.role === 'MAIN');
     if (!mainTheme) {
       alert('Main theme not found.');
-      return;
+      return false;
     }
 
     const themeId = mainTheme.id.replace('gid://shopify/OnlineStoreTheme/', '');
@@ -795,16 +795,20 @@ export default function ABTests() {
         } else {
           console.log('❌ App block not found in template');
         }
+        return result.blockExists;
       } else {
         console.error('❌ Failed to check block status:', result.error);
         alert(`Failed to check if widget is saved: ${result.error}`);
+        return false;
       }
     } catch (error) {
       console.error('❌ Error checking block status:', error);
       alert('Error checking if widget is saved. Please try again.');
+      return false;
     } finally {
       setIsCheckingBlockSaved(false);
     }
+    return false;
   };
 
   // Generate preview URL for wizard
@@ -2545,28 +2549,31 @@ export default function ABTests() {
             animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
             transform: 'translateX(0)',
             opacity: 1,
-            maxWidth: '800px',
-            margin: '0 auto'
+            display: 'flex',
+            gap: '40px',
+            alignItems: 'flex-start'
           }}>
-            <h2 style={{
-              fontSize: '32px',
-              fontWeight: '700',
-              color: '#1F2937',
-              marginBottom: '12px'
-            }}>
-              Install your widget
-            </h2>
-            <p style={{
-              fontSize: '16px',
-              color: '#6B7280',
-              marginBottom: '40px'
-            }}>
-              TryLab has already inserted your widget into your product template. Just click Save in Shopify.
-            </p>
+            {/* Left side - Steps */}
+            <div style={{ flex: 1, maxWidth: '600px' }}>
+              <h2 style={{
+                fontSize: '32px',
+                fontWeight: '700',
+                color: '#1F2937',
+                marginBottom: '12px'
+              }}>
+                Install your widget
+              </h2>
+              <p style={{
+                fontSize: '16px',
+                color: '#6B7280',
+                marginBottom: '40px'
+              }}>
+                TryLab has already inserted your widget into your product template <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>. Just click Save in Shopify.
+              </p>
 
             {/* Step 1: Open Shopify Theme Editor */}
             <div style={{
-              marginBottom: '32px'
+              marginBottom: '0'
             }}>
               <div style={{
                 display: 'flex',
@@ -2575,19 +2582,32 @@ export default function ABTests() {
                 marginBottom: '16px'
               }}>
                 <div style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  background: '#3B82F6',
-                  color: '#FFFFFF',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '16px',
-                  fontWeight: '600',
                   flexShrink: 0
                 }}>
-                  1
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: '#3B82F6',
+                    color: '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '16px',
+                    fontWeight: '600'
+                  }}>
+                    1
+                  </div>
+                  {/* Progress line */}
+                  <div style={{
+                    width: '2px',
+                    height: '40px',
+                    background: '#E5E7EB',
+                    marginTop: '8px'
+                  }}></div>
                 </div>
                 <div style={{ flex: 1 }}>
                   <h3 style={{
@@ -2635,7 +2655,7 @@ export default function ABTests() {
 
             {/* Step 2: Press Save in Shopify */}
             <div style={{
-              marginBottom: '32px'
+              marginBottom: '0'
             }}>
               <div style={{
                 display: 'flex',
@@ -2644,19 +2664,32 @@ export default function ABTests() {
                 marginBottom: '16px'
               }}>
                 <div style={{
-                  width: '32px',
-                  height: '32px',
-                  borderRadius: '50%',
-                  background: '#9CA3AF',
-                  color: '#FFFFFF',
                   display: 'flex',
+                  flexDirection: 'column',
                   alignItems: 'center',
-                  justifyContent: 'center',
-                  fontSize: '16px',
-                  fontWeight: '600',
                   flexShrink: 0
                 }}>
-                  2
+                  <div style={{
+                    width: '32px',
+                    height: '32px',
+                    borderRadius: '50%',
+                    background: '#9CA3AF',
+                    color: '#FFFFFF',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    fontSize: '16px',
+                    fontWeight: '600'
+                  }}>
+                    2
+                  </div>
+                  {/* Progress line */}
+                  <div style={{
+                    width: '2px',
+                    height: '40px',
+                    background: '#E5E7EB',
+                    marginTop: '8px'
+                  }}></div>
                 </div>
                 <div style={{ flex: 1 }}>
                   <h3 style={{
@@ -2673,7 +2706,7 @@ export default function ABTests() {
                     margin: '0 0 16px 0',
                     lineHeight: '1.5'
                   }}>
-                    Look for the green Save button in the top-right corner of your theme editor.
+                    Look for the black Save button in the top-right corner of your theme editor.
                   </p>
                   <div style={{
                     background: '#F3F4F6',
@@ -2684,7 +2717,7 @@ export default function ABTests() {
                   }}>
                     <button style={{
                       padding: '8px 16px',
-                      background: '#10B981',
+                      background: '#000000',
                       color: '#FFFFFF',
                       borderRadius: '6px',
                       border: 'none',
@@ -2692,7 +2725,7 @@ export default function ABTests() {
                       fontWeight: '600',
                       cursor: 'default'
                     }}>
-                      Save
+                      black
                     </button>
                     <p style={{
                       fontSize: '12px',
@@ -2700,7 +2733,7 @@ export default function ABTests() {
                       margin: '8px 0 0 0',
                       textAlign: 'center'
                     }}>
-                      Click the green Save button
+                      Click the black Save button
                     </p>
                   </div>
                 </div>
@@ -2758,7 +2791,12 @@ export default function ABTests() {
               marginBottom: '40px'
             }}>
               <button
-                onClick={checkIfBlockSaved}
+                onClick={async () => {
+                  const wasSaved = await checkIfBlockSaved();
+                  if (wasSaved === false) {
+                    alert('Widget not found. Please make sure you clicked the Save button in the Shopify theme editor and try again.');
+                  }
+                }}
                 disabled={isCheckingBlockSaved}
                 style={{
                   padding: '12px 32px',
@@ -2804,31 +2842,6 @@ export default function ABTests() {
               )}
             </div>
 
-            {/* Back button */}
-            <div style={{
-              marginTop: '40px'
-            }}>
-              <button
-                onClick={() => setCurrentStep(1)}
-                style={{
-                  background: 'transparent',
-                  border: 'none',
-                  color: '#6B7280',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  padding: '8px 0',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '4px'
-                }}
-              >
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M10 12L6 8L10 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-                Back
-              </button>
-            </div>
-
             {/* Next button - only enabled when saved */}
             {isBlockSaved && (
               <div style={{
@@ -2851,6 +2864,138 @@ export default function ABTests() {
                 >
                   Next
                 </button>
+              </div>
+            )}
+            </div>
+
+            {/* Right side - Conversion Play Display */}
+            {selectedIdea && (
+              <div style={{
+                flex: 1,
+                maxWidth: '400px',
+                position: 'sticky',
+                top: '20px'
+              }}>
+                <div style={{
+                  background: '#FFFFFF',
+                  borderRadius: '16px',
+                  padding: '24px',
+                  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px'
+                }}>
+                  {/* Widget Preview */}
+                  <div style={{ 
+                    width: '100%', 
+                    height: '200px', 
+                    borderRadius: '10px', 
+                    overflow: 'hidden',
+                    boxSizing: 'border-box',
+                    background: getWidgetBackgroundColor(selectedIdea.utility)
+                  }}>
+                    {selectedIdea.utility === 'Free Shipping Badge' ? (
+                      <img 
+                        src={freeShippingBadgeImage} 
+                        alt="Free Shipping Badge"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain',
+                          display: 'block'
+                        }}
+                      />
+                    ) : selectedIdea.utility === 'How Many in Cart' ? (
+                      <img 
+                        src={addToCartImage} 
+                        alt="How Many in Cart"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain',
+                          display: 'block'
+                        }}
+                      />
+                    ) : selectedIdea.utility === 'Returns Guarantee Badge' ? (
+                      <img 
+                        src={moneyBackGuaranteeImage} 
+                        alt="Returns Guarantee Badge"
+                        style={{
+                          width: '100%',
+                          height: '100%',
+                          objectFit: 'contain',
+                          display: 'block'
+                        }}
+                      />
+                    ) : null}
+                  </div>
+
+                  {/* Title */}
+                  <p style={{
+                    fontFamily: 'Geist, sans-serif',
+                    fontWeight: 600,
+                    fontSize: '20px',
+                    color: figmaColors.darkGray,
+                    margin: 0,
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                    width: '100%',
+                    boxSizing: 'border-box',
+                    textAlign: 'center'
+                  }}>
+                    {selectedIdea.utility}
+                  </p>
+                  
+                  {/* Tags */}
+                  <div style={{
+                    display: 'flex',
+                    gap: '8px',
+                    flexWrap: 'wrap',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    width: '100%',
+                    boxSizing: 'border-box'
+                  }}>
+                    {(Array.isArray(selectedIdea.style) ? selectedIdea.style : [selectedIdea.style]).map((tag, tagIndex) => (
+                      <div
+                        key={tagIndex}
+                        style={{
+                          background: '#FFFFFF',
+                          color: '#1E40AF',
+                          padding: '8px 16px',
+                          borderRadius: '16px',
+                          fontSize: '14px',
+                          fontWeight: '500',
+                          width: 'fit-content',
+                          border: '1px solid #E5E7EB',
+                          wordWrap: 'break-word',
+                          overflowWrap: 'break-word',
+                          maxWidth: '100%',
+                          boxSizing: 'border-box'
+                        }}
+                      >
+                        {tag}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Description */}
+                  <p style={{
+                    fontFamily: 'Inter, sans-serif',
+                    fontWeight: 500,
+                    fontSize: '14px',
+                    color: figmaColors.darkGray,
+                    margin: 0,
+                    lineHeight: '20px',
+                    width: '100%',
+                    wordWrap: 'break-word',
+                    overflowWrap: 'break-word',
+                    boxSizing: 'border-box',
+                    textAlign: 'center'
+                  }}>
+                    {selectedIdea.rationale}
+                  </p>
+                </div>
               </div>
             )}
           </div>
