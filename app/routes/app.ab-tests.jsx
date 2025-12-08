@@ -270,17 +270,16 @@ export default function ABTests() {
     if (!selectedGoal) return [];
     
     return abTestIdeas.filter(widget => {
-      // If widget has availableForGoals, check if selectedGoal is in the array
-      if (widget.availableForGoals) {
-        return widget.availableForGoals.includes(selectedGoal);
-      }
-      // For widgets without availableForGoals, show them for all goals (backward compatibility)
-      // But "How Many in Cart" should only show for Social Proof and Urgency
+      // "How Many in Cart" should ONLY show for Social Proof or Urgency
       if (widget.utility === 'How Many in Cart') {
-        return ['Social Proof', 'Urgency'].includes(selectedGoal);
+        return selectedGoal === 'Social Proof' || selectedGoal === 'Urgency';
       }
-      // For other widgets (Free Shipping, Returns Guarantee), show for Trust goal
-      return selectedGoal === 'Trust';
+      // Free Shipping and Returns Guarantee should ONLY show for Trust
+      if (widget.utility === 'Free Shipping Badge' || widget.utility === 'Returns Guarantee Badge') {
+        return selectedGoal === 'Trust';
+      }
+      // Default: don't show
+      return false;
     });
   };
 
@@ -536,7 +535,7 @@ export default function ABTests() {
           header_font: 'system',
           header_font_size: 24,
           header_underline: false,
-          bodyText: '🛒 0 people have this item in their cart right now',
+          bodyText: '<span style="display: inline-flex; align-items: center; margin-right: 6px;"><svg width="18" height="18" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align: middle;"><rect x="4" y="6" width="12" height="10" rx="1" stroke="currentColor" stroke-width="1.5" fill="none"/><path d="M6 6V4C6 3.44772 6.44772 3 7 3H13C13.5523 3 14 3.44772 14 4V6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M7 3C7 2.44772 7.44772 2 8 2H12C12.5523 2 13 2.44772 13 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/><path d="M5 8L4.5 7.5C4.22386 7.5 4 7.72386 4 8V8.5" stroke="currentColor" stroke-width="1" stroke-linecap="round" fill="none" opacity="0.7"/></svg></span>0 people have this item in their cart right now',
           body_font: 'system',
           body_font_size: 16,
           body_underline: false,
@@ -1713,7 +1712,7 @@ export default function ABTests() {
             </div>
 
             {/* Tinder Swiper - Right Side (appears when goal is selected) */}
-            {selectedGoal && selectedGoal === 'Trust' && (
+            {selectedGoal && (
               <div style={{
                 backgroundColor: '#FFFFFF',
                 borderRadius: '16px',
