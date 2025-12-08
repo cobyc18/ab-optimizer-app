@@ -526,7 +526,18 @@ export default function ABTests() {
     setSwipeDirection(direction);
     
     if (direction === 'like') {
-      const selectedWidget = abTestIdeas[currentWidgetIndex];
+      const filteredWidgets = getFilteredConversionPlays();
+      if (filteredWidgets.length === 0 || currentWidgetIndex >= filteredWidgets.length) {
+        setIsAnimating(false);
+        setSwipeDirection(null);
+        return;
+      }
+      const selectedWidget = filteredWidgets[currentWidgetIndex];
+      if (!selectedWidget) {
+        setIsAnimating(false);
+        setSwipeDirection(null);
+        return;
+      }
       
       // Auto-populate settings for How Many in Cart
       if (selectedWidget.id === 1 && selectedWidget.utility === 'How Many in Cart') {
