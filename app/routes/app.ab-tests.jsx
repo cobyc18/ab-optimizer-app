@@ -227,7 +227,7 @@ export default function ABTests() {
       rationale: 'Shows real-time visitor activity, creates urgency and social proof',
       style: 'Dynamic',
       preview: '👁️ 76 people viewing this page',
-      blockId: 'live-visitor-count',
+      blockId: 'simple-text-badge',
       appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
     },
     {
@@ -498,6 +498,45 @@ export default function ABTests() {
     
     if (direction === 'like') {
       const selectedWidget = abTestIdeas[currentWidgetIndex];
+      
+      // Auto-populate settings for Live Visitor Count
+      if (selectedWidget.id === 1 && selectedWidget.utility === 'Live Visitor Count') {
+        setWidgetSettings({
+          enable_step_2: false,
+          headerText: '',
+          header_font: 'system',
+          header_font_size: 24,
+          header_underline: false,
+          bodyText: 'There are currently 0 people currently looking at this product',
+          body_font: 'system',
+          body_font_size: 16,
+          body_underline: false,
+          header_body_spacing: 6,
+          icon_text_spacing: 20,
+          inner_padding_horizontal: 24,
+          inner_padding_vertical: 16,
+          inner_padding_horizontal_mobile: 16,
+          inner_padding_vertical_mobile: 12,
+          outer_padding_horizontal: 0,
+          outer_padding_vertical: 0,
+          outer_padding_horizontal_mobile: 0,
+          outer_padding_vertical_mobile: 0,
+          icon_choice: 'none',
+          icon_custom: '',
+          icon_blink: false,
+          icon_blink_intensity: 50,
+          icon_size: 36,
+          icon_size_mobile: 30,
+          border_radius: 8,
+          border_thickness: 1,
+          hover_effect: true,
+          drop_shadow: 10,
+          header_color: '#0f172a',
+          textColor: '#1a5f5f',
+          backgroundColor: '#f5f5f0',
+          border_color: '#d4d4d8'
+        });
+      }
       
       // Auto-populate settings for Free Shipping Badge
       if (selectedWidget.id === 2 && selectedWidget.utility === 'Free Shipping Badge') {

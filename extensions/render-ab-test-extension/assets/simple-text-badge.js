@@ -83,16 +83,35 @@
     const validMin = Math.min(minCount, maxCount);
     const validMax = Math.max(minCount, maxCount);
     
-    let currentCount = Math.max(validMin, Math.min(validMax, parseInt(countMatch[0]) || validMin));
+    // Get the initial count from the text
+    const initialCount = parseInt(countMatch[0]);
+    
+    // If the text shows 0, start from a random value within the range
+    // Otherwise, use the number found, clamped to the valid range
+    let currentCount;
+    if (initialCount === 0) {
+      // Start from a random value within the range
+      currentCount = Math.floor(Math.random() * (validMax - validMin + 1)) + validMin;
+    } else {
+      // Use the found number, clamped to the valid range
+      currentCount = Math.max(validMin, Math.min(validMax, initialCount));
+    }
     
     // Store the original HTML content
     const originalHTML = bodyElement.innerHTML;
     const countPlaceholder = countMatch[0];
-    const countIndex = bodyText.indexOf(countPlaceholder);
     
-    // Split the HTML by finding where the number appears
-    // We need to preserve HTML structure, so we'll use a regex replacement approach
+    // Create regex to find and replace the number (including 0)
+    // Use word boundary to match whole numbers only
     const countRegex = new RegExp('\\b' + countPlaceholder + '\\b', 'g');
+    
+    // If starting from 0, immediately update to the initial random value
+    if (initialCount === 0) {
+      setTimeout(function() {
+        const updatedHTML = bodyElement.innerHTML.replace(countRegex, String(currentCount));
+        bodyElement.innerHTML = updatedHTML;
+      }, 100);
+    }
     
     function updateVisitorCount() {
       const change = Math.floor(Math.random() * 5) - 2;
