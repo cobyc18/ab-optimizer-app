@@ -66,8 +66,11 @@ export const action = async ({ request }) => {
       return json({ success: false, error: "A test with this name already exists. Please choose a different name." }, { status: 400 });
     }
 
+    // Check if there's a running test for this product - SCOPED BY SHOP
+    // Different shops can use the same product ID for different tests
     const existingRunningTest = await prisma.aBTest.findFirst({
       where: {
+        shop: shop,
         productId: productNumericId,
         status: "running"
       }

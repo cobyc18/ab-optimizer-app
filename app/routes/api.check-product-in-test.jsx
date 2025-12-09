@@ -40,7 +40,8 @@ export const action = async ({ request }) => {
       shop: session.shop
     });
 
-    // Check if there's a running test for this product
+    // Check if there's a running test for this product - SCOPED BY SHOP
+    // Different shops can use the same product ID for different tests
     const runningTest = await prisma.aBTest.findFirst({
       where: {
         shop: session.shop,
