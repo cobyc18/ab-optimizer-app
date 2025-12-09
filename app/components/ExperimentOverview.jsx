@@ -1,5 +1,6 @@
 import { Link } from "@remix-run/react";
 import React from "react";
+import ExperimentChart from "./ExperimentChart.jsx";
 
 export default function ExperimentOverview({ experiments, getWidgetTweaks, figmaColors, icons }) {
   const runningTest = experiments.find(exp => exp.status === 'running' || exp.status === 'active' || exp.status === 'live');
@@ -103,57 +104,12 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
 
       {/* Chart Area with X/Y Axes */}
       <div style={{ marginBottom: '30px', position: 'relative', height: '300px' }}>
-        {/* Y-Axis Labels */}
-        <div style={{
-          position: 'absolute',
-          left: '20px',
-          top: '20px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '55px',
-          alignItems: 'center',
-          fontSize: '18px',
-          color: 'rgba(21,21,21,0.7)',
-          fontFamily: 'Inter, sans-serif',
-          fontWeight: 400,
-          height: '240px',
-          justifyContent: 'space-between'
-        }}>
-          <p style={{ margin: 0 }}>5</p>
-          <p style={{ margin: 0 }}>4</p>
-          <p style={{ margin: 0 }}>3</p>
-          <p style={{ margin: 0 }}>2</p>
-          <p style={{ margin: 0 }}>1</p>
-          <p style={{ margin: 0 }}>0</p>
-        </div>
-        
-        {/* X-Axis Labels */}
-        <div style={{
-          position: 'absolute',
-          bottom: '20px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          display: 'flex',
-          gap: '70px',
-          alignItems: 'center',
-          fontSize: '18px',
-          color: 'rgba(21,21,21,0.7)',
-          fontFamily: 'Inter, sans-serif',
-          fontWeight: 400
-        }}>
-          <p style={{ margin: 0 }}>JAN</p>
-          <p style={{ margin: 0 }}>FEB</p>
-          <p style={{ margin: 0 }}>MAR</p>
-          <p style={{ margin: 0 }}>APR</p>
-          <p style={{ margin: 0 }}>MAY</p>
-          <p style={{ margin: 0 }}>JUN</p>
-          <p style={{ margin: 0 }}>JUL</p>
-          <p style={{ margin: 0 }}>AUG</p>
-          <p style={{ margin: 0 }}>SEP</p>
-          <p style={{ margin: 0 }}>OCT</p>
-          <p style={{ margin: 0 }}>NOV</p>
-          <p style={{ margin: 0 }}>DEC</p>
-        </div>
+        <ExperimentChart
+          dailyData={spotlightTest.dailyMetrics || []}
+          chartWidth={1200}
+          chartHeight={240}
+          figmaColors={figmaColors}
+        />
       </div>
 
       {/* Experiment Title */}

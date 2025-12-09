@@ -337,6 +337,71 @@ export const loader = async ({ request }) => {
         const controlPurchases = controlEvents.filter(e => e.eventType === 'purchase').length;
         const variantPurchases = variantEvents.filter(e => e.eventType === 'purchase').length;
 
+        // Calculate daily metrics for chart
+        const startDate = test.startDate ? new Date(test.startDate) : new Date();
+        const dailyMetrics = [];
+        
+        // Group events by day
+        const eventsByDay = {};
+        events.forEach(event => {
+          const eventDate = new Date(event.timestamp);
+          const dayNumber = Math.floor((eventDate - startDate) / (1000 * 60 * 60 * 24)) + 1;
+          
+          if (dayNumber < 1) return; // Skip events before test start
+          
+          const dayKey = dayNumber;
+          if (!eventsByDay[dayKey]) {
+            eventsByDay[dayKey] = {
+              control: { impressions: 0, addToCart: 0 },
+              variant: { impressions: 0, addToCart: 0 }
+            };
+          }
+          
+          const variant = event.variant === test.templateA ? 'control' : 
+                         event.variant === test.templateB ? 'variant' : null;
+          
+          if (variant) {
+            if (event.eventType === 'impression') {
+              eventsByDay[dayKey][variant].impressions++;
+            } else if (event.eventType === 'add_to_cart') {
+              eventsByDay[dayKey][variant].addToCart++;
+            }
+          }
+        });
+        
+        // Calculate add to cart rate per day
+        Object.keys(eventsByDay).forEach(dayKey => {
+          const day = parseInt(dayKey, 10);
+          const dayData = eventsByDay[dayKey];
+          
+          // Control metrics
+          const controlRate = dayData.control.impressions > 0
+            ? dayData.control.addToCart / dayData.control.impressions
+            : 0;
+          dailyMetrics.push({
+            dayNumber: day,
+            variant: 'control',
+            impressions: dayData.control.impressions,
+            addToCart: dayData.control.addToCart,
+            addToCartRate: controlRate
+          });
+          
+          // Variant metrics
+          const variantRate = dayData.variant.impressions > 0
+            ? dayData.variant.addToCart / dayData.variant.impressions
+            : 0;
+          dailyMetrics.push({
+            dayNumber: day,
+            variant: 'variant',
+            impressions: dayData.variant.impressions,
+            addToCart: dayData.variant.addToCart,
+            addToCartRate: variantRate
+          });
+        });
+        
+        // Sort by day number
+        dailyMetrics.sort((a, b) => a.dayNumber - b.dayNumber);
+
         console.log(`🔍 Test ${test.id} (${test.name}):`);
         console.log(`  Template A: ${test.templateA}`);
         console.log(`  Template B: ${test.templateB}`);
@@ -506,7 +571,10 @@ export const loader = async ({ request }) => {
           winnerDeclared: winnerDeclared,
           winner: test.winner || (winnerDeclared ? (analysis.decision.includes('variant') ? 'B' : 'A') : null),
           widgetType: test.widgetType || null,
-          widgetSettings: test.widgetSettings || null
+          widgetSettings: test.widgetSettings || null,
+          dailyMetrics: dailyMetrics,
+          templateA: test.templateA,
+          templateB: test.templateB
         };
       })
     );
