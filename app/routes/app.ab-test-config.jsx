@@ -52,11 +52,11 @@ export const loader = async ({ request }) => {
       }
     }
 
-    // Find active A/B tests for this product
+    // Find active A/B tests for this product (exclude manually_ended and completed)
     const activeTests = await prisma.aBTest.findMany({
       where: {
         productId: numericProductId,
-        status: "running"
+        status: { in: ["running", "active", "live"] } // Exclude manually_ended, completed, paused
       },
       orderBy: {
         startDate: 'desc'

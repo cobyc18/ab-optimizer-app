@@ -300,11 +300,11 @@ export const loader = async ({ request }) => {
       console.log('📄 Filtered product templates!!!:', productTemplates);
     }
 
-    // Fetch all A/B tests (both active and completed with winners)
+    // Fetch all A/B tests (both active and completed with winners, including manually ended)
     const allTests = await prisma.aBTest.findMany({
       where: { 
         shop: session.shop,
-        status: { in: ['active', 'running', 'live', 'completed'] }
+        status: { in: ['active', 'running', 'live', 'completed', 'manually_ended'] }
       },
       orderBy: { startDate: 'desc' }
     });
@@ -563,8 +563,8 @@ export const loader = async ({ request }) => {
           id: test.id,
           name: test.name,
           status: test.status,
-          variantA: controlVisits,
-          variantB: variantVisits,
+          variantA: controlVisits, // Total impressions for control
+          variantB: variantVisits, // Total impressions for variant
           runtime: `${daysRunning}d`,
           goal: "95%",
           analysis: analysis,
@@ -574,7 +574,8 @@ export const loader = async ({ request }) => {
           widgetSettings: test.widgetSettings || null,
           dailyMetrics: dailyMetrics,
           templateA: test.templateA,
-          templateB: test.templateB
+          templateB: test.templateB,
+          startDate: test.startDate // Add startDate for runtime calculation
         };
       })
     );

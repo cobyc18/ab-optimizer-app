@@ -38,16 +38,19 @@ export default function ExperimentChart({
   const plotWidth = chartWidth - padding.left - padding.right;
   const plotHeight = chartHeight - padding.top - padding.bottom;
   
+  // Fixed Y-axis: 0% to 40% with 5% increments
+  const maxRate = 0.40; // 40%
+  const yAxisIncrement = 0.05; // 5%
+  
   // Process data and calculate regression
-  const { controlPoints, variantPoints, controlRegression, variantRegression, maxDay, maxRate } = useMemo(() => {
+  const { controlPoints, variantPoints, controlRegression, variantRegression, maxDay } = useMemo(() => {
     if (!dailyData || dailyData.length === 0) {
       return {
         controlPoints: [],
         variantPoints: [],
         controlRegression: { points: [] },
         variantRegression: { points: [] },
-        maxDay: 1,
-        maxRate: 0.05
+        maxDay: 1
       };
     }
     
@@ -64,19 +67,16 @@ export default function ExperimentChart({
     const controlReg = calculateRegression(controlData);
     const variantReg = calculateRegression(variantData);
     
-    // Find max values for scaling
+    // Find max day for scaling
     const allDays = dailyData.map(d => d.dayNumber);
-    const allRates = dailyData.map(d => d.addToCartRate);
     const maxDay = Math.max(...allDays, 1);
-    const maxRate = Math.max(...allRates, 0.05); // Minimum 5% for visibility
     
     return {
       controlPoints: controlData,
       variantPoints: variantData,
       controlRegression: controlReg,
       variantRegression: variantReg,
-      maxDay,
-      maxRate: Math.ceil(maxRate * 100) / 100 // Round up to 2 decimals
+      maxDay
     };
   }, [dailyData]);
   
@@ -84,16 +84,15 @@ export default function ExperimentChart({
   const toSVGX = (x) => padding.left + (x / maxDay) * plotWidth;
   const toSVGY = (y) => padding.top + plotHeight - (y / maxRate) * plotHeight;
   
-  // Generate Y-axis labels (0 to maxRate)
+  // Generate Y-axis labels (0% to 40% with 5% increments)
   const yAxisLabels = useMemo(() => {
-    const numLabels = 6;
     const labels = [];
-    for (let i = 0; i <= numLabels; i++) {
-      const value = (maxRate / numLabels) * i;
+    for (let i = 0; i <= 8; i++) { // 0, 5, 10, 15, 20, 25, 30, 35, 40
+      const value = i * yAxisIncrement;
       labels.push(value.toFixed(2));
     }
     return labels;
-  }, [maxRate]);
+  }, []);
   
   // Generate X-axis labels (day numbers)
   const xAxisLabels = useMemo(() => {
@@ -127,6 +126,42 @@ export default function ExperimentChart({
   
   return (
     <div style={{ position: 'relative', width: '100%', height: `${chartHeight}px` }}>
+      {/* Legend - Top Right */}
+      <div style={{
+        position: 'absolute',
+        top: '10px',
+        right: '20px',
+        display: 'flex',
+        gap: '20px',
+        alignItems: 'center',
+        zIndex: 10
+      }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{ backgroundColor: '#3d3af3', borderRadius: '4px', width: '16px', height: '16px' }} />
+          <p style={{ 
+            fontFamily: 'Poppins, sans-serif', 
+            fontWeight: 400, 
+            fontSize: '16px', 
+            color: figmaColors?.themeDark || '#464255', 
+            margin: 0 
+          }}>
+            Variant
+          </p>
+        </div>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          <div style={{ backgroundColor: figmaColors?.orange || '#ef9362', borderRadius: '4px', width: '16px', height: '16px' }} />
+          <p style={{ 
+            fontFamily: 'Poppins, sans-serif', 
+            fontWeight: 400, 
+            fontSize: '16px', 
+            color: figmaColors?.themeDark || '#464255', 
+            margin: 0 
+          }}>
+            Control
+          </p>
+        </div>
+      </div>
+      
       <svg 
         width={chartWidth} 
         height={chartHeight}
@@ -255,7 +290,7 @@ export default function ExperimentChart({
         fontWeight: 400
       }}>
         {yAxisLabels.map((label, i) => {
-          const percentage = (parseFloat(label) * 100).toFixed(1);
+          const percentage = (parseFloat(label) * 100).toFixed(0);
           return (
             <p key={`y-label-${i}`} style={{ margin: 0, textAlign: 'right', width: '50px' }}>
               {percentage}%
@@ -268,20 +303,18 @@ export default function ExperimentChart({
       <div style={{
         position: 'absolute',
         bottom: '20px',
-        left: '50%',
-        transform: 'translateX(-50%)',
+        left: `${padding.left}px`,
+        width: `${plotWidth}px`,
         display: 'flex',
-        gap: `${plotWidth / (xAxisLabels.length - 1 || 1)}px`,
+        justifyContent: 'space-between',
         alignItems: 'center',
         fontSize: '18px',
         color: 'rgba(21,21,21,0.7)',
         fontFamily: 'Inter, sans-serif',
-        fontWeight: 400,
-        width: `${plotWidth}px`,
-        marginLeft: `${padding.left}px`
+        fontWeight: 400
       }}>
         {xAxisLabels.map((day, i) => (
-          <p key={`x-label-${i}`} style={{ margin: 0, textAlign: 'center', flex: 1 }}>
+          <p key={`x-label-${i}`} style={{ margin: 0, textAlign: 'center' }}>
             {day}
           </p>
         ))}

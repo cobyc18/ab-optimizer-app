@@ -1,8 +1,11 @@
 import { Link } from "@remix-run/react";
-import React from "react";
+import React, { useState } from "react";
 import ExperimentChart from "./ExperimentChart.jsx";
 
 export default function ExperimentOverview({ experiments, getWidgetTweaks, figmaColors, icons }) {
+  const [showEndModal, setShowEndModal] = useState(false);
+  const [isEnding, setIsEnding] = useState(false);
+  
   const runningTest = experiments.find(exp => exp.status === 'running' || exp.status === 'active' || exp.status === 'live');
   const completedWithWinner = experiments.find(exp => exp.status === 'completed' && exp.winner);
   const spotlightTest = runningTest || completedWithWinner;
@@ -11,10 +14,25 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
     return null;
   }
 
-  const runtimeMatch = spotlightTest.runtime?.match(/(\d+)d/);
-  const days = runtimeMatch ? parseInt(runtimeMatch[1], 10) : 0;
-  const hours = days * 24;
-  const runtimeDisplay = hours >= 24 ? `${days} d` : `${hours} h`;
+  // Calculate runtime from startDate
+  const calculateRuntime = () => {
+    if (!spotlightTest.startDate) return '0h';
+    
+    const startDate = new Date(spotlightTest.startDate);
+    const now = new Date();
+    const diffMs = now - startDate;
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    
+    if (diffHours < 24) {
+      return `${diffHours}h`;
+    } else {
+      const days = Math.floor(diffHours / 24);
+      const hours = diffHours % 24;
+      return `${days}d${hours}h`;
+    }
+  };
+  
+  const runtimeDisplay = calculateRuntime();
 
   const formatNumber = (num) => {
     if (num === null || num === undefined) return '0';
@@ -112,6 +130,53 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
         />
       </div>
 
+      {/* AutoPilot On - Between chart and test name */}
+      <div style={{ 
+        display: 'flex', 
+        gap: '15px', 
+        alignItems: 'center',
+        marginBottom: '20px'
+      }}>
+        {/* Circular icon with upward zigzag arrow */}
+        <div style={{ 
+          width: '28px', 
+          height: '28px',
+          borderRadius: '50%',
+          backgroundColor: '#E0F2FE',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12L6 8L8 10L12 4" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            <path d="M10 4L12 4L12 6" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          </svg>
+        </div>
+        {/* Lightning bolt icon */}
+        <div style={{ 
+          width: '16px', 
+          height: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 2L5 9H8L7 14L11 7H8L9 2Z" fill="#3B82F6" stroke="#3B82F6" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
+        <p style={{
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: 500,
+          fontSize: '16px',
+          color: figmaColors.primaryBlue,
+          margin: 0
+        }}>
+          AutoPilot On
+        </p>
+      </div>
+
       {/* Experiment Title */}
       <div style={{ marginBottom: '30px' }}>
         <p style={{
@@ -198,7 +263,7 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
               color: figmaColors.primaryBlue,
               margin: 0
             }}>
-              Variant A
+              Total Variant A Impressions
             </p>
           </div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -219,7 +284,7 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
               color: figmaColors.primaryBlue,
               margin: 0
             }}>
-              Variant B
+              Total Variant B Impressions
             </p>
           </div>
         </div>
@@ -232,15 +297,18 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
           width: '186px',
           height: '105px'
         }}>
-          <button style={{
-            backgroundColor: figmaColors.primaryBlue,
-            borderRadius: '5px',
-            border: 'none',
-            padding: '12px 24px',
-            cursor: 'pointer',
-            height: '48px',
-            flex: 1
-          }}>
+          <button 
+            onClick={() => setShowEndModal(true)}
+            style={{
+              backgroundColor: figmaColors.primaryBlue,
+              borderRadius: '5px',
+              border: 'none',
+              padding: '12px 24px',
+              cursor: 'pointer',
+              height: '48px',
+              flex: 1
+            }}
+          >
             <p style={{
               fontFamily: 'Poppins, sans-serif',
               fontWeight: 500,
@@ -273,45 +341,117 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
         </div>
       </div>
       
-      {/* Legend */}
-      <div style={{ display: 'flex', gap: '20px', marginBottom: '30px' }}>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <div style={{ backgroundColor: '#3d3af3', borderRadius: '4px', width: '16px', height: '16px' }} />
-          <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400, fontSize: '16px', color: figmaColors.themeDark, margin: 0 }}>
-            Variant
-          </p>
+      {/* End Experiment Modal */}
+      {showEndModal && (
+        <div style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          backgroundColor: 'rgba(0, 0, 0, 0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000
+        }}
+        onClick={() => !isEnding && setShowEndModal(false)}
+        >
+          <div style={{
+            backgroundColor: '#FFFFFF',
+            borderRadius: '12px',
+            padding: '40px',
+            maxWidth: '500px',
+            width: '90%',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.15)'
+          }}
+          onClick={(e) => e.stopPropagation()}
+          >
+            <h3 style={{
+              fontFamily: 'Geist, sans-serif',
+              fontWeight: 600,
+              fontSize: '24px',
+              color: figmaColors.darkGray,
+              margin: '0 0 16px 0'
+            }}>
+              End Experiment?
+            </h3>
+            <p style={{
+              fontFamily: 'Inter, sans-serif',
+              fontSize: '16px',
+              color: figmaColors.darkGray,
+              margin: '0 0 32px 0',
+              lineHeight: '24px'
+            }}>
+              Are you sure you want to end this experiment? This action will stop redirecting visitors to the control or variant and cannot be undone.
+            </p>
+            <div style={{
+              display: 'flex',
+              gap: '12px',
+              justifyContent: 'flex-end'
+            }}>
+              <button
+                onClick={() => setShowEndModal(false)}
+                disabled={isEnding}
+                style={{
+                  padding: '12px 24px',
+                  background: '#FFFFFF',
+                  border: '1px solid #D1D5DB',
+                  borderRadius: '8px',
+                  cursor: isEnding ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: figmaColors.darkGray,
+                  fontFamily: 'Poppins, sans-serif'
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setIsEnding(true);
+                  try {
+                    const response = await fetch('/api/end-experiment', {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({
+                        testId: spotlightTest.id
+                      })
+                    });
+                    
+                    const result = await response.json();
+                    if (result.success) {
+                      setShowEndModal(false);
+                      window.location.reload(); // Reload to show updated status
+                    } else {
+                      alert(result.error || 'Failed to end experiment');
+                      setIsEnding(false);
+                    }
+                  } catch (error) {
+                    console.error('Error ending experiment:', error);
+                    alert('Failed to end experiment. Please try again.');
+                    setIsEnding(false);
+                  }
+                }}
+                disabled={isEnding}
+                style={{
+                  padding: '12px 24px',
+                  background: figmaColors.orange || '#ef9362',
+                  border: 'none',
+                  borderRadius: '8px',
+                  cursor: isEnding ? 'not-allowed' : 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '500',
+                  color: '#FFFFFF',
+                  fontFamily: 'Poppins, sans-serif'
+                }}
+              >
+                {isEnding ? 'Ending...' : 'End Experiment'}
+              </button>
+            </div>
+          </div>
         </div>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          <div style={{ backgroundColor: figmaColors.orange, borderRadius: '4px', width: '16px', height: '16px' }} />
-          <p style={{ fontFamily: 'Poppins, sans-serif', fontWeight: 400, fontSize: '16px', color: figmaColors.themeDark, margin: 0 }}>
-            Control
-          </p>
-        </div>
-      </div>
-      
-      {/* AutoPilot */}
-      <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-        <div style={{ width: '28px', height: '28px' }}>
-          <img alt="Graph" src={icons.graph} style={{ width: '100%', height: '100%' }} />
-        </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          <div style={{ 
-            width: '16px', 
-            height: '16px',
-            backgroundColor: figmaColors.primaryBlue,
-            borderRadius: '50%'
-          }}></div>
-          <p style={{
-            fontFamily: 'Inter, sans-serif',
-            fontWeight: 500,
-            fontSize: '16px',
-            color: figmaColors.primaryBlue,
-            margin: 0
-          }}>
-            AutoPilot On
-          </p>
-        </div>
-      </div>
+      )}
 
       {winnerDeclared && widgetTweaks.length > 0 && (
         <div style={{ marginTop: '35px' }}>
