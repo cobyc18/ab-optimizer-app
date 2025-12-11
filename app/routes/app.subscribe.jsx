@@ -1,5 +1,6 @@
 import { json, redirect } from "@remix-run/node";
 import { authenticate, BASIC_PLAN, PRO_PLAN, ENTERPRISE_PLAN } from "../shopify.server.js";
+import { BillingInterval } from "@shopify/shopify-app-remix/server";
 
 export const action = async ({ request }) => {
   try {
@@ -36,11 +37,50 @@ export const action = async ({ request }) => {
 
     console.log("Requesting subscription for plan:", planName, "with returnUrl:", returnUrl);
 
-    // Request the subscription - this will redirect to Shopify
+    // Define plan configurations (must match shopify.server.js)
+    const planConfigs = {
+      [BASIC_PLAN]: {
+        lineItems: [
+          {
+            amount: 5,
+            currencyCode: "USD",
+            interval: BillingInterval.Every30Days,
+          },
+        ],
+      },
+      [PRO_PLAN]: {
+        lineItems: [
+          {
+            amount: 6,
+            currencyCode: "USD",
+            interval: BillingInterval.Every30Days,
+          },
+        ],
+      },
+      [ENTERPRISE_PLAN]: {
+        lineItems: [
+          {
+            amount: 7,
+            currencyCode: "USD",
+            interval: BillingInterval.Every30Days,
+          },
+        ],
+      },
+    };
+
+    const selectedPlanConfig = planConfigs[planName];
+    if (!selectedPlanConfig) {
+      return json({ error: `Plan configuration not found for: ${planName}` }, { status: 400 });
+    }
+
+    console.log("Plan config:", JSON.stringify(selectedPlanConfig, null, 2));
+
+    // Request the subscription - explicitly pass lineItems to ensure they're included
     await billing.request({
       plan: planName,
       isTest: true, // Always use test mode for testing
       returnUrl: returnUrl,
+      lineItems: selectedPlanConfig.lineItems, // Explicitly pass lineItems
     });
 
     // This will redirect to Shopify's confirmation page
