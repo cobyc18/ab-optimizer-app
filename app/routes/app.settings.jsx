@@ -42,9 +42,9 @@ export default function Settings() {
       icon: CreditCardIcon,
       color: "purple",
       items: [
-        { name: "Current Plan", description: "View and manage your subscription", href: "#" },
-        { name: "Billing History", description: "Download invoices and receipts", href: "#" },
-        { name: "Payment Methods", description: "Update payment information", href: "#" }
+        { name: "Manage Subscription", description: "View and manage your subscription", href: "/app/billing" },
+        { name: "Current Plan", description: "View your current plan details", href: "/app/billing" },
+        { name: "Billing History", description: "Download invoices and receipts", href: "/app/billing" }
       ]
     },
     {
@@ -161,6 +161,11 @@ export default function Settings() {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ delay: (index * 0.1) + (itemIndex * 0.05) }}
                     className="bg-white rounded-lg p-4 shadow-sm border border-gray-100 hover:shadow-md transition-all duration-200 cursor-pointer group"
+                    onClick={() => {
+                      if (item.href && item.href !== "#") {
+                        window.location.href = item.href;
+                      }
+                    }}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex-1">

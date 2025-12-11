@@ -3,9 +3,15 @@ import {
   ApiVersion,
   AppDistribution,
   shopifyApp,
+  BillingInterval,
 } from "@shopify/shopify-app-remix/server";
 import { PrismaSessionStorage } from "@shopify/shopify-app-session-storage-prisma";
 import prisma from "./db.server";
+
+// Export plan constants for use throughout the app
+export const BASIC_PLAN = "Basic Plan";
+export const PRO_PLAN = "Pro Plan";
+export const ENTERPRISE_PLAN = "Enterprise Plan";
 
 const shopify = shopifyApp({
   apiKey: process.env.SHOPIFY_API_KEY,
@@ -20,6 +26,35 @@ const shopify = shopifyApp({
   future: {
     unstable_newEmbeddedAuthStrategy: true,
     removeRest: true,
+  },
+  billing: {
+    [BASIC_PLAN]: {
+      lineItems: [
+        {
+          amount: 29,
+          currencyCode: "USD",
+          interval: BillingInterval.Every30Days,
+        },
+      ],
+    },
+    [PRO_PLAN]: {
+      lineItems: [
+        {
+          amount: 79,
+          currencyCode: "USD",
+          interval: BillingInterval.Every30Days,
+        },
+      ],
+    },
+    [ENTERPRISE_PLAN]: {
+      lineItems: [
+        {
+          amount: 199,
+          currencyCode: "USD",
+          interval: BillingInterval.Every30Days,
+        },
+      ],
+    },
   },
   ...(process.env.SHOP_CUSTOM_DOMAIN
     ? { customShopDomains: [process.env.SHOP_CUSTOM_DOMAIN] }

@@ -1,7 +1,8 @@
 import { json } from "@remix-run/node";
 import { useLoaderData, useNavigate } from "@remix-run/react";
 import React, { useState, useEffect, useCallback } from "react";
-import { authenticate } from "../shopify.server.js";
+import { authenticate, BASIC_PLAN, PRO_PLAN, ENTERPRISE_PLAN } from "../shopify.server.js";
+import { checkBillingStatus } from "../utils/billing.server.js";
 import freeShippingBadgeImage from "../assets/free-shipping-badge.png";
 import moneyBackGuaranteeImage from "../assets/money-back-guarantee.png";
 import addToCartImage from "../assets/add-to-cart.png";
@@ -9,6 +10,9 @@ import WidgetLivePreview from "../components/WidgetLivePreview.jsx";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
+  
+  // Check billing status for premium features
+  const billingStatus = await checkBillingStatus(request, [BASIC_PLAN, PRO_PLAN, ENTERPRISE_PLAN]);
   
   try {
     // Fetch themes for preview functionality
@@ -85,7 +89,9 @@ export const loader = async ({ request }) => {
       themes: themes,
       products: products,
       productTemplates: productTemplates,
-      shop: session.shop
+      shop: session.shop,
+      hasActivePayment: billingStatus.hasActivePayment,
+      isDevelopmentStore: billingStatus.isDevelopmentStore,
     });
   } catch (error) {
     console.error("Error loading AB tests data:", error);
