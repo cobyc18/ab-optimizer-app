@@ -146,6 +146,14 @@ export default function Billing() {
     (sub) => sub.status === "ACTIVE" || sub.status === "ACCEPTED"
   );
 
+  // Debug logging
+  console.log("Billing Page State:", {
+    hasActivePayment,
+    appSubscriptions,
+    activeSubscription,
+    isRequesting,
+  });
+
   const plans = [
     {
       name: BASIC_PLAN,
@@ -220,22 +228,28 @@ export default function Billing() {
       )}
 
       {/* Debug Info - Remove in production */}
-      {process.env.NODE_ENV === "development" && (
-        <div style={{
-          padding: "16px",
-          backgroundColor: "#F5F5F5",
-          borderRadius: "8px",
-          marginBottom: "24px",
-          fontSize: "12px",
-          fontFamily: "monospace",
-        }}>
-          <strong>Debug Info:</strong><br />
-          hasActivePayment: {String(hasActivePayment)}<br />
-          isRequesting: {String(isRequesting)}<br />
-          appSubscriptions: {JSON.stringify(appSubscriptions, null, 2)}<br />
-          activeSubscription: {activeSubscription ? activeSubscription.name : "null"}
-        </div>
-      )}
+      <div style={{
+        padding: "16px",
+        backgroundColor: "#F5F5F5",
+        borderRadius: "8px",
+        marginBottom: "24px",
+        fontSize: "12px",
+        fontFamily: "monospace",
+        maxHeight: "300px",
+        overflow: "auto",
+      }}>
+        <strong>Debug Info:</strong><br />
+        hasActivePayment: {String(hasActivePayment)}<br />
+        isRequesting: {String(isRequesting)}<br />
+        appSubscriptions count: {appSubscriptions?.length || 0}<br />
+        appSubscriptions: <pre>{JSON.stringify(appSubscriptions, null, 2)}</pre><br />
+        activeSubscription: {activeSubscription ? JSON.stringify(activeSubscription, null, 2) : "null"}<br />
+        <br />
+        <strong>Plan Names:</strong><br />
+        BASIC_PLAN: {BASIC_PLAN}<br />
+        PRO_PLAN: {PRO_PLAN}<br />
+        ENTERPRISE_PLAN: {ENTERPRISE_PLAN}<br />
+      </div>
 
       {/* Current Subscription Status */}
       <div style={{
@@ -306,10 +320,25 @@ export default function Billing() {
           gap: "24px",
         }}>
           {plans.map((plan) => {
-            const isCurrentPlan = activeSubscription?.name === plan.name;
+            // Strict comparison - ensure both exist and match exactly
+            const isCurrentPlan = activeSubscription && 
+                                 activeSubscription.name && 
+                                 plan.name &&
+                                 String(activeSubscription.name).trim() === String(plan.name).trim();
+            
             const isUpgrade = activeSubscription && 
               (plan.name === PRO_PLAN || plan.name === ENTERPRISE_PLAN) &&
               activeSubscription.name === BASIC_PLAN;
+
+            // Debug each plan
+            console.log(`Plan: ${plan.name}`, {
+              isCurrentPlan,
+              activeSubscriptionExists: !!activeSubscription,
+              activeSubscriptionName: activeSubscription?.name,
+              planName: plan.name,
+              nameMatch: activeSubscription?.name === plan.name,
+              stringComparison: String(activeSubscription?.name || '') === String(plan.name || ''),
+            });
 
             return (
               <div
@@ -391,14 +420,19 @@ export default function Billing() {
                     position: "relative",
                     zIndex: 1,
                   }}
-                >
-                  {isCurrentPlan
-                    ? "Current Plan"
-                    : isRequesting
-                    ? "Processing..."
-                    : isUpgrade
-                    ? "Upgrade"
-                    : "Subscribe"}
+                  >
+                  {(() => {
+                    if (isCurrentPlan) {
+                      return "Current Plan";
+                    }
+                    if (isRequesting) {
+                      return "Processing...";
+                    }
+                    if (isUpgrade) {
+                      return "Upgrade";
+                    }
+                    return "Subscribe";
+                  })()}
                 </button>
               </div>
             );
