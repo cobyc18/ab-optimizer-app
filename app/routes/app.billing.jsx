@@ -110,15 +110,18 @@ export default function Billing() {
   const [isRequesting, setIsRequesting] = useState(false);
 
   const handleSubscribe = async (planName) => {
+    console.log("Subscribe button clicked for plan:", planName);
     setIsRequesting(true);
     try {
       const formData = new FormData();
       formData.append("plan", planName);
       formData.append("isTest", "true"); // Always use test mode for testing
+      console.log("Submitting subscription request...");
       submit(formData, { method: "post", action: "/app/subscribe" });
     } catch (err) {
       console.error("Error requesting subscription:", err);
       setIsRequesting(false);
+      alert(`Error: ${err.message || "Failed to request subscription"}`);
     }
   };
 
@@ -213,6 +216,24 @@ export default function Billing() {
           marginBottom: "24px",
         }}>
           Error: {error}
+        </div>
+      )}
+
+      {/* Debug Info - Remove in production */}
+      {process.env.NODE_ENV === "development" && (
+        <div style={{
+          padding: "16px",
+          backgroundColor: "#F5F5F5",
+          borderRadius: "8px",
+          marginBottom: "24px",
+          fontSize: "12px",
+          fontFamily: "monospace",
+        }}>
+          <strong>Debug Info:</strong><br />
+          hasActivePayment: {String(hasActivePayment)}<br />
+          isRequesting: {String(isRequesting)}<br />
+          appSubscriptions: {JSON.stringify(appSubscriptions, null, 2)}<br />
+          activeSubscription: {activeSubscription ? activeSubscription.name : "null"}
         </div>
       )}
 
@@ -313,6 +334,8 @@ export default function Billing() {
                     borderRadius: "12px",
                     fontSize: "12px",
                     fontWeight: "600",
+                    zIndex: 0,
+                    pointerEvents: "none",
                   }}>
                     Current Plan
                   </div>
@@ -344,7 +367,15 @@ export default function Billing() {
                   ))}
                 </ul>
                 <button
-                  onClick={() => handleSubscribe(plan.name)}
+                  type="button"
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log("Button clicked, plan:", plan.name, "isRequesting:", isRequesting, "isCurrentPlan:", isCurrentPlan);
+                    if (!isRequesting && !isCurrentPlan) {
+                      handleSubscribe(plan.name);
+                    }
+                  }}
                   disabled={isRequesting || isCurrentPlan}
                   style={{
                     width: "100%",
@@ -357,6 +388,8 @@ export default function Billing() {
                     fontSize: "16px",
                     fontWeight: "600",
                     opacity: (isRequesting || isCurrentPlan) ? 0.6 : 1,
+                    position: "relative",
+                    zIndex: 1,
                   }}
                 >
                   {isCurrentPlan
