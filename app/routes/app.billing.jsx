@@ -21,7 +21,7 @@ export const loader = async ({ request }) => {
         appSubscriptions: [],
         isDevelopmentStore: true,
         currencyCode: "USD",
-        error: "Billing API not configured. Please check your shopify.server.js configuration.",
+        error: "Billing API not configured! Please check your shopify.server.js configuration.",
       });
     }
 
