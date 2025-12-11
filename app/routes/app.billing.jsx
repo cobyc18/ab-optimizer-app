@@ -5,7 +5,37 @@ import { useState } from "react";
 
 export const loader = async ({ request }) => {
   try {
-    const { billing, admin, session } = await authenticate.admin(request);
+    const authResult = await authenticate.admin(request);
+    const { billing, admin, session } = authResult;
+
+    // Check if billing is available
+    if (!billing) {
+      console.error("Billing API not available. Auth result keys:", Object.keys(authResult || {}));
+      return json({
+        hasActivePayment: false,
+        appSubscriptions: [],
+        isDevelopmentStore: true,
+        currencyCode: "USD",
+        error: "Billing API not configured. Please check your shopify.server.js configuration.",
+      });
+    }
+
+    // Log billing object structure for debugging
+    console.log("Billing object type:", typeof billing);
+    console.log("Billing object keys:", Object.keys(billing || {}));
+    console.log("billing.check type:", typeof billing.check);
+
+    if (typeof billing.check !== 'function') {
+      console.error("billing.check is not a function. Available methods:", Object.keys(billing || {}));
+      // Return fallback data instead of error to allow page to load
+      return json({
+        hasActivePayment: false,
+        appSubscriptions: [],
+        isDevelopmentStore: true,
+        currencyCode: "USD",
+        error: null, // Don't show error to user, just return empty state
+      });
+    }
 
     // Check if shop is a development store
     const shopQuery = `
@@ -25,9 +55,22 @@ export const loader = async ({ request }) => {
     const isDevelopmentStore = true; // shopData.data?.shop?.plan?.partnerDevelopment || false;
 
     // Check current billing status
-    const billingCheck = await billing.check({
-      isTest: true, // Always use test mode for testing
-    });
+    let billingCheck;
+    try {
+      billingCheck = await billing.check({
+        isTest: true, // Always use test mode for testing
+      });
+    } catch (billingError) {
+      console.error("Error calling billing.check:", billingError);
+      // Return fallback data if billing check fails
+      return json({
+        hasActivePayment: false,
+        appSubscriptions: [],
+        isDevelopmentStore,
+        currencyCode: "USD",
+        error: `Billing check failed: ${billingError.message}`,
+      });
+    }
 
     // Get shop's billing currency
     const currencyQuery = `
@@ -43,19 +86,20 @@ export const loader = async ({ request }) => {
     const currencyCode = currencyData.data?.shop?.currencyCode || "USD";
 
     return json({
-      hasActivePayment: billingCheck.hasActivePayment,
-      appSubscriptions: billingCheck.appSubscriptions || [],
+      hasActivePayment: billingCheck?.hasActivePayment || false,
+      appSubscriptions: billingCheck?.appSubscriptions || [],
       isDevelopmentStore,
       currencyCode,
     });
   } catch (error) {
     console.error("Error in billing loader:", error);
+    console.error("Error stack:", error.stack);
     return json({
       hasActivePayment: false,
       appSubscriptions: [],
       isDevelopmentStore: true, // Always true for testing
       currencyCode: "USD",
-      error: error.message,
+      error: error.message || "Unknown error occurred",
     });
   }
 };
