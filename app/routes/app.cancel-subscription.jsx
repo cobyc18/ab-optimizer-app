@@ -7,7 +7,6 @@ export const action = async ({ request }) => {
 
     const formData = await request.formData();
     const subscriptionId = formData.get("subscriptionId");
-    const isTest = formData.get("isTest") === "true";
 
     if (!subscriptionId) {
       return json({ error: "Subscription ID is required" }, { status: 400 });
@@ -16,7 +15,7 @@ export const action = async ({ request }) => {
     // Cancel the subscription
     await billing.cancel({
       subscriptionId: subscriptionId,
-      isTest: isTest,
+      isTest: true, // Always use test mode for testing
       prorate: true, // Issue prorated credits
     });
 

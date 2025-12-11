@@ -44,7 +44,7 @@ export async function checkBillingStatus(request, plans = null) {
 
     const billingCheck = await billing.check({
       plans: plans || undefined,
-      isTest: isDevStore,
+      isTest: true, // Always use test mode for testing
     });
 
     return {
@@ -76,14 +76,14 @@ export async function requireBilling(request, plans, redirectTo = "/app/billing"
 
     const billingCheck = await billing.require({
       plans: plans,
-      isTest: isDevStore,
+      isTest: true, // Always use test mode for testing
       onFailure: async () => {
         // Redirect to billing page
         const url = new URL(request.url);
         const returnUrl = `${url.origin}${url.pathname}${url.search}`;
         return billing.request({
           plan: plans[0], // Use first plan as default
-          isTest: isDevStore,
+          isTest: true, // Always use test mode for testing
           returnUrl: returnUrl,
         });
       },

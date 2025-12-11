@@ -7,7 +7,6 @@ export const action = async ({ request }) => {
 
     const formData = await request.formData();
     const planName = formData.get("plan");
-    const isTest = formData.get("isTest") === "true";
 
     if (!planName) {
       return json({ error: "Plan name is required" }, { status: 400 });
@@ -26,7 +25,7 @@ export const action = async ({ request }) => {
     // Request the subscription
     await billing.request({
       plan: planName,
-      isTest: isTest,
+      isTest: true, // Always use test mode for testing
       returnUrl: returnUrl,
     });
 

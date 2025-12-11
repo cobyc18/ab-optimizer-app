@@ -21,11 +21,12 @@ export const loader = async ({ request }) => {
 
     const shopResponse = await admin.graphql(shopQuery);
     const shopData = await shopResponse.json();
-    const isDevelopmentStore = shopData.data?.shop?.plan?.partnerDevelopment || false;
+    // Always set to true for testing - all charges are in test mode
+    const isDevelopmentStore = true; // shopData.data?.shop?.plan?.partnerDevelopment || false;
 
     // Check current billing status
     const billingCheck = await billing.check({
-      isTest: isDevelopmentStore, // Include test charges for dev stores
+      isTest: true, // Always use test mode for testing
     });
 
     // Get shop's billing currency
@@ -52,7 +53,7 @@ export const loader = async ({ request }) => {
     return json({
       hasActivePayment: false,
       appSubscriptions: [],
-      isDevelopmentStore: false,
+      isDevelopmentStore: true, // Always true for testing
       currencyCode: "USD",
       error: error.message,
     });
@@ -69,7 +70,7 @@ export default function Billing() {
     try {
       const formData = new FormData();
       formData.append("plan", planName);
-      formData.append("isTest", isDevelopmentStore.toString());
+      formData.append("isTest", "true"); // Always use test mode for testing
       submit(formData, { method: "post", action: "/app/subscribe" });
     } catch (err) {
       console.error("Error requesting subscription:", err);
@@ -86,7 +87,7 @@ export default function Billing() {
     try {
       const formData = new FormData();
       formData.append("subscriptionId", subscriptionId);
-      formData.append("isTest", isDevelopmentStore.toString());
+      formData.append("isTest", "true"); // Always use test mode for testing
       submit(formData, { method: "post", action: "/app/cancel-subscription" });
     } catch (err) {
       console.error("Error cancelling subscription:", err);

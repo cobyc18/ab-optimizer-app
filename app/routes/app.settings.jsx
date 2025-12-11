@@ -1,4 +1,6 @@
-import { useOutletContext } from "@remix-run/react";
+import { json } from "@remix-run/node";
+import { useLoaderData } from "@remix-run/react";
+import { authenticate } from "../shopify.server.js";
 import { 
   CogIcon, 
   SparklesIcon,
@@ -13,8 +15,15 @@ import {
 } from "@heroicons/react/24/outline";
 import { motion } from "framer-motion";
 
+export const loader = async ({ request }) => {
+  const { session } = await authenticate.admin(request);
+  return json({
+    shop: session.shop,
+  });
+};
+
 export default function Settings() {
-  const { user } = useOutletContext();
+  const { shop } = useLoaderData();
 
   const settingsSections = [
     {
@@ -114,7 +123,7 @@ export default function Settings() {
             </div>
             <div className="ml-4">
               <p className="text-sm font-medium text-gray-600">Shop Domain</p>
-              <p className="text-lg font-semibold text-gray-900">{user.shop}</p>
+              <p className="text-lg font-semibold text-gray-900">{shop}</p>
             </div>
           </div>
         </div>
