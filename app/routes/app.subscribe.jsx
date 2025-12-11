@@ -1,6 +1,5 @@
 import { json, redirect } from "@remix-run/node";
 import { authenticate, BASIC_PLAN, PRO_PLAN, ENTERPRISE_PLAN } from "../shopify.server.js";
-import { BillingInterval } from "@shopify/shopify-app-remix/server";
 
 export const action = async ({ request }) => {
   try {
@@ -37,32 +36,51 @@ export const action = async ({ request }) => {
 
     console.log("Requesting subscription for plan:", planName, "with returnUrl:", returnUrl);
 
-    // Define plan configurations (must match shopify.server.js)
+    // Define plan configurations with nested GraphQL format
+    // This matches the AppSubscriptionLineItemInput structure from Shopify's GraphQL API
     const planConfigs = {
       [BASIC_PLAN]: {
         lineItems: [
           {
-            amount: 5,
-            currencyCode: "USD",
-            interval: BillingInterval.Every30Days,
+            plan: {
+              appRecurringPricingDetails: {
+                price: {
+                  amount: 5,
+                  currencyCode: "USD",
+                },
+                interval: "EVERY_30_DAYS",
+              },
+            },
           },
         ],
       },
       [PRO_PLAN]: {
         lineItems: [
           {
-            amount: 6,
-            currencyCode: "USD",
-            interval: BillingInterval.Every30Days,
+            plan: {
+              appRecurringPricingDetails: {
+                price: {
+                  amount: 6,
+                  currencyCode: "USD",
+                },
+                interval: "EVERY_30_DAYS",
+              },
+            },
           },
         ],
       },
       [ENTERPRISE_PLAN]: {
         lineItems: [
           {
-            amount: 7,
-            currencyCode: "USD",
-            interval: BillingInterval.Every30Days,
+            plan: {
+              appRecurringPricingDetails: {
+                price: {
+                  amount: 7,
+                  currencyCode: "USD",
+                },
+                interval: "EVERY_30_DAYS",
+              },
+            },
           },
         ],
       },
@@ -73,14 +91,14 @@ export const action = async ({ request }) => {
       return json({ error: `Plan configuration not found for: ${planName}` }, { status: 400 });
     }
 
-    console.log("Plan config:", JSON.stringify(selectedPlanConfig, null, 2));
+    console.log("Plan config (GraphQL format):", JSON.stringify(selectedPlanConfig, null, 2));
 
-    // Request the subscription - explicitly pass lineItems to ensure they're included
+    // Request the subscription using the nested GraphQL format
     await billing.request({
       plan: planName,
       isTest: true, // Always use test mode for testing
       returnUrl: returnUrl,
-      lineItems: selectedPlanConfig.lineItems, // Explicitly pass lineItems
+      lineItems: selectedPlanConfig.lineItems, // Use nested GraphQL format
     });
 
     // This will redirect to Shopify's confirmation page
