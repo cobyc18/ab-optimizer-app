@@ -3,6 +3,11 @@ import { useLoaderData, useSubmit, Link } from "@remix-run/react";
 import { authenticate, BASIC_PLAN, PRO_PLAN, ENTERPRISE_PLAN } from "../shopify.server.js";
 import { useState } from "react";
 
+// Define plan names as constants (must match shopify.server.js)
+const BASIC_PLAN_NAME = "Basic Plan";
+const PRO_PLAN_NAME = "Pro Plan";
+const ENTERPRISE_PLAN_NAME = "Enterprise Plan";
+
 export const loader = async ({ request }) => {
   try {
     const authResult = await authenticate.admin(request);
@@ -156,8 +161,8 @@ export default function Billing() {
 
   const plans = [
     {
-      name: BASIC_PLAN,
-      price: 29,
+      name: BASIC_PLAN_NAME, // Use the constant defined above
+      price: 5,
       interval: "month",
       features: [
         "Up to 5 A/B tests",
@@ -167,8 +172,8 @@ export default function Billing() {
       ],
     },
     {
-      name: PRO_PLAN,
-      price: 79,
+      name: PRO_PLAN_NAME, // Use the constant defined above
+      price: 6,
       interval: "month",
       features: [
         "Unlimited A/B tests",
@@ -179,8 +184,8 @@ export default function Billing() {
       ],
     },
     {
-      name: ENTERPRISE_PLAN,
-      price: 199,
+      name: ENTERPRISE_PLAN_NAME, // Use the constant defined above
+      price: 7,
       interval: "month",
       features: [
         "Everything in Pro",
@@ -246,9 +251,9 @@ export default function Billing() {
         activeSubscription: {activeSubscription ? JSON.stringify(activeSubscription, null, 2) : "null"}<br />
         <br />
         <strong>Plan Names:</strong><br />
-        BASIC_PLAN: {BASIC_PLAN}<br />
-        PRO_PLAN: {PRO_PLAN}<br />
-        ENTERPRISE_PLAN: {ENTERPRISE_PLAN}<br />
+        BASIC_PLAN_NAME: {BASIC_PLAN_NAME}<br />
+        PRO_PLAN_NAME: {PRO_PLAN_NAME}<br />
+        ENTERPRISE_PLAN_NAME: {ENTERPRISE_PLAN_NAME}<br />
       </div>
 
       {/* Current Subscription Status */}
@@ -327,8 +332,8 @@ export default function Billing() {
                                  String(activeSubscription.name).trim() === String(plan.name).trim();
             
             const isUpgrade = activeSubscription && 
-              (plan.name === PRO_PLAN || plan.name === ENTERPRISE_PLAN) &&
-              activeSubscription.name === BASIC_PLAN;
+              (plan.name === PRO_PLAN_NAME || plan.name === ENTERPRISE_PLAN_NAME) &&
+              activeSubscription.name === BASIC_PLAN_NAME;
 
             // Debug each plan
             console.log(`Plan: ${plan.name}`, {

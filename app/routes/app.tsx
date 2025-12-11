@@ -43,6 +43,7 @@ export default function AppLayout() {
     { id: "Insights & Report", label: "Insights & Report", icon: imgFrame2147224424, href: "/app/analytics" },
     { id: "Widget Library", label: "Widget Library", icon: imgLibrary, href: "/app/widgets" },
     { id: "Settings", label: "Settings", icon: imgSetting, href: "/app/settings" },
+    { id: "Subscribe", label: "Subscrive", icon: imgSetting, href: "/app/subscribe" },
     { id: "Help / Onboarding", label: "Help / Onboarding", icon: imgVideo, href: "/app/help" },
     { id: "Log out", label: "Log out", icon: imgLogout, href: "/auth/logout" }
   ];
