@@ -274,7 +274,7 @@ export default function Billing() {
                   </div>
                 )}
                 <h3 style={{ fontSize: "24px", fontWeight: "600", marginBottom: "8px" }}>
-                  {plan.name.replace(" Plan", "")}
+                  {plan.name ? plan.name.replace(" Plan", "") : "Plan"}
                 </h3>
                 <div style={{ marginBottom: "16px" }}>
                   <span style={{ fontSize: "36px", fontWeight: "bold" }}>
