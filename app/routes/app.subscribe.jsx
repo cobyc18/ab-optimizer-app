@@ -1,15 +1,9 @@
 import { json, redirect } from "@remix-run/node";
 import { authenticate, BASIC_PLAN, PRO_PLAN, ENTERPRISE_PLAN } from "../shopify.server.js";
-import { BillingInterval } from "@shopify/shopify-app-remix/server";
 
 export const action = async ({ request }) => {
   try {
-    const { billing, session } = await authenticate.admin(request);
-
-    if (!billing || typeof billing.request !== 'function') {
-      console.error("Billing API not available");
-      return json({ error: "Billing API not configured" }, { status: 500 });
-    }
+    const { admin, session } = await authenticate.admin(request);
 
     const formData = await request.formData();
     const planName = formData.get("plan");
@@ -47,32 +41,80 @@ export const action = async ({ request }) => {
       planAmount = 7;
     }
 
-    // WORKAROUND: The library is not reading the billing config from shopify.server.js
-    // for non-embedded apps. We must pass lineItems in the simplified format (matching shopify.server.js),
-    // and the library will transform it to the GraphQL structure. However, since the config isn't being
-    // read, we need to include ALL fields explicitly (amount, currencyCode, interval).
-    const lineItems = [
-      {
-        amount: planAmount,
-        currencyCode: "USD",
-        interval: BillingInterval.Every30Days,
-      },
-    ];
+    // BYPASS billing.request() and call GraphQL API directly
+    // This ensures we have full control over the structure for non-embedded apps
+    const mutation = `
+      mutation AppSubscriptionCreate($name: String!, $lineItems: [AppSubscriptionLineItemInput!]!, $returnUrl: URL!, $test: Boolean) {
+        appSubscriptionCreate(name: $name, returnUrl: $returnUrl, lineItems: $lineItems, test: $test) {
+          userErrors {
+            field
+            message
+          }
+          appSubscription {
+            id
+          }
+          confirmationUrl
+        }
+      }
+    `;
 
-    console.log("Passing lineItems explicitly (simplified format):", JSON.stringify(lineItems, null, 2));
-
-    // Request the subscription with explicitly constructed lineItems
-    await billing.request({
-      plan: planName,
-      isTest: true, // Always use test mode for testing
+    const variables = {
+      name: planName,
       returnUrl: returnUrl,
-      lineItems: lineItems, // Pass in simplified format - library will transform to GraphQL
+      test: true, // Always use test mode for testing
+      lineItems: [
+        {
+          plan: {
+            appRecurringPricingDetails: {
+              price: {
+                amount: planAmount,
+                currencyCode: "USD",
+              },
+              interval: "EVERY_30_DAYS",
+            },
+          },
+        },
+      ],
+    };
+
+    console.log("Calling GraphQL mutation directly with variables:", JSON.stringify(variables, null, 2));
+
+    const response = await admin.graphql(mutation, {
+      variables: variables,
     });
 
-    // This will redirect to Shopify's confirmation page
-    // The redirect happens automatically via billing.request()
-    // If we reach here, something went wrong
-    return json({ error: "Billing request did not redirect" }, { status: 500 });
+    const data = await response.json();
+
+    console.log("GraphQL response:", JSON.stringify(data, null, 2));
+
+    if (data.errors) {
+      console.error("GraphQL errors:", data.errors);
+      return json(
+        { error: data.errors.map(e => e.message).join(", ") || "Failed to create subscription" },
+        { status: 500 }
+      );
+    }
+
+    if (data.data?.appSubscriptionCreate?.userErrors?.length > 0) {
+      const userErrors = data.data.appSubscriptionCreate.userErrors;
+      console.error("User errors:", userErrors);
+      return json(
+        { error: userErrors.map(e => e.message).join(", ") || "Failed to create subscription" },
+        { status: 400 }
+      );
+    }
+
+    const confirmationUrl = data.data?.appSubscriptionCreate?.confirmationUrl;
+
+    if (!confirmationUrl) {
+      console.error("No confirmation URL returned");
+      return json({ error: "No confirmation URL returned from Shopify" }, { status: 500 });
+    }
+
+    console.log("Redirecting to confirmation URL:", confirmationUrl);
+
+    // Redirect to Shopify's confirmation page
+    return redirect(confirmationUrl);
   } catch (error) {
     console.error("Error in subscribe action:", error);
     console.error("Error stack:", error.stack);
