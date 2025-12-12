@@ -36,69 +36,13 @@ export const action = async ({ request }) => {
 
     console.log("Requesting subscription for plan:", planName, "with returnUrl:", returnUrl);
 
-    // Define plan configurations with nested GraphQL format
-    // This matches the AppSubscriptionLineItemInput structure from Shopify's GraphQL API
-    const planConfigs = {
-      [BASIC_PLAN]: {
-        lineItems: [
-          {
-            plan: {
-              appRecurringPricingDetails: {
-                price: {
-                  amount: 5,
-                  currencyCode: "USD",
-                },
-                interval: "EVERY_30_DAYS",
-              },
-            },
-          },
-        ],
-      },
-      [PRO_PLAN]: {
-        lineItems: [
-          {
-            plan: {
-              appRecurringPricingDetails: {
-                price: {
-                  amount: 6,
-                  currencyCode: "USD",
-                },
-                interval: "EVERY_30_DAYS",
-              },
-            },
-          },
-        ],
-      },
-      [ENTERPRISE_PLAN]: {
-        lineItems: [
-          {
-            plan: {
-              appRecurringPricingDetails: {
-                price: {
-                  amount: 7,
-                  currencyCode: "USD",
-                },
-                interval: "EVERY_30_DAYS",
-              },
-            },
-          },
-        ],
-      },
-    };
-
-    const selectedPlanConfig = planConfigs[planName];
-    if (!selectedPlanConfig) {
-      return json({ error: `Plan configuration not found for: ${planName}` }, { status: 400 });
-    }
-
-    console.log("Plan config (GraphQL format):", JSON.stringify(selectedPlanConfig, null, 2));
-
-    // Request the subscription using the nested GraphQL format
+    // Request the subscription - the library will automatically read the billing config
+    // from shopify.server.js and construct the correct GraphQL structure
     await billing.request({
       plan: planName,
       isTest: true, // Always use test mode for testing
       returnUrl: returnUrl,
-      lineItems: selectedPlanConfig.lineItems, // Use nested GraphQL format
+      // No need to pass lineItems - the library reads from shopify.server.js config
     });
 
     // This will redirect to Shopify's confirmation page
