@@ -1,5 +1,6 @@
 import { json, redirect } from "@remix-run/node";
 import { authenticate, BASIC_PLAN, PRO_PLAN, ENTERPRISE_PLAN } from "../shopify.server.js";
+import { BillingInterval } from "@shopify/shopify-app-remix/server";
 
 export const action = async ({ request }) => {
   try {
@@ -36,13 +37,44 @@ export const action = async ({ request }) => {
 
     console.log("Requesting subscription for plan:", planName, "with returnUrl:", returnUrl);
 
-    // Request the subscription - the library will automatically read the billing config
-    // from shopify.server.js and construct the correct GraphQL structure
+    // Determine the plan amount based on plan name
+    let planAmount = 0;
+    if (planName === BASIC_PLAN) {
+      planAmount = 5;
+    } else if (planName === PRO_PLAN) {
+      planAmount = 6;
+    } else if (planName === ENTERPRISE_PLAN) {
+      planAmount = 7;
+    }
+
+    // WORKAROUND: The library is not reading the billing config from shopify.server.js
+    // for non-embedded apps, so we must explicitly pass lineItems with the full structure.
+    // According to the GraphQL schema, we need:
+    // lineItems[].plan.appRecurringPricingDetails.price.amount (Decimal!)
+    // lineItems[].plan.appRecurringPricingDetails.price.currencyCode (CurrencyCode!)
+    // lineItems[].plan.appRecurringPricingDetails.interval (AppPricingInterval)
+    const lineItems = [
+      {
+        plan: {
+          appRecurringPricingDetails: {
+            price: {
+              amount: planAmount,
+              currencyCode: "USD",
+            },
+            interval: BillingInterval.Every30Days,
+          },
+        },
+      },
+    ];
+
+    console.log("Passing lineItems explicitly:", JSON.stringify(lineItems, null, 2));
+
+    // Request the subscription with explicitly constructed lineItems
     await billing.request({
       plan: planName,
       isTest: true, // Always use test mode for testing
       returnUrl: returnUrl,
-      // No need to pass lineItems - the library reads from shopify.server.js config
+      lineItems: lineItems, // Explicitly pass the full structure as workaround
     });
 
     // This will redirect to Shopify's confirmation page
