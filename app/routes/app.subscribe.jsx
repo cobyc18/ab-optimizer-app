@@ -48,33 +48,25 @@ export const action = async ({ request }) => {
     }
 
     // WORKAROUND: The library is not reading the billing config from shopify.server.js
-    // for non-embedded apps, so we must explicitly pass lineItems with the full structure.
-    // According to the GraphQL schema, we need:
-    // lineItems[].plan.appRecurringPricingDetails.price.amount (Decimal!)
-    // lineItems[].plan.appRecurringPricingDetails.price.currencyCode (CurrencyCode!)
-    // lineItems[].plan.appRecurringPricingDetails.interval (AppPricingInterval)
+    // for non-embedded apps. We must pass lineItems in the simplified format (matching shopify.server.js),
+    // and the library will transform it to the GraphQL structure. However, since the config isn't being
+    // read, we need to include ALL fields explicitly (amount, currencyCode, interval).
     const lineItems = [
       {
-        plan: {
-          appRecurringPricingDetails: {
-            price: {
-              amount: planAmount,
-              currencyCode: "USD",
-            },
-            interval: BillingInterval.Every30Days,
-          },
-        },
+        amount: planAmount,
+        currencyCode: "USD",
+        interval: BillingInterval.Every30Days,
       },
     ];
 
-    console.log("Passing lineItems explicitly:", JSON.stringify(lineItems, null, 2));
+    console.log("Passing lineItems explicitly (simplified format):", JSON.stringify(lineItems, null, 2));
 
     // Request the subscription with explicitly constructed lineItems
     await billing.request({
       plan: planName,
       isTest: true, // Always use test mode for testing
       returnUrl: returnUrl,
-      lineItems: lineItems, // Explicitly pass the full structure as workaround
+      lineItems: lineItems, // Pass in simplified format - library will transform to GraphQL
     });
 
     // This will redirect to Shopify's confirmation page
