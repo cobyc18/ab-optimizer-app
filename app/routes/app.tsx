@@ -205,7 +205,7 @@ export default function AppLayout() {
           ))}
         </div>
         
-        {/* Trial Banner - only show when expanded */}
+        {/* Trial Banner - only show when expanded 
         {!isCollapsed && (
           <div style={{
             position: 'absolute',
@@ -268,6 +268,7 @@ export default function AppLayout() {
             </div>
           </div>
         )}
+        */}
 
         {/* Collapse/Expand Toggle Button */}
         <button
