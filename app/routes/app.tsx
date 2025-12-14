@@ -39,13 +39,13 @@ export default function AppLayout() {
   const navigationItems = [
     { id: "Home", label: "Home", icon: img, href: "/app" },
     { id: "A/B Testing", label: "A/B Testing", icon: imgCultureTube, href: "/app/ab-tests" },
-    { id: "Experiments Hub", label: "Experiments Hub", icon: imgCultureTube, href: "/app/experiments" },
-    { id: "Insights & Report", label: "Insights & Report", icon: imgFrame2147224424, href: "/app/analytics" },
-    { id: "Widget Library", label: "Widget Library", icon: imgLibrary, href: "/app/widgets" },
+    //{ id: "Experiments Hub", label: "Experiments Hub", icon: imgCultureTube, href: "/app/experiments" },
+    //{ id: "Insights & Report", label: "Insights & Report", icon: imgFrame2147224424, href: "/app/analytics" },
+    //{ id: "Widget Library", label: "Widget Library", icon: imgLibrary, href: "/app/widgets" },
     { id: "Settings", label: "Settings", icon: imgSetting, href: "/app/settings" },
-    { id: "Subscribe", label: "Subscribe", icon: imgSetting, href: "/app/subscribe" },
-    { id: "Help / Onboarding", label: "Help / Onboarding", icon: imgVideo, href: "/app/help" },
-    { id: "Log out", label: "Log out", icon: imgLogout, href: "/auth/logout" }
+    //{ id: "Subscribe", label: "Subscribe", icon: imgSetting, href: "/app/subscribe" },
+    //{ id: "Help / Onboarding", label: "Help / Onboarding", icon: imgVideo, href: "/app/help" },
+    //{ id: "Log out", label: "Log out", icon: imgLogout, href: "/auth/logout" }
   ];
 
   // Update selected item based on current location

@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { useLoaderData, Link } from "@remix-run/react";
+import { useLoaderData } from "@remix-run/react";
 import { authenticate } from "../shopify.server.js";
 
 export const loader = async ({ request }) => {
@@ -12,9 +12,17 @@ export const loader = async ({ request }) => {
 export default function Settings() {
   const { shop } = useLoaderData();
 
+  // Extract store handle from shop domain (e.g., "ogcc18" from "ogcc18.myshopify.com")
+  const storeHandle = shop ? shop.replace('.myshopify.com', '') : '';
+  const appHandle = "ab-optimizer-app";
+  
+  // Shopify charges page URL for managing subscriptions
+  const manageSubscriptionUrl = `https://admin.shopify.com/store/${storeHandle}/charges/${appHandle}/pricing_plans`;
+
   const settingsSections = [
     {
       title: "Account Settings",
+      hidden: true, // Hidden for now
       items: [
         { name: "Profile Information", description: "Update your account details", href: "#" },
         { name: "Email Preferences", description: "Manage notification settings", href: "#" },
@@ -23,6 +31,7 @@ export default function Settings() {
     },
     {
       title: "App Configuration",
+      hidden: true, // Hidden for now
       items: [
         { name: "General Settings", description: "Configure app behavior and defaults", href: "#" },
         { name: "Integration Settings", description: "Manage third-party integrations", href: "#" },
@@ -31,18 +40,20 @@ export default function Settings() {
     },
     {
       title: "Billing & Subscription",
+      hidden: false,
       items: [
-        { name: "Manage Subscription", description: "View and manage your subscription", href: "/app/billing" },
-        { name: "Current Plan", description: "View your current plan details", href: "/app/billing" },
-        { name: "Billing History", description: "Download invoices and receipts", href: "/app/billing" }
+        { name: "Manage Subscription", description: "View and manage your subscription", href: manageSubscriptionUrl, external: true, hidden: false },
+        { name: "Current Plan", description: "View your current plan details", href: "/app/billing", hidden: true },
+        { name: "Billing History", description: "Download invoices and receipts", href: "/app/billing", hidden: true }
       ]
     },
     {
       title: "Privacy & Security",
+      hidden: false,
       items: [
-        { name: "Data Privacy", description: "Manage data collection and usage", href: "#" },
-        { name: "Security Settings", description: "Configure security preferences", href: "#" },
-        { name: "Access Logs", description: "View account activity and access", href: "#" }
+        { name: "Data Privacy", description: "Manage data collection and usage", href: "https://trylab.io/privacy-policy", external: true, hidden: false },
+        { name: "Security Settings", description: "Configure security preferences", href: "#", hidden: true },
+        { name: "Access Logs", description: "View account activity and access", href: "#", hidden: true }
       ]
     }
   ];
@@ -59,13 +70,14 @@ export default function Settings() {
         </p>
       </div>
 
-      {/* Shop Info */}
+      {/* Shop Info - Hidden for now */}
       <div style={{
         backgroundColor: "white",
         borderRadius: "8px",
         padding: "20px",
         marginBottom: "24px",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+        display: "none" // Hidden for now
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
           <div style={{
@@ -102,7 +114,8 @@ export default function Settings() {
               backgroundColor: "white",
               borderRadius: "8px",
               padding: "24px",
-              boxShadow: "0 2px 4px rgba(0,0,0,0.1)"
+              boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
+              display: section.hidden ? "none" : "block" // Hide entire section if hidden flag is true
             }}
           >
             <h2 style={{
@@ -115,17 +128,20 @@ export default function Settings() {
             </h2>
             <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
               {section.items.map((item) => (
-                <Link
+                <a
                   key={item.name}
-                  to={item.href}
+                  href={item.href}
+                  target={item.external ? "_blank" : undefined}
+                  rel={item.external ? "noopener noreferrer" : undefined}
                   style={{
-                    display: "block",
+                    display: item.hidden ? "none" : "block", // Hide individual items if hidden flag is true
                     padding: "16px",
                     backgroundColor: "#f9fafb",
                     borderRadius: "6px",
                     textDecoration: "none",
                     border: "1px solid #e5e7eb",
-                    transition: "all 0.2s"
+                    transition: "all 0.2s",
+                    cursor: "pointer"
                   }}
                   onMouseEnter={(e) => {
                     e.currentTarget.style.backgroundColor = "#f3f4f6";
@@ -152,7 +168,7 @@ export default function Settings() {
                   }}>
                     {item.description}
                   </p>
-                </Link>
+                </a>
               ))}
             </div>
           </div>
