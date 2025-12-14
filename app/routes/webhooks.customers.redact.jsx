@@ -16,9 +16,26 @@ import prisma from "../db.server.js";
  * @see https://shopify.dev/docs/apps/build/compliance/privacy-law-compliance#customers-redact
  */
 export const action = async ({ request }) => {
+  let topic, shop, payload;
+  
   try {
-    const { topic, shop, payload } = await authenticate.webhook(request);
+    const authResult = await authenticate.webhook(request);
+    topic = authResult.topic;
+    shop = authResult.shop;
+    payload = authResult.payload;
 
+    // Check if authentication was successful
+    if (!topic || !shop) {
+      console.error("❌ Webhook authentication failed - missing topic or shop");
+      return json({ error: "Unauthorized" }, { status: 401 });
+    }
+  } catch (authError) {
+    // authenticate.webhook() throws an error when HMAC validation fails
+    console.error("❌ Webhook HMAC validation failed:", authError.message);
+    return json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  try {
     console.log(`🗑️ Customer Redact webhook received for ${shop}`);
 
     const {
@@ -76,8 +93,8 @@ export const action = async ({ request }) => {
     return json({ status: "success" }, { status: 200 });
   } catch (error) {
     console.error("Error processing customers/redact webhook:", error);
-    // Still return 200 to prevent Shopify from retrying
-    // Log the error for your internal tracking
+    // For processing errors (after successful authentication), return 200
+    // to prevent Shopify from retrying
     return json({ status: "error", message: error.message }, { status: 200 });
   }
 };
