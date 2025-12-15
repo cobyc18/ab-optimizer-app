@@ -599,7 +599,7 @@ export const loader = async ({ request }) => {
       if (activities.length === 0) {
         return [
           { action: "Welcome to A/B Optimizer!", date: new Date().toLocaleDateString() },
-          { action: "Ready to start your first test", date: new Date().toLocaleDateString() }
+          { action: "Ready to start your first test!", date: new Date().toLocaleDateString() }
         ];
       }
       
