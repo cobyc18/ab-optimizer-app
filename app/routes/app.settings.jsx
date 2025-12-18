@@ -3,67 +3,14 @@ import { useLoaderData } from "@remix-run/react";
 import { authenticate } from "../shopify.server.js";
 
 export const loader = async ({ request }) => {
-  const { session, admin } = await authenticate.admin(request);
-  
-  // Fetch merchant's subscription plan details
-  let planDetails = null;
-  try {
-    const response = await admin.graphql(
-      `#graphql
-      query GetMerchantPlan {
-        currentAppInstallation {
-          activeSubscriptions {
-            id
-            name
-            status
-            createdAt
-            currentPeriodEnd
-            lineItems {
-              id
-              plan {
-                pricingDetails {
-                  __typename
-                  ... on AppRecurringPricing {
-                    price {
-                      amount
-                      currencyCode
-                    }
-                    interval
-                  }
-                }
-              }
-            }
-          }
-        }
-      }`
-    );
-    
-    const data = await response.json();
-    const activeSubscriptions = data.data?.currentAppInstallation?.activeSubscriptions || [];
-    
-    if (activeSubscriptions.length > 0) {
-      const activePlan = activeSubscriptions.find(sub => sub.status === 'ACTIVE') || activeSubscriptions[0];
-      planDetails = {
-        planName: activePlan.name,
-        status: activePlan.status,
-        createdAt: activePlan.createdAt,
-        currentPeriodEnd: activePlan.currentPeriodEnd,
-        lineItems: activePlan.lineItems
-      };
-    }
-  } catch (error) {
-    console.error('Error fetching plan details:', error);
-    // Don't throw - just log the error and continue
-  }
-  
+  const { session } = await authenticate.admin(request);
   return json({
     shop: session.shop,
-    planDetails,
   });
 };
 
 export default function Settings() {
-  const { shop, planDetails } = useLoaderData();
+  const { shop } = useLoaderData();
 
   // Extract store handle from shop domain (e.g., "ogcc18" from "ogcc18.myshopify.com")
   const storeHandle = shop ? shop.replace('.myshopify.com', '') : '';
@@ -152,89 +99,6 @@ export default function Settings() {
             <p style={{ margin: 0, fontSize: "18px", fontWeight: "600", color: "#333" }}>{shop || "N/A"}</p>
           </div>
         </div>
-      </div>
-
-      {/* Plan Details Placeholder */}
-      <div style={{
-        backgroundColor: "white",
-        borderRadius: "8px",
-        padding: "24px",
-        marginBottom: "24px",
-        boxShadow: "0 2px 4px rgba(0,0,0,0.1)",
-        border: "2px solid #1976D2"
-      }}>
-        <h2 style={{
-          fontSize: "20px",
-          fontWeight: "600",
-          marginBottom: "16px",
-          color: "#333"
-        }}>
-          Current Subscription Plan (Test)
-        </h2>
-        {planDetails ? (
-          <div style={{ display: "flex", flexDirection: "column", gap: "12px" }}>
-            <div>
-              <p style={{ margin: 0, fontSize: "14px", color: "#666", marginBottom: "4px" }}>Plan Name:</p>
-              <p style={{ margin: 0, fontSize: "18px", fontWeight: "600", color: "#1976D2" }}>
-                {planDetails.planName || "N/A"}
-              </p>
-            </div>
-            <div>
-              <p style={{ margin: 0, fontSize: "14px", color: "#666", marginBottom: "4px" }}>Status:</p>
-              <p style={{ margin: 0, fontSize: "16px", fontWeight: "500", color: "#333" }}>
-                {planDetails.status || "N/A"}
-              </p>
-            </div>
-            {planDetails.currentPeriodEnd && (
-              <div>
-                <p style={{ margin: 0, fontSize: "14px", color: "#666", marginBottom: "4px" }}>Current Period End:</p>
-                <p style={{ margin: 0, fontSize: "16px", fontWeight: "500", color: "#333" }}>
-                  {new Date(planDetails.currentPeriodEnd).toLocaleDateString()}
-                </p>
-              </div>
-            )}
-            {planDetails.lineItems && planDetails.lineItems.length > 0 && (
-              <div>
-                <p style={{ margin: 0, fontSize: "14px", color: "#666", marginBottom: "8px" }}>Pricing Details:</p>
-                <div style={{ paddingLeft: "16px" }}>
-                  {planDetails.lineItems.map((item, index) => {
-                    const pricing = item.plan?.pricingDetails;
-                    if (pricing?.__typename === 'AppRecurringPricing') {
-                      return (
-                        <div key={index} style={{ marginBottom: "8px" }}>
-                          <p style={{ margin: 0, fontSize: "14px", color: "#333" }}>
-                            ${pricing.price?.amount} {pricing.price?.currencyCode} / {pricing.interval?.toLowerCase().replace('_', ' ')}
-                          </p>
-                        </div>
-                      );
-                    }
-                    return null;
-                  })}
-                </div>
-              </div>
-            )}
-            <div style={{
-              marginTop: "8px",
-              padding: "12px",
-              backgroundColor: "#f0f9ff",
-              borderRadius: "6px",
-              border: "1px solid #bae6fd"
-            }}>
-              <p style={{ margin: 0, fontSize: "12px", color: "#666", fontStyle: "italic" }}>
-                This is a test placeholder showing plan details fetched via GraphQL
-              </p>
-            </div>
-          </div>
-        ) : (
-          <div>
-            <p style={{ margin: 0, fontSize: "16px", color: "#666" }}>
-              No active subscription found
-            </p>
-            <p style={{ margin: "8px 0 0 0", fontSize: "14px", color: "#999", fontStyle: "italic" }}>
-              This could mean the merchant hasn't subscribed yet, or there was an error fetching the data.
-            </p>
-          </div>
-        )}
       </div>
 
       {/* Settings Sections */}
