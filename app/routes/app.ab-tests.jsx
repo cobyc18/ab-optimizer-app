@@ -1010,73 +1010,9 @@ export default function ABTests() {
         return;
       }
 
-      // CRITICAL: Ensure template is assigned to product before opening editor
-      // Shopify's theme editor uses the product's templateSuffix assignment, not just the URL parameter
-      // We must verify the assignment has propagated before opening, otherwise Shopify will override with the old template
-      if (wizardVariantProductId && wizardVariantName) {
-        try {
-          // First, assign the template to the product
-          const assignResponse = await fetch('/api/assign-product-template', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              productId: wizardVariantProductId,
-              templateSuffix: wizardVariantName
-            })
-          });
-          const assignResult = await assignResponse.json();
-          
-          if (!assignResponse.ok || !assignResult.success) {
-            console.error('❌ Failed to assign template to product:', assignResult.error);
-            alert(`Failed to assign template to product. Please try again. Error: ${assignResult.error || 'Unknown error'}`);
-            return;
-          }
-          
-          // Verify the assignment has propagated by querying the product
-          // Retry up to 5 times with increasing delays
-          let assignmentVerified = false;
-          for (let attempt = 1; attempt <= 5; attempt++) {
-            await new Promise(resolve => setTimeout(resolve, attempt * 500)); // 500ms, 1000ms, 1500ms, 2000ms, 2500ms
-            
-            try {
-              const verifyResponse = await fetch('/api/verify-product-template', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  productId: wizardVariantProductId,
-                  expectedTemplateSuffix: wizardVariantName
-                })
-              });
-              
-              if (verifyResponse.ok) {
-                const verifyResult = await verifyResponse.json();
-                if (verifyResult.success && verifyResult.matches) {
-                  assignmentVerified = true;
-                  console.log(`✅ Template assignment verified on attempt ${attempt}:`, { 
-                    productId: wizardVariantProductId, 
-                    templateSuffix: wizardVariantName,
-                    actualTemplateSuffix: verifyResult.actualTemplateSuffix
-                  });
-                  break;
-                } else {
-                  console.log(`⏳ Attempt ${attempt}: Template assignment not yet propagated. Expected: ${wizardVariantName}, Actual: ${verifyResult.actualTemplateSuffix || 'null'}`);
-                }
-              }
-            } catch (verifyError) {
-              console.warn(`⚠️ Verification attempt ${attempt} failed:`, verifyError);
-            }
-          }
-          
-          if (!assignmentVerified) {
-            console.warn('⚠️ Could not verify template assignment, but proceeding anyway. Shopify may override the template.');
-          }
-          
-        } catch (assignError) {
-          console.error('❌ Error assigning template before opening editor:', assignError);
-          alert('Failed to assign template to product. Please try again.');
-          return;
-        }
-      }
+      // Note: We no longer assign the product to the variant template when opening the theme editor.
+      // The product will only be assigned to the variant template if it wins the A/B test.
+      // The theme editor should work with URL parameters (?view=templateName) without requiring assignment.
 
       const productHandleForPreview = wizardVariantProductHandle;
       // For OS 2.0 JSON templates, the template param should be: product.<suffix>
