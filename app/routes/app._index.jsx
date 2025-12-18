@@ -478,6 +478,55 @@ export const loader = async ({ request }) => {
 
           test.status = 'completed';
           test.winner = 'B';
+          
+          // Assign product to variant template since variant won
+          try {
+            let productGid = test.productId;
+            if (!productGid.startsWith('gid://')) {
+              const numericId = productGid.match(/Product\/(\d+)/)?.[1] || productGid.match(/^(\d+)$/)?.[1] || productGid;
+              productGid = `gid://shopify/Product/${numericId}`;
+            }
+            
+            const variantTemplateSuffix = test.templateB === 'default' ? null : test.templateB;
+            
+            const mutation = `
+              mutation assignTemplate($input: ProductInput!) {
+                productUpdate(input: $input) {
+                  product {
+                    id
+                    templateSuffix
+                  }
+                  userErrors {
+                    field
+                    message
+                  }
+                }
+              }
+            `;
+
+            const response = await admin.graphql(mutation, {
+              variables: {
+                input: {
+                  id: productGid,
+                  templateSuffix: variantTemplateSuffix
+                }
+              }
+            });
+
+            const result = await response.json();
+            if (result.errors?.length) {
+              console.error("❌ GraphQL errors assigning variant template:", result.errors);
+            } else {
+              const userErrors = result.data?.productUpdate?.userErrors || [];
+              if (userErrors.length > 0) {
+                console.error("❌ User errors assigning variant template:", userErrors);
+              } else {
+                console.log(`✅ Successfully assigned product to variant template: ${test.templateB}`);
+              }
+            }
+          } catch (assignError) {
+            console.error("❌ Error assigning variant template after winner declaration:", assignError);
+          }
         } else if (controlVisits >= 1 && variantVisits >= 1) { // Lowered threshold for testing
           const testData = {
             control: {
@@ -517,15 +566,68 @@ export const loader = async ({ request }) => {
             winnerDeclared = true;
               console.log(`🎉 WINNER DECLARED for test ${test.id} (day ${daysRunning}): ${analysis.decision}`);
             
+            const winner = analysis.decision.includes('variant') ? 'B' : 'A';
+            
             // Update test status to completed with winner
             await prisma.aBTest.update({
               where: { id: test.id },
               data: { 
                 status: 'completed',
-                winner: analysis.decision.includes('variant') ? 'B' : 'A',
+                winner: winner,
                 endDate: new Date()
               }
             });
+            
+            // If variant (B) wins, assign the product to the variant template
+            if (winner === 'B') {
+              try {
+                let productGid = test.productId;
+                if (!productGid.startsWith('gid://')) {
+                  const numericId = productGid.match(/Product\/(\d+)/)?.[1] || productGid.match(/^(\d+)$/)?.[1] || productGid;
+                  productGid = `gid://shopify/Product/${numericId}`;
+                }
+                
+                const variantTemplateSuffix = test.templateB === 'default' ? null : test.templateB;
+                
+                const mutation = `
+                  mutation assignTemplate($input: ProductInput!) {
+                    productUpdate(input: $input) {
+                      product {
+                        id
+                        templateSuffix
+                      }
+                      userErrors {
+                        field
+                        message
+                      }
+                    }
+                  }
+                `;
+
+                const response = await admin.graphql(mutation, {
+                  variables: {
+                    input: {
+                      id: productGid,
+                      templateSuffix: variantTemplateSuffix
+                    }
+                  }
+                });
+
+                const result = await response.json();
+                if (result.errors?.length) {
+                  console.error("❌ GraphQL errors assigning variant template:", result.errors);
+                } else {
+                  const userErrors = result.data?.productUpdate?.userErrors || [];
+                  if (userErrors.length > 0) {
+                    console.error("❌ User errors assigning variant template:", userErrors);
+                  } else {
+                    console.log(`✅ Successfully assigned product to variant template: ${test.templateB}`);
+                  }
+                }
+              } catch (assignError) {
+                console.error("❌ Error assigning variant template after winner declaration:", assignError);
+              }
+            }
           } else {
               console.log(`⏳ No clear winner yet for test ${test.id} (day ${daysRunning}). Waiting until day 21.`);
             }
