@@ -963,28 +963,9 @@ export default function ABTests() {
         setWizardVariantTemplateFilename(result.newFilename);
         setIsVariantTemplateReady(true);
 
-        try {
-          const assignResponse = await fetch('/api/assign-product-template', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              productId,
-              templateSuffix: variantName
-            })
-          });
-          const assignTemplateResult = await assignResponse.json();
-          if (assignResponse.ok && assignTemplateResult.success) {
-            setWizardSelectedProductSnapshot(prev => {
-              if (!prev) return prev;
-              return {
-                ...prev,
-                templateSuffix: variantName
-              };
-            });
-          }
-        } catch (assignError) {
-          console.error('⚠️ Error assigning template to product:', assignError);
-        }
+        // Note: We no longer assign the product to the variant template here.
+        // The product will only be assigned to the variant template if it wins the A/B test.
+        // Assignment happens temporarily when opening the theme editor, and permanently only when variant wins.
 
         creationResult = { success: true, variantName, newFilename: result.newFilename };
       } else {

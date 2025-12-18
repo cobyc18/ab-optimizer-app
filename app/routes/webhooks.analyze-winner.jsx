@@ -162,7 +162,7 @@ export const action = async ({ request }) => {
   try {
     console.log("🔍 ANALYZE WINNER WEBHOOK TRIGGERED");
     
-    const { session, admin } = await authenticate.admin(request);
+    const { session } = await authenticate.admin(request);
     const { testId } = await request.json();
 
     if (!testId) {
@@ -244,7 +244,8 @@ export const action = async ({ request }) => {
         where: { id: test.id },
         data: { 
           status: 'completed',
-          winner: winner
+          winner: winner,
+          endDate: new Date()
         }
       });
 
@@ -253,16 +254,20 @@ export const action = async ({ request }) => {
       console.log(`Purchase win probability: ${(analysis.purchases.probB * 100).toFixed(1)}%`);
       console.log(`Expected lift: ${(analysis.purchases.expectedRelLift * 100).toFixed(1)}%`);
 
-      // If variant wins, assign product to variant template
-      // If control wins, do nothing (product is already on control template)
+      // If variant (B) wins, assign the product to the variant template
+      // If control (A) wins, no assignment needed - product is already on control template
       if (winner === 'B') {
         try {
-          const variantTemplateSuffix = test.templateB === "default" ? null : test.templateB;
+          const { admin } = await authenticate.admin(request);
           
-          // Handle productId format - could be numeric or GID
-          const productGid = test.productId.startsWith('gid://')
-            ? test.productId
+          // Convert numeric productId to GraphQL GID format
+          const productGid = test.productId.startsWith('gid://') 
+            ? test.productId 
             : `gid://shopify/Product/${test.productId}`;
+          
+          // Get the variant template suffix (templateB)
+          // Handle "default" template suffix - convert to null for GraphQL
+          const variantTemplateSuffix = test.templateB === 'default' ? null : test.templateB;
           
           const mutation = `
             mutation assignTemplate($input: ProductInput!) {
@@ -291,21 +296,21 @@ export const action = async ({ request }) => {
           const result = await response.json();
 
           if (result.errors?.length) {
-            console.error("⚠️ GraphQL errors assigning product template to variant:", result.errors);
+            console.error("❌ GraphQL errors assigning variant template to product:", result.errors);
           } else {
             const userErrors = result.data?.productUpdate?.userErrors || [];
             if (userErrors.length > 0) {
-              console.error("⚠️ User errors assigning product template to variant:", userErrors);
+              console.error("❌ User errors assigning variant template to product:", userErrors);
             } else {
-              console.log(`✅ Product ${test.productId} assigned to variant template: ${test.templateB}`);
+              console.log(`✅ Successfully assigned product to variant template: ${test.templateB}`);
             }
           }
-        } catch (error) {
-          console.error("⚠️ Failed to assign product template to variant:", error);
-          // Don't fail the webhook if template assignment fails - winner is already recorded
+        } catch (assignError) {
+          console.error("❌ Error assigning variant template to product after winner declaration:", assignError);
+          // Don't fail the webhook if assignment fails - log and continue
         }
       } else {
-        console.log(`ℹ️ Control won - product remains on control template (no assignment needed)`);
+        console.log(`ℹ️ Control (A) won - product remains on control template (no assignment needed)`);
       }
 
       return json({ 
