@@ -1,5 +1,6 @@
 import { json } from "@remix-run/node";
-import { authenticate, sessionStorage, shopify } from "../shopify.server.js";
+import { authenticate, sessionStorage } from "../shopify.server.js";
+import shopify from "../shopify.server.js";
 import prisma from "../db.server.js";
 
 // ---------- Statistical Analysis Functions ----------
