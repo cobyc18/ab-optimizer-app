@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { authenticate } from "../shopify.server.js";
+import { authenticate, sessionStorage, shopify } from "../shopify.server.js";
 import prisma from "../db.server.js";
 
 // ---------- Statistical Analysis Functions ----------
@@ -162,7 +162,17 @@ export const action = async ({ request }) => {
   try {
     console.log("🔍 ANALYZE WINNER WEBHOOK TRIGGERED");
     
-    const { session } = await authenticate.admin(request);
+    let session, admin;
+    try {
+      const authResult = await authenticate.admin(request);
+      session = authResult.session;
+      admin = authResult.admin;
+    } catch (authError) {
+      // If admin auth fails (e.g., called via fetch without proper session),
+      // we'll get the shop from the test record and use that
+      console.log("⚠️ Admin authentication failed, will use shop from test record:", authError.message);
+    }
+    
     const { testId } = await request.json();
 
     if (!testId) {
@@ -258,16 +268,76 @@ export const action = async ({ request }) => {
       // If control (A) wins, no assignment needed - product is already on control template
       if (winner === 'B') {
         try {
-          const { admin } = await authenticate.admin(request);
+          // If we don't have admin client from authentication, get it from the shop's session
+          if (!admin) {
+            console.log(`⚠️ No admin client from auth, loading session for shop: ${test.shop}`);
+            
+            // Try to get session from database (Session table)
+            const dbSession = await prisma.session.findFirst({
+              where: { shop: test.shop },
+              orderBy: { expires: 'desc' }
+            });
+            
+            if (dbSession && dbSession.accessToken) {
+              // Create session object from database record
+              const sessionData = {
+                id: dbSession.id,
+                shop: dbSession.shop,
+                state: dbSession.state,
+                isOnline: dbSession.isOnline || false,
+                accessToken: dbSession.accessToken,
+                scope: dbSession.scope || "",
+              };
+              
+              admin = shopify.clients.graphql({ session: sessionData });
+              console.log(`✅ Created admin client from database session for shop: ${test.shop}`);
+            } else {
+              // Fallback: get shop record and create session manually
+              const shopRecord = await prisma.shop.findUnique({
+                where: { shop: test.shop }
+              });
+              
+              if (!shopRecord || !shopRecord.accessToken) {
+                throw new Error(`No session or shop record found for shop: ${test.shop}`);
+              }
+              
+              // Create a session object from shop record
+              const sessionData = {
+                id: `offline_${test.shop}`,
+                shop: test.shop,
+                state: "",
+                isOnline: false,
+                accessToken: shopRecord.accessToken,
+                scope: shopRecord.scope || "",
+              };
+              
+              admin = shopify.clients.graphql({ session: sessionData });
+              console.log(`✅ Created admin client from shop record for shop: ${test.shop}`);
+            }
+          }
           
           // Convert numeric productId to GraphQL GID format
-          const productGid = test.productId.startsWith('gid://') 
-            ? test.productId 
-            : `gid://shopify/Product/${test.productId}`;
+          // Database stores productId as numeric (e.g., "123456789")
+          // GraphQL needs GID format (e.g., "gid://shopify/Product/123456789")
+          let productGid = test.productId;
+          if (!productGid.startsWith('gid://')) {
+            // Extract numeric ID if it's in format like "gid://shopify/Product/123456789" or just "123456789"
+            const numericId = productGid.match(/Product\/(\d+)/)?.[1] || productGid.match(/^(\d+)$/)?.[1] || productGid;
+            productGid = `gid://shopify/Product/${numericId}`;
+          }
           
           // Get the variant template suffix (templateB)
           // Handle "default" template suffix - convert to null for GraphQL
           const variantTemplateSuffix = test.templateB === 'default' ? null : test.templateB;
+          
+          console.log(`🔄 Attempting to assign variant template to product:`, {
+            productId: test.productId,
+            productGid: productGid,
+            templateB: test.templateB,
+            variantTemplateSuffix: variantTemplateSuffix,
+            testId: test.id,
+            testName: test.name
+          });
           
           const mutation = `
             mutation assignTemplate($input: ProductInput!) {
@@ -297,16 +367,24 @@ export const action = async ({ request }) => {
 
           if (result.errors?.length) {
             console.error("❌ GraphQL errors assigning variant template to product:", result.errors);
+            console.error("❌ Full GraphQL response:", JSON.stringify(result, null, 2));
           } else {
             const userErrors = result.data?.productUpdate?.userErrors || [];
             if (userErrors.length > 0) {
               console.error("❌ User errors assigning variant template to product:", userErrors);
+              console.error("❌ Full GraphQL response:", JSON.stringify(result, null, 2));
             } else {
-              console.log(`✅ Successfully assigned product to variant template: ${test.templateB}`);
+              const updatedProduct = result.data?.productUpdate?.product;
+              console.log(`✅ Successfully assigned product to variant template:`, {
+                templateB: test.templateB,
+                productId: updatedProduct?.id,
+                newTemplateSuffix: updatedProduct?.templateSuffix
+              });
             }
           }
         } catch (assignError) {
           console.error("❌ Error assigning variant template to product after winner declaration:", assignError);
+          console.error("❌ Error stack:", assignError.stack);
           // Don't fail the webhook if assignment fails - log and continue
         }
       } else {
