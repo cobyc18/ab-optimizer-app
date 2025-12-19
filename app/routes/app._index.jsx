@@ -4,6 +4,8 @@ import React, { useState, useEffect } from "react";
 import { authenticate } from "../shopify.server.js";
 import prisma from "../db.server.js";
 import ExperimentOverview from "../components/ExperimentOverview.jsx";
+import ConversionPlayCard from "../components/ConversionPlayCard.jsx";
+import { abTestIdeas } from "../data/abTestIdeas.js";
 
 // ---------- Statistical Analysis Functions ----------
 function betaSample(alpha, beta) {
@@ -716,12 +718,7 @@ export const loader = async ({ request }) => {
       maxXp: 3000
     },
       experiments: experimentsWithAnalysis,
-      testCards: [
-        { id: 1, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-        { id: 2, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-        { id: 3, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-        { id: 4, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" }
-      ],
+      // testCards removed - using conversion plays from abTestIdeas instead
       queuedTests: [
         { name: "Shipping badge Design Test" },
         { name: "Feature Bullet Points Test" },
@@ -742,12 +739,7 @@ export const loader = async ({ request }) => {
       user: { name: "Zac", level: "Legend Scientist", xp: 2100, maxXp: 3000 },
       experiments: [],
       productTemplates: [],
-    testCards: [
-      { id: 1, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-      { id: 2, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-      { id: 3, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" },
-      { id: 4, name: "Test Name", status: "maybe", description: "Architecto consequatur molestias repellat qui. Quia est asd doloremque veniam est rerum. Soluta" }
-    ],
+      // testCards removed - using conversion plays from abTestIdeas instead
     queuedTests: [
       { name: "Shipping badge Design Test" },
       { name: "Feature Bullet Points Test" },
@@ -917,7 +909,7 @@ export const loader = async ({ request }) => {
   const getWidgetTweaks = (widgetType) => widgetTweaksCatalog[widgetType] || [];
 
 export default function Dashboard() {
-  const { user, experiments, testCards, queuedTests, recentActivities, themes, products, productTemplates, shop } = useLoaderData();
+  const { user, experiments, queuedTests, recentActivities, themes, products, productTemplates, shop } = useLoaderData();
   const [expandedTests, setExpandedTests] = useState(new Set());
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -1245,101 +1237,26 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Test Cards */}
+      {/* Conversion Play Cards - Using exact same cards from A/B flow */}
       <div style={{ display: 'flex', gap: '25px', marginBottom: '40px', overflowX: 'auto', paddingBottom: '10px', maxWidth: '100%' }}>
-        {testCards.map((card, index) => (
+        {abTestIdeas.map((widget, index) => (
           <div
-            key={card.id}
+            key={widget.id}
             style={{
-              backgroundColor: figmaColors.gray,
-              border: `1px solid ${figmaColors.primaryBlue}`,
-              borderRadius: '24px',
-              padding: '40px',
-              minWidth: '280px',
               flexShrink: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '20px',
-              alignItems: 'flex-start',
-              cursor: 'pointer',
               transition: 'transform 0.2s ease'
             }}
             onMouseEnter={(e) => {
-              e.target.style.transform = 'translateY(-5px)';
+              e.currentTarget.style.transform = 'translateY(-5px)';
             }}
             onMouseLeave={(e) => {
-              e.target.style.transform = 'translateY(0)';
+              e.currentTarget.style.transform = 'translateY(0)';
             }}
           >
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'flex-start' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'flex-start' }}>
-                <div style={{ width: '280px', height: '200px', borderRadius: '10px', overflow: 'hidden' }}>
-                  <img alt="Placeholder" src={imgPlaceholder} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-                </div>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'flex-start' }}>
-                  <p style={{
-                    fontFamily: 'Geist, sans-serif',
-                    fontWeight: 600,
-                    fontSize: '24px',
-                    color: figmaColors.darkGray,
-                    margin: 0
-                  }}>
-                    {card.name}
-                  </p>
-                  <p style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    color: figmaColors.darkGray,
-                    margin: 0,
-                    lineHeight: '20px',
-                    width: '280px'
-                  }}>
-                    {card.description}
-                  </p>
-                </div>
-              </div>
-                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', width: '280px' }}>
-                <div style={{ display: 'flex', gap: '15px', alignItems: 'center' }}>
-                  <div style={{ width: '68px', height: '68px' }}>
-                    <img alt="Frame" src={imgFrame2147224432} style={{ width: '100%', height: '100%' }} />
-                  </div>
-                  <div style={{
-                    backgroundColor: figmaColors.yellow,
-                    borderRadius: '20px',
-                    padding: '5px 12px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center'
-                  }}>
-                    <p style={{
-                      fontFamily: 'Poppins, sans-serif',
-                      fontWeight: 500,
-                      fontSize: '14px',
-                      color: figmaColors.yellow,
-                      margin: 0,
-                      letterSpacing: '0.4px'
-                    }}>
-                      {card.status}
-                    </p>
-                  </div>
-                </div>
-                <div style={{
-                  border: `1px solid ${figmaColors.green}`,
-                  borderRadius: '43px',
-                  width: '68px',
-                  height: '68px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  cursor: 'pointer'
-                }}>
-                  <div style={{ width: '28.544px', height: '24.013px' }}>
-                    <img alt="Layer" src={imgLayer2} style={{ width: '100%', height: '100%' }} />
-                  </div>
-                </div>
-              </div>
-            </div>
+            <ConversionPlayCard
+              widget={widget}
+              isSelected={false}
+            />
           </div>
         ))}
       </div>

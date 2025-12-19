@@ -3,10 +3,9 @@ import { useLoaderData, useNavigate } from "@remix-run/react";
 import React, { useState, useEffect, useCallback } from "react";
 import { authenticate, BASIC_PLAN, PRO_PLAN, ENTERPRISE_PLAN } from "../shopify.server.js";
 import { checkBillingStatus } from "../utils/billing.server.js";
-import freeShippingBadgeImage from "../assets/free-shipping-badge.png";
-import moneyBackGuaranteeImage from "../assets/money-back-guarantee.png";
-import addToCartImage from "../assets/add-to-cart.png";
 import WidgetLivePreview from "../components/WidgetLivePreview.jsx";
+import ConversionPlayCard from "../components/ConversionPlayCard.jsx";
+import { abTestIdeas } from "../data/abTestIdeas.js";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
@@ -234,36 +233,7 @@ export default function ABTests() {
   const [isCheckingProductInTest, setIsCheckingProductInTest] = useState(false);
   const [productInTestError, setProductInTestError] = useState(null);
 
-  const abTestIdeas = [
-    {
-      id: 1,
-      utility: 'How Many in Cart',
-      rationale: 'Displaying an in-cart count highlights demand and motivates customers to act before the item sells out',
-      style: ['Urgency', 'Social Proof'], // Array of tags
-      preview: '👁️ 76 people viewing this page',
-      blockId: 'simple-text-badge',
-      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4',
-      availableForGoals: ['Social Proof', 'Urgency'] // Goals this conversion play is available for
-    },
-    {
-      id: 2,
-      utility: 'Free Shipping Badge',
-      rationale: 'Displaying a free-shipping badge helps build trust by showing customers there are no hidden costs',
-      style: 'Increase Trust',
-      preview: 'In-stock, ships in 1-2 business days | Free shipping & returns',
-      blockId: 'simple-text-badge',
-      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
-    },
-    {
-      id: 3,
-      utility: 'Returns Guarantee Badge',
-      rationale: 'Displaying a refund guarantee builds trust by letting customers know they can shop without risk',
-      style: 'Increase Trust',
-      preview: 'Returns Guarantee Badge',
-      blockId: 'simple-text-badge',
-      appExtensionId: '5ff212573a3e19bae68ca45eae0a80c4'
-    }
-  ];
+  // abTestIdeas is now imported from shared data file
 
   // Background colors for each widget type - more vibrant and distinct
   const getWidgetBackgroundColor = (utility) => {
@@ -1896,33 +1866,11 @@ export default function ABTests() {
                     return (
                       <div
                         key={`stack-${index}-${stackIndex}`}
-                        onMouseDown={isCurrent ? handleDragStart : undefined}
-                        onTouchStart={isCurrent ? handleDragStart : undefined}
-                        onClick={(e) => {
-                          // Only handle click if not dragging and it's the current card
-                          if (isCurrent && !isDragging && !isAnimating) {
-                            e.stopPropagation();
-                            // Toggle selection: if already selected, deselect; otherwise select
-                            if (selectedConversionPlayIndex === index) {
-                              setSelectedConversionPlayIndex(null);
-                            } else {
-                              setSelectedConversionPlayIndex(index);
-                            }
-                          }
-                        }}
                         style={{
                           position: 'absolute',
                           top: 0,
                           left: '50%',
                           transform: `translate(${translateX}, ${translateY}px)`,
-                          minWidth: '320px',
-                          backgroundColor: figmaColors.gray,
-                          border: isSelected ? `3px solid ${figmaColors.primaryBlue}` : `1px solid ${figmaColors.primaryBlue}`,
-                          borderRadius: '24px',
-                          padding: '40px',
-                          margin: '0',
-                          boxSizing: 'border-box',
-                          overflow: 'visible',
                           zIndex: zIndex,
                           opacity: opacity,
                           transformOrigin: 'center center',
@@ -1931,12 +1879,7 @@ export default function ABTests() {
                             : !isCurrent 
                               ? `opacity 0.1s ease` // Fast transition when dragging
                               : 'none',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '20px',
-                          alignItems: 'center',
                           cursor: isCurrent ? (isDragging ? 'grabbing' : 'pointer') : 'default',
-                          userSelect: 'none',
                           ...(isCurrent && isAnimating && swipeDirection === 'like' && {
                             animation: 'swipeRight 0.4s cubic-bezier(0.4, 0, 0.2, 1) forwards'
                           }),
@@ -1945,155 +1888,26 @@ export default function ABTests() {
                           })
                         }}
                       >
-                        {/* Checkmark icon - top right */}
-                        {isSelected && (
-                          <div style={{
-                            position: 'absolute',
-                            top: '12px',
-                            right: '12px',
-                            width: '28px',
-                            height: '28px',
-                            borderRadius: '50%',
-                            backgroundColor: '#2563EB',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            zIndex: 1000,
-                            boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
-                          }}>
-                            <svg
-                              width="16"
-                              height="16"
-                              viewBox="0 0 16 16"
-                              fill="none"
-                              xmlns="http://www.w3.org/2000/svg"
-                            >
-                              <path
-                                d="M13.3333 4L6 11.3333L2.66667 8"
-                                stroke="white"
-                                strokeWidth="2"
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                              />
-                            </svg>
-                          </div>
-                        )}
-                        <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box', position: 'relative' }}>
-                          <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
-                            {/* Widget Preview - Image Section */}
-                            <div style={{ 
-                              width: '280px', 
-                              height: '200px', 
-                              borderRadius: '10px', 
-                              overflow: 'hidden',
-                              boxSizing: 'border-box'
-                            }}>
-                              {widget.utility === 'Free Shipping Badge' ? (
-                                <img 
-                                  src={freeShippingBadgeImage} 
-                                  alt="Free Shipping Badge"
-                                  style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'contain',
-                                    display: 'block'
-                                  }}
-                                />
-                              ) : widget.utility === 'How Many in Cart' ? (
-                                <img 
-                                  src={addToCartImage} 
-                                  alt="How Many in Cart"
-                                  style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'contain',
-                                    display: 'block'
-                                  }}
-                                />
-                              ) : widget.utility === 'Returns Guarantee Badge' ? (
-                                <img 
-                                  src={moneyBackGuaranteeImage} 
-                                  alt="Returns Guarantee Badge"
-                                  style={{
-                                    width: '100%',
-                                    height: '100%',
-                                    objectFit: 'contain',
-                                    display: 'block'
-                                  }}
-                                />
-                              ) : null}
-                            </div>
-
-                            {/* Title and Description Section */}
-                            <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
-                              {/* Title */}
-                              <p style={{
-                                fontFamily: 'Geist, sans-serif',
-                                fontWeight: 600,
-                                fontSize: '20px',
-                                color: figmaColors.darkGray,
-                                margin: 0,
-                                wordWrap: 'break-word',
-                                overflowWrap: 'break-word',
-                                width: '100%',
-                                boxSizing: 'border-box',
-                                textAlign: 'center'
-                              }}>
-                                {widget.utility}
-                              </p>
-                              
-                              {/* Tags */}
-                              <div style={{
-                                display: 'flex',
-                                gap: '8px',
-                                flexWrap: 'wrap',
-                                justifyContent: 'center',
-                                alignItems: 'center',
-                                width: '100%',
-                                boxSizing: 'border-box'
-                              }}>
-                                {(Array.isArray(widget.style) ? widget.style : [widget.style]).map((tag, tagIndex) => (
-                                  <div
-                                    key={tagIndex}
-                                    style={{
-                                      background: '#FFFFFF',
-                                      color: '#1E40AF',
-                                      padding: '8px 16px',
-                                      borderRadius: '16px',
-                                      fontSize: '14px',
-                                      fontWeight: '500',
-                                      width: 'fit-content',
-                                      border: '1px solid #E5E7EB',
-                                      wordWrap: 'break-word',
-                                      overflowWrap: 'break-word',
-                                      maxWidth: '100%',
-                                      boxSizing: 'border-box'
-                                    }}
-                                  >
-                                    {tag}
-                                  </div>
-                                ))}
-                              </div>
-                              
-                              {/* Description */}
-                              <p style={{
-                                fontFamily: 'Inter, sans-serif',
-                                fontWeight: 500,
-                                fontSize: '14px',
-                                color: figmaColors.darkGray,
-                                margin: 0,
-                                lineHeight: '20px',
-                                width: '100%',
-                                wordWrap: 'break-word',
-                                overflowWrap: 'break-word',
-                                boxSizing: 'border-box',
-                                textAlign: 'center'
-                              }}>
-                                {widget.rationale}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
+                        <ConversionPlayCard
+                          widget={widget}
+                          isSelected={isSelected}
+                          onClick={(e) => {
+                            // Only handle click if not dragging and it's the current card
+                            if (isCurrent && !isDragging && !isAnimating) {
+                              e.stopPropagation();
+                              // Toggle selection: if already selected, deselect; otherwise select
+                              if (selectedConversionPlayIndex === index) {
+                                setSelectedConversionPlayIndex(null);
+                              } else {
+                                setSelectedConversionPlayIndex(index);
+                              }
+                            }
+                          }}
+                          dragHandlers={{
+                            onMouseDown: isCurrent ? handleDragStart : undefined,
+                            onTouchStart: isCurrent ? handleDragStart : undefined
+                          }}
+                        />
                       </div>
                     );
                   })}
