@@ -67,13 +67,15 @@
     },
     {
       "type": "header",
-      "content": "Text Content"
+      "content": "Text Content",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "richtext",
       "id": "header_text",
       "label": "Header text",
-      "default": "<p>Store Announcement</p>"
+      "default": "<p>Store Announcement</p>",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "select",
@@ -105,7 +107,8 @@
         { "value": "verdana", "label": "Verdana" },
         { "value": "trebuchet", "label": "Trebuchet MS" }
       ],
-      "default": "system"
+      "default": "system",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -114,19 +117,22 @@
       "min": 12,
       "max": 64,
       "step": 1,
-      "default": 24
+      "default": 24,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "checkbox",
       "id": "header_underline",
       "label": "Underline",
-      "default": false
+      "default": false,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "richtext",
       "id": "body_text",
       "label": "Body text",
-      "default": "<p>Describe the promotion or offer details here.</p>"
+      "default": "<p>Describe the promotion or offer details here.</p>",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "select",
@@ -158,7 +164,8 @@
         { "value": "verdana", "label": "Verdana" },
         { "value": "trebuchet", "label": "Trebuchet MS" }
       ],
-      "default": "system"
+      "default": "system",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -167,13 +174,15 @@
       "min": 10,
       "max": 36,
       "step": 1,
-      "default": 16
+      "default": 16,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "checkbox",
       "id": "body_underline",
       "label": "Underline",
-      "default": false
+      "default": false,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -183,7 +192,8 @@
       "max": 40,
       "step": 2,
       "default": 6,
-      "info": "Vertical space between header and body text"
+      "info": "Vertical space between header and body text",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -193,11 +203,13 @@
       "max": 60,
       "step": 2,
       "default": 20,
-      "info": "Horizontal space between icon and text content"
+      "info": "Horizontal space between icon and text content",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "header",
-      "content": "Padding"
+      "content": "Padding",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -206,7 +218,8 @@
       "min": 0,
       "max": 100,
       "step": 1,
-      "default": 24
+      "default": 24,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -215,7 +228,8 @@
       "min": 0,
       "max": 100,
       "step": 1,
-      "default": 16
+      "default": 16,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -224,7 +238,8 @@
       "min": 0,
       "max": 80,
       "step": 1,
-      "default": 16
+      "default": 16,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -233,7 +248,8 @@
       "min": 0,
       "max": 80,
       "step": 1,
-      "default": 12
+      "default": 12,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -242,7 +258,8 @@
       "min": 0,
       "max": 100,
       "step": 1,
-      "default": 0
+      "default": 0,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -251,7 +268,8 @@
       "min": 0,
       "max": 100,
       "step": 1,
-      "default": 0
+      "default": 0,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -260,7 +278,8 @@
       "min": 0,
       "max": 100,
       "step": 1,
-      "default": 0
+      "default": 0,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -269,11 +288,13 @@
       "min": 0,
       "max": 100,
       "step": 1,
-      "default": 0
+      "default": 0,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "header",
-      "content": "Icon"
+      "content": "Icon",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "select",
@@ -286,19 +307,22 @@
         { "value": "gift", "label": "🎁 Gift", "group": "Gift Icons" }
       ],
       "default": "star",
-      "info": "Choose a built-in icon or select 'None' to remove. Upload a custom icon below to override."
+      "info": "Choose a built-in icon or select 'None' to remove. Upload a custom icon below to override.",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "image_picker",
       "id": "icon_custom",
       "label": "Upload custom icon",
-      "info": "If uploaded, this icon will be used instead of the selected icon above"
+      "info": "If uploaded, this icon will be used instead of the selected icon above",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "checkbox",
       "id": "icon_blink",
       "label": "Enable icon blink effect",
-      "default": false
+      "default": false,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -308,7 +332,8 @@
       "max": 100,
       "step": 5,
       "default": 50,
-      "info": "Lower = subtle, Higher = intense"
+      "info": "Lower = subtle, Higher = intense",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -317,7 +342,8 @@
       "min": 12,
       "max": 120,
       "step": 2,
-      "default": 36
+      "default": 36,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "range",
@@ -326,11 +352,13 @@
       "min": 8,
       "max": 100,
       "step": 2,
-      "default": 30
+      "default": 30,
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "header",
-      "content": "Border and Colors"
+      "content": "Border and Colors",
+      "visible_if": "{{ block.settings.enable_step_2 == true }}"
     },
     {
       "type": "range",
@@ -339,7 +367,8 @@
       "min": 0,
       "max": 60,
       "step": 1,
-      "default": 8
+      "default": 8,
+      "visible_if": "{{ block.settings.enable_step_2 == true }}"
     },
     {
       "type": "range",
@@ -348,13 +377,15 @@
       "min": 0,
       "max": 12,
       "step": 1,
-      "default": 1
+      "default": 1,
+      "visible_if": "{{ block.settings.enable_step_2 == true }}"
     },
     {
       "type": "checkbox",
       "id": "hover_effect",
       "label": "Enable hover lift effect",
-      "default": true
+      "default": true,
+      "visible_if": "{{ block.settings.enable_step_2 == true }}"
     },
     {
       "type": "range",
@@ -363,37 +394,43 @@
       "min": 0,
       "max": 50,
       "step": 1,
-      "default": 10
+      "default": 10,
+      "visible_if": "{{ block.settings.enable_step_2 == true }}"
     },
     {
       "type": "color",
       "id": "header_color",
       "label": "Header color",
-      "default": "#0f172a"
+      "default": "#0f172a",
+      "visible_if": "{{ block.settings.enable_step_2 == true }}"
     },
     {
       "type": "color",
       "id": "text_color",
       "label": "Body text color",
-      "default": "#1a5f5f"
+      "default": "#1a5f5f",
+      "visible_if": "{{ block.settings.enable_step_2 == true }}"
     },
     {
       "type": "color",
       "id": "background_color",
       "label": "Background color",
-      "default": "#f5f5f0"
+      "default": "#f5f5f0",
+      "visible_if": "{{ block.settings.enable_step_2 == true }}"
     },
     {
       "type": "color",
       "id": "border_color",
       "label": "Border color",
-      "default": "#d4d4d8"
+      "default": "#d4d4d8",
+      "visible_if": "{{ block.settings.enable_step_2 == true }}"
     },
     {
       "type": "text",
       "id": "conversion_play_type",
       "label": "Conversion Play Type",
-      "info": "Internal setting to identify widget behavior type"
+      "info": "Internal setting to identify widget behavior type",
+      "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
       "type": "number",
@@ -401,7 +438,7 @@
       "label": "Minimum Count",
       "default": 40,
       "info": "Minimum number for how many in cart count (internal use)",
-      "visible_if": "{{ block.settings.conversion_play_type == 'how-many-in-cart' }}"
+      "visible_if": "{{ block.settings.conversion_play_type == 'how-many-in-cart' and block.settings.enable_step_2 == false }}"
     },
     {
       "type": "number",
@@ -409,7 +446,7 @@
       "label": "Maximum Count",
       "default": 60,
       "info": "Maximum number for how many in cart count (internal use)",
-      "visible_if": "{{ block.settings.conversion_play_type == 'how-many-in-cart' }}"
+      "visible_if": "{{ block.settings.conversion_play_type == 'how-many-in-cart' and block.settings.enable_step_2 == false }}"
     }
   ]
 }

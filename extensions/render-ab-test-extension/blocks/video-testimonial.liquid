@@ -1,0 +1,448 @@
+{%- comment -%}
+  Video Testimonial Widget Block
+  Displays multiple video testimonials in a carousel with image, video, author, stars, and text
+{%- endcomment -%}
+
+<div class="video-testimonial-widget" 
+     {{ block.shopify_attributes }}
+     data-block-id="{{ block.id }}"
+     data-inner-padding-x="{{ block.settings.inner_padding_horizontal | default: 24 }}"
+     data-inner-padding-y="{{ block.settings.inner_padding_vertical | default: 16 }}"
+     data-inner-padding-x-mobile="{{ block.settings.inner_padding_horizontal_mobile | default: 16 }}"
+     data-inner-padding-y-mobile="{{ block.settings.inner_padding_vertical_mobile | default: 12 }}"
+     data-outer-padding-x="{{ block.settings.outer_padding_horizontal | default: 0 }}"
+     data-outer-padding-y="{{ block.settings.outer_padding_vertical | default: 0 }}"
+     data-outer-padding-x-mobile="{{ block.settings.outer_padding_horizontal_mobile | default: 0 }}"
+     data-outer-padding-y-mobile="{{ block.settings.outer_padding_vertical_mobile | default: 0 }}"
+     data-border-radius="{{ block.settings.border_radius | default: 20 }}"
+     data-border-thickness="{{ block.settings.border_thickness | default: 0 }}"
+     data-hover-effect="{{ block.settings.hover_effect | default: false }}"
+     data-drop-shadow="{{ block.settings.drop_shadow | default: 10 }}"
+     data-text-color="{{ block.settings.text_color | default: '#1a5f5f' }}"
+     data-author-color="{{ block.settings.author_color | default: '#0f172a' }}"
+     data-background-color="{{ block.settings.background_color | default: '#ffffff' }}"
+     data-border-color="{{ block.settings.border_color | default: '#d4d4d8' }}"
+     data-media-size="{{ block.settings.media_size | default: 100 }}"
+     data-testimonial-placement="{{ block.settings.testimonial_placement | default: 'layout_1' }}"
+     data-star-color="{{ block.settings.star_color | default: '#000000' }}"
+     data-title-font-size="{{ block.settings.title_font_size | default: 18 }}"
+     data-title-color="{{ block.settings.title_color | default: '#0f172a' }}">
+  {%- assign testimonials_count_str = block.settings.testimonials_count | default: '1' -%}
+  {%- assign testimonials_count = testimonials_count_str | plus: 0 -%}
+  {%- for i in (1..3) -%}
+    {%- if i <= testimonials_count -%}
+    {%- assign image_key = 'image_' | append: i -%}
+    {%- assign video_key = 'video_' | append: i -%}
+    {%- assign video_url_key = 'video_url_' | append: i -%}
+    {%- assign author_key = 'author_' | append: i -%}
+    {%- assign stars_key = 'stars_count_' | append: i -%}
+    {%- assign text_key = 'text_' | append: i -%}
+    {%- assign date_key = 'date_' | append: i -%}
+    {%- assign verified_key = 'verified_' | append: i -%}
+    {%- assign title_key = 'title_' | append: i -%}
+    {%- assign checkmark_key = 'checkmark_' | append: i -%}
+    {%- assign has_content = false -%}
+    {%- if block.settings[image_key] or block.settings[video_key] or block.settings[video_url_key] or block.settings[author_key] != blank or block.settings[text_key] != blank -%}
+      {%- assign has_content = true -%}
+    {%- endif -%}
+    {%- if has_content -%}
+      <div class="testimonial-item" 
+           data-testimonial-id="testimonial-{{ i }}"
+           data-image="{% if block.settings[image_key] %}{{ block.settings[image_key] | image_url: width: 400 }}{% endif %}"
+           data-video="{% if block.settings[video_key] %}{{ block.settings[video_key] }}{% endif %}"
+           data-video-url="{{ block.settings[video_url_key] | escape }}"
+           data-author="{{ block.settings[author_key] | escape }}"
+           data-stars-count="{{ block.settings[stars_key] | default: 5 }}"
+           data-text="{{ block.settings[text_key] | escape }}"
+           data-date="{{ block.settings[date_key] | escape }}"
+           data-verified="{{ block.settings[verified_key] | default: false }}"
+           data-title="{{ block.settings[title_key] | escape }}"
+           data-checkmark="{{ block.settings[checkmark_key] | default: false }}"
+           {% if forloop.first %}data-active="true"{% else %}data-active="false"{% endif %}>
+      </div>
+    {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+</div>
+
+{% schema %}
+{
+  "name": "Video Testimonial",
+  "target": "section",
+  "stylesheet": "video-testimonial.css",
+  "javascript": "video-testimonial.js",
+  "settings": [
+    {
+      "type": "select",
+      "id": "testimonials_count",
+      "label": "Number of Testimonials",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Testimonial 1 - Image"
+    },
+    {
+      "type": "video",
+      "id": "video_1",
+      "label": "Testimonial 1 - Video from Shopify"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_1",
+      "label": "Testimonial 1 - Video Embed from Url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "text",
+      "id": "author_1",
+      "label": "Testimonial 1 - Author",
+      "default": "Author"
+    },
+    {
+      "type": "range",
+      "id": "stars_count_1",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "label": "Testimonial 1 - Stars Count",
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "text_1",
+      "label": "Testimonial 1 - Text",
+      "default": "Text"
+    },
+    {
+      "type": "text",
+      "id": "title_1",
+      "label": "Testimonial 1 - Title"
+    },
+    {
+      "type": "text",
+      "id": "date_1",
+      "label": "Testimonial 1 - Date"
+    },
+    {
+      "type": "checkbox",
+      "id": "verified_1",
+      "label": "Testimonial 1 - Show Verified Buyer Badge",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "checkmark_1",
+      "label": "Testimonial 1 - Show Green Checkmark",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Testimonial 2 - Image"
+    },
+    {
+      "type": "video",
+      "id": "video_2",
+      "label": "Testimonial 2 - Video from Shopify"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_2",
+      "label": "Testimonial 2 - Video Embed from Url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "text",
+      "id": "author_2",
+      "label": "Testimonial 2 - Author",
+      "default": "Author"
+    },
+    {
+      "type": "range",
+      "id": "stars_count_2",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "label": "Testimonial 2 - Stars Count",
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "text_2",
+      "label": "Testimonial 2 - Text",
+      "default": "Text"
+    },
+    {
+      "type": "text",
+      "id": "title_2",
+      "label": "Testimonial 2 - Title"
+    },
+    {
+      "type": "text",
+      "id": "date_2",
+      "label": "Testimonial 2 - Date"
+    },
+    {
+      "type": "checkbox",
+      "id": "verified_2",
+      "label": "Testimonial 2 - Show Verified Buyer Badge",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "checkmark_2",
+      "label": "Testimonial 2 - Show Green Checkmark",
+      "default": false
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Testimonial 3 - Image"
+    },
+    {
+      "type": "video",
+      "id": "video_3",
+      "label": "Testimonial 3 - Video from Shopify"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_3",
+      "label": "Testimonial 3 - Video Embed from Url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "text",
+      "id": "author_3",
+      "label": "Testimonial 3 - Author",
+      "default": "Author"
+    },
+    {
+      "type": "range",
+      "id": "stars_count_3",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "label": "Testimonial 3 - Stars Count",
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "text_3",
+      "label": "Testimonial 3 - Text",
+      "default": "Text"
+    },
+    {
+      "type": "text",
+      "id": "title_3",
+      "label": "Testimonial 3 - Title"
+    },
+    {
+      "type": "text",
+      "id": "date_3",
+      "label": "Testimonial 3 - Date"
+    },
+    {
+      "type": "checkbox",
+      "id": "verified_3",
+      "label": "Testimonial 3 - Show Verified Buyer Badge",
+      "default": false
+    },
+    {
+      "type": "checkbox",
+      "id": "checkmark_3",
+      "label": "Testimonial 3 - Show Green Checkmark",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Padding"
+    },
+    {
+      "type": "range",
+      "id": "inner_padding_horizontal",
+      "label": "Horizontal padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "inner_padding_vertical",
+      "label": "Vertical padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "inner_padding_horizontal_mobile",
+      "label": "Mobile horizontal padding (px)",
+      "min": 0,
+      "max": 80,
+      "step": 1,
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "inner_padding_vertical_mobile",
+      "label": "Mobile vertical padding (px)",
+      "min": 0,
+      "max": 80,
+      "step": 1,
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "outer_padding_horizontal",
+      "label": "Outer horizontal padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "outer_padding_vertical",
+      "label": "Outer vertical padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "outer_padding_horizontal_mobile",
+      "label": "Outer mobile horizontal padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "outer_padding_vertical_mobile",
+      "label": "Outer mobile vertical padding (px)",
+      "min": 0,
+      "max": 100,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Layout and Display"
+    },
+    {
+      "type": "select",
+      "id": "testimonial_placement",
+      "label": "Testimonial Layout",
+      "options": [
+        { "value": "layout_1", "label": "Image/Video Left - Stars & Text Right" },
+        { "value": "layout_2", "label": "No Media - Stars, Title, Text, Author" },
+        { "value": "layout_3", "label": "No Media - Stars Left, Author Right" }
+      ],
+      "default": "layout_1"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Title Font Size (px)",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "default": 18
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title Color",
+      "default": "#0f172a"
+    },
+    {
+      "type": "header",
+      "content": "Border and Colors"
+    },
+    {
+      "type": "color",
+      "id": "star_color",
+      "label": "Star Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius (px)",
+      "min": 0,
+      "max": 60,
+      "step": 1,
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "media_size",
+      "label": "Video/Image size (px)",
+      "min": 40,
+      "max": 150,
+      "step": 5,
+      "default": 100,
+      "info": "Size of the video thumbnail or image"
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "label": "Border outline thickness (px)",
+      "min": 0,
+      "max": 12,
+      "step": 1,
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "hover_effect",
+      "label": "Enable hover lift effect",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "drop_shadow",
+      "label": "Drop shadow amount",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "default": 10
+    },
+    {
+      "type": "color",
+      "id": "author_color",
+      "label": "Author color",
+      "default": "#0f172a"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#1a5f5f"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border color",
+      "default": "#d4d4d8"
+    }
+  ]
+}
+{% endschema %}

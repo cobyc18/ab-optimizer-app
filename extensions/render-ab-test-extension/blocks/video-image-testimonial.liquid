@@ -1,0 +1,695 @@
+{%- comment -%}
+  Video Image Testimonial Widget Block
+  Displays video/image testimonials with customizable styling
+{%- endcomment -%}
+
+<div class="video-image-testimonial-widget" 
+     {{ block.shopify_attributes }}
+     data-block-id="{{ block.id }}"
+     data-reviews-radius="{{ block.settings.reviews_radius | default: 0 }}"
+     data-review-padding-vertical="{{ block.settings.review_padding_vertical | default: 8 }}"
+     data-review-padding-horizontal="{{ block.settings.review_padding_horizontal | default: 8 }}"
+     data-review-radius="{{ block.settings.review_radius | default: 8 }}"
+     data-review-border-thickness="{{ block.settings.review_border_thickness | default: 0 }}"
+     data-image-width="{{ block.settings.image_width | default: 60 }}"
+     data-image-radius="{{ block.settings.image_radius | default: 8 }}"
+     data-image-border-thickness="{{ block.settings.image_border_thickness | default: 0 }}"
+     data-image-ratio="{{ block.settings.image_ratio | default: 'square' }}"
+     data-play-icon-size="{{ block.settings.play_icon_size | default: 30 }}"
+     data-stars-size="{{ block.settings.stars_size | default: 14 }}"
+     data-author-custom="{{ block.settings.author_custom | default: false }}"
+     data-author-font="{{ block.settings.author_font | default: 'josefin_sans_n4' }}"
+     data-author-size="{{ block.settings.author_size | default: 14 }}"
+     data-author-size-mobile="{{ block.settings.author_size_mobile | default: 14 }}"
+     data-author-height="{{ block.settings.author_height | default: 130 }}"
+     data-text-custom="{{ block.settings.text_custom | default: false }}"
+     data-text-font="{{ block.settings.text_font | default: 'josefin_sans_n4' }}"
+     data-text-size="{{ block.settings.text_size | default: 12 }}"
+     data-text-size-mobile="{{ block.settings.text_size_mobile | default: 12 }}"
+     data-text-height="{{ block.settings.text_height | default: 130 }}"
+     data-text-mt="{{ block.settings.text_mt | default: 4 }}"
+     data-arrow-size="{{ block.settings.arrow_size | default: 24 }}"
+     data-arrow-icon-size="{{ block.settings.arrow_icon_size | default: 16 }}"
+     data-arrow-border-thickness="{{ block.settings.arrow_border_thickness | default: 0 }}"
+     data-arrow-show-desktop="{{ block.settings.arrow_show_desktop | default: true }}"
+     data-arrow-show-mobile="{{ block.settings.arrow_show_mobile | default: true }}"
+     data-video-radius="{{ block.settings.video_radius | default: 8 }}"
+     data-video-border-thickness="{{ block.settings.video_border_thickness | default: 0 }}"
+     data-video-ratio="{{ block.settings.video_ratio | default: 'original' }}"
+     data-video-ratio-mobile="{{ block.settings.video_ratio_mobile | default: 'original' }}"
+     data-review-bg-color="{{ block.settings.review_bg_color | default: '#F3F3F3' }}"
+     data-review-border-color="{{ block.settings.review_border_color | default: '#000000' }}"
+     data-image-border-color="{{ block.settings.image_border_color | default: '#000000' }}"
+     data-video-border-color="{{ block.settings.video_border_color | default: '#000000' }}"
+     data-author-color="{{ block.settings.author_color | default: '#000000' }}"
+     data-text-color="{{ block.settings.text_color | default: '#000000' }}"
+     data-arrow-color="{{ block.settings.arrow_color | default: '#000000' }}"
+     data-arrow-hover-color="{{ block.settings.arrow_hover_color | default: '#000000' }}"
+     data-arrow-bg-color="{{ block.settings.arrow_bg_color | default: '#F3F3F3' }}"
+     data-arrow-bg-hover-color="{{ block.settings.arrow_bg_hover_color | default: '#DDDDDD' }}"
+     data-arrow-border-color="{{ block.settings.arrow_border_color | default: '#F3F3F3' }}"
+     data-arrow-border-hover-color="{{ block.settings.arrow_border_hover_color | default: '#DDDDDD' }}"
+     data-stars-color="{{ block.settings.stars_color | default: '#000000' }}"
+     data-play-icon-color="{{ block.settings.play_icon_color | default: '#FFFFFF' }}"
+     data-background-color="{{ block.settings.background_color | default: '#F3F3F3' }}"
+     data-border-color="{{ block.settings.border_color | default: '#000000' }}"
+     data-margin-top="{{ block.settings.margin_top | default: 10 }}"
+     data-margin-bottom="{{ block.settings.margin_bottom | default: 10 }}"
+     data-padding-top="{{ block.settings.padding_top | default: 0 }}"
+     data-padding-bottom="{{ block.settings.padding_bottom | default: 0 }}"
+     data-padding-horizontal="{{ block.settings.padding_horizontal | default: 0 }}"
+     data-padding-horizontal-mobile="{{ block.settings.padding_horizontal_mobile | default: 0 }}"
+     data-border-thickness="{{ block.settings.border_thickness | default: 0 }}"
+     data-play-icon-url="{% if block.settings.play_icon %}{{ block.settings.play_icon | image_url: width: 200 }}{% endif %}"
+     data-stars-icon-url="{% if block.settings.stars_icon %}{{ block.settings.stars_icon | image_url: width: 200 }}{% endif %}">
+  {%- assign reviews_count_str = block.settings.reviews_count | default: '1' -%}
+  {%- assign reviews_count = reviews_count_str | plus: 0 -%}
+  {%- for i in (1..3) -%}
+    {%- if i <= reviews_count -%}
+    {%- assign image_key = 'image_' | append: i -%}
+    {%- assign video_key = 'video_' | append: i -%}
+    {%- assign video_url_key = 'video_url_' | append: i -%}
+    {%- assign author_key = 'author_' | append: i -%}
+    {%- assign stars_key = 'stars_count_' | append: i -%}
+    {%- assign text_key = 'text_' | append: i -%}
+    {%- assign has_content = false -%}
+    {%- if block.settings[image_key] or block.settings[video_key] or block.settings[video_url_key] or block.settings[author_key] != blank or block.settings[text_key] != blank -%}
+      {%- assign has_content = true -%}
+    {%- endif -%}
+    {%- if has_content -%}
+      <div class="review-item" 
+           data-review-id="review-{{ i }}"
+           data-image="{% if block.settings[image_key] %}{{ block.settings[image_key] | image_url: width: 400 }}{% endif %}"
+           data-video="{% if block.settings[video_key] %}{{ block.settings[video_key] }}{% endif %}"
+           data-video-url="{{ block.settings[video_url_key] | escape }}"
+           data-author="{{ block.settings[author_key] | escape }}"
+           data-stars-count="{{ block.settings[stars_key] | default: 5 }}"
+           data-text="{{ block.settings[text_key] | escape }}"
+           {% if forloop.first %}data-active="true"{% else %}data-active="false"{% endif %}>
+      </div>
+    {%- endif -%}
+    {%- endif -%}
+  {%- endfor -%}
+</div>
+
+{% schema %}
+{
+  "name": "Video Image Testimonial",
+  "target": "section",
+  "stylesheet": "video-image-testimonial.css",
+  "javascript": "video-image-testimonial.js",
+  "settings": [
+    {
+      "type": "select",
+      "id": "reviews_count",
+      "label": "Number of Reviews",
+      "options": [
+        { "value": "1", "label": "1" },
+        { "value": "2", "label": "2" },
+        { "value": "3", "label": "3" }
+      ],
+      "default": "1"
+    },
+    {
+      "type": "range",
+      "id": "reviews_radius",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Reviews Border Radius",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "review_padding_vertical",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Review Padding Vertical",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "review_padding_horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Review Padding Horizontal",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "review_radius",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Review Border Radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "review_border_thickness",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Border Thickness",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "image_width",
+      "min": 40,
+      "max": 200,
+      "step": 5,
+      "unit": "px",
+      "label": "Review Image Width",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "image_radius",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Review Image Border Radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "image_border_thickness",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Image Border Thickness",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "image_ratio",
+      "label": "Review Image Aspect Ratio",
+      "default": "square",
+      "options": [
+        { "label": "Original", "value": "original" },
+        { "label": "Portrait", "value": "portrait" },
+        { "label": "Square", "value": "square" },
+        { "label": "Landscape", "value": "landscape" }
+      ]
+    },
+    {
+      "type": "image_picker",
+      "id": "play_icon",
+      "label": "Play Icon"
+    },
+    {
+      "type": "range",
+      "id": "play_icon_size",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "label": "Play Icon Size",
+      "default": 30
+    },
+    {
+      "type": "image_picker",
+      "id": "stars_icon",
+      "label": "Stars Icon",
+      "info": "Replaces the default stars icon"
+    },
+    {
+      "type": "range",
+      "id": "stars_size",
+      "min": 10,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Stars Size",
+      "default": 14
+    },
+    {
+      "type": "checkbox",
+      "id": "author_custom",
+      "label": "Use Custom Font for Author",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "author_font",
+      "label": "Review Author Font Family",
+      "default": "josefin_sans_n4"
+    },
+    {
+      "type": "range",
+      "id": "author_size",
+      "min": 0,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Review Author Size",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "author_size_mobile",
+      "min": 0,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Review Author Size - Mobile",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "author_height",
+      "min": 50,
+      "max": 200,
+      "step": 10,
+      "unit": "%",
+      "label": "Card Author Line Height",
+      "default": 130
+    },
+    {
+      "type": "checkbox",
+      "id": "text_custom",
+      "label": "Use Custom Font for Text",
+      "default": false
+    },
+    {
+      "type": "font_picker",
+      "id": "text_font",
+      "label": "Review Text Font Family",
+      "default": "josefin_sans_n4"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "min": 0,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Review Text Size",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "text_size_mobile",
+      "min": 0,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "label": "Review Text Size - Mobile",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "text_height",
+      "min": 50,
+      "max": 200,
+      "step": 10,
+      "unit": "%",
+      "label": "Review Text Line Height",
+      "default": 130
+    },
+    {
+      "type": "range",
+      "id": "text_mt",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "label": "Review Text Margin Top",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "min": 10,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Arrow Size",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "arrow_icon_size",
+      "min": 10,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "label": "Arrow Icon Size",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "arrow_border_thickness",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Arrow Border Thickness",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "arrow_show_desktop",
+      "label": "Show Arrow on Desktop",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "arrow_show_mobile",
+      "label": "Show Arrow on Mobile",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "video_radius",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Review Video Border Radius",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "video_border_thickness",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "label": "Review Video Border Thickness",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "video_ratio",
+      "label": "Review Video Aspect Ratio",
+      "default": "original",
+      "options": [
+        { "label": "Original", "value": "original" },
+        { "label": "Portrait", "value": "portrait" },
+        { "label": "Square", "value": "square" },
+        { "label": "Landscape", "value": "landscape" }
+      ]
+    },
+    {
+      "type": "select",
+      "id": "video_ratio_mobile",
+      "label": "Review Video Aspect Ratio - Mobile",
+      "default": "original",
+      "options": [
+        { "label": "Original", "value": "original" },
+        { "label": "Portrait", "value": "portrait" },
+        { "label": "Square", "value": "square" },
+        { "label": "Landscape", "value": "landscape" }
+      ]
+    },
+    {
+      "type": "color",
+      "id": "review_bg_color",
+      "label": "Review Background Color",
+      "default": "#F3F3F3"
+    },
+    {
+      "type": "color",
+      "id": "review_border_color",
+      "label": "Review Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "image_border_color",
+      "label": "Review Image Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "video_border_color",
+      "label": "Review Video Border Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "author_color",
+      "label": "Review Author Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Review Text Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "arrow_color",
+      "label": "Arrow Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "arrow_hover_color",
+      "label": "Arrow Hover Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "arrow_bg_color",
+      "label": "Arrow Background Color",
+      "default": "#F3F3F3"
+    },
+    {
+      "type": "color",
+      "id": "arrow_bg_hover_color",
+      "label": "Arrow Background Hover Color",
+      "default": "#DDDDDD"
+    },
+    {
+      "type": "color",
+      "id": "arrow_border_color",
+      "label": "Arrow Border Color",
+      "default": "#F3F3F3"
+    },
+    {
+      "type": "color",
+      "id": "arrow_border_hover_color",
+      "label": "Arrow Border Hover Color",
+      "default": "#DDDDDD"
+    },
+    {
+      "type": "color",
+      "id": "stars_color",
+      "label": "Default Stars Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "play_icon_color",
+      "label": "Icon Play Color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Section Background",
+      "default": "#F3F3F3"
+    },
+    {
+      "type": "color",
+      "id": "border_color",
+      "label": "Border",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "margin_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Margin Top",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "margin_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Margin Bottom",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding Top",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "min": 0,
+      "max": 100,
+      "step": 2,
+      "unit": "px",
+      "label": "Padding Bottom",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "rem",
+      "label": "Padding Sides",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal_mobile",
+      "min": 0,
+      "max": 15,
+      "step": 0.5,
+      "unit": "rem",
+      "label": "Padding Sides Mobile",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "border_thickness",
+      "min": 0,
+      "max": 50,
+      "step": 1,
+      "unit": "px",
+      "label": "Border Thickness",
+      "default": 0
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Review 1 - Image"
+    },
+    {
+      "type": "video",
+      "id": "video_1",
+      "label": "Review 1 - Video from Shopify"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_1",
+      "label": "Review 1 - Video Embed from Url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "text",
+      "id": "author_1",
+      "label": "Review 1 - Author",
+      "default": "Author"
+    },
+    {
+      "type": "range",
+      "id": "stars_count_1",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "label": "Review 1 - Stars Count",
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "text_1",
+      "label": "Review 1 - Text",
+      "default": "Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Review 2 - Image"
+    },
+    {
+      "type": "video",
+      "id": "video_2",
+      "label": "Review 2 - Video from Shopify"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_2",
+      "label": "Review 2 - Video Embed from Url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "text",
+      "id": "author_2",
+      "label": "Review 2 - Author",
+      "default": "Author"
+    },
+    {
+      "type": "range",
+      "id": "stars_count_2",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "label": "Review 2 - Stars Count",
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "text_2",
+      "label": "Review 2 - Text",
+      "default": "Text"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Review 3 - Image"
+    },
+    {
+      "type": "video",
+      "id": "video_3",
+      "label": "Review 3 - Video from Shopify"
+    },
+    {
+      "type": "video_url",
+      "id": "video_url_3",
+      "label": "Review 3 - Video Embed from Url",
+      "accept": ["youtube", "vimeo"]
+    },
+    {
+      "type": "text",
+      "id": "author_3",
+      "label": "Review 3 - Author",
+      "default": "Author"
+    },
+    {
+      "type": "range",
+      "id": "stars_count_3",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "label": "Review 3 - Stars Count",
+      "default": 5
+    },
+    {
+      "type": "text",
+      "id": "text_3",
+      "label": "Review 3 - Text",
+      "default": "Text"
+    }
+  ]
+}
+{% endschema %}
