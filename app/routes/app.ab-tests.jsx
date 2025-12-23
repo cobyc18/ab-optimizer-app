@@ -997,13 +997,12 @@ export default function ABTests() {
       }
 
       // Temporarily assign the product to the variant template so Shopify's theme editor uses the correct product
-      // We'll revert it back to the original template after opening the editor
+      // The product will be reverted back to the control template when the test is launched
       const productIdForAssignment = wizardVariantProductId || wizardSelectedProductSnapshot?.id || selectedProduct?.id;
-      const originalTemplateSuffix = wizardVariantOriginalTemplateSuffix;
       
       if (productIdForAssignment) {
         try {
-          await fetch('/api/assign-product-template', {
+          const assignResponse = await fetch('/api/assign-product-template', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -1011,14 +1010,27 @@ export default function ABTests() {
               templateSuffix: wizardVariantName
             })
           });
-          console.log('✅ Temporarily assigned product to variant template for theme editor');
+          
+          if (assignResponse.ok) {
+            console.log('✅ Temporarily assigned product to variant template for theme editor');
+          } else {
+            console.error('⚠️ Failed to assign product template:', await assignResponse.json());
+          }
         } catch (assignError) {
           console.error('⚠️ Failed to temporarily assign product template:', assignError);
           // Continue anyway - the URL parameters might still work
         }
       }
 
+      // Use the product handle that was set when the template was duplicated
       const productHandleForPreview = wizardVariantProductHandle;
+      
+      console.log('🔍 Opening theme editor with:', {
+        productHandle: productHandleForPreview,
+        productId: productIdForAssignment,
+        variantName: wizardVariantName,
+        templateParam: `product.${wizardVariantName}`
+      });
       // For OS 2.0 JSON templates, the template param should be: product.<suffix>
       // This tells Shopify which template file to load in the editor
       const templateParam = `product.${wizardVariantName}`;
@@ -1079,25 +1091,10 @@ export default function ABTests() {
 
       window.open(editorUrl, '_blank');
 
-      // Revert the product back to its original template after a short delay
-      // This ensures the theme editor opens with the correct product, but we don't permanently assign it
-      if (productIdForAssignment && originalTemplateSuffix !== undefined) {
-        setTimeout(async () => {
-          try {
-            await fetch('/api/assign-product-template', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                productId: productIdForAssignment,
-                templateSuffix: originalTemplateSuffix === null ? null : originalTemplateSuffix
-              })
-            });
-            console.log('✅ Reverted product back to original template:', originalTemplateSuffix);
-          } catch (revertError) {
-            console.error('⚠️ Failed to revert product template:', revertError);
-          }
-        }, 2000); // Wait 2 seconds to ensure theme editor has loaded
-      }
+      // Note: We temporarily assign the product to the variant template so Shopify's theme editor
+      // uses the correct product. The product will be reverted back to the control template
+      // when the test is launched (in the launch API). This ensures the theme editor works correctly
+      // and the product is only permanently assigned if the variant wins the A/B test.
 
       if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
         const formatText = (text) => {
