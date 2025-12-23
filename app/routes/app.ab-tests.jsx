@@ -826,6 +826,13 @@ export default function ABTests() {
     if (product) {
       setWizardSelectedProductSnapshot(product);
     }
+    // Clear variant-related state when selecting a new product
+    setWizardVariantProductHandle(null);
+    setWizardVariantProductId(null);
+    setWizardVariantProductTitle('');
+    setWizardVariantName('');
+    setWizardVariantTemplateFilename('');
+    setIsVariantTemplateReady(false);
     setWizardLaunchError(null);
     setWizardLaunchSuccess(null);
     setProductInTestError(null); // Clear product in test error when selecting a new product
