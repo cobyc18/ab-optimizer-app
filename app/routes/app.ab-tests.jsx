@@ -996,9 +996,27 @@ export default function ABTests() {
         return;
       }
 
-      // Note: We no longer assign the product to the variant template when opening the theme editor.
-      // The product will only be assigned to the variant template if it wins the A/B test.
-      // The theme editor should work with URL parameters (?view=templateName) without requiring assignment.
+      // Temporarily assign the product to the variant template so Shopify's theme editor uses the correct product
+      // We'll revert it back to the original template after opening the editor
+      const productIdForAssignment = wizardVariantProductId || wizardSelectedProductSnapshot?.id || selectedProduct?.id;
+      const originalTemplateSuffix = wizardVariantOriginalTemplateSuffix;
+      
+      if (productIdForAssignment) {
+        try {
+          await fetch('/api/assign-product-template', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              productId: productIdForAssignment,
+              templateSuffix: wizardVariantName
+            })
+          });
+          console.log('✅ Temporarily assigned product to variant template for theme editor');
+        } catch (assignError) {
+          console.error('⚠️ Failed to temporarily assign product template:', assignError);
+          // Continue anyway - the URL parameters might still work
+        }
+      }
 
       const productHandleForPreview = wizardVariantProductHandle;
       // For OS 2.0 JSON templates, the template param should be: product.<suffix>
@@ -1060,6 +1078,26 @@ export default function ABTests() {
       const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
 
       window.open(editorUrl, '_blank');
+
+      // Revert the product back to its original template after a short delay
+      // This ensures the theme editor opens with the correct product, but we don't permanently assign it
+      if (productIdForAssignment && originalTemplateSuffix !== undefined) {
+        setTimeout(async () => {
+          try {
+            await fetch('/api/assign-product-template', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                productId: productIdForAssignment,
+                templateSuffix: originalTemplateSuffix === null ? null : originalTemplateSuffix
+              })
+            });
+            console.log('✅ Reverted product back to original template:', originalTemplateSuffix);
+          } catch (revertError) {
+            console.error('⚠️ Failed to revert product template:', revertError);
+          }
+        }, 2000); // Wait 2 seconds to ensure theme editor has loaded
+      }
 
       if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
         const formatText = (text) => {
