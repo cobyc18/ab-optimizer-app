@@ -90,8 +90,8 @@ function analyzeABDualMetric(input) {
   // thresholds and minima per your notes
   const MODE = {
     fast: { threshold: 0.55, minN: 1, minDays: 0 },
-    standard: { threshold: 0.58, minN: 1, minDays: 0 },
-    careful: { threshold: 0.65, minN: 1, minDays: 0 }
+    standard: { threshold: 0.70, minN: 1, minDays: 0 },
+    careful: { threshold: 0.95, minN: 1, minDays: 0 }
   }[mode];
 
   // Build posteriors for both metrics: Beta(success+1, failures+1)

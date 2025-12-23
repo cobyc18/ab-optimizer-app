@@ -176,6 +176,12 @@ export default function ABTests() {
   const [autopilotOff, setAutopilotOff] = useState(false);
   const [autopilotOn, setAutopilotOn] = useState(true); // Default ON
   const [manualMode, setManualMode] = useState(false); // Default OFF
+  const [fastMode, setFastMode] = useState(false);
+  const [standardMode, setStandardMode] = useState(false);
+  const [carefulMode, setCarefulMode] = useState(false);
+  const [showFastTooltip, setShowFastTooltip] = useState(false);
+  const [showStandardTooltip, setShowStandardTooltip] = useState(false);
+  const [showCarefulTooltip, setShowCarefulTooltip] = useState(false);
   const [trafficSplitA, setTrafficSplitA] = useState(50);
   const [trafficSplitB, setTrafficSplitB] = useState(50);
   const [startDate, setStartDate] = useState(new Date().toISOString().slice(0, 16));
@@ -1281,7 +1287,8 @@ export default function ABTests() {
     wizardVariantProductId &&
     wizardVariantName &&
     wizardControlTemplateFilename &&
-    wizardSelectedProductSnapshot
+    wizardSelectedProductSnapshot &&
+    (manualMode ? endOnDate : (fastMode || standardMode || carefulMode)) // Require mode selection if autopilot, or end date if manual
   );
 
   return (
@@ -4583,8 +4590,8 @@ export default function ABTests() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  marginBottom: '24px',
-                  paddingBottom: '24px',
+                  marginBottom: '16px',
+                  paddingBottom: '16px',
                   borderBottom: '1px solid #E5E7EB'
                 }}>
                   <div>
@@ -4621,6 +4628,10 @@ export default function ABTests() {
                         // If autopilot is turned on, manual mode must be off
                         if (newValue) {
                           setManualMode(false);
+                          // Reset mode selections when switching back to autopilot
+                          setFastMode(false);
+                          setStandardMode(false);
+                          setCarefulMode(false);
                         } else {
                           // If autopilot is turned off, manual mode must be on (mutually exclusive)
                           setManualMode(true);
@@ -4661,13 +4672,378 @@ export default function ABTests() {
                   </label>
                 </div>
 
+                {/* Mode Selection - Only shown when Autopilot is ON */}
+                {autopilotOn && (
+                  <div style={{
+                    marginLeft: '24px',
+                    marginTop: '16px',
+                    paddingLeft: '24px',
+                    borderLeft: '3px solid #3B82F6',
+                    background: '#F0F9FF',
+                    borderRadius: '8px',
+                    padding: '20px',
+                    marginBottom: '24px'
+                  }}>
+                    <p style={{
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#1F2937',
+                      marginBottom: '16px'
+                    }}>
+                      Select Analysis Mode:
+                    </p>
+                    
+                    {/* Fast Mode */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '12px',
+                      padding: '12px',
+                      background: fastMode ? '#E0F2FE' : '#FFFFFF',
+                      border: fastMode ? '2px solid #3B82F6' : '1px solid #E5E7EB',
+                      borderRadius: '8px',
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                        <label style={{
+                          position: 'relative',
+                          display: 'inline-block',
+                          width: '40px',
+                          height: '20px',
+                          flexShrink: 0
+                        }}>
+                          <input
+                            type="checkbox"
+                            checked={fastMode}
+                            onChange={(e) => {
+                              const newValue = e.target.checked;
+                              setFastMode(newValue);
+                              if (newValue) {
+                                setStandardMode(false);
+                                setCarefulMode(false);
+                              }
+                            }}
+                            style={{
+                              opacity: 0,
+                              width: 0,
+                              height: 0
+                            }}
+                          />
+                          <span style={{
+                            position: 'absolute',
+                            cursor: 'pointer',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: fastMode ? '#3B82F6' : '#D1D5DB',
+                            borderRadius: '20px',
+                            transition: '0.3s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '2px'
+                          }}>
+                            <span style={{
+                              content: '""',
+                              position: 'absolute',
+                              height: '16px',
+                              width: '16px',
+                              left: fastMode ? '22px' : '2px',
+                              backgroundColor: '#FFFFFF',
+                              borderRadius: '50%',
+                              transition: '0.3s',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                            }} />
+                          </span>
+                        </label>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              color: fastMode ? '#3B82F6' : '#1F2937'
+                            }}>
+                              Fast Mode
+                            </span>
+                            <div style={{
+                              position: 'relative',
+                              display: 'inline-block',
+                              cursor: 'help'
+                            }}>
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: '#6B7280' }}>
+                                <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+                                <text x="8" y="11" textAnchor="middle" fontSize="10" fill="currentColor" fontWeight="bold">?</text>
+                              </svg>
+                              <div style={{
+                                position: 'absolute',
+                                bottom: '100%',
+                                left: '50%',
+                                transform: 'translateX(-50%)',
+                                marginBottom: '8px',
+                                padding: '8px 12px',
+                                background: '#1F2937',
+                                color: '#FFFFFF',
+                                borderRadius: '6px',
+                                fontSize: '12px',
+                                whiteSpace: 'nowrap',
+                                opacity: 0,
+                                pointerEvents: 'none',
+                                transition: 'opacity 0.2s',
+                                zIndex: 1000,
+                                width: '200px',
+                                whiteSpace: 'normal',
+                                textAlign: 'left'
+                              }}
+                              onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
+                              onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
+                              >
+                                <strong>Fast Mode (55% probability)</strong><br/>
+                                Quick decisions with lower confidence. Best for rapid iteration and early insights.
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Standard Mode */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '12px',
+                      padding: '12px',
+                      background: standardMode ? '#E0F2FE' : '#FFFFFF',
+                      border: standardMode ? '2px solid #3B82F6' : '1px solid #E5E7EB',
+                      borderRadius: '8px',
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                        <label style={{
+                          position: 'relative',
+                          display: 'inline-block',
+                          width: '40px',
+                          height: '20px',
+                          flexShrink: 0
+                        }}>
+                          <input
+                            type="checkbox"
+                            checked={standardMode}
+                            onChange={(e) => {
+                              const newValue = e.target.checked;
+                              setStandardMode(newValue);
+                              if (newValue) {
+                                setFastMode(false);
+                                setCarefulMode(false);
+                              }
+                            }}
+                            style={{
+                              opacity: 0,
+                              width: 0,
+                              height: 0
+                            }}
+                          />
+                          <span style={{
+                            position: 'absolute',
+                            cursor: 'pointer',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: standardMode ? '#3B82F6' : '#D1D5DB',
+                            borderRadius: '20px',
+                            transition: '0.3s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '2px'
+                          }}>
+                            <span style={{
+                              content: '""',
+                              position: 'absolute',
+                              height: '16px',
+                              width: '16px',
+                              left: standardMode ? '22px' : '2px',
+                              backgroundColor: '#FFFFFF',
+                              borderRadius: '50%',
+                              transition: '0.3s',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                            }} />
+                          </span>
+                        </label>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              color: standardMode ? '#3B82F6' : '#1F2937'
+                            }}>
+                              Standard Mode
+                            </span>
+                            <div 
+                              style={{
+                                position: 'relative',
+                                display: 'inline-block',
+                                cursor: 'help'
+                              }}
+                              onMouseEnter={() => setShowStandardTooltip(true)}
+                              onMouseLeave={() => setShowStandardTooltip(false)}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: '#6B7280' }}>
+                                <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+                                <text x="8" y="11" textAnchor="middle" fontSize="10" fill="currentColor" fontWeight="bold">?</text>
+                              </svg>
+                              {showStandardTooltip && (
+                                <div style={{
+                                  position: 'absolute',
+                                  bottom: '100%',
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  marginBottom: '8px',
+                                  padding: '8px 12px',
+                                  background: '#1F2937',
+                                  color: '#FFFFFF',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  zIndex: 1000,
+                                  width: '200px',
+                                  whiteSpace: 'normal',
+                                  textAlign: 'left',
+                                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                  <strong>Standard Mode (70% probability)</strong><br/>
+                                  Balanced approach with moderate confidence. Recommended for most tests.
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Careful Mode */}
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      marginBottom: '0',
+                      padding: '12px',
+                      background: carefulMode ? '#E0F2FE' : '#FFFFFF',
+                      border: carefulMode ? '2px solid #3B82F6' : '1px solid #E5E7EB',
+                      borderRadius: '8px',
+                      transition: 'all 0.2s ease'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
+                        <label style={{
+                          position: 'relative',
+                          display: 'inline-block',
+                          width: '40px',
+                          height: '20px',
+                          flexShrink: 0
+                        }}>
+                          <input
+                            type="checkbox"
+                            checked={carefulMode}
+                            onChange={(e) => {
+                              const newValue = e.target.checked;
+                              setCarefulMode(newValue);
+                              if (newValue) {
+                                setFastMode(false);
+                                setStandardMode(false);
+                              }
+                            }}
+                            style={{
+                              opacity: 0,
+                              width: 0,
+                              height: 0
+                            }}
+                          />
+                          <span style={{
+                            position: 'absolute',
+                            cursor: 'pointer',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: carefulMode ? '#3B82F6' : '#D1D5DB',
+                            borderRadius: '20px',
+                            transition: '0.3s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '2px'
+                          }}>
+                            <span style={{
+                              content: '""',
+                              position: 'absolute',
+                              height: '16px',
+                              width: '16px',
+                              left: carefulMode ? '22px' : '2px',
+                              backgroundColor: '#FFFFFF',
+                              borderRadius: '50%',
+                              transition: '0.3s',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                            }} />
+                          </span>
+                        </label>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                            <span style={{
+                              fontSize: '14px',
+                              fontWeight: '600',
+                              color: carefulMode ? '#3B82F6' : '#1F2937'
+                            }}>
+                              Careful Mode
+                            </span>
+                            <div 
+                              style={{
+                                position: 'relative',
+                                display: 'inline-block',
+                                cursor: 'help'
+                              }}
+                              onMouseEnter={() => setShowCarefulTooltip(true)}
+                              onMouseLeave={() => setShowCarefulTooltip(false)}
+                            >
+                              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: '#6B7280' }}>
+                                <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+                                <text x="8" y="11" textAnchor="middle" fontSize="10" fill="currentColor" fontWeight="bold">?</text>
+                              </svg>
+                              {showCarefulTooltip && (
+                                <div style={{
+                                  position: 'absolute',
+                                  bottom: '100%',
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  marginBottom: '8px',
+                                  padding: '8px 12px',
+                                  background: '#1F2937',
+                                  color: '#FFFFFF',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  zIndex: 1000,
+                                  width: '200px',
+                                  whiteSpace: 'normal',
+                                  textAlign: 'left',
+                                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                  <strong>Careful Mode (95% probability)</strong><br/>
+                                  High statistical significance. Best for critical decisions requiring maximum confidence.
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {/* Manual Mode Toggle */}
                 <div style={{
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'space-between',
-                  marginBottom: manualMode ? '24px' : '0',
-                  paddingBottom: manualMode ? '24px' : '0',
+                  marginBottom: manualMode ? '16px' : '0',
+                  paddingBottom: manualMode ? '16px' : '0',
                   borderBottom: manualMode ? '1px solid #E5E7EB' : 'none'
                 }}>
                   <div>
@@ -4704,6 +5080,10 @@ export default function ABTests() {
                         // If manual mode is turned on, autopilot must be off
                         if (newValue) {
                           setAutopilotOn(false);
+                          // Reset mode selections when switching to manual
+                          setFastMode(false);
+                          setStandardMode(false);
+                          setCarefulMode(false);
                         } else {
                           // If manual mode is turned off, autopilot must be on (mutually exclusive)
                           setAutopilotOn(true);
@@ -4743,6 +5123,27 @@ export default function ABTests() {
                     </span>
                   </label>
                 </div>
+
+                {/* Manual Mode Explanation */}
+                {manualMode && (
+                  <div style={{
+                    marginTop: '12px',
+                    marginBottom: '16px',
+                    padding: '12px',
+                    background: '#F0F9FF',
+                    border: '1px solid #3B82F6',
+                    borderRadius: '6px'
+                  }}>
+                    <p style={{
+                      fontSize: '13px',
+                      color: '#1F2937',
+                      margin: 0,
+                      lineHeight: '1.5'
+                    }}>
+                      <strong>Note:</strong> In manual mode, the primary measure we're targeting is <strong>add-to-cart</strong>, given that we're using widgets to optimize conversion.
+                    </p>
+                  </div>
+                )}
               </div>
 
               {/* End Test Section - Only shown when Manual Mode is ON */}
@@ -4757,121 +5158,62 @@ export default function ABTests() {
                   padding: '20px',
                   marginBottom: '0'
                 }}>
-                  {/* Impressions Toggle */}
+                  {/* End Date Input */}
                   <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    marginBottom: '16px'
+                    background: '#FFFFFF',
+                    border: '1px solid #3B82F6',
+                    borderRadius: '8px',
+                    padding: '16px'
                   }}>
-                    <div>
-                      <label style={{
-                        fontSize: '14px',
-                        fontWeight: '600',
-                        color: '#3B82F6',
-                        marginBottom: '4px',
-                        display: 'block'
-                      }}>
-                        Impressions
-                      </label>
-                      <p style={{
-                        fontSize: '12px',
-                        color: '#6B7280',
-                        margin: 0
-                      }}>
-                        End test when impression count is met for either variant
-                      </p>
-                    </div>
                     <label style={{
-                      position: 'relative',
-                      display: 'inline-block',
-                      width: '48px',
-                      height: '24px'
+                      display: 'block',
+                      fontSize: '14px',
+                      fontWeight: '600',
+                      color: '#3B82F6',
+                      marginBottom: '8px'
                     }}>
-                      <input
-                        type="checkbox"
-                        checked={endOnImpressionsEnabled}
-                        onChange={(e) => setEndOnImpressionsEnabled(e.target.checked)}
-                        style={{
-                          opacity: 0,
-                          width: 0,
-                          height: 0
-                        }}
-                      />
-                      <span style={{
-                        position: 'absolute',
-                        cursor: 'pointer',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        backgroundColor: endOnImpressionsEnabled ? '#3B82F6' : '#D1D5DB',
-                        borderRadius: '24px',
-                        transition: '0.3s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '2px'
-                      }}>
-                        <span style={{
-                          content: '""',
-                          position: 'absolute',
-                          height: '20px',
-                          width: '20px',
-                          left: endOnImpressionsEnabled ? '26px' : '2px',
-                          backgroundColor: '#FFFFFF',
-                          borderRadius: '50%',
-                          transition: '0.3s',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                        }} />
-                      </span>
+                      End Date
                     </label>
-                  </div>
-
-                  {/* Impressions Input - Only shown when toggle is ON */}
-                  {endOnImpressionsEnabled && (
-                    <div style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #3B82F6',
-                      borderRadius: '8px',
-                      padding: '16px',
-                      marginTop: '16px'
+                    <input
+                      type="datetime-local"
+                      value={endOnDate}
+                      min={(() => {
+                        const minDate = new Date();
+                        minDate.setDate(minDate.getDate() + 7); // Minimum 1 week from today
+                        return minDate.toISOString().slice(0, 16);
+                      })()}
+                      onChange={(e) => {
+                        const selectedDate = new Date(e.target.value);
+                        const minDate = new Date();
+                        minDate.setDate(minDate.getDate() + 7);
+                        
+                        if (selectedDate < minDate) {
+                          setWizardLaunchError('End date must be at least 1 week from today');
+                        } else {
+                          setWizardLaunchError(null);
+                          setEndOnDate(e.target.value);
+                        }
+                      }}
+                      style={{
+                        width: '100%',
+                        maxWidth: '300px',
+                        padding: '8px 12px',
+                        border: '1px solid #3B82F6',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        color: '#1F2937',
+                        outline: 'none',
+                        background: '#F9FAFB'
+                      }}
+                    />
+                    <p style={{
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      margin: '8px 0 0 0'
                     }}>
-                      <label style={{
-                        display: 'block',
-                        fontSize: '12px',
-                        fontWeight: '500',
-                        color: '#3B82F6',
-                        marginBottom: '8px'
-                      }}>
-                        Impression Threshold
-                      </label>
-                      <input
-                        type="number"
-                        min="1"
-                        value={impressionsThreshold}
-                        onChange={(e) => setImpressionsThreshold(e.target.value)}
-                        placeholder="Enter number of impressions"
-                        style={{
-                          width: '100%',
-                          maxWidth: '300px',
-                          padding: '8px 12px',
-                          border: '1px solid #3B82F6',
-                          borderRadius: '6px',
-                          fontSize: '14px',
-                          color: '#1F2937',
-                          outline: 'none',
-                          background: '#F9FAFB'
-                        }}
-                      />
-                      <p style={{
-                        fontSize: '12px',
-                        color: '#6B7280',
-                        margin: '8px 0 0 0'
-                      }}>
-                        Test will end and declare a winner when either Control or Variant reaches this impression count.
-                      </p>
-                    </div>
-                  )}
+                      Test will end on this date. Minimum duration is 1 week from today.
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
