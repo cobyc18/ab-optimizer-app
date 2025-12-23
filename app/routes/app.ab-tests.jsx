@@ -1091,10 +1091,29 @@ export default function ABTests() {
 
       window.open(editorUrl, '_blank');
 
-      // Note: We temporarily assign the product to the variant template so Shopify's theme editor
-      // uses the correct product. The product will be reverted back to the control template
-      // when the test is launched (in the launch API). This ensures the theme editor works correctly
-      // and the product is only permanently assigned if the variant wins the A/B test.
+      // Revert the product back to its original template immediately after opening the editor
+      // This minimizes the risk of customers seeing the product with an unconfigured widget
+      // The theme editor will still work because it uses the URL parameters (?view=templateName)
+      // and the temporary assignment gives it enough time to initialize
+      if (productIdForAssignment && originalTemplateSuffix !== undefined) {
+        // Use a very short delay (500ms) - just enough for the editor to initialize
+        // The ?view= parameter in the URL will keep the editor showing the correct template
+        setTimeout(async () => {
+          try {
+            await fetch('/api/assign-product-template', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                productId: productIdForAssignment,
+                templateSuffix: originalTemplateSuffix === null ? null : originalTemplateSuffix
+              })
+            });
+            console.log('✅ Reverted product back to original template to prevent customer visibility:', originalTemplateSuffix);
+          } catch (revertError) {
+            console.error('⚠️ Failed to revert product template:', revertError);
+          }
+        }, 5000); // 5 second delay - enough for editor to initialize, but minimizes customer exposure window
+      }
 
       if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
         const formatText = (text) => {
