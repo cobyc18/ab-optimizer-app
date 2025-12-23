@@ -997,14 +997,46 @@ export default function ABTests() {
         return;
       }
 
+      // SHOPIFY LIMITATION: The theme editor requires the template to be assigned to the product
+      // to properly preview it. The 'view' parameter works on the storefront but not reliably
+      // in the theme editor's previewPath. We must temporarily assign the template, then revert it.
+      const productIdForAssignment = wizardVariantProductId || wizardSelectedProductSnapshot?.id || selectedProduct?.id;
+      // Use the original template suffix that was captured when the product was selected
+      const originalTemplateSuffix = wizardVariantOriginalTemplateSuffix;
+
+      // Temporarily assign the product to the variant template for theme editor preview
+      if (productIdForAssignment) {
+        try {
+          const assignResponse = await fetch('/api/assign-product-template', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              productId: productIdForAssignment,
+              templateSuffix: wizardVariantName
+            })
+          });
+          
+          if (assignResponse.ok) {
+            console.log('✅ Temporarily assigned product to variant template for theme editor');
+          } else {
+            console.error('⚠️ Failed to assign product template:', await assignResponse.json());
+          }
+        } catch (assignError) {
+          console.error('⚠️ Failed to temporarily assign product template:', assignError);
+          // Continue anyway - the URL parameters might still work
+        }
+      }
+
       // Use the product handle that was set when the template was duplicated
       const productHandleForPreview = wizardVariantProductHandle;
       
       console.log('🔍 Opening theme editor with:', {
         productHandle: productHandleForPreview,
+        productId: productIdForAssignment,
         variantName: wizardVariantName,
         templateParam: `product.${wizardVariantName}`,
-        note: 'Using view parameter in previewPath - no template assignment needed'
+        originalTemplate: originalTemplateSuffix,
+        note: 'Temporary assignment required due to Shopify theme editor limitation'
       });
       // For OS 2.0 JSON templates, the template param should be: product.<suffix>
       // This tells Shopify which template file to load in the editor
@@ -1067,9 +1099,28 @@ export default function ABTests() {
 
       window.open(editorUrl, '_blank');
 
-      // No template assignment needed - the theme editor uses the 'template' parameter
-      // in the URL and the 'view' parameter in previewPath to show the correct template
-      // without requiring the product to have the template assigned
+      // Revert the product back to its original template immediately after opening the editor
+      // This is necessary because Shopify's theme editor requires template assignment to preview,
+      // but we don't want customers to see the product with an unconfigured widget.
+      // The revert happens quickly (500ms delay) to minimize customer exposure while allowing
+      // the editor to initialize properly.
+      if (productIdForAssignment && originalTemplateSuffix !== undefined) {
+        setTimeout(async () => {
+          try {
+            await fetch('/api/assign-product-template', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                productId: productIdForAssignment,
+                templateSuffix: originalTemplateSuffix === null ? null : originalTemplateSuffix
+              })
+            });
+            console.log('✅ Reverted product back to original template to prevent customer visibility:', originalTemplateSuffix);
+          } catch (revertError) {
+            console.error('⚠️ Failed to revert product template:', revertError);
+          }
+        }, 5000); // Short delay - just enough for editor to initialize
+      }
 
       if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
         const formatText = (text) => {
