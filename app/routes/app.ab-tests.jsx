@@ -1175,6 +1175,17 @@ export default function ABTests() {
       ? wizardTestName.trim()
       : `${selectedIdea?.utility || 'Widget'} Test - ${wizardSelectedProductSnapshot.title || 'Product'} (${new Date().toLocaleDateString()})`;
 
+    // Determine endResultType based on mode selection
+    const endResultType = autopilotOn ? 'auto-pilot' : 'manual';
+    
+    // Determine which mode was selected for autopilot
+    let selectedMode = null;
+    if (autopilotOn) {
+      if (fastMode) selectedMode = 'fast';
+      else if (standardMode) selectedMode = 'standard';
+      else if (carefulMode) selectedMode = 'careful';
+    }
+
     const payload = {
       shop,
       testName: finalTestName,
@@ -1185,7 +1196,10 @@ export default function ABTests() {
       variantTemplateSuffix: wizardVariantName,
       trafficSplit: wizardTrafficSplit,
       widgetType: selectedIdea?.blockId || null,
-      widgetSettings: selectedWidgetConfig || null
+      widgetSettings: selectedWidgetConfig || null,
+      endResultType: endResultType,
+      endDate: manualMode && endOnDate ? endOnDate : null,
+      autopilotMode: selectedMode
     };
 
     setIsLaunchingTest(true);
@@ -4409,7 +4423,9 @@ export default function ABTests() {
                           flex: 1
                         }}
                       >
-                        {wizardTestName || `${wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Product'} - ${selectedIdea?.utility || 'Widget'}`}
+                        {wizardTestName || (selectedIdea && (wizardSelectedProductSnapshot || selectedProduct) 
+                          ? `${selectedIdea.utility || 'Widget'} on ${wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Product'}`
+                          : 'Test Name')}
                       </p>
                     )}
                   </div>
@@ -4610,7 +4626,7 @@ export default function ABTests() {
                       color: '#6B7280',
                       margin: 0
                     }}>
-                      Auto-stop at significance
+                      Automatically declares a winner when the selected confidence threshold is reached
                     </p>
                   </div>
                   <label style={{
@@ -4766,41 +4782,41 @@ export default function ABTests() {
                             }}>
                               Fast Mode
                             </span>
-                            <div style={{
-                              position: 'relative',
-                              display: 'inline-block',
-                              cursor: 'help'
-                            }}>
+                            <div 
+                              style={{
+                                position: 'relative',
+                                display: 'inline-block',
+                                cursor: 'help'
+                              }}
+                              onMouseEnter={() => setShowFastTooltip(true)}
+                              onMouseLeave={() => setShowFastTooltip(false)}
+                            >
                               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: '#6B7280' }}>
                                 <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
                                 <text x="8" y="11" textAnchor="middle" fontSize="10" fill="currentColor" fontWeight="bold">?</text>
                               </svg>
-                              <div style={{
-                                position: 'absolute',
-                                bottom: '100%',
-                                left: '50%',
-                                transform: 'translateX(-50%)',
-                                marginBottom: '8px',
-                                padding: '8px 12px',
-                                background: '#1F2937',
-                                color: '#FFFFFF',
-                                borderRadius: '6px',
-                                fontSize: '12px',
-                                whiteSpace: 'nowrap',
-                                opacity: 0,
-                                pointerEvents: 'none',
-                                transition: 'opacity 0.2s',
-                                zIndex: 1000,
-                                width: '200px',
-                                whiteSpace: 'normal',
-                                textAlign: 'left'
-                              }}
-                              onMouseEnter={(e) => e.currentTarget.style.opacity = '1'}
-                              onMouseLeave={(e) => e.currentTarget.style.opacity = '0'}
-                              >
-                                <strong>Fast Mode (55% probability)</strong><br/>
-                                Quick decisions with lower confidence. Best for rapid iteration and early insights.
-                              </div>
+                              {showFastTooltip && (
+                                <div style={{
+                                  position: 'absolute',
+                                  bottom: '100%',
+                                  left: '50%',
+                                  transform: 'translateX(-50%)',
+                                  marginBottom: '8px',
+                                  padding: '8px 12px',
+                                  background: '#1F2937',
+                                  color: '#FFFFFF',
+                                  borderRadius: '6px',
+                                  fontSize: '12px',
+                                  zIndex: 1000,
+                                  width: '200px',
+                                  whiteSpace: 'normal',
+                                  textAlign: 'left',
+                                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                                }}>
+                                  <strong>Fast Mode (55% probability)</strong><br/>
+                                  Quick decisions with lower confidence. Best for rapid iteration and early insights.
+                                </div>
+                              )}
                             </div>
                           </div>
                         </div>

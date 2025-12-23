@@ -24,7 +24,10 @@ export const action = async ({ request }) => {
       variantTemplateSuffix,
       trafficSplit = "50",
       widgetType,
-      widgetSettings
+      widgetSettings,
+      endResultType = "manual",
+      endDate = null,
+      autopilotMode = null
     } = body;
 
     if (!productId) {
@@ -121,9 +124,14 @@ export const action = async ({ request }) => {
       templateA: controlSuffixForDb,
       templateB: variantSuffix,
       trafficSplit: trafficSplitInt,
-      endResultType: "manual",
+      endResultType: endResultType || "manual",
       widgetType: widgetType || null
     };
+
+    // Add endDate if provided (manual mode)
+    if (endDate) {
+      createData.endDate = new Date(endDate);
+    }
 
     if (normalizedWidgetSettings && Object.keys(normalizedWidgetSettings).length > 0) {
       createData.widgetSettings = normalizedWidgetSettings;
