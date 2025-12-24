@@ -1095,19 +1095,24 @@ export default function ABTests() {
 
       const cacheBuster = `&_t=${Date.now()}`;
 
-      // STEP 1: Temporarily assign the product to the variant template
-      // This is required for the theme editor to show the correct product
-      // CRITICAL: We need to wait longer (2 seconds) for the theme editor to fully load
-      // before reverting, otherwise it will show the wrong product
+      // STEP 1: Assign the product to the variant template
+      // This is REQUIRED for the theme editor to show the correct product.
+      // The theme editor checks which product has the template assigned, and if none
+      // (or a different one), it defaults to the first product it finds.
+      // 
+      // STRATEGY: Keep the product assigned until test launch (which reverts it to control).
+      // Only revert if the user closes the theme editor without launching.
+      // This prevents visitors from seeing unconfigured widgets while allowing the editor to work.
       let assignmentSuccessful = false;
       if (productIdForAssignment) {
         try {
-          console.log('🔧 Temporarily assigning product to variant template for theme editor...');
+          console.log('🔧 Assigning product to variant template for theme editor...');
           console.log('🔍 Assignment details:', {
             productId: productIdForAssignment,
             productHandle: productHandleForPreview,
             variantTemplate: wizardVariantName,
-            originalTemplate: originalTemplateSuffix || 'default'
+            originalTemplate: originalTemplateSuffix || 'default',
+            strategy: 'Keep assigned until test launch (launch API will revert to control)'
           });
           
           const assignResponse = await fetch('/api/assign-product-template', {
@@ -1121,8 +1126,9 @@ export default function ABTests() {
           
           if (assignResponse.ok) {
             assignmentSuccessful = true;
-            console.log('✅ Product temporarily assigned to variant template');
-            console.log('⏱️ Will revert after 2 seconds to give theme editor time to load');
+            console.log('✅ Product assigned to variant template');
+            console.log('ℹ️ Product will remain assigned until test launch (prevents visitor exposure)');
+            console.log('ℹ️ If you close the editor without launching, product will stay assigned');
           } else {
             const errorData = await assignResponse.json();
             console.error('⚠️ Failed to assign product template:', errorData);
@@ -1148,49 +1154,51 @@ export default function ABTests() {
       // STEP 2: Open the theme editor
       const themeEditorWindow = window.open(editorUrl, '_blank');
       
-      // STEP 3: Revert the product assignment after a delay (2 seconds)
-      // IMPORTANT: The theme editor needs time to:
-      // 1. Load the page (500-1000ms)
-      // 2. Read the product assignment from Shopify (200-500ms)
-      // 3. Render the correct product (200-500ms)
-      // Total: ~1.5-2 seconds minimum
-      // 
-      // 2 seconds is still very unlikely for visitors to hit, but gives the editor enough time.
-      // If visitors do hit this window, they'll see an unconfigured widget, but this is
-      // a necessary trade-off for the theme editor to work correctly.
-      if (assignmentSuccessful && productIdForAssignment) {
-        setTimeout(async () => {
+      // STEP 3: Monitor the theme editor window and revert if closed without launching
+      // The product will be reverted to control when the test is launched (in launch API).
+      // If the user closes the editor without launching, we revert after a delay to prevent
+      // visitors from seeing unconfigured widgets.
+      if (assignmentSuccessful && productIdForAssignment && themeEditorWindow) {
+        let revertTimer = null;
+        const checkInterval = setInterval(() => {
           try {
-            console.log('🔧 Reverting product template assignment to original...');
-            console.log('🔍 Revert details:', {
-              productId: productIdForAssignment,
-              revertingTo: originalTemplateSuffix || 'default template'
-            });
-            
-            const revertResponse = await fetch('/api/assign-product-template', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                productId: productIdForAssignment,
-                templateSuffix: originalTemplateSuffix // Revert to original (null if it was default)
-              })
-            });
-            
-            if (revertResponse.ok) {
-              console.log('✅ Product template reverted to original');
-              console.log('✅ Visitors will not see unconfigured widget (reverted after 2 seconds)');
-            } else {
-              const errorData = await revertResponse.json();
-              console.error('⚠️ Failed to revert product template:', errorData);
-              console.error('⚠️ WARNING: Product may still be assigned to variant template!');
-              console.error('⚠️ ACTION REQUIRED: Manually revert product template assignment to prevent visitor exposure');
+            if (themeEditorWindow.closed) {
+              clearInterval(checkInterval);
+              if (revertTimer) clearTimeout(revertTimer);
+              
+              // User closed the editor - revert after a short delay to ensure editor finished loading
+              revertTimer = setTimeout(async () => {
+                try {
+                  console.log('🔧 Theme editor closed - reverting product template assignment...');
+                  const revertResponse = await fetch('/api/assign-product-template', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                      productId: productIdForAssignment,
+                      templateSuffix: originalTemplateSuffix
+                    })
+                  });
+                  
+                  if (revertResponse.ok) {
+                    console.log('✅ Product template reverted (editor was closed without launching)');
+                  } else {
+                    console.error('⚠️ Failed to revert product template');
+                  }
+                } catch (revertError) {
+                  console.error('⚠️ Error reverting product template:', revertError);
+                }
+              }, 1000); // 1 second delay after window closes
             }
-          } catch (revertError) {
-            console.error('⚠️ Error reverting product template:', revertError);
-            console.error('⚠️ WARNING: Product may still be assigned to variant template!');
-            console.error('⚠️ ACTION REQUIRED: Manually revert product template assignment to prevent visitor exposure');
+          } catch (e) {
+            // Cross-origin restrictions - expected
           }
-        }, 2000); // 2 second delay - gives theme editor enough time to load and read assignment
+        }, 500); // Check every 500ms
+        
+        // Clean up interval after 5 minutes (editor session unlikely to last longer)
+        setTimeout(() => {
+          clearInterval(checkInterval);
+          if (revertTimer) clearTimeout(revertTimer);
+        }, 300000);
       } else if (!assignmentSuccessful) {
         console.warn('⚠️ Product was not assigned - theme editor may show wrong product');
         console.warn('⚠️ The theme editor requires product assignment to show the correct product');
