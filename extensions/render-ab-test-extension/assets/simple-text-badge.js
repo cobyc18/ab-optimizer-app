@@ -45,78 +45,100 @@
 
   function refreshBadges() {
     document.querySelectorAll('.simple-text-badge-widget').forEach(function(container) {
-      // Check if we're in theme editor - always show in editor
+      // Debug: Log the container's HTML to see what data attributes are present
+      console.log('🔍 Container HTML:', container.outerHTML.substring(0, 500));
+      
+      // Check if widget should be enabled (visible) on live storefront
+      checkWidgetEnabled(container).then(function(enabled) {
+        if (!enabled) {
+          // Widget not enabled - hide it on live storefront
+          container.style.display = 'none';
+          console.log('🚫 Widget hidden - test not launched yet');
+          return; // Don't render the badge
+        }
+        
+        // Widget is enabled or in theme editor - show and render it
+        container.style.display = '';
+        
+        // Reset initialization flag before re-rendering
+        container.dataset.liveVisitorInitialized = 'false';
+        
+        renderBadge(container);
+        
+        // Check if this is a live visitor count or how many in cart widget
+        const conversionPlayType = container.dataset.conversionPlayType;
+        if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
+          initLiveVisitorCount(container);
+        }
+      }).catch(function(error) {
+        console.error('⚠️ Error checking widget enabled status:', error);
+        // On error, default to showing widget (fail-safe)
+        container.style.display = '';
+        container.dataset.liveVisitorInitialized = 'false';
+        renderBadge(container);
+      });
+    });
+  }
+
+  /**
+   * Check if widget should be enabled (visible) on the live storefront.
+   * Widgets are only enabled if there's a running A/B test for the product.
+   * Always enabled in theme editor.
+   * 
+   * @param {HTMLElement} container - The widget container element
+   * @returns {Promise<boolean>} - True if widget should be enabled, false otherwise
+   */
+  function checkWidgetEnabled(container) {
+    return new Promise(function(resolve, reject) {
+      // Check if we're in theme editor
       const isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
       const designModeFromLiquid = container.dataset.designMode === 'true';
       
       if (isInThemeEditor || designModeFromLiquid) {
-        // Always show in theme editor - merchant needs to configure it
-        container.style.display = '';
-        container.dataset.liveVisitorInitialized = 'false';
-        renderBadge(container);
-        
-        // Check if this is a live visitor count or how many in cart widget
-        const conversionPlayType = container.dataset.conversionPlayType;
-        if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
-          initLiveVisitorCount(container);
-        }
+        // Always show widget in theme editor
+        console.log('✅ Widget enabled - in theme editor');
+        resolve(true);
         return;
       }
       
-      // On live site: Check if there's an active A/B test for this product
+      // On live storefront, check if test is running
       const productId = container.dataset.productId;
-      if (!productId || productId === '') {
-        // No product ID - hide widget (not on a product page or product not available)
-        container.style.display = 'none';
-        console.log('🚫 Widget hidden - no product ID available');
+      const shop = container.dataset.shop;
+      
+      if (!productId || !shop) {
+        console.warn('⚠️ Missing productId or shop - defaulting to disabled');
+        resolve(false);
         return;
       }
       
-      // Check if test is launched by querying the API
-      checkActiveTestAndShowWidget(container, productId);
+      // Use app proxy to call API from storefront
+      // App proxy pattern: https://{shop}/apps/ab-optimizer-app/{path}
+      const shopDomain = shop.includes('.myshopify.com') ? shop : shop + '.myshopify.com';
+      const apiUrl = 'https://' + shopDomain + '/apps/ab-optimizer-app/api/check-widget-enabled?productId=' + encodeURIComponent(productId) + '&shop=' + encodeURIComponent(shop);
+      
+      fetch(apiUrl)
+        .then(function(response) {
+          if (!response.ok) {
+            throw new Error('API request failed: ' + response.status);
+          }
+          return response.json();
+        })
+        .then(function(data) {
+          const enabled = data.enabled === true;
+          console.log('🔍 Widget enabled check:', {
+            enabled: enabled,
+            productId: productId,
+            shop: shop,
+            testName: data.testName
+          });
+          resolve(enabled);
+        })
+        .catch(function(error) {
+          console.error('❌ Error checking widget enabled status:', error);
+          // On error, default to disabled (fail-safe - don't show unconfigured widgets)
+          resolve(false);
+        });
     });
-  }
-  
-  async function checkActiveTestAndShowWidget(container, productId) {
-    try {
-      // Use direct API URL (same as ab-test-tracking.js)
-      // This endpoint has CORS headers configured for storefront access
-      const apiUrl = `https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=${encodeURIComponent(productId)}`;
-      
-      console.log('🔍 Checking for active A/B test for product:', productId);
-      const response = await fetch(apiUrl);
-      
-      if (!response.ok) {
-        console.log('🚫 Widget hidden - failed to check active test (status:', response.status, ')');
-        container.style.display = 'none';
-        return;
-      }
-      
-      const config = await response.json();
-      console.log('📊 A/B test config response:', config);
-      
-      // Only show widget if there's an active test (testId exists)
-      // This means the test has been launched
-      if (config.testId) {
-        console.log('✅ Widget shown - active test found (test launched):', config.testId);
-        container.style.display = '';
-        container.dataset.liveVisitorInitialized = 'false';
-        renderBadge(container);
-        
-        // Check if this is a live visitor count or how many in cart widget
-        const conversionPlayType = container.dataset.conversionPlayType;
-        if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
-          initLiveVisitorCount(container);
-        }
-      } else {
-        console.log('🚫 Widget hidden - no active test found (test not launched yet)');
-        container.style.display = 'none';
-      }
-    } catch (error) {
-      console.error('❌ Error checking active test:', error);
-      // On error, hide widget to be safe (don't show unconfigured widget)
-      container.style.display = 'none';
-    }
   }
   
   function initLiveVisitorCount(container) {

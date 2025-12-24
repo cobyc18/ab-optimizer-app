@@ -3,22 +3,16 @@
   Displays a promotional badge with icon, text, and customizable colors
 {%- endcomment -%}
 
-{%- comment -%}
-  Get product ID for checking active A/B test
-  Product ID is available on product pages
-{%- endcomment -%}
-{%- assign product_id = product.id | default: '' -%}
-{%- if product_id != blank -%}
-  {%- assign product_id_numeric = product_id | split: '/' | last -%}
-{%- else -%}
-  {%- assign product_id_numeric = '' -%}
-{%- endif -%}
-
 <div class="simple-text-badge-widget" 
      {{ block.shopify_attributes }}
      data-badge-id="badge-{{ block.id }}"
      data-block-id="{{ block.id }}"
-     data-product-id="{{ product_id_numeric }}"
+     {% if product %}
+     data-product-id="{{ product.id }}"
+     {% endif %}
+     {% if shop %}
+     data-shop="{{ shop.permanent_domain | default: shop.domain }}"
+     {% endif %}
      data-design-mode="{{ request.design_mode }}"
     data-enable-step-2="{{ block.settings.enable_step_2 | default: false }}"
     data-header-text="{{ block.settings.header_text | escape }}"
