@@ -48,36 +48,66 @@
       // Debug: Log the container's HTML to see what data attributes are present
       console.log('🔍 Container HTML:', container.outerHTML.substring(0, 500));
       
+      // Check if widget has already been rendered (to prevent re-rendering with defaults)
+      const alreadyRendered = container.querySelector('.simple-text-badge') !== null;
+      
       // ALWAYS render the badge first (to ensure settings are loaded from data attributes)
-      // Then check if it should be visible on live storefront
-      container.style.display = '';
-      
-      // Reset initialization flag before re-rendering
-      container.dataset.liveVisitorInitialized = 'false';
-      
-      // Render badge with settings from data attributes (this was the original behavior)
-      renderBadge(container);
-      
-      // Check if this is a live visitor count or how many in cart widget
-      const conversionPlayType = container.dataset.conversionPlayType;
-      if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
-        initLiveVisitorCount(container);
+      // Only render if not already rendered to preserve existing settings
+      if (!alreadyRendered) {
+        container.style.display = '';
+        
+        // Reset initialization flag before re-rendering
+        container.dataset.liveVisitorInitialized = 'false';
+        
+        // Log data attributes before rendering to debug settings
+        console.log('🎨 Rendering widget with data attributes:', {
+          headerText: container.getAttribute('data-header-text'),
+          bodyText: container.getAttribute('data-body-text'),
+          textColor: container.getAttribute('data-text-color'),
+          backgroundColor: container.getAttribute('data-background-color'),
+          iconChoice: container.getAttribute('data-icon-choice')
+        });
+        
+        // Render badge with settings from data attributes (this was the original behavior)
+        renderBadge(container);
+        
+        // Check if this is a live visitor count or how many in cart widget
+        const conversionPlayType = container.dataset.conversionPlayType;
+        if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
+          initLiveVisitorCount(container);
+        }
+      } else {
+        // Widget already rendered - just ensure visibility is correct
+        console.log('ℹ️ Widget already rendered, preserving existing settings');
       }
       
-      // AFTER rendering, check if widget should be visible on live storefront
-      // This doesn't interfere with settings loading
+      // AFTER rendering (or if already rendered), check if widget should be visible on live storefront
+      // This doesn't interfere with settings loading - we only control visibility, not re-rendering
+      // Store a flag to prevent multiple simultaneous checks
+      if (container.dataset.enabledCheckInProgress === 'true') {
+        return; // Already checking, don't duplicate
+      }
+      
+      container.dataset.enabledCheckInProgress = 'true';
+      
       checkWidgetEnabled(container).then(function(enabled) {
+        // Remove the flag
+        container.dataset.enabledCheckInProgress = 'false';
+        
         if (!enabled) {
           // Widget not enabled - hide it on live storefront
+          // IMPORTANT: Only change visibility, don't re-render (settings are already loaded)
           container.style.display = 'none';
           console.log('🚫 Widget hidden - test not launched yet');
         } else {
           // Widget is enabled - ensure it's visible
+          // IMPORTANT: Only change visibility, don't re-render (settings are already loaded)
           container.style.display = '';
-          console.log('✅ Widget enabled - showing on live storefront');
+          console.log('✅ Widget enabled - showing on live storefront with configured settings');
         }
       }).catch(function(error) {
         console.error('⚠️ Error checking widget enabled status:', error);
+        container.dataset.enabledCheckInProgress = 'false';
         // On error, default to showing widget (fail-safe)
         container.style.display = '';
       });
@@ -90,9 +120,14 @@
    * Always enabled in theme editor.
    * 
    * @param {HTMLElement} container - The widget container element
+   * @param {number} retryCount - Current retry attempt (for retry logic)
+   * @param {number} maxRetries - Maximum number of retries
    * @returns {Promise<boolean>} - True if widget should be enabled, false otherwise
    */
-  function checkWidgetEnabled(container) {
+  function checkWidgetEnabled(container, retryCount, maxRetries) {
+    retryCount = retryCount || 0;
+    maxRetries = maxRetries || 3;
+    
     return new Promise(function(resolve, reject) {
       // Check if we're in theme editor
       const isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
@@ -133,13 +168,38 @@
             enabled: enabled,
             productId: productId,
             shop: shop,
-            testName: data.testName
+            testName: data.testName,
+            retryAttempt: retryCount
           });
+          
+          // If not enabled and we haven't exhausted retries, retry after a delay
+          // This handles cases where test was just created and database hasn't propagated yet
+          if (!enabled && retryCount < maxRetries) {
+            console.log('⏳ Test not found, retrying in ' + ((retryCount + 1) * 1000) + 'ms...');
+            setTimeout(function() {
+              checkWidgetEnabled(container, retryCount + 1, maxRetries).then(resolve).catch(reject);
+            }, (retryCount + 1) * 1000); // 1s, 2s, 3s delays
+            return;
+          }
+          
           resolve(enabled);
         })
         .catch(function(error) {
           console.error('❌ Error checking widget enabled status:', error);
-          // On error, default to disabled (fail-safe - don't show unconfigured widgets)
+          
+          // Retry on error if we haven't exhausted retries
+          if (retryCount < maxRetries) {
+            console.log('⏳ API error, retrying in ' + ((retryCount + 1) * 1000) + 'ms...');
+            setTimeout(function() {
+              checkWidgetEnabled(container, retryCount + 1, maxRetries).then(resolve).catch(function() {
+                // On final error, default to disabled (fail-safe)
+                resolve(false);
+              });
+            }, (retryCount + 1) * 1000);
+            return;
+          }
+          
+          // On final error, default to disabled (fail-safe - don't show unconfigured widgets)
           resolve(false);
         });
     });
@@ -215,7 +275,18 @@
 
   function registerConfigListener() {
     if (window.__simpleTextBadgeConfigListenerAdded) return;
-    window.addEventListener('abTestWidgetConfigUpdate', refreshBadges);
+    window.addEventListener('abTestWidgetConfigUpdate', function() {
+      // Only refresh if we're in theme editor or if widget config actually has settings
+      // This prevents re-rendering with defaults on live storefront
+      var isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
+      var hasValidConfig = window.ABTestWidgetConfig && window.ABTestWidgetConfig.settings && Object.keys(window.ABTestWidgetConfig.settings).length > 0;
+      
+      if (isInThemeEditor || hasValidConfig) {
+        refreshBadges();
+      } else {
+        console.log('ℹ️ Skipping widget refresh - no valid config and not in theme editor');
+      }
+    });
     window.__simpleTextBadgeConfigListenerAdded = true;
   }
 
@@ -452,7 +523,12 @@
     }
 
     var normalizedOverrides = normalizeOverrides(overrides);
-    Object.assign(base, normalizedOverrides);
+    // Only apply overrides that have actual values (don't override with undefined/null/empty)
+    for (var key in normalizedOverrides) {
+      if (normalizedOverrides[key] !== undefined && normalizedOverrides[key] !== null && normalizedOverrides[key] !== '') {
+        base[key] = normalizedOverrides[key];
+      }
+    }
 
     console.log('Final settings after overrides:', {
       headerText: base.headerText,
