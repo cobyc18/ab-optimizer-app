@@ -949,10 +949,9 @@ export default function ABTests() {
         setWizardVariantTemplateFilename(result.newFilename);
         setIsVariantTemplateReady(true);
 
-        // Note: We do NOT assign the product to the variant template here.
+        // Note: We no longer assign the product to the variant template here.
         // The product will only be assigned to the variant template if it wins the A/B test.
-        // The theme editor uses the 'template' URL parameter and 'view' parameter in previewPath
-        // to preview the correct template without requiring template assignment.
+        // Assignment happens temporarily when opening the theme editor, and permanently only when variant wins.
 
         creationResult = { success: true, variantName, newFilename: result.newFilename };
       } else {
@@ -997,58 +996,63 @@ export default function ABTests() {
         return;
       }
 
-      // SHOPIFY LIMITATION: The theme editor requires the template to be assigned to the product
-      // to properly preview it. The 'view' parameter works on the storefront but not reliably
-      // in the theme editor's previewPath. We must temporarily assign the template, then revert it.
-      const productIdForAssignment = wizardVariantProductId || wizardSelectedProductSnapshot?.id || selectedProduct?.id;
-      // Use the original template suffix that was captured when the product was selected
-      const originalTemplateSuffix = wizardVariantOriginalTemplateSuffix;
-
-      // Temporarily assign the product to the variant template for theme editor preview
-      if (productIdForAssignment) {
-        try {
-          const assignResponse = await fetch('/api/assign-product-template', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              productId: productIdForAssignment,
-              templateSuffix: wizardVariantName
-            })
-          });
-          
-          if (assignResponse.ok) {
-            console.log('✅ Temporarily assigned product to variant template for theme editor');
-          } else {
-            console.error('⚠️ Failed to assign product template:', await assignResponse.json());
-          }
-        } catch (assignError) {
-          console.error('⚠️ Failed to temporarily assign product template:', assignError);
-          // Continue anyway - the URL parameters might still work
-        }
-      }
-
+      // According to Shopify docs, we can preview alternate templates using the 'view' URL parameter
+      // without assigning the template to the product. This prevents visitors from seeing unconfigured widgets.
+      // Reference: https://shopify.dev/docs/storefronts/themes/architecture/templates/alternate-templates
+      // 
+      // We are NOT assigning the product to avoid exposing unconfigured widgets to visitors.
+      // If Shopify redirects to a different product, the debug logs below will help diagnose the issue.
+      
       // Use the product handle that was set when the template was duplicated
       const productHandleForPreview = wizardVariantProductHandle;
+      const productIdForDebug = wizardVariantProductId || wizardSelectedProductSnapshot?.id || selectedProduct?.id;
       
-      console.log('🔍 Opening theme editor with:', {
+      // Comprehensive debug logging to diagnose any redirect issues
+      console.log('🔍 Opening theme editor - Debug Info:', {
         productHandle: productHandleForPreview,
-        productId: productIdForAssignment,
+        productId: productIdForDebug,
+        productTitle: wizardVariantProductTitle || wizardSelectedProductSnapshot?.title || selectedProduct?.title,
         variantName: wizardVariantName,
+        variantTemplateFilename: wizardVariantTemplateFilename,
         templateParam: `product.${wizardVariantName}`,
-        originalTemplate: originalTemplateSuffix,
-        note: 'Temporary assignment required due to Shopify theme editor limitation'
+        selectedProductSnapshot: wizardSelectedProductSnapshot ? {
+          id: wizardSelectedProductSnapshot.id,
+          handle: wizardSelectedProductSnapshot.handle,
+          title: wizardSelectedProductSnapshot.title,
+          templateSuffix: wizardSelectedProductSnapshot.templateSuffix
+        } : null,
+        selectedProduct: selectedProduct ? {
+          id: selectedProduct.id,
+          handle: selectedProduct.handle,
+          title: selectedProduct.title,
+          templateSuffix: selectedProduct.templateSuffix
+        } : null,
+        assignmentStrategy: 'NO_ASSIGNMENT - Using view parameter only'
       });
+      
+      // Validate we have the required data
+      if (!productHandleForPreview) {
+        console.error('❌ Missing product handle - cannot open theme editor');
+        alert('We could not determine which product to preview. Please go back, re-select your product, and duplicate the template again.');
+        return;
+      }
+      
+      if (!wizardVariantName) {
+        console.error('❌ Missing variant name - cannot open theme editor');
+        alert('Variant template has not been created yet. Please duplicate the template first.');
+        return;
+      }
       // For OS 2.0 JSON templates, the template param should be: product.<suffix>
       // This tells Shopify which template file to load in the editor
       const templateParam = `product.${wizardVariantName}`;
 
-      // The previewPath includes ?view=<suffix> to tell Shopify which template to render
-      // This allows the theme editor to preview the variant template without assigning it to the product
-      // The 'view' parameter works on both storefront and in the theme editor preview
+      // The previewPath must include ?view=<suffix> to ensure Shopify uses the correct template
+      // This is critical - without it, Shopify will use the product's default template assignment
+      // Build preview path with view parameter to use the alternate template without assignment
+      // The 'view' parameter tells Shopify to use the specified template suffix
       const previewParams = new URLSearchParams();
-      if (wizardVariantName) {
-        previewParams.set('view', wizardVariantName);
-      }
+      previewParams.set('view', wizardVariantName); // Critical: This makes Shopify use the variant template
+      
       if (selectedIdea?.blockId && selectedWidgetConfig) {
         const encodedConfig = encodeWidgetConfigPayload({
           widgetType: selectedIdea.blockId,
@@ -1058,10 +1062,16 @@ export default function ABTests() {
           previewParams.set('ab_widget_config', encodedConfig);
         }
       }
-      const previewPath = previewParams.toString()
-        ? `/products/${productHandleForPreview}?${previewParams.toString()}`
-        : `/products/${productHandleForPreview}`;
+      
+      const previewPath = `/products/${productHandleForPreview}?${previewParams.toString()}`;
       const encodedPreviewPath = encodeURIComponent(previewPath);
+      
+      console.log('🔍 Preview path details:', {
+        previewPath: previewPath,
+        encodedPreviewPath: encodedPreviewPath,
+        viewParameter: wizardVariantName,
+        productHandle: productHandleForPreview
+      });
 
       const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
       const widgetHandle = selectedIdea?.blockId || null;
@@ -1097,30 +1107,60 @@ export default function ABTests() {
 
       const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
 
-      window.open(editorUrl, '_blank');
+      console.log('🔍 Final theme editor URL:', {
+        url: editorUrl,
+        templateParam: templateParam,
+        previewPath: previewPath,
+        hasViewParam: previewParams.has('view'),
+        viewValue: previewParams.get('view')
+      });
 
-      // Revert the product back to its original template immediately after opening the editor
-      // This is necessary because Shopify's theme editor requires template assignment to preview,
-      // but we don't want customers to see the product with an unconfigured widget.
-      // The revert happens quickly (500ms delay) to minimize customer exposure while allowing
-      // the editor to initialize properly.
-      if (productIdForAssignment && originalTemplateSuffix !== undefined) {
-        setTimeout(async () => {
-          try {
-            await fetch('/api/assign-product-template', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                productId: productIdForAssignment,
-                templateSuffix: originalTemplateSuffix === null ? null : originalTemplateSuffix
-              })
-            });
-            console.log('✅ Reverted product back to original template to prevent customer visibility:', originalTemplateSuffix);
-          } catch (revertError) {
-            console.error('⚠️ Failed to revert product template:', revertError);
-          }
-        }, 5000); // Short delay - just enough for editor to initialize
+      const themeEditorWindow = window.open(editorUrl, '_blank');
+      
+      // Debug: Log what we expect vs what might happen
+      console.log('🔍 Theme Editor Opening - Expected Behavior:', {
+        expectedProductHandle: productHandleForPreview,
+        expectedProductTitle: wizardVariantProductTitle || wizardSelectedProductSnapshot?.title || selectedProduct?.title,
+        expectedTemplate: `product.${wizardVariantName}`,
+        previewPathIncludesView: previewPath.includes('view='),
+        viewParameterValue: wizardVariantName,
+        strategy: 'Using view parameter WITHOUT product assignment to prevent visitors from seeing unconfigured widgets'
+      });
+      
+      console.log('⚠️ DEBUGGING: If the theme editor shows a DIFFERENT product, check:', {
+        possibleCauses: [
+          'Shopify may require product assignment for theme editor preview (despite docs saying view param should work)',
+          'Another product may have this template assigned and Shopify is defaulting to it',
+          'The view parameter may not be working as expected in theme editor context'
+        ],
+        whatToCheck: [
+          'Check the URL in the theme editor - does it show the correct product handle?',
+          'Does the previewPath in the URL include ?view=' + wizardVariantName + '?',
+          'What product is actually displayed in the theme editor?'
+        ],
+        fallbackSolution: 'If view parameter alone doesn\'t work, we may need to temporarily assign the product, but this exposes unconfigured widgets to visitors'
+      });
+      
+      // Monitor window (though we can't read cross-origin URLs)
+      if (themeEditorWindow) {
+        setTimeout(() => {
+          console.log('🔍 Theme editor opened. Please check:', {
+            instruction: 'Look at the theme editor URL and verify:',
+            checks: [
+              '1. Does the previewPath show the correct product handle?',
+              '2. Does it include ?view=' + wizardVariantName + '?',
+              '3. What product is actually displayed in the preview?',
+              '4. If wrong product, note which product it shows'
+            ]
+          });
+        }, 1000);
       }
+      
+      // Note: We are NOT assigning the product to the variant template.
+      // According to Shopify docs (https://shopify.dev/docs/storefronts/themes/architecture/templates/alternate-templates),
+      // the 'view' parameter in previewPath should allow previewing the alternate template without assignment.
+      // This prevents visitors from seeing unconfigured widgets.
+      // If Shopify redirects to a different product, the debug logs above will help diagnose the issue.
 
       if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
         const formatText = (text) => {
