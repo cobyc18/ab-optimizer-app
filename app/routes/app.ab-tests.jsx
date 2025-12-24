@@ -1095,63 +1095,26 @@ export default function ABTests() {
 
       const cacheBuster = `&_t=${Date.now()}`;
 
-      // CRITICAL STRATEGY: Assign product ONLY while theme editor window is open
-      // The theme editor requires assignment to show the correct product.
-      // We'll monitor the window and revert immediately when it closes.
-      // This prevents visitors from seeing unconfigured widgets.
-      // The product will only be permanently assigned when the variant wins.
-      
+      // STEP 1: Assign the product to the variant template
+      // This is REQUIRED for the theme editor to show the correct product.
+      // The theme editor checks which product has the template assigned, and if none
+      // (or a different one), it defaults to the first product it finds.
+      // 
+      // STRATEGY: Keep the product assigned until test launch (which reverts it to control).
+      // Only revert if the user closes the theme editor without launching.
+      // This prevents visitors from seeing unconfigured widgets while allowing the editor to work.
       let assignmentSuccessful = false;
-      const conflictingProductsToRestore = [];
-      
       if (productIdForAssignment) {
         try {
-          // Step 1: Check for and temporarily unassign conflicting products
-          console.log('🔍 Checking for template conflicts...');
-          const conflictCheckResponse = await fetch('/api/check-template-conflicts', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              templateSuffix: wizardVariantName,
-              excludeProductId: productIdForAssignment
-            })
+          console.log('🔧 Assigning product to variant template for theme editor...');
+          console.log('🔍 Assignment details:', {
+            productId: productIdForAssignment,
+            productHandle: productHandleForPreview,
+            variantTemplate: wizardVariantName,
+            originalTemplate: originalTemplateSuffix || 'default',
+            strategy: 'Keep assigned until test launch (launch API will revert to control)'
           });
           
-          if (conflictCheckResponse.ok) {
-            const conflictData = await conflictCheckResponse.json();
-            if (conflictData.hasConflicts && conflictData.conflictingProducts.length > 0) {
-              console.warn('⚠️ Found conflicting products - temporarily unassigning them...');
-              
-              for (const conflict of conflictData.conflictingProducts) {
-                try {
-                  const unassignResponse = await fetch('/api/assign-product-template', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      productId: conflict.id,
-                      templateSuffix: null
-                    })
-                  });
-                  
-                  if (unassignResponse.ok) {
-                    conflictingProductsToRestore.push({
-                      id: conflict.id,
-                      originalTemplate: conflict.templateSuffix
-                    });
-                    console.log(`✅ Temporarily unassigned: ${conflict.title}`);
-                  }
-                } catch (unassignError) {
-                  console.error(`⚠️ Error unassigning ${conflict.title}:`, unassignError);
-                }
-              }
-              
-              // Wait for unassignments to propagate
-              await new Promise(resolve => setTimeout(resolve, 200));
-            }
-          }
-          
-          // Step 2: Assign our product
-          console.log('🔧 Assigning product to variant template (will revert when editor closes)...');
           const assignResponse = await fetch('/api/assign-product-template', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1163,14 +1126,18 @@ export default function ABTests() {
           
           if (assignResponse.ok) {
             assignmentSuccessful = true;
-            console.log('✅ Product assigned (will revert when editor closes)');
+            console.log('✅ Product assigned to variant template');
+            console.log('ℹ️ Product will remain assigned until test launch (prevents visitor exposure)');
+            console.log('ℹ️ If you close the editor without launching, product will stay assigned');
           } else {
             const errorData = await assignResponse.json();
             console.error('⚠️ Failed to assign product template:', errorData);
           }
         } catch (assignError) {
-          console.error('⚠️ Error in assignment process:', assignError);
+          console.error('⚠️ Error assigning product template:', assignError);
         }
+      } else {
+        console.warn('⚠️ No product ID available for assignment');
       }
 
       const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
@@ -1181,31 +1148,28 @@ export default function ABTests() {
         previewPath: previewPath,
         hasViewParam: previewParams.has('view'),
         viewValue: previewParams.get('view'),
-        assignmentStatus: assignmentSuccessful ? 'ASSIGNED (will revert when editor closes)' : 'NOT_ASSIGNED'
+        assignmentStatus: assignmentSuccessful ? 'ASSIGNED' : 'NOT_ASSIGNED'
       });
 
-      // Open the theme editor
+      // STEP 2: Open the theme editor
       const themeEditorWindow = window.open(editorUrl, '_blank');
       
-      // CRITICAL: Monitor the editor window and revert assignment immediately when it closes
-      // This ensures visitors never see unconfigured widgets
+      // STEP 3: Monitor the theme editor window and revert if closed without launching
+      // The product will be reverted to control when the test is launched (in launch API).
+      // If the user closes the editor without launching, we revert after a delay to prevent
+      // visitors from seeing unconfigured widgets.
       if (assignmentSuccessful && productIdForAssignment && themeEditorWindow) {
         let revertTimer = null;
-        let isReverted = false;
-        
         const checkInterval = setInterval(() => {
           try {
-            if (themeEditorWindow.closed && !isReverted) {
-              isReverted = true;
+            if (themeEditorWindow.closed) {
               clearInterval(checkInterval);
               if (revertTimer) clearTimeout(revertTimer);
               
-              // Editor closed - revert immediately
+              // User closed the editor - revert after a short delay to ensure editor finished loading
               revertTimer = setTimeout(async () => {
                 try {
                   console.log('🔧 Theme editor closed - reverting product template assignment...');
-                  
-                  // Revert our product
                   const revertResponse = await fetch('/api/assign-product-template', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -1216,67 +1180,29 @@ export default function ABTests() {
                   });
                   
                   if (revertResponse.ok) {
-                    console.log('✅ Product template reverted (visitors will not see unconfigured widget)');
+                    console.log('✅ Product template reverted (editor was closed without launching)');
                   } else {
                     console.error('⚠️ Failed to revert product template');
                   }
-                  
-                  // Restore conflicting products
-                  if (conflictingProductsToRestore.length > 0) {
-                    console.log(`🔧 Restoring ${conflictingProductsToRestore.length} conflicting product(s)...`);
-                    for (const conflict of conflictingProductsToRestore) {
-                      try {
-                        await fetch('/api/assign-product-template', {
-                          method: 'POST',
-                          headers: { 'Content-Type': 'application/json' },
-                          body: JSON.stringify({
-                            productId: conflict.id,
-                            templateSuffix: conflict.originalTemplate || null
-                          })
-                        });
-                      } catch (restoreError) {
-                        console.error(`⚠️ Error restoring ${conflict.id}:`, restoreError);
-                      }
-                    }
-                  }
                 } catch (revertError) {
-                  console.error('⚠️ Error reverting assignment:', revertError);
+                  console.error('⚠️ Error reverting product template:', revertError);
                 }
-              }, 100); // 100ms delay after window closes
+              }, 1000); // 1 second delay after window closes
             }
           } catch (e) {
             // Cross-origin restrictions - expected
           }
-        }, 100); // Check every 100ms for faster detection
+        }, 500); // Check every 500ms
         
-        // Clean up after 10 minutes (editor session unlikely to last longer)
+        // Clean up interval after 5 minutes (editor session unlikely to last longer)
         setTimeout(() => {
           clearInterval(checkInterval);
-          if (!isReverted && assignmentSuccessful) {
-            console.warn('⚠️ Editor window monitoring timeout - reverting assignment as safety measure');
-            // Revert as safety measure
-            fetch('/api/assign-product-template', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                productId: productIdForAssignment,
-                templateSuffix: originalTemplateSuffix
-              })
-            }).catch(err => console.error('⚠️ Safety revert failed:', err));
-          }
-        }, 600000); // 10 minutes
+          if (revertTimer) clearTimeout(revertTimer);
+        }, 300000);
+      } else if (!assignmentSuccessful) {
+        console.warn('⚠️ Product was not assigned - theme editor may show wrong product');
+        console.warn('⚠️ The theme editor requires product assignment to show the correct product');
       }
-      
-      console.log('🔍 Theme editor opened:', {
-        expectedProduct: {
-          handle: productHandleForPreview,
-          title: wizardVariantProductTitle || wizardSelectedProductSnapshot?.title || selectedProduct?.title,
-          id: productIdForAssignment
-        },
-        expectedTemplate: wizardVariantName,
-        assignmentStrategy: 'ASSIGNED_WHILE_EDITOR_OPEN - Will revert immediately when editor closes',
-        note: 'Product will only be permanently assigned when variant wins the A/B test'
-      });
       
       console.log('🔍 Theme Editor Opening:', {
         expectedProductHandle: productHandleForPreview,
