@@ -2308,7 +2308,8 @@ export default function ABTests() {
                       display: 'flex',
                       flexDirection: 'column',
                       boxShadow: selectedProduct?.id === product.id ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 1px 3px rgba(0, 0, 0, 0.1)',
-                      transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)'
+                      transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)',
+                      position: 'relative'
                     }}
                     onMouseEnter={(e) => {
                       if (selectedProduct?.id !== product.id) {
@@ -2323,6 +2324,39 @@ export default function ABTests() {
                       }
                     }}
                   >
+                    {/* Checkmark icon - top right */}
+                    {selectedProduct?.id === product.id && (
+                      <div style={{
+                        position: 'absolute',
+                        top: '12px',
+                        right: '12px',
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '50%',
+                        backgroundColor: '#2563EB',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        zIndex: 1000,
+                        boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
+                      }}>
+                        <svg
+                          width="16"
+                          height="16"
+                          viewBox="0 0 16 16"
+                          fill="none"
+                          xmlns="http://www.w3.org/2000/svg"
+                        >
+                          <path
+                            d="M13.3333 4L6 11.3333L2.66667 8"
+                            stroke="white"
+                            strokeWidth="2"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                          />
+                        </svg>
+                      </div>
+                    )}
                     {/* Product Image */}
                     <div style={{
                       width: '100%',
