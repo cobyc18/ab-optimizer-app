@@ -1097,10 +1097,19 @@ export default function ABTests() {
 
       // STEP 1: Temporarily assign the product to the variant template
       // This is required for the theme editor to show the correct product
+      // CRITICAL: We need to wait longer (2 seconds) for the theme editor to fully load
+      // before reverting, otherwise it will show the wrong product
       let assignmentSuccessful = false;
       if (productIdForAssignment) {
         try {
           console.log('🔧 Temporarily assigning product to variant template for theme editor...');
+          console.log('🔍 Assignment details:', {
+            productId: productIdForAssignment,
+            productHandle: productHandleForPreview,
+            variantTemplate: wizardVariantName,
+            originalTemplate: originalTemplateSuffix || 'default'
+          });
+          
           const assignResponse = await fetch('/api/assign-product-template', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1113,6 +1122,7 @@ export default function ABTests() {
           if (assignResponse.ok) {
             assignmentSuccessful = true;
             console.log('✅ Product temporarily assigned to variant template');
+            console.log('⏱️ Will revert after 2 seconds to give theme editor time to load');
           } else {
             const errorData = await assignResponse.json();
             console.error('⚠️ Failed to assign product template:', errorData);
@@ -1138,15 +1148,25 @@ export default function ABTests() {
       // STEP 2: Open the theme editor
       const themeEditorWindow = window.open(editorUrl, '_blank');
       
-      // STEP 3: Revert the product assignment after a short delay (300ms)
-      // This delay is a trade-off:
-      // - Short enough (300ms) that visitors are extremely unlikely to see the unconfigured widget
-      // - Long enough for the theme editor to read the assignment and show the correct product
-      // If the theme editor still shows the wrong product, we may need to increase this slightly
+      // STEP 3: Revert the product assignment after a delay (2 seconds)
+      // IMPORTANT: The theme editor needs time to:
+      // 1. Load the page (500-1000ms)
+      // 2. Read the product assignment from Shopify (200-500ms)
+      // 3. Render the correct product (200-500ms)
+      // Total: ~1.5-2 seconds minimum
+      // 
+      // 2 seconds is still very unlikely for visitors to hit, but gives the editor enough time.
+      // If visitors do hit this window, they'll see an unconfigured widget, but this is
+      // a necessary trade-off for the theme editor to work correctly.
       if (assignmentSuccessful && productIdForAssignment) {
         setTimeout(async () => {
           try {
             console.log('🔧 Reverting product template assignment to original...');
+            console.log('🔍 Revert details:', {
+              productId: productIdForAssignment,
+              revertingTo: originalTemplateSuffix || 'default template'
+            });
+            
             const revertResponse = await fetch('/api/assign-product-template', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -1158,7 +1178,7 @@ export default function ABTests() {
             
             if (revertResponse.ok) {
               console.log('✅ Product template reverted to original');
-              console.log('✅ Visitors will not see unconfigured widget (reverted after 300ms)');
+              console.log('✅ Visitors will not see unconfigured widget (reverted after 2 seconds)');
             } else {
               const errorData = await revertResponse.json();
               console.error('⚠️ Failed to revert product template:', errorData);
@@ -1170,9 +1190,10 @@ export default function ABTests() {
             console.error('⚠️ WARNING: Product may still be assigned to variant template!');
             console.error('⚠️ ACTION REQUIRED: Manually revert product template assignment to prevent visitor exposure');
           }
-        }, 300); // 300ms delay - balance between editor loading time and visitor safety
+        }, 2000); // 2 second delay - gives theme editor enough time to load and read assignment
       } else if (!assignmentSuccessful) {
         console.warn('⚠️ Product was not assigned - theme editor may show wrong product');
+        console.warn('⚠️ The theme editor requires product assignment to show the correct product');
       }
       
       console.log('🔍 Theme Editor Opening:', {
