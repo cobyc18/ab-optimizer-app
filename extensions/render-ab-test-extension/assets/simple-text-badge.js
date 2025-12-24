@@ -48,34 +48,38 @@
       // Debug: Log the container's HTML to see what data attributes are present
       console.log('🔍 Container HTML:', container.outerHTML.substring(0, 500));
       
-      // Check if widget should be enabled (visible) on live storefront
+      // ALWAYS render the badge first (to ensure settings are loaded from data attributes)
+      // Then check if it should be visible on live storefront
+      container.style.display = '';
+      
+      // Reset initialization flag before re-rendering
+      container.dataset.liveVisitorInitialized = 'false';
+      
+      // Render badge with settings from data attributes (this was the original behavior)
+      renderBadge(container);
+      
+      // Check if this is a live visitor count or how many in cart widget
+      const conversionPlayType = container.dataset.conversionPlayType;
+      if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
+        initLiveVisitorCount(container);
+      }
+      
+      // AFTER rendering, check if widget should be visible on live storefront
+      // This doesn't interfere with settings loading
       checkWidgetEnabled(container).then(function(enabled) {
         if (!enabled) {
           // Widget not enabled - hide it on live storefront
           container.style.display = 'none';
           console.log('🚫 Widget hidden - test not launched yet');
-          return; // Don't render the badge
-        }
-        
-        // Widget is enabled or in theme editor - show and render it
-        container.style.display = '';
-        
-        // Reset initialization flag before re-rendering
-        container.dataset.liveVisitorInitialized = 'false';
-        
-        renderBadge(container);
-        
-        // Check if this is a live visitor count or how many in cart widget
-        const conversionPlayType = container.dataset.conversionPlayType;
-        if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
-          initLiveVisitorCount(container);
+        } else {
+          // Widget is enabled - ensure it's visible
+          container.style.display = '';
+          console.log('✅ Widget enabled - showing on live storefront');
         }
       }).catch(function(error) {
         console.error('⚠️ Error checking widget enabled status:', error);
         // On error, default to showing widget (fail-safe)
         container.style.display = '';
-        container.dataset.liveVisitorInitialized = 'false';
-        renderBadge(container);
       });
     });
   }
