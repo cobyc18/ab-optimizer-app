@@ -45,20 +45,78 @@
 
   function refreshBadges() {
     document.querySelectorAll('.simple-text-badge-widget').forEach(function(container) {
-      // Debug: Log the container's HTML to see what data attributes are present
-      console.log('🔍 Container HTML:', container.outerHTML.substring(0, 500));
+      // Check if we're in theme editor - always show in editor
+      const isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
+      const designModeFromLiquid = container.dataset.designMode === 'true';
       
-      // Reset initialization flag before re-rendering
-      container.dataset.liveVisitorInitialized = 'false';
-      
-      renderBadge(container);
-      
-      // Check if this is a live visitor count or how many in cart widget
-      const conversionPlayType = container.dataset.conversionPlayType;
-      if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
-        initLiveVisitorCount(container);
+      if (isInThemeEditor || designModeFromLiquid) {
+        // Always show in theme editor - merchant needs to configure it
+        container.style.display = '';
+        container.dataset.liveVisitorInitialized = 'false';
+        renderBadge(container);
+        
+        // Check if this is a live visitor count or how many in cart widget
+        const conversionPlayType = container.dataset.conversionPlayType;
+        if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
+          initLiveVisitorCount(container);
+        }
+        return;
       }
+      
+      // On live site: Check if there's an active A/B test for this product
+      const productId = container.dataset.productId;
+      if (!productId || productId === '') {
+        // No product ID - hide widget (not on a product page or product not available)
+        container.style.display = 'none';
+        console.log('🚫 Widget hidden - no product ID available');
+        return;
+      }
+      
+      // Check if test is launched by querying the API
+      checkActiveTestAndShowWidget(container, productId);
     });
+  }
+  
+  async function checkActiveTestAndShowWidget(container, productId) {
+    try {
+      // Use direct API URL (same as ab-test-tracking.js)
+      // This endpoint has CORS headers configured for storefront access
+      const apiUrl = `https://ab-optimizer-app.onrender.com/app/ab-test-config?productId=${encodeURIComponent(productId)}`;
+      
+      console.log('🔍 Checking for active A/B test for product:', productId);
+      const response = await fetch(apiUrl);
+      
+      if (!response.ok) {
+        console.log('🚫 Widget hidden - failed to check active test (status:', response.status, ')');
+        container.style.display = 'none';
+        return;
+      }
+      
+      const config = await response.json();
+      console.log('📊 A/B test config response:', config);
+      
+      // Only show widget if there's an active test (testId exists)
+      // This means the test has been launched
+      if (config.testId) {
+        console.log('✅ Widget shown - active test found (test launched):', config.testId);
+        container.style.display = '';
+        container.dataset.liveVisitorInitialized = 'false';
+        renderBadge(container);
+        
+        // Check if this is a live visitor count or how many in cart widget
+        const conversionPlayType = container.dataset.conversionPlayType;
+        if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
+          initLiveVisitorCount(container);
+        }
+      } else {
+        console.log('🚫 Widget hidden - no active test found (test not launched yet)');
+        container.style.display = 'none';
+      }
+    } catch (error) {
+      console.error('❌ Error checking active test:', error);
+      // On error, hide widget to be safe (don't show unconfigured widget)
+      container.style.display = 'none';
+    }
   }
   
   function initLiveVisitorCount(container) {
