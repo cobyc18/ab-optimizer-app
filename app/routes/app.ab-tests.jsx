@@ -6,6 +6,9 @@ import { checkBillingStatus } from "../utils/billing.server.js";
 import WidgetLivePreview from "../components/WidgetLivePreview.jsx";
 import ConversionPlayCard from "../components/ConversionPlayCard.jsx";
 import { abTestIdeas } from "../data/abTestIdeas.js";
+import freeShippingBadgeImage from "../assets/free-shipping-badge.png";
+import moneyBackGuaranteeImage from "../assets/money-back-guarantee.png";
+import addToCartImage from "../assets/add-to-cart.png";
 
 export const loader = async ({ request }) => {
   const { admin, session } = await authenticate.admin(request);
