@@ -5,4 +5,4 @@
  * 
  * This forwards to the main API endpoint.
  */
-export { loader, options } from "../api.check-widget-enabled.jsx";
+export { loader, options } from "./api.check-widget-enabled.jsx";
