@@ -1,8 +1,21 @@
 {%- comment -%}
   Video Testimonial Widget Block
   Displays multiple video testimonials in a carousel with image, video, author, stars, and text
+  
+  Visibility Logic:
+  - Always visible in theme editor (request.design_mode)
+  - On live storefront, only visible if A/B test is running (product.metafields.ab_optimizer.test_running)
 {%- endcomment -%}
 
+{%- comment -%} Check if block should be visible: always in theme editor, or if test is running on live storefront {%- endcomment -%}
+{%- assign is_visible = false -%}
+{%- if request.design_mode -%}
+  {%- assign is_visible = true -%}
+{%- elsif product.metafields.ab_optimizer.test_running == true -%}
+  {%- assign is_visible = true -%}
+{%- endif -%}
+
+{%- if is_visible -%}
 <div class="video-testimonial-widget" 
      {{ block.shopify_attributes }}
      data-block-id="{{ block.id }}"
@@ -64,6 +77,7 @@
     {%- endif -%}
   {%- endfor -%}
 </div>
+{%- endif -%}
 
 {% schema %}
 {

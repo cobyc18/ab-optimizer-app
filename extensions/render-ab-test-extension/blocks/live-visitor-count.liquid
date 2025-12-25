@@ -1,8 +1,21 @@
 {%- comment -%}
   Live Visitor Count Widget Block
   Displays a dynamic count of visitors viewing the product
+  
+  Visibility Logic:
+  - Always visible in theme editor (request.design_mode)
+  - On live storefront, only visible if A/B test is running (product.metafields.ab_optimizer.test_running)
 {%- endcomment -%}
 
+{%- comment -%} Check if block should be visible: always in theme editor, or if test is running on live storefront {%- endcomment -%}
+{%- assign is_visible = false -%}
+{%- if request.design_mode -%}
+  {%- assign is_visible = true -%}
+{%- elsif product.metafields.ab_optimizer.test_running == true -%}
+  {%- assign is_visible = true -%}
+{%- endif -%}
+
+{%- if is_visible -%}
 <div class="live-visitor-count-widget" 
      data-widget-id="live-visitor-{{ block.id }}"
      data-block-id="{{ block.id }}"
@@ -26,6 +39,7 @@
      data-mobile-height="{{ block.settings.mobile_height | default: 48 }}"
      data-desktop-alignment="{{ block.settings.desktop_alignment | default: 'left' }}">
 </div>
+{%- endif -%}
 
 {% schema %}
 {

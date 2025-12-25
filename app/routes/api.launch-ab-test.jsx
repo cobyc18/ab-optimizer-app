@@ -142,6 +142,54 @@ export const action = async ({ request }) => {
     });
 
     try {
+      // First, set a metafield on the product to indicate test is running
+      // This allows app blocks to check visibility on the live storefront
+      const metafieldMutation = `
+        mutation productUpdateMetafield($metafields: [MetafieldsSetInput!]!) {
+          metafieldsSet(metafields: $metafields) {
+            metafields {
+              id
+              namespace
+              key
+              value
+            }
+            userErrors {
+              field
+              message
+            }
+          }
+        }
+      `;
+
+      // Get the product's GID for metafield
+      const productGid = productId.startsWith('gid://') ? productId : `gid://shopify/Product/${productNumericId}`;
+      
+      const metafieldResponse = await admin.graphql(metafieldMutation, {
+        variables: {
+          metafields: [
+            {
+              ownerId: productGid,
+              namespace: "ab_optimizer",
+              key: "test_running",
+              type: "boolean",
+              value: "true"
+            }
+          ]
+        }
+      });
+
+      const metafieldResult = await metafieldResponse.json();
+      if (metafieldResult.data?.metafieldsSet?.userErrors?.length > 0) {
+        console.error("⚠️ Metafield user errors:", metafieldResult.data.metafieldsSet.userErrors);
+      } else {
+        console.log("✅ Set product metafield: ab_optimizer.test_running = true");
+      }
+    } catch (error) {
+      console.error("⚠️ Failed to set product metafield for test visibility:", error);
+      // Don't fail the launch if metafield setting fails
+    }
+
+    try {
       const mutation = `
         mutation assignTemplate($input: ProductInput!) {
           productUpdate(input: $input) {

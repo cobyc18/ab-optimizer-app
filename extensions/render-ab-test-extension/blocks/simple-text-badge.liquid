@@ -1,8 +1,21 @@
 {%- comment -%}
   Simple Text Badge Widget Block
   Displays a promotional badge with icon, text, and customizable colors
+  
+  Visibility Logic:
+  - Always visible in theme editor (request.design_mode)
+  - On live storefront, only visible if A/B test is running (product.metafields.ab_optimizer.test_running)
 {%- endcomment -%}
 
+{%- comment -%} Check if block should be visible: always in theme editor, or if test is running on live storefront {%- endcomment -%}
+{%- assign is_visible = false -%}
+{%- if request.design_mode -%}
+  {%- assign is_visible = true -%}
+{%- elsif product.metafields.ab_optimizer.test_running == true -%}
+  {%- assign is_visible = true -%}
+{%- endif -%}
+
+{%- if is_visible -%}
 <div class="simple-text-badge-widget" 
      {{ block.shopify_attributes }}
      data-badge-id="badge-{{ block.id }}"
@@ -50,6 +63,7 @@
      data-count-min="{{ block.settings.count_min | default: 40 }}"
      data-count-max="{{ block.settings.count_max | default: 60 }}">
 </div>
+{%- endif -%}
 
 {% schema %}
 {
