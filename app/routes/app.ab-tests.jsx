@@ -949,9 +949,40 @@ export default function ABTests() {
         setWizardVariantTemplateFilename(result.newFilename);
         setIsVariantTemplateReady(true);
 
-        // Note: We no longer assign the product to the variant template here.
-        // The product will only be assigned to the variant template if it wins the A/B test.
-        // Assignment happens temporarily when opening the theme editor, and permanently only when variant wins.
+        // Assign the product to the variant template immediately after duplication
+        // This ensures the product is assigned even when manually navigating to the theme editor
+        if (productId) {
+          try {
+            console.log('🔧 Assigning product to variant template immediately after duplication...');
+            const assignResponse = await fetch('/api/assign-product-template', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                productId: productId,
+                templateSuffix: variantName
+              })
+            });
+            
+            if (assignResponse.ok) {
+              const assignResult = await assignResponse.json();
+              if (assignResult.success) {
+                console.log('✅ Product assigned to variant template:', {
+                  productId: productId,
+                  templateSuffix: variantName
+                });
+              } else {
+                console.warn('⚠️ Failed to assign product to variant template:', assignResult.error);
+                // Don't fail the entire operation - template was created successfully
+              }
+            } else {
+              console.warn('⚠️ Failed to assign product to variant template - HTTP error');
+              // Don't fail the entire operation - template was created successfully
+            }
+          } catch (assignError) {
+            console.error('⚠️ Error assigning product to variant template:', assignError);
+            // Don't fail the entire operation - template was created successfully
+          }
+        }
 
         creationResult = { success: true, variantName, newFilename: result.newFilename };
       } else {

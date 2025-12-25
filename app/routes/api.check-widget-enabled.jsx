@@ -49,34 +49,42 @@ export const loader = async ({ request }) => {
       ? (productId.match(/Product\/(\d+)/)?.[1] || productId)
       : productId;
 
-    console.log('🔍 Checking widget enabled status:', {
-      originalProductId: productId,
-      normalizedProductId: productNumericId,
-      shop: shop
-    });
+            console.log('🔍 [DEBUG] Checking widget enabled status:', {
+              originalProductId: productId,
+              normalizedProductId: productNumericId,
+              shop: shop,
+              timestamp: new Date().toISOString()
+            });
 
-    // Check if there's a running test for this product - SCOPED BY SHOP
-    const runningTest = await prisma.aBTest.findFirst({
-      where: {
-        shop: shop,
-        productId: productNumericId,
-        status: 'running'
-      },
-      select: {
-        id: true,
-        name: true,
-        status: true,
-        startDate: true
-      }
-    });
+            // Check if there's a running test for this product - SCOPED BY SHOP
+            const runningTest = await prisma.aBTest.findFirst({
+              where: {
+                shop: shop,
+                productId: productNumericId,
+                status: 'running'
+              },
+              select: {
+                id: true,
+                name: true,
+                status: true,
+                startDate: true,
+                widgetType: true,
+                widgetSettings: true
+              }
+            });
 
-    const enabled = !!runningTest;
+            const enabled = !!runningTest;
 
-    console.log('🔍 Widget enabled check result:', {
-      enabled: enabled,
-      testName: runningTest?.name,
-      testId: runningTest?.id
-    });
+            console.log('🔍 [DEBUG] Widget enabled check result:', {
+              enabled: enabled,
+              testName: runningTest?.name,
+              testId: runningTest?.id,
+              testStatus: runningTest?.status,
+              startDate: runningTest?.startDate,
+              widgetType: runningTest?.widgetType,
+              hasWidgetSettings: !!runningTest?.widgetSettings,
+              widgetSettingsKeys: runningTest?.widgetSettings ? Object.keys(runningTest.widgetSettings) : []
+            });
 
     return json({ 
       enabled: enabled,

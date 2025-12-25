@@ -38,6 +38,13 @@
   };
 
   function init() {
+    console.log('🔧 [DEBUG] Widget init() called', {
+      readyState: document.readyState,
+      isInThemeEditor: typeof Shopify !== 'undefined' && Shopify.designMode,
+      url: window.location.href,
+      hasABTestWidgetConfig: !!window.ABTestWidgetConfig,
+      abTestWidgetConfig: window.ABTestWidgetConfig
+    });
     refreshBadges();
     registerConfigListener();
     registerThemeEditorListeners();
@@ -57,34 +64,42 @@
       // In theme editor: Always refresh to show latest settings
       if (!alreadyRendered || inEditor) {
         if (!alreadyRendered) {
-          // First render - log data attributes for debugging
-          console.log('🎨 Initial render - reading settings from data attributes:', {
-            headerText: container.getAttribute('data-header-text'),
-            bodyText: container.getAttribute('data-body-text'),
-            textColor: container.getAttribute('data-text-color'),
-            backgroundColor: container.getAttribute('data-background-color'),
-            iconChoice: container.getAttribute('data-icon-choice'),
-            inThemeEditor: inEditor
+          // First render - log ALL data attributes for debugging
+          const allDataAttrs = {};
+          Array.from(container.attributes).forEach(function(attr) {
+            if (attr.name.startsWith('data-')) {
+              allDataAttrs[attr.name] = attr.value;
+            }
+          });
+          
+          console.log('🎨 [DEBUG] Initial render - ALL data attributes from Liquid template:', {
+            widgetIndex: index + 1,
+            inThemeEditor: inEditor,
+            allDataAttributes: allDataAttrs,
+            containerHTML: container.outerHTML.substring(0, 300)
           });
         }
         
         container.style.display = '';
-        
+      
         // Reset initialization flag before rendering
-        container.dataset.liveVisitorInitialized = 'false';
-        
+      container.dataset.liveVisitorInitialized = 'false';
+      
         // Render badge with settings from data attributes
-        renderBadge(container);
-        
-        // Check if this is a live visitor count or how many in cart widget
-        const conversionPlayType = container.dataset.conversionPlayType;
-        if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
-          initLiveVisitorCount(container);
-        }
+      renderBadge(container);
+      
+      // Check if this is a live visitor count or how many in cart widget
+      const conversionPlayType = container.dataset.conversionPlayType;
+      if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
+        initLiveVisitorCount(container);
+      }
       } else {
         // Widget already rendered on live storefront - DO NOT re-render
         // Only control visibility to preserve configured settings
-        console.log('ℹ️ Widget already rendered on live storefront - preserving settings, only checking visibility');
+        console.log('ℹ️ [DEBUG] Widget already rendered on live storefront - preserving settings, only checking visibility', {
+          widgetIndex: index + 1,
+          currentInnerHTML: container.innerHTML.substring(0, 200)
+        });
       }
       
       // AFTER rendering (or if already rendered), check if widget should be visible on live storefront
@@ -107,19 +122,38 @@
         // Remove the flag
         container.dataset.enabledCheckInProgress = 'false';
         
+        console.log('🔍 [DEBUG] Widget enabled check result:', {
+          widgetIndex: index + 1,
+          enabled: enabled,
+          currentDisplay: container.style.display,
+          hasRenderedContent: container.querySelector('.simple-text-badge') !== null,
+          renderedContent: container.querySelector('.simple-text-badge') ? container.querySelector('.simple-text-badge').innerHTML.substring(0, 100) : 'NOT RENDERED'
+        });
+        
         if (!enabled) {
           // Widget not enabled - hide it on live storefront
           // CRITICAL: Only change visibility, NEVER re-render (settings are already loaded from template)
           container.style.display = 'none';
-          console.log('🚫 Widget hidden - test not launched yet');
+          console.log('🚫 [DEBUG] Widget hidden - test not launched yet', {
+            widgetIndex: index + 1,
+            innerHTMLBeforeHide: container.innerHTML.substring(0, 200)
+          });
         } else {
           // Widget is enabled - ensure it's visible
           // CRITICAL: Only change visibility, NEVER re-render (settings are already loaded from template)
           container.style.display = '';
-          console.log('✅ Widget enabled - showing on live storefront with configured settings from template');
+          console.log('✅ [DEBUG] Widget enabled - showing on live storefront', {
+            widgetIndex: index + 1,
+            innerHTML: container.innerHTML.substring(0, 300),
+            currentSettings: {
+              headerText: container.getAttribute('data-header-text'),
+              bodyText: container.getAttribute('data-body-text'),
+              textColor: container.getAttribute('data-text-color')
+            }
+          });
         }
       }).catch(function(error) {
-        console.error('⚠️ Error checking widget enabled status:', error);
+        console.error('⚠️ [DEBUG] Error checking widget enabled status:', error);
         container.dataset.enabledCheckInProgress = 'false';
         // On error, default to hidden (fail-safe - don't show unconfigured widgets)
         container.style.display = 'none';
@@ -480,16 +514,47 @@
   function getSettings(container, overrides) {
     var dataset = container.dataset;
     
-    // Debug: Log all data attributes
-    console.log('🔍 Reading data attributes from container:', {
+    // Debug: Log ALL data attributes in detail
+    const allDataAttrs = {};
+    Array.from(container.attributes).forEach(function(attr) {
+      if (attr.name.startsWith('data-')) {
+        allDataAttrs[attr.name] = attr.value;
+      }
+    });
+    
+    console.log('🔍 [DEBUG] getSettings() - Reading data attributes from container:', {
       hasContainer: !!container,
-      allDataAttributes: Object.keys(dataset),
-      headerTextRaw: container.getAttribute('data-header-text'),
-      bodyTextRaw: container.getAttribute('data-body-text'),
-      textColorRaw: container.getAttribute('data-text-color'),
-      headerTextDataset: dataset.headerText,
-      bodyTextDataset: dataset.bodyText,
-      textColorDataset: dataset.textColor
+      allDataAttributesFromDataset: Object.keys(dataset),
+      allDataAttributesFromGetAttribute: Object.keys(allDataAttrs),
+      criticalSettings: {
+        headerText: {
+          fromGetAttribute: container.getAttribute('data-header-text'),
+          fromDataset: dataset.headerText,
+          final: container.getAttribute('data-header-text') || dataset.headerText || ''
+        },
+        bodyText: {
+          fromGetAttribute: container.getAttribute('data-body-text'),
+          fromDataset: dataset.bodyText,
+          final: container.getAttribute('data-body-text') || dataset.bodyText || ''
+        },
+        textColor: {
+          fromGetAttribute: container.getAttribute('data-text-color'),
+          fromDataset: dataset.textColor,
+          final: container.getAttribute('data-text-color') || dataset.textColor || '#1a5f5f'
+        },
+        backgroundColor: {
+          fromGetAttribute: container.getAttribute('data-background-color'),
+          fromDataset: dataset.backgroundColor,
+          final: container.getAttribute('data-background-color') || dataset.backgroundColor || '#f5f5f0'
+        },
+        iconChoice: {
+          fromGetAttribute: container.getAttribute('data-icon-choice'),
+          fromDataset: dataset.iconChoice,
+          final: container.getAttribute('data-icon-choice') || dataset.iconChoice || 'star'
+        }
+      },
+      hasOverrides: !!overrides,
+      overrideKeys: overrides ? Object.keys(overrides) : []
     });
     
     var base = {
@@ -548,30 +613,58 @@
     }
 
     var normalizedOverrides = normalizeOverrides(overrides);
+    console.log('🔧 [DEBUG] Normalized overrides:', {
+      hasOverrides: Object.keys(normalizedOverrides).length > 0,
+      overrideKeys: Object.keys(normalizedOverrides),
+      overrideValues: normalizedOverrides
+    });
+    
     // Only apply overrides that have actual values (don't override with undefined/null/empty)
     // CRITICAL: On live storefront, prioritize data attributes from template over any overrides
     // Overrides should only be used in theme editor preview scenarios
     var isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
     var designModeFromLiquid = container.dataset.designMode === 'true';
     
+    console.log('🔧 [DEBUG] Override application decision:', {
+      isInThemeEditor: isInThemeEditor,
+      designModeFromLiquid: designModeFromLiquid,
+      willApplyOverrides: isInThemeEditor || designModeFromLiquid,
+      baseSettingsBeforeOverrides: {
+        headerText: base.headerText,
+        bodyText: base.bodyText,
+        textColor: base.textColor,
+        backgroundColor: base.backgroundColor,
+        iconChoice: base.iconChoice
+      }
+    });
+    
     if (isInThemeEditor || designModeFromLiquid) {
       // In theme editor, apply overrides (for preview purposes)
+      console.log('✅ [DEBUG] Theme editor detected - applying overrides');
       for (var key in normalizedOverrides) {
         if (normalizedOverrides[key] !== undefined && normalizedOverrides[key] !== null && normalizedOverrides[key] !== '') {
+          console.log(`  → Overriding ${key}: "${base[key]}" → "${normalizedOverrides[key]}"`);
           base[key] = normalizedOverrides[key];
         }
       }
     } else {
       // On live storefront, IGNORE overrides - only use settings from template (data attributes)
       // This ensures configured settings from template JSON are always used
-      console.log('ℹ️ Live storefront - using settings from template data attributes only, ignoring overrides');
+      console.log('ℹ️ [DEBUG] Live storefront - using settings from template data attributes only, ignoring overrides', {
+        ignoredOverrideKeys: Object.keys(normalizedOverrides)
+      });
     }
 
-    console.log('Final settings after overrides:', {
+    console.log('✅ [DEBUG] Final settings after override logic:', {
       headerText: base.headerText,
-      iconChoice: base.iconChoice,
+      bodyText: base.bodyText,
+      textColor: base.textColor,
       backgroundColor: base.backgroundColor,
-      hasExternalOverrides: Object.keys(normalizedOverrides).length > 0
+      iconChoice: base.iconChoice,
+      headerColor: base.headerColor,
+      borderColor: base.borderColor,
+      hasExternalOverrides: Object.keys(normalizedOverrides).length > 0,
+      appliedOverrides: isInThemeEditor || designModeFromLiquid
     });
 
     return base;
@@ -697,6 +790,32 @@
 
     return null;
   }
+
+  // Add page visibility change listener to detect when theme editor closes
+  document.addEventListener('visibilitychange', function() {
+    console.log('👁️ [DEBUG] Page visibility changed:', {
+      hidden: document.hidden,
+      visibilityState: document.visibilityState,
+      isInThemeEditor: typeof Shopify !== 'undefined' && Shopify.designMode,
+      url: window.location.href
+    });
+  });
+  
+  // Add beforeunload listener to detect when page is about to unload (editor closing)
+  window.addEventListener('beforeunload', function() {
+    console.log('🚪 [DEBUG] Page about to unload (editor closing?)', {
+      isInThemeEditor: typeof Shopify !== 'undefined' && Shopify.designMode,
+      url: window.location.href
+    });
+  });
+  
+  // Log when page loads
+  console.log('📄 [DEBUG] Page load state:', {
+    readyState: document.readyState,
+    isInThemeEditor: typeof Shopify !== 'undefined' && Shopify.designMode,
+    url: window.location.href,
+    timestamp: new Date().toISOString()
+  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);
