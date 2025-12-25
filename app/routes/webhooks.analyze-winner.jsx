@@ -434,6 +434,55 @@ export const action = async ({ request }) => {
           }
       } else {
         console.log(`ℹ️ Control (A) won - product remains on control template (no assignment needed)`);
+        
+        // Clear the metafield since control won (no widget in control template)
+        try {
+          let productGid = test.productId;
+          if (!productGid.startsWith('gid://')) {
+            const numericId = productGid.match(/Product\/(\d+)/)?.[1] || productGid.match(/^(\d+)$/)?.[1] || productGid;
+            productGid = `gid://shopify/Product/${numericId}`;
+          }
+
+          const metafieldMutation = `
+            mutation productUpdateMetafield($metafields: [MetafieldsSetInput!]!) {
+              metafieldsSet(metafields: $metafields) {
+                metafields {
+                  id
+                  namespace
+                  key
+                  value
+                }
+                userErrors {
+                  field
+                  message
+                }
+              }
+            }
+          `;
+          
+          const metafieldResponse = await admin.graphql(metafieldMutation, {
+            variables: {
+              metafields: [
+                {
+                  ownerId: productGid,
+                  namespace: "ab_optimizer",
+                  key: "test_running",
+                  type: "boolean",
+                  value: "false"
+                }
+              ]
+            }
+          });
+          
+          const metafieldResult = await metafieldResponse.json();
+          if (metafieldResult.data?.metafieldsSet?.userErrors?.length > 0) {
+            console.error("⚠️ Metafield user errors when clearing:", metafieldResult.data.metafieldsSet.userErrors);
+          } else {
+            console.log("✅ Cleared product metafield: ab_optimizer.test_running = false (control won)");
+          }
+        } catch (metafieldError) {
+          console.error("⚠️ Failed to clear metafield when control won:", metafieldError);
+        }
       }
 
       return json({ 
