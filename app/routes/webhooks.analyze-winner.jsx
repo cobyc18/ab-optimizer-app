@@ -369,25 +369,69 @@ export const action = async ({ request }) => {
           if (result.errors?.length) {
             console.error("❌ GraphQL errors assigning variant template to product:", result.errors);
             console.error("❌ Full GraphQL response:", JSON.stringify(result, null, 2));
-          } else {
-            const userErrors = result.data?.productUpdate?.userErrors || [];
-            if (userErrors.length > 0) {
-              console.error("❌ User errors assigning variant template to product:", userErrors);
-              console.error("❌ Full GraphQL response:", JSON.stringify(result, null, 2));
             } else {
-              const updatedProduct = result.data?.productUpdate?.product;
-              console.log(`✅ Successfully assigned product to variant template:`, {
-                templateB: test.templateB,
-                productId: updatedProduct?.id,
-                newTemplateSuffix: updatedProduct?.templateSuffix
-              });
+              const userErrors = result.data?.productUpdate?.userErrors || [];
+              if (userErrors.length > 0) {
+                console.error("❌ User errors assigning variant template to product:", userErrors);
+                console.error("❌ Full GraphQL response:", JSON.stringify(result, null, 2));
+              } else {
+                const updatedProduct = result.data?.productUpdate?.product;
+                console.log(`✅ Successfully assigned product to variant template:`, {
+                  templateB: test.templateB,
+                  productId: updatedProduct?.id,
+                  newTemplateSuffix: updatedProduct?.templateSuffix
+                });
+                
+                // Keep the metafield set to true so widget remains visible on live storefront
+                // since the variant template (with widget) is now the live template
+                try {
+                  const metafieldMutation = `
+                    mutation productUpdateMetafield($metafields: [MetafieldsSetInput!]!) {
+                      metafieldsSet(metafields: $metafields) {
+                        metafields {
+                          id
+                          namespace
+                          key
+                          value
+                        }
+                        userErrors {
+                          field
+                          message
+                        }
+                      }
+                    }
+                  `;
+                  
+                  const metafieldResponse = await admin.graphql(metafieldMutation, {
+                    variables: {
+                      metafields: [
+                        {
+                          ownerId: productGid,
+                          namespace: "ab_optimizer",
+                          key: "test_running",
+                          type: "boolean",
+                          value: "true"
+                        }
+                      ]
+                    }
+                  });
+                  
+                  const metafieldResult = await metafieldResponse.json();
+                  if (metafieldResult.data?.metafieldsSet?.userErrors?.length > 0) {
+                    console.error("⚠️ Metafield user errors:", metafieldResult.data.metafieldsSet.userErrors);
+                  } else {
+                    console.log("✅ Kept product metafield: ab_optimizer.test_running = true (variant won, widget now live)");
+                  }
+                } catch (metafieldError) {
+                  console.error("⚠️ Failed to update metafield after variant win:", metafieldError);
+                }
+              }
             }
+          } catch (assignError) {
+            console.error("❌ Error assigning variant template to product after winner declaration:", assignError);
+            console.error("❌ Error stack:", assignError.stack);
+            // Don't fail the webhook if assignment fails - log and continue
           }
-        } catch (assignError) {
-          console.error("❌ Error assigning variant template to product after winner declaration:", assignError);
-          console.error("❌ Error stack:", assignError.stack);
-          // Don't fail the webhook if assignment fails - log and continue
-        }
       } else {
         console.log(`ℹ️ Control (A) won - product remains on control template (no assignment needed)`);
       }

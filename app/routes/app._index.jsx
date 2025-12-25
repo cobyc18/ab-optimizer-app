@@ -524,6 +524,50 @@ export const loader = async ({ request }) => {
                 console.error("❌ User errors assigning variant template:", userErrors);
               } else {
                 console.log(`✅ Successfully assigned product to variant template: ${test.templateB}`);
+                
+                // Keep the metafield set to true so widget remains visible on live storefront
+                // since the variant template (with widget) is now the live template
+                try {
+                  const metafieldMutation = `
+                    mutation productUpdateMetafield($metafields: [MetafieldsSetInput!]!) {
+                      metafieldsSet(metafields: $metafields) {
+                        metafields {
+                          id
+                          namespace
+                          key
+                          value
+                        }
+                        userErrors {
+                          field
+                          message
+                        }
+                      }
+                    }
+                  `;
+                  
+                  const metafieldResponse = await admin.graphql(metafieldMutation, {
+                    variables: {
+                      metafields: [
+                        {
+                          ownerId: productGid,
+                          namespace: "ab_optimizer",
+                          key: "test_running",
+                          type: "boolean",
+                          value: "true"
+                        }
+                      ]
+                    }
+                  });
+                  
+                  const metafieldResult = await metafieldResponse.json();
+                  if (metafieldResult.data?.metafieldsSet?.userErrors?.length > 0) {
+                    console.error("⚠️ Metafield user errors:", metafieldResult.data.metafieldsSet.userErrors);
+                  } else {
+                    console.log("✅ Kept product metafield: ab_optimizer.test_running = true (variant won, widget now live)");
+                  }
+                } catch (metafieldError) {
+                  console.error("⚠️ Failed to update metafield after variant win:", metafieldError);
+                }
               }
             }
           } catch (assignError) {
@@ -624,6 +668,50 @@ export const loader = async ({ request }) => {
                     console.error("❌ User errors assigning variant template:", userErrors);
                   } else {
                     console.log(`✅ Successfully assigned product to variant template: ${test.templateB}`);
+                    
+                    // Keep the metafield set to true so widget remains visible on live storefront
+                    // since the variant template (with widget) is now the live template
+                    try {
+                      const metafieldMutation = `
+                        mutation productUpdateMetafield($metafields: [MetafieldsSetInput!]!) {
+                          metafieldsSet(metafields: $metafields) {
+                            metafields {
+                              id
+                              namespace
+                              key
+                              value
+                            }
+                            userErrors {
+                              field
+                              message
+                            }
+                          }
+                        }
+                      `;
+                      
+                      const metafieldResponse = await admin.graphql(metafieldMutation, {
+                        variables: {
+                          metafields: [
+                            {
+                              ownerId: productGid,
+                              namespace: "ab_optimizer",
+                              key: "test_running",
+                              type: "boolean",
+                              value: "true"
+                            }
+                          ]
+                        }
+                      });
+                      
+                      const metafieldResult = await metafieldResponse.json();
+                      if (metafieldResult.data?.metafieldsSet?.userErrors?.length > 0) {
+                        console.error("⚠️ Metafield user errors:", metafieldResult.data.metafieldsSet.userErrors);
+                      } else {
+                        console.log("✅ Kept product metafield: ab_optimizer.test_running = true (variant won, widget now live)");
+                      }
+                    } catch (metafieldError) {
+                      console.error("⚠️ Failed to update metafield after variant win:", metafieldError);
+                    }
                   }
                 }
               } catch (assignError) {
