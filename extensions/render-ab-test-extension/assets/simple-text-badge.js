@@ -38,13 +38,6 @@
   };
 
   function init() {
-    console.log('🔧 [DEBUG] Widget init() called', {
-      readyState: document.readyState,
-      isInThemeEditor: typeof Shopify !== 'undefined' && Shopify.designMode,
-      url: window.location.href,
-      hasABTestWidgetConfig: !!window.ABTestWidgetConfig,
-      abTestWidgetConfig: window.ABTestWidgetConfig
-    });
     refreshBadges();
     registerConfigListener();
     registerThemeEditorListeners();
@@ -52,40 +45,12 @@
 
   function refreshBadges() {
     document.querySelectorAll('.simple-text-badge-widget').forEach(function(container) {
-      // Check if we're in theme editor
-      const isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
-      const designModeFromLiquid = container.dataset.designMode === 'true';
-      const inEditor = isInThemeEditor || designModeFromLiquid;
+      // Debug: Log the container's HTML to see what data attributes are present
+      console.log('🔍 Container HTML:', container.outerHTML.substring(0, 500));
       
-      // Check if widget has already been rendered (to prevent re-rendering with defaults)
-      const alreadyRendered = container.querySelector('.simple-text-badge') !== null;
-      
-      // On live storefront: Only render once, then only control visibility
-      // In theme editor: Always refresh to show latest settings
-      if (!alreadyRendered || inEditor) {
-        if (!alreadyRendered) {
-          // First render - log ALL data attributes for debugging
-          const allDataAttrs = {};
-          Array.from(container.attributes).forEach(function(attr) {
-            if (attr.name.startsWith('data-')) {
-              allDataAttrs[attr.name] = attr.value;
-            }
-          });
-          
-          console.log('🎨 [DEBUG] Initial render - ALL data attributes from Liquid template:', {
-            widgetIndex: index + 1,
-            inThemeEditor: inEditor,
-            allDataAttributes: allDataAttrs,
-            containerHTML: container.outerHTML.substring(0, 300)
-          });
-        }
-        
-        container.style.display = '';
-      
-        // Reset initialization flag before rendering
+      // Reset initialization flag before re-rendering
       container.dataset.liveVisitorInitialized = 'false';
       
-        // Render badge with settings from data attributes
       renderBadge(container);
       
       // Check if this is a live visitor count or how many in cart widget
@@ -93,162 +58,6 @@
       if (conversionPlayType === 'live-visitor-count' || conversionPlayType === 'how-many-in-cart') {
         initLiveVisitorCount(container);
       }
-      } else {
-        // Widget already rendered on live storefront - DO NOT re-render
-        // Only control visibility to preserve configured settings
-        console.log('ℹ️ [DEBUG] Widget already rendered on live storefront - preserving settings, only checking visibility', {
-          widgetIndex: index + 1,
-          currentInnerHTML: container.innerHTML.substring(0, 200)
-        });
-      }
-      
-      // AFTER rendering (or if already rendered), check if widget should be visible on live storefront
-      // This doesn't interfere with settings loading - we only control visibility, not re-rendering
-      // Store a flag to prevent multiple simultaneous checks
-      if (container.dataset.enabledCheckInProgress === 'true') {
-        return; // Already checking, don't duplicate
-      }
-      
-      // On live storefront, check visibility. In theme editor, always show.
-      if (inEditor) {
-        // Always visible in theme editor
-        container.style.display = '';
-        return;
-      }
-      
-      container.dataset.enabledCheckInProgress = 'true';
-      
-      checkWidgetEnabled(container).then(function(enabled) {
-        // Remove the flag
-        container.dataset.enabledCheckInProgress = 'false';
-        
-        console.log('🔍 [DEBUG] Widget enabled check result:', {
-          widgetIndex: index + 1,
-          enabled: enabled,
-          currentDisplay: container.style.display,
-          hasRenderedContent: container.querySelector('.simple-text-badge') !== null,
-          renderedContent: container.querySelector('.simple-text-badge') ? container.querySelector('.simple-text-badge').innerHTML.substring(0, 100) : 'NOT RENDERED'
-        });
-        
-        if (!enabled) {
-          // Widget not enabled - hide it on live storefront
-          // CRITICAL: Only change visibility, NEVER re-render (settings are already loaded from template)
-          container.style.display = 'none';
-          console.log('🚫 [DEBUG] Widget hidden - test not launched yet', {
-            widgetIndex: index + 1,
-            innerHTMLBeforeHide: container.innerHTML.substring(0, 200)
-          });
-        } else {
-          // Widget is enabled - ensure it's visible
-          // CRITICAL: Only change visibility, NEVER re-render (settings are already loaded from template)
-          container.style.display = '';
-          console.log('✅ [DEBUG] Widget enabled - showing on live storefront', {
-            widgetIndex: index + 1,
-            innerHTML: container.innerHTML.substring(0, 300),
-            currentSettings: {
-              headerText: container.getAttribute('data-header-text'),
-              bodyText: container.getAttribute('data-body-text'),
-              textColor: container.getAttribute('data-text-color')
-            }
-          });
-        }
-      }).catch(function(error) {
-        console.error('⚠️ [DEBUG] Error checking widget enabled status:', error);
-        container.dataset.enabledCheckInProgress = 'false';
-        // On error, default to hidden (fail-safe - don't show unconfigured widgets)
-        container.style.display = 'none';
-      });
-    });
-  }
-
-  /**
-   * Check if widget should be enabled (visible) on the live storefront.
-   * Widgets are only enabled if there's a running A/B test for the product.
-   * Always enabled in theme editor.
-   * 
-   * @param {HTMLElement} container - The widget container element
-   * @param {number} retryCount - Current retry attempt (for retry logic)
-   * @param {number} maxRetries - Maximum number of retries
-   * @returns {Promise<boolean>} - True if widget should be enabled, false otherwise
-   */
-  function checkWidgetEnabled(container, retryCount, maxRetries) {
-    retryCount = retryCount || 0;
-    maxRetries = maxRetries || 3;
-    
-    return new Promise(function(resolve, reject) {
-      // Check if we're in theme editor
-      const isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
-      const designModeFromLiquid = container.dataset.designMode === 'true';
-      
-      if (isInThemeEditor || designModeFromLiquid) {
-        // Always show widget in theme editor
-        console.log('✅ Widget enabled - in theme editor');
-        resolve(true);
-        return;
-      }
-      
-      // On live storefront, check if test is running
-      const productId = container.dataset.productId;
-      const shop = container.dataset.shop;
-      
-      if (!productId || !shop) {
-        console.warn('⚠️ Missing productId or shop - defaulting to disabled');
-        resolve(false);
-        return;
-      }
-      
-      // Use app proxy to call API from storefront
-      // App proxy pattern: https://{shop}/apps/ab-optimizer-app/{path}
-      const shopDomain = shop.includes('.myshopify.com') ? shop : shop + '.myshopify.com';
-      const apiUrl = 'https://' + shopDomain + '/apps/ab-optimizer-app/api/check-widget-enabled?productId=' + encodeURIComponent(productId) + '&shop=' + encodeURIComponent(shop);
-      
-      fetch(apiUrl)
-        .then(function(response) {
-          if (!response.ok) {
-            throw new Error('API request failed: ' + response.status);
-          }
-          return response.json();
-        })
-        .then(function(data) {
-          const enabled = data.enabled === true;
-          console.log('🔍 Widget enabled check:', {
-            enabled: enabled,
-            productId: productId,
-            shop: shop,
-            testName: data.testName,
-            retryAttempt: retryCount
-          });
-          
-          // If not enabled and we haven't exhausted retries, retry after a delay
-          // This handles cases where test was just created and database hasn't propagated yet
-          if (!enabled && retryCount < maxRetries) {
-            console.log('⏳ Test not found, retrying in ' + ((retryCount + 1) * 1000) + 'ms...');
-            setTimeout(function() {
-              checkWidgetEnabled(container, retryCount + 1, maxRetries).then(resolve).catch(reject);
-            }, (retryCount + 1) * 1000); // 1s, 2s, 3s delays
-            return;
-          }
-          
-          resolve(enabled);
-        })
-        .catch(function(error) {
-          console.error('❌ Error checking widget enabled status:', error);
-          
-          // Retry on error if we haven't exhausted retries
-          if (retryCount < maxRetries) {
-            console.log('⏳ API error, retrying in ' + ((retryCount + 1) * 1000) + 'ms...');
-            setTimeout(function() {
-              checkWidgetEnabled(container, retryCount + 1, maxRetries).then(resolve).catch(function() {
-                // On final error, default to disabled (fail-safe)
-                resolve(false);
-              });
-            }, (retryCount + 1) * 1000);
-            return;
-          }
-          
-          // On final error, default to disabled (fail-safe - don't show unconfigured widgets)
-          resolve(false);
-        });
     });
   }
   
@@ -322,36 +131,13 @@
 
   function registerConfigListener() {
     if (window.__simpleTextBadgeConfigListenerAdded) return;
-    window.addEventListener('abTestWidgetConfigUpdate', function() {
-      // Only refresh if we're in theme editor or if widget config actually has settings
-      // This prevents re-rendering with defaults on live storefront
-      var isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
-      var hasValidConfig = window.ABTestWidgetConfig && window.ABTestWidgetConfig.settings && Object.keys(window.ABTestWidgetConfig.settings).length > 0;
-      
-      if (isInThemeEditor || hasValidConfig) {
-        refreshBadges();
-      } else {
-        console.log('ℹ️ Skipping widget refresh - no valid config and not in theme editor');
-      }
-    });
+    window.addEventListener('abTestWidgetConfigUpdate', refreshBadges);
     window.__simpleTextBadgeConfigListenerAdded = true;
   }
 
   function registerThemeEditorListeners() {
     // Prevent duplicate listeners
     if (window.__simpleTextBadgeThemeEditorListenersAdded) return;
-    
-    // CRITICAL: Only register these listeners if we're in theme editor
-    // These events fire on live storefront too, which causes unwanted re-renders
-    var isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
-    
-    if (!isInThemeEditor) {
-      // On live storefront, don't listen to these events - they cause re-renders
-      // Settings should come from data attributes only, rendered once
-      console.log('ℹ️ Theme editor listeners skipped - not in theme editor');
-      window.__simpleTextBadgeThemeEditorListenersAdded = true;
-      return;
-    }
     
     // Listen for section load events (fires when section is added/re-rendered)
     // This is the standard Shopify way to handle theme editor updates
@@ -514,47 +300,16 @@
   function getSettings(container, overrides) {
     var dataset = container.dataset;
     
-    // Debug: Log ALL data attributes in detail
-    const allDataAttrs = {};
-    Array.from(container.attributes).forEach(function(attr) {
-      if (attr.name.startsWith('data-')) {
-        allDataAttrs[attr.name] = attr.value;
-      }
-    });
-    
-    console.log('🔍 [DEBUG] getSettings() - Reading data attributes from container:', {
+    // Debug: Log all data attributes
+    console.log('🔍 Reading data attributes from container:', {
       hasContainer: !!container,
-      allDataAttributesFromDataset: Object.keys(dataset),
-      allDataAttributesFromGetAttribute: Object.keys(allDataAttrs),
-      criticalSettings: {
-        headerText: {
-          fromGetAttribute: container.getAttribute('data-header-text'),
-          fromDataset: dataset.headerText,
-          final: container.getAttribute('data-header-text') || dataset.headerText || ''
-        },
-        bodyText: {
-          fromGetAttribute: container.getAttribute('data-body-text'),
-          fromDataset: dataset.bodyText,
-          final: container.getAttribute('data-body-text') || dataset.bodyText || ''
-        },
-        textColor: {
-          fromGetAttribute: container.getAttribute('data-text-color'),
-          fromDataset: dataset.textColor,
-          final: container.getAttribute('data-text-color') || dataset.textColor || '#1a5f5f'
-        },
-        backgroundColor: {
-          fromGetAttribute: container.getAttribute('data-background-color'),
-          fromDataset: dataset.backgroundColor,
-          final: container.getAttribute('data-background-color') || dataset.backgroundColor || '#f5f5f0'
-        },
-        iconChoice: {
-          fromGetAttribute: container.getAttribute('data-icon-choice'),
-          fromDataset: dataset.iconChoice,
-          final: container.getAttribute('data-icon-choice') || dataset.iconChoice || 'star'
-        }
-      },
-      hasOverrides: !!overrides,
-      overrideKeys: overrides ? Object.keys(overrides) : []
+      allDataAttributes: Object.keys(dataset),
+      headerTextRaw: container.getAttribute('data-header-text'),
+      bodyTextRaw: container.getAttribute('data-body-text'),
+      textColorRaw: container.getAttribute('data-text-color'),
+      headerTextDataset: dataset.headerText,
+      bodyTextDataset: dataset.bodyText,
+      textColorDataset: dataset.textColor
     });
     
     var base = {
@@ -613,58 +368,13 @@
     }
 
     var normalizedOverrides = normalizeOverrides(overrides);
-    console.log('🔧 [DEBUG] Normalized overrides:', {
-      hasOverrides: Object.keys(normalizedOverrides).length > 0,
-      overrideKeys: Object.keys(normalizedOverrides),
-      overrideValues: normalizedOverrides
-    });
-    
-    // Only apply overrides that have actual values (don't override with undefined/null/empty)
-    // CRITICAL: On live storefront, prioritize data attributes from template over any overrides
-    // Overrides should only be used in theme editor preview scenarios
-    var isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
-    var designModeFromLiquid = container.dataset.designMode === 'true';
-    
-    console.log('🔧 [DEBUG] Override application decision:', {
-      isInThemeEditor: isInThemeEditor,
-      designModeFromLiquid: designModeFromLiquid,
-      willApplyOverrides: isInThemeEditor || designModeFromLiquid,
-      baseSettingsBeforeOverrides: {
-        headerText: base.headerText,
-        bodyText: base.bodyText,
-        textColor: base.textColor,
-        backgroundColor: base.backgroundColor,
-        iconChoice: base.iconChoice
-      }
-    });
-    
-    if (isInThemeEditor || designModeFromLiquid) {
-      // In theme editor, apply overrides (for preview purposes)
-      console.log('✅ [DEBUG] Theme editor detected - applying overrides');
-      for (var key in normalizedOverrides) {
-        if (normalizedOverrides[key] !== undefined && normalizedOverrides[key] !== null && normalizedOverrides[key] !== '') {
-          console.log(`  → Overriding ${key}: "${base[key]}" → "${normalizedOverrides[key]}"`);
-          base[key] = normalizedOverrides[key];
-        }
-      }
-    } else {
-      // On live storefront, IGNORE overrides - only use settings from template (data attributes)
-      // This ensures configured settings from template JSON are always used
-      console.log('ℹ️ [DEBUG] Live storefront - using settings from template data attributes only, ignoring overrides', {
-        ignoredOverrideKeys: Object.keys(normalizedOverrides)
-      });
-    }
+    Object.assign(base, normalizedOverrides);
 
-    console.log('✅ [DEBUG] Final settings after override logic:', {
+    console.log('Final settings after overrides:', {
       headerText: base.headerText,
-      bodyText: base.bodyText,
-      textColor: base.textColor,
-      backgroundColor: base.backgroundColor,
       iconChoice: base.iconChoice,
-      headerColor: base.headerColor,
-      borderColor: base.borderColor,
-      hasExternalOverrides: Object.keys(normalizedOverrides).length > 0,
-      appliedOverrides: isInThemeEditor || designModeFromLiquid
+      backgroundColor: base.backgroundColor,
+      hasExternalOverrides: Object.keys(normalizedOverrides).length > 0
     });
 
     return base;
@@ -790,32 +500,6 @@
 
     return null;
   }
-
-  // Add page visibility change listener to detect when theme editor closes
-  document.addEventListener('visibilitychange', function() {
-    console.log('👁️ [DEBUG] Page visibility changed:', {
-      hidden: document.hidden,
-      visibilityState: document.visibilityState,
-      isInThemeEditor: typeof Shopify !== 'undefined' && Shopify.designMode,
-      url: window.location.href
-    });
-  });
-  
-  // Add beforeunload listener to detect when page is about to unload (editor closing)
-  window.addEventListener('beforeunload', function() {
-    console.log('🚪 [DEBUG] Page about to unload (editor closing?)', {
-      isInThemeEditor: typeof Shopify !== 'undefined' && Shopify.designMode,
-      url: window.location.href
-    });
-  });
-  
-  // Log when page loads
-  console.log('📄 [DEBUG] Page load state:', {
-    readyState: document.readyState,
-    isInThemeEditor: typeof Shopify !== 'undefined' && Shopify.designMode,
-    url: window.location.href,
-    timestamp: new Date().toISOString()
-  });
 
   if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', init);

@@ -949,40 +949,9 @@ export default function ABTests() {
         setWizardVariantTemplateFilename(result.newFilename);
         setIsVariantTemplateReady(true);
 
-        // Assign the product to the variant template immediately after duplication
-        // This ensures the product is assigned even when manually navigating to the theme editor
-        if (productId) {
-          try {
-            console.log('🔧 Assigning product to variant template immediately after duplication...');
-            const assignResponse = await fetch('/api/assign-product-template', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                productId: productId,
-                templateSuffix: variantName
-              })
-            });
-            
-            if (assignResponse.ok) {
-              const assignResult = await assignResponse.json();
-              if (assignResult.success) {
-                console.log('✅ Product assigned to variant template:', {
-                  productId: productId,
-                  templateSuffix: variantName
-                });
-              } else {
-                console.warn('⚠️ Failed to assign product to variant template:', assignResult.error);
-                // Don't fail the entire operation - template was created successfully
-              }
-            } else {
-              console.warn('⚠️ Failed to assign product to variant template - HTTP error');
-              // Don't fail the entire operation - template was created successfully
-            }
-          } catch (assignError) {
-            console.error('⚠️ Error assigning product to variant template:', assignError);
-            // Don't fail the entire operation - template was created successfully
-          }
-        }
+        // Note: We no longer assign the product to the variant template here.
+        // The product will only be assigned to the variant template if it wins the A/B test.
+        // Assignment happens temporarily when opening the theme editor, and permanently only when variant wins.
 
         creationResult = { success: true, variantName, newFilename: result.newFilename };
       } else {
@@ -1027,53 +996,51 @@ export default function ABTests() {
         return;
       }
 
-      // CRITICAL: The theme editor requires the product to have the template assigned.
-      // The 'view' parameter only works on the storefront, not in the theme editor.
-      // To prevent visitors from seeing unconfigured widgets, we:
-      // 1. Temporarily assign the product to the variant template
-      // 2. Open the theme editor
-      // 3. Immediately revert it back (within 100-200ms) - fast enough that visitors won't see it
+      // Temporarily assign the product to the variant template so Shopify's theme editor uses the correct product
+      // The product will be reverted back to the control template when the test is launched
+      const productIdForAssignment = wizardVariantProductId || wizardSelectedProductSnapshot?.id || selectedProduct?.id;
       
+      if (productIdForAssignment) {
+        try {
+          const assignResponse = await fetch('/api/assign-product-template', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              productId: productIdForAssignment,
+              templateSuffix: wizardVariantName
+            })
+          });
+          
+          if (assignResponse.ok) {
+            console.log('✅ Temporarily assigned product to variant template for theme editor');
+          } else {
+            console.error('⚠️ Failed to assign product template:', await assignResponse.json());
+          }
+        } catch (assignError) {
+          console.error('⚠️ Failed to temporarily assign product template:', assignError);
+          // Continue anyway - the URL parameters might still work
+        }
+      }
+
       // Use the product handle that was set when the template was duplicated
       const productHandleForPreview = wizardVariantProductHandle;
-      const productIdForAssignment = wizardVariantProductId || wizardSelectedProductSnapshot?.id || selectedProduct?.id;
-      const originalTemplateSuffix = wizardVariantOriginalTemplateSuffix; // This was saved when template was duplicated
       
-      // Comprehensive debug logging
-      console.log('🔍 Opening theme editor - Debug Info:', {
+      console.log('🔍 Opening theme editor with:', {
         productHandle: productHandleForPreview,
         productId: productIdForAssignment,
-        productTitle: wizardVariantProductTitle || wizardSelectedProductSnapshot?.title || selectedProduct?.title,
         variantName: wizardVariantName,
-        variantTemplateFilename: wizardVariantTemplateFilename,
-        templateParam: `product.${wizardVariantName}`,
-        originalTemplateSuffix: originalTemplateSuffix,
-        assignmentStrategy: 'TEMPORARY_ASSIGNMENT - Will revert immediately after opening editor'
+        templateParam: `product.${wizardVariantName}`
       });
-      
-      // Validate we have the required data
-      if (!productHandleForPreview) {
-        console.error('❌ Missing product handle - cannot open theme editor');
-        alert('We could not determine which product to preview. Please go back, re-select your product, and duplicate the template again.');
-        return;
-      }
-      
-      if (!wizardVariantName) {
-        console.error('❌ Missing variant name - cannot open theme editor');
-        alert('Variant template has not been created yet. Please duplicate the template first.');
-          return;
-        }
       // For OS 2.0 JSON templates, the template param should be: product.<suffix>
       // This tells Shopify which template file to load in the editor
       const templateParam = `product.${wizardVariantName}`;
 
       // The previewPath must include ?view=<suffix> to ensure Shopify uses the correct template
       // This is critical - without it, Shopify will use the product's default template assignment
-      // Build preview path with view parameter to use the alternate template without assignment
-      // The 'view' parameter tells Shopify to use the specified template suffix
       const previewParams = new URLSearchParams();
-      previewParams.set('view', wizardVariantName); // Critical: This makes Shopify use the variant template
-      
+      if (wizardVariantName) {
+        previewParams.set('view', wizardVariantName);
+      }
       if (selectedIdea?.blockId && selectedWidgetConfig) {
         const encodedConfig = encodeWidgetConfigPayload({
           widgetType: selectedIdea.blockId,
@@ -1083,16 +1050,10 @@ export default function ABTests() {
           previewParams.set('ab_widget_config', encodedConfig);
         }
       }
-      
-      const previewPath = `/products/${productHandleForPreview}?${previewParams.toString()}`;
+      const previewPath = previewParams.toString()
+        ? `/products/${productHandleForPreview}?${previewParams.toString()}`
+        : `/products/${productHandleForPreview}`;
       const encodedPreviewPath = encodeURIComponent(previewPath);
-      
-      console.log('🔍 Preview path details:', {
-        previewPath: previewPath,
-        encodedPreviewPath: encodedPreviewPath,
-        viewParameter: wizardVariantName,
-        productHandle: productHandleForPreview
-      });
 
       const apiKey = "5ff212573a3e19bae68ca45eae0a80c4";
       const widgetHandle = selectedIdea?.blockId || null;
@@ -1126,122 +1087,14 @@ export default function ABTests() {
 
       const cacheBuster = `&_t=${Date.now()}`;
 
-      // STEP 1: Assign the product to the variant template
-      // This is REQUIRED for the theme editor to show the correct product.
-      // The theme editor checks which product has the template assigned, and if none
-      // (or a different one), it defaults to the first product it finds.
-      // 
-      // STRATEGY: Keep the product assigned until test launch (which reverts it to control).
-      // Only revert if the user closes the theme editor without launching.
-      // This prevents visitors from seeing unconfigured widgets while allowing the editor to work.
-      let assignmentSuccessful = false;
-      if (productIdForAssignment) {
-        try {
-          console.log('🔧 Assigning product to variant template for theme editor...');
-          console.log('🔍 Assignment details:', {
-            productId: productIdForAssignment,
-            productHandle: productHandleForPreview,
-            variantTemplate: wizardVariantName,
-            originalTemplate: originalTemplateSuffix || 'default',
-            strategy: 'Keep assigned until test launch (launch API will revert to control)'
-          });
-          
-          const assignResponse = await fetch('/api/assign-product-template', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              productId: productIdForAssignment,
-              templateSuffix: wizardVariantName
-            })
-          });
-          
-          if (assignResponse.ok) {
-            assignmentSuccessful = true;
-            console.log('✅ Product assigned to variant template');
-            console.log('ℹ️ Product will remain assigned until test launch (prevents visitor exposure)');
-            console.log('ℹ️ If you close the editor without launching, product will stay assigned');
-          } else {
-            const errorData = await assignResponse.json();
-            console.error('⚠️ Failed to assign product template:', errorData);
-          }
-        } catch (assignError) {
-          console.error('⚠️ Error assigning product template:', assignError);
-        }
-      } else {
-        console.warn('⚠️ No product ID available for assignment');
-      }
-
       const editorUrl = `https://admin.shopify.com/store/${storeSubdomain}/themes/${numericThemeId}/editor?template=${encodeURIComponent(templateParam)}&previewPath=${encodedPreviewPath}${addBlockParams}${cacheBuster}`;
 
-      console.log('🔍 Final theme editor URL:', {
-        url: editorUrl,
-        templateParam: templateParam,
-        previewPath: previewPath,
-        hasViewParam: previewParams.has('view'),
-        viewValue: previewParams.get('view'),
-        assignmentStatus: assignmentSuccessful ? 'ASSIGNED' : 'NOT_ASSIGNED'
-      });
+      window.open(editorUrl, '_blank');
 
-      // STEP 2: Open the theme editor
-      const themeEditorWindow = window.open(editorUrl, '_blank');
-      
-      // STEP 3: Monitor the theme editor window and revert if closed without launching
-      // The product will be reverted to control when the test is launched (in launch API).
-      // If the user closes the editor without launching, we revert after a delay to prevent
-      // visitors from seeing unconfigured widgets.
-      if (assignmentSuccessful && productIdForAssignment && themeEditorWindow) {
-        let revertTimer = null;
-        const checkInterval = setInterval(() => {
-          try {
-            if (themeEditorWindow.closed) {
-              clearInterval(checkInterval);
-              if (revertTimer) clearTimeout(revertTimer);
-              
-              // User closed the editor - revert after a short delay to ensure editor finished loading
-              revertTimer = setTimeout(async () => {
-                try {
-                  console.log('🔧 Theme editor closed - reverting product template assignment...');
-                  const revertResponse = await fetch('/api/assign-product-template', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                      productId: productIdForAssignment,
-                      templateSuffix: originalTemplateSuffix
-                    })
-                  });
-                  
-                  if (revertResponse.ok) {
-                    console.log('✅ Product template reverted (editor was closed without launching)');
-                  } else {
-                    console.error('⚠️ Failed to revert product template');
-                  }
-                } catch (revertError) {
-                  console.error('⚠️ Error reverting product template:', revertError);
-                }
-              }, 1000); // 1 second delay after window closes
-            }
-          } catch (e) {
-            // Cross-origin restrictions - expected
-          }
-        }, 500); // Check every 500ms
-        
-        // Clean up interval after 5 minutes (editor session unlikely to last longer)
-        setTimeout(() => {
-          clearInterval(checkInterval);
-          if (revertTimer) clearTimeout(revertTimer);
-        }, 300000);
-      } else if (!assignmentSuccessful) {
-        console.warn('⚠️ Product was not assigned - theme editor may show wrong product');
-        console.warn('⚠️ The theme editor requires product assignment to show the correct product');
-      }
-      
-      console.log('🔍 Theme Editor Opening:', {
-        expectedProductHandle: productHandleForPreview,
-        expectedProductTitle: wizardVariantProductTitle || wizardSelectedProductSnapshot?.title || selectedProduct?.title,
-        expectedTemplate: `product.${wizardVariantName}`,
-        assignmentStrategy: 'TEMPORARY_ASSIGNMENT - Reverted after 150ms to prevent visitor exposure',
-        revertTo: originalTemplateSuffix || 'default template'
-      });
+      // Note: We temporarily assign the product to the variant template so Shopify's theme editor
+      // uses the correct product. The product will be reverted back to the control template
+      // when the test is launched (in the launch API). This ensures the theme editor works correctly
+      // and the product is only permanently assigned if the variant wins the A/B test.
 
       if (widgetHandle && selectedIdea?.blockId === 'simple-text-badge' && widgetSettings && Object.keys(widgetSettings).length > 0) {
         const formatText = (text) => {
@@ -2339,8 +2192,7 @@ export default function ABTests() {
                       display: 'flex',
                       flexDirection: 'column',
                       boxShadow: selectedProduct?.id === product.id ? '0 4px 12px rgba(59, 130, 246, 0.15)' : '0 1px 3px rgba(0, 0, 0, 0.1)',
-                      transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)',
-                      position: 'relative'
+                      transform: selectedProduct?.id === product.id ? 'scale(1.02)' : 'scale(1)'
                     }}
                     onMouseEnter={(e) => {
                       if (selectedProduct?.id !== product.id) {
@@ -2355,39 +2207,6 @@ export default function ABTests() {
                       }
                     }}
                   >
-                    {/* Checkmark icon - top right */}
-                    {selectedProduct?.id === product.id && (
-                      <div style={{
-                        position: 'absolute',
-                        top: '12px',
-                        right: '12px',
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '50%',
-                        backgroundColor: '#2563EB',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        zIndex: 1000,
-                        boxShadow: '0 2px 8px rgba(37, 99, 235, 0.3)'
-                      }}>
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 16 16"
-                          fill="none"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <path
-                            d="M13.3333 4L6 11.3333L2.66667 8"
-                            stroke="white"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          />
-                        </svg>
-                      </div>
-                    )}
                     {/* Product Image */}
                     <div style={{
                       width: '100%',
@@ -4933,19 +4752,19 @@ export default function ABTests() {
                     </p>
                     
                     {/* Fast Mode */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                    <div style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
                       marginBottom: '12px',
                       padding: '12px',
                       background: fastMode ? '#E0F2FE' : '#FFFFFF',
                       border: fastMode ? '2px solid #3B82F6' : '1px solid #E5E7EB',
                       borderRadius: '8px',
                       transition: 'all 0.2s ease'
-                }}>
+                    }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                    <label style={{
+                        <label style={{
                           position: 'relative',
                           display: 'inline-block',
                           width: '40px',
@@ -4995,7 +4814,7 @@ export default function ABTests() {
                               boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                             }} />
                           </span>
-                    </label>
+                        </label>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span style={{
@@ -5029,7 +4848,7 @@ export default function ABTests() {
                                   background: '#1F2937',
                                   color: '#FFFFFF',
                                   borderRadius: '6px',
-                      fontSize: '12px',
+                                  fontSize: '12px',
                                   zIndex: 1000,
                                   width: '200px',
                                   whiteSpace: 'normal',
@@ -5038,7 +4857,7 @@ export default function ABTests() {
                                 }}>
                                   <strong>Fast Mode (55% probability)</strong><br/>
                                   Quick decisions with lower confidence. Best for rapid iteration and early insights.
-                  </div>
+                                </div>
                               )}
                             </div>
                           </div>
@@ -5059,57 +4878,57 @@ export default function ABTests() {
                       transition: 'all 0.2s ease'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                  <label style={{
-                    position: 'relative',
-                    display: 'inline-block',
+                        <label style={{
+                          position: 'relative',
+                          display: 'inline-block',
                           width: '40px',
                           height: '20px',
                           flexShrink: 0
-                  }}>
-                    <input
-                      type="checkbox"
+                        }}>
+                          <input
+                            type="checkbox"
                             checked={standardMode}
-                      onChange={(e) => {
-                        const newValue = e.target.checked;
+                            onChange={(e) => {
+                              const newValue = e.target.checked;
                               setStandardMode(newValue);
-                        if (newValue) {
+                              if (newValue) {
                                 setFastMode(false);
                                 setCarefulMode(false);
-                        }
-                      }}
-                      style={{
-                        opacity: 0,
-                        width: 0,
-                        height: 0
-                      }}
-                    />
-                    <span style={{
-                      position: 'absolute',
-                      cursor: 'pointer',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
+                              }
+                            }}
+                            style={{
+                              opacity: 0,
+                              width: 0,
+                              height: 0
+                            }}
+                          />
+                          <span style={{
+                            position: 'absolute',
+                            cursor: 'pointer',
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
                             backgroundColor: standardMode ? '#3B82F6' : '#D1D5DB',
                             borderRadius: '20px',
-                      transition: '0.3s',
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '2px'
-                    }}>
-                      <span style={{
-                        content: '""',
-                        position: 'absolute',
+                            transition: '0.3s',
+                            display: 'flex',
+                            alignItems: 'center',
+                            padding: '2px'
+                          }}>
+                            <span style={{
+                              content: '""',
+                              position: 'absolute',
                               height: '16px',
                               width: '16px',
                               left: standardMode ? '22px' : '2px',
-                        backgroundColor: '#FFFFFF',
-                        borderRadius: '50%',
-                        transition: '0.3s',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                      }} />
-                    </span>
-                  </label>
+                              backgroundColor: '#FFFFFF',
+                              borderRadius: '50%',
+                              transition: '0.3s',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                            }} />
+                          </span>
+                        </label>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span style={{
@@ -5157,11 +4976,11 @@ export default function ABTests() {
                             </div>
                           </div>
                         </div>
-                </div>
-              </div>
+                      </div>
+                    </div>
 
                     {/* Careful Mode */}
-                <div style={{ 
+                    <div style={{
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
@@ -5169,7 +4988,7 @@ export default function ABTests() {
                       padding: '12px',
                       background: carefulMode ? '#E0F2FE' : '#FFFFFF',
                       border: carefulMode ? '2px solid #3B82F6' : '1px solid #E5E7EB',
-                  borderRadius: '8px',
+                      borderRadius: '8px',
                       transition: 'all 0.2s ease'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
@@ -5277,41 +5096,41 @@ export default function ABTests() {
                 )}
 
                 {/* Manual Mode Toggle */}
-                  <div style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                   marginBottom: manualMode ? '16px' : '0',
                   paddingBottom: manualMode ? '16px' : '0',
                   borderBottom: manualMode ? '1px solid #E5E7EB' : 'none'
-                  }}>
-                    <div>
-                      <label style={{
+                }}>
+                  <div>
+                    <label style={{
                       fontSize: '16px',
-                        fontWeight: '600',
+                      fontWeight: '600',
                       color: manualMode ? '#3B82F6' : '#1F2937',
-                        marginBottom: '4px',
+                      marginBottom: '4px',
                       display: 'block',
                       transition: 'color 0.2s ease'
-                      }}>
-                      Manual Mode
-                      </label>
-                      <p style={{
-                        fontSize: '12px',
-                        color: '#6B7280',
-                        margin: 0
-                      }}>
-                      Set end conditions manually
-                      </p>
-                    </div>
-                    <label style={{
-                      position: 'relative',
-                      display: 'inline-block',
-                      width: '48px',
-                      height: '24px'
                     }}>
-                      <input
-                        type="checkbox"
+                      Manual Mode
+                    </label>
+                    <p style={{
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      margin: 0
+                    }}>
+                      Set end conditions manually
+                    </p>
+                  </div>
+                  <label style={{
+                    position: 'relative',
+                    display: 'inline-block',
+                    width: '48px',
+                    height: '24px'
+                  }}>
+                    <input
+                      type="checkbox"
                       checked={manualMode}
                       onChange={(e) => {
                         const newValue = e.target.checked;
@@ -5328,40 +5147,40 @@ export default function ABTests() {
                           setAutopilotOn(true);
                         }
                       }}
-                        style={{
-                          opacity: 0,
-                          width: 0,
-                          height: 0
-                        }}
-                      />
-                      <span style={{
-                        position: 'absolute',
-                        cursor: 'pointer',
-                        top: 0,
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
+                      style={{
+                        opacity: 0,
+                        width: 0,
+                        height: 0
+                      }}
+                    />
+                    <span style={{
+                      position: 'absolute',
+                      cursor: 'pointer',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
                       backgroundColor: manualMode ? '#3B82F6' : '#D1D5DB',
-                        borderRadius: '24px',
-                        transition: '0.3s',
-                        display: 'flex',
-                        alignItems: 'center',
-                        padding: '2px'
-                      }}>
-                        <span style={{
-                          content: '""',
-                          position: 'absolute',
-                          height: '20px',
-                          width: '20px',
+                      borderRadius: '24px',
+                      transition: '0.3s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '2px'
+                    }}>
+                      <span style={{
+                        content: '""',
+                        position: 'absolute',
+                        height: '20px',
+                        width: '20px',
                         left: manualMode ? '26px' : '2px',
-                          backgroundColor: '#FFFFFF',
-                          borderRadius: '50%',
-                          transition: '0.3s',
-                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                        }} />
-                      </span>
-                    </label>
-                  </div>
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: '50%',
+                        transition: '0.3s',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                      }} />
+                    </span>
+                  </label>
+                </div>
 
                 {/* Manual Mode Explanation */}
                 {manualMode && (
@@ -5398,22 +5217,22 @@ export default function ABTests() {
                   marginBottom: '0'
                 }}>
                   {/* End Date Input */}
-                    <div style={{
-                      background: '#FFFFFF',
-                      border: '1px solid #3B82F6',
-                      borderRadius: '8px',
+                  <div style={{
+                    background: '#FFFFFF',
+                    border: '1px solid #3B82F6',
+                    borderRadius: '8px',
                     padding: '16px'
-                    }}>
-                      <label style={{
-                        display: 'block',
+                  }}>
+                    <label style={{
+                      display: 'block',
                       fontSize: '14px',
                       fontWeight: '600',
-                        color: '#3B82F6',
-                        marginBottom: '8px'
-                      }}>
+                      color: '#3B82F6',
+                      marginBottom: '8px'
+                    }}>
                       End Date
-                      </label>
-                      <input
+                    </label>
+                    <input
                       type="datetime-local"
                       value={endOnDate}
                       min={(() => {
@@ -5433,26 +5252,26 @@ export default function ABTests() {
                           setEndOnDate(e.target.value);
                         }
                       }}
-                        style={{
-                          width: '100%',
-                          maxWidth: '300px',
-                          padding: '8px 12px',
-                          border: '1px solid #3B82F6',
-                          borderRadius: '6px',
-                          fontSize: '14px',
-                          color: '#1F2937',
-                          outline: 'none',
-                          background: '#F9FAFB'
-                        }}
-                      />
-                      <p style={{
-                        fontSize: '12px',
-                        color: '#6B7280',
-                        margin: '8px 0 0 0'
-                      }}>
+                      style={{
+                        width: '100%',
+                        maxWidth: '300px',
+                        padding: '8px 12px',
+                        border: '1px solid #3B82F6',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        color: '#1F2937',
+                        outline: 'none',
+                        background: '#F9FAFB'
+                      }}
+                    />
+                    <p style={{
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      margin: '8px 0 0 0'
+                    }}>
                       Test will end on this date. Minimum duration is 1 week from today.
-                      </p>
-                    </div>
+                    </p>
+                  </div>
                 </div>
               )}
             </div>
@@ -5538,3 +5357,4 @@ export default function ABTests() {
     </div>
   );
 }
+

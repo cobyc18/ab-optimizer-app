@@ -28,20 +28,12 @@ export const action = async ({ request }) => {
       }, { status: 400 });
     }
 
-    console.log('🔧 [DEBUG] Update widget settings API called:', {
+    console.log('🔧 Update widget settings API called:', {
       templateFilename,
       themeId,
       blockId,
       appExtensionId,
-      blockSettingsKeys: blockSettings ? Object.keys(blockSettings) : [],
-      blockSettingsSample: blockSettings ? {
-        header_text: blockSettings.header_text,
-        body_text: blockSettings.body_text,
-        text_color: blockSettings.text_color,
-        background_color: blockSettings.background_color,
-        icon_choice: blockSettings.icon_choice
-      } : null,
-      timestamp: new Date().toISOString()
+      blockSettings
     });
 
     // Read the current template file
@@ -276,24 +268,11 @@ export const action = async ({ request }) => {
       }
     }
 
-    console.log('🔧 [DEBUG] Settings formatting:', {
-      originalBlockSettings: appBlock.settings,
-      formattedSettings: formattedSettings,
-      willMerge: true
-    });
-
     // Merge with existing settings (don't overwrite everything, just update what we need)
-    const previousSettings = { ...(appBlock.settings || {}) };
     appBlock.settings = {
       ...(appBlock.settings || {}),
       ...formattedSettings
     };
-    
-    console.log('🔧 [DEBUG] Settings merge result:', {
-      previousSettings: previousSettings,
-      newSettings: appBlock.settings,
-      changedKeys: Object.keys(formattedSettings)
-    });
 
     // Reorder block to appear after "price" block
     if (!mainSection.block_order) {
@@ -327,26 +306,8 @@ export const action = async ({ request }) => {
     // Update the template
     templateJson.sections[mainSectionKey] = mainSection;
 
-    // Debug: Log the final settings in the template JSON before saving
-    const finalBlockInJson = templateJson.sections[mainSectionKey]?.blocks?.[blockInstanceId];
-    console.log('💾 [DEBUG] Template JSON before save - block settings:', {
-      blockInstanceId: blockInstanceId,
-      blockExists: !!finalBlockInJson,
-      blockSettings: finalBlockInJson?.settings,
-      blockSettingsKeys: finalBlockInJson?.settings ? Object.keys(finalBlockInJson.settings) : [],
-      blockSettingsSample: finalBlockInJson?.settings ? {
-        header_text: finalBlockInJson.settings.header_text,
-        body_text: finalBlockInJson.settings.body_text,
-        text_color: finalBlockInJson.settings.text_color,
-        background_color: finalBlockInJson.settings.background_color,
-        icon_choice: finalBlockInJson.settings.icon_choice
-      } : null
-    });
-
     // Save the updated template
     const updatedContent = JSON.stringify(templateJson, null, 2);
-    
-    console.log('💾 [DEBUG] Template JSON content length:', updatedContent.length);
 
     const updateMutation = `
       mutation themeFilesUpsert($themeId: ID!, $files: [OnlineStoreThemeFilesUpsertFileInput!]!) {
@@ -378,52 +339,17 @@ export const action = async ({ request }) => {
     const updateJson = await updateResponse.json();
 
     if (updateJson.data?.themeFilesUpsert?.userErrors?.length > 0) {
-      console.error('❌ [DEBUG] Theme update errors:', updateJson.data.themeFilesUpsert.userErrors);
+      console.error('❌ Theme update errors:', updateJson.data.themeFilesUpsert.userErrors);
       return json({ 
         error: 'Failed to update template',
         userErrors: updateJson.data.themeFilesUpsert.userErrors
       }, { status: 400 });
     }
 
-    console.log('✅ [DEBUG] Successfully updated app block settings:', {
+    console.log('✅ Successfully updated app block settings:', {
       blockInstanceId,
-      updatedSettings: formattedSettings,
-      finalBlockSettings: appBlock.settings,
-      templateFilename: templateFilename,
-      themeId: themeId,
-      upsertedFiles: updateJson.data?.themeFilesUpsert?.upsertedThemeFiles,
-      timestamp: new Date().toISOString()
+      updatedSettings: formattedSettings
     });
-    
-    // Verify the settings were actually saved by reading the template back
-    console.log('🔍 [DEBUG] Verifying settings were saved...');
-    try {
-      const verifyResponse = await admin.graphql(fileQuery, {
-        variables: {
-          themeId,
-          filename: templateFilename
-        }
-      });
-      const verifyJson = await verifyResponse.json();
-      const verifyContent = verifyJson.data?.theme?.files?.nodes?.[0]?.body?.content;
-      if (verifyContent) {
-        const verifyTemplate = JSON.parse(stripJsonComments(verifyContent));
-        const verifyBlock = verifyTemplate.sections?.[mainSectionKey]?.blocks?.[blockInstanceId];
-        console.log('✅ [DEBUG] Verification - settings in saved template:', {
-          blockExists: !!verifyBlock,
-          blockSettings: verifyBlock?.settings,
-          blockSettingsSample: verifyBlock?.settings ? {
-            header_text: verifyBlock.settings.header_text,
-            body_text: verifyBlock.settings.body_text,
-            text_color: verifyBlock.settings.text_color,
-            background_color: verifyBlock.settings.background_color,
-            icon_choice: verifyBlock.settings.icon_choice
-          } : null
-        });
-      }
-    } catch (verifyError) {
-      console.error('⚠️ [DEBUG] Could not verify saved settings:', verifyError);
-    }
 
     // Wait a moment for Shopify to process
     await new Promise(resolve => setTimeout(resolve, 2000));
