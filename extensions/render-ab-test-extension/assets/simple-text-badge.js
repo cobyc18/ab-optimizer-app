@@ -45,30 +45,35 @@
 
   function refreshBadges() {
     document.querySelectorAll('.simple-text-badge-widget').forEach(function(container) {
-      // Debug: Log the container's HTML to see what data attributes are present
-      console.log('🔍 Container HTML:', container.outerHTML.substring(0, 500));
+      // Check if we're in theme editor
+      const isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
+      const designModeFromLiquid = container.dataset.designMode === 'true';
+      const inEditor = isInThemeEditor || designModeFromLiquid;
       
       // Check if widget has already been rendered (to prevent re-rendering with defaults)
       const alreadyRendered = container.querySelector('.simple-text-badge') !== null;
       
-      // ALWAYS render the badge first (to ensure settings are loaded from data attributes)
-      // Only render if not already rendered to preserve existing settings
-      if (!alreadyRendered) {
+      // On live storefront: Only render once, then only control visibility
+      // In theme editor: Always refresh to show latest settings
+      if (!alreadyRendered || inEditor) {
+        if (!alreadyRendered) {
+          // First render - log data attributes for debugging
+          console.log('🎨 Initial render - reading settings from data attributes:', {
+            headerText: container.getAttribute('data-header-text'),
+            bodyText: container.getAttribute('data-body-text'),
+            textColor: container.getAttribute('data-text-color'),
+            backgroundColor: container.getAttribute('data-background-color'),
+            iconChoice: container.getAttribute('data-icon-choice'),
+            inThemeEditor: inEditor
+          });
+        }
+        
         container.style.display = '';
         
-        // Reset initialization flag before re-rendering
+        // Reset initialization flag before rendering
         container.dataset.liveVisitorInitialized = 'false';
         
-        // Log data attributes before rendering to debug settings
-        console.log('🎨 Rendering widget with data attributes:', {
-          headerText: container.getAttribute('data-header-text'),
-          bodyText: container.getAttribute('data-body-text'),
-          textColor: container.getAttribute('data-text-color'),
-          backgroundColor: container.getAttribute('data-background-color'),
-          iconChoice: container.getAttribute('data-icon-choice')
-        });
-        
-        // Render badge with settings from data attributes (this was the original behavior)
+        // Render badge with settings from data attributes
         renderBadge(container);
         
         // Check if this is a live visitor count or how many in cart widget
@@ -77,8 +82,9 @@
           initLiveVisitorCount(container);
         }
       } else {
-        // Widget already rendered - just ensure visibility is correct
-        console.log('ℹ️ Widget already rendered, preserving existing settings');
+        // Widget already rendered on live storefront - DO NOT re-render
+        // Only control visibility to preserve configured settings
+        console.log('ℹ️ Widget already rendered on live storefront - preserving settings, only checking visibility');
       }
       
       // AFTER rendering (or if already rendered), check if widget should be visible on live storefront
@@ -86,6 +92,13 @@
       // Store a flag to prevent multiple simultaneous checks
       if (container.dataset.enabledCheckInProgress === 'true') {
         return; // Already checking, don't duplicate
+      }
+      
+      // On live storefront, check visibility. In theme editor, always show.
+      if (inEditor) {
+        // Always visible in theme editor
+        container.style.display = '';
+        return;
       }
       
       container.dataset.enabledCheckInProgress = 'true';
@@ -96,20 +109,20 @@
         
         if (!enabled) {
           // Widget not enabled - hide it on live storefront
-          // IMPORTANT: Only change visibility, don't re-render (settings are already loaded)
+          // CRITICAL: Only change visibility, NEVER re-render (settings are already loaded from template)
           container.style.display = 'none';
           console.log('🚫 Widget hidden - test not launched yet');
         } else {
           // Widget is enabled - ensure it's visible
-          // IMPORTANT: Only change visibility, don't re-render (settings are already loaded)
+          // CRITICAL: Only change visibility, NEVER re-render (settings are already loaded from template)
           container.style.display = '';
-          console.log('✅ Widget enabled - showing on live storefront with configured settings');
+          console.log('✅ Widget enabled - showing on live storefront with configured settings from template');
         }
       }).catch(function(error) {
         console.error('⚠️ Error checking widget enabled status:', error);
         container.dataset.enabledCheckInProgress = 'false';
-        // On error, default to showing widget (fail-safe)
-        container.style.display = '';
+        // On error, default to hidden (fail-safe - don't show unconfigured widgets)
+        container.style.display = 'none';
       });
     });
   }
@@ -293,6 +306,18 @@
   function registerThemeEditorListeners() {
     // Prevent duplicate listeners
     if (window.__simpleTextBadgeThemeEditorListenersAdded) return;
+    
+    // CRITICAL: Only register these listeners if we're in theme editor
+    // These events fire on live storefront too, which causes unwanted re-renders
+    var isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
+    
+    if (!isInThemeEditor) {
+      // On live storefront, don't listen to these events - they cause re-renders
+      // Settings should come from data attributes only, rendered once
+      console.log('ℹ️ Theme editor listeners skipped - not in theme editor');
+      window.__simpleTextBadgeThemeEditorListenersAdded = true;
+      return;
+    }
     
     // Listen for section load events (fires when section is added/re-rendered)
     // This is the standard Shopify way to handle theme editor updates
@@ -524,10 +549,22 @@
 
     var normalizedOverrides = normalizeOverrides(overrides);
     // Only apply overrides that have actual values (don't override with undefined/null/empty)
-    for (var key in normalizedOverrides) {
-      if (normalizedOverrides[key] !== undefined && normalizedOverrides[key] !== null && normalizedOverrides[key] !== '') {
-        base[key] = normalizedOverrides[key];
+    // CRITICAL: On live storefront, prioritize data attributes from template over any overrides
+    // Overrides should only be used in theme editor preview scenarios
+    var isInThemeEditor = typeof Shopify !== 'undefined' && Shopify.designMode;
+    var designModeFromLiquid = container.dataset.designMode === 'true';
+    
+    if (isInThemeEditor || designModeFromLiquid) {
+      // In theme editor, apply overrides (for preview purposes)
+      for (var key in normalizedOverrides) {
+        if (normalizedOverrides[key] !== undefined && normalizedOverrides[key] !== null && normalizedOverrides[key] !== '') {
+          base[key] = normalizedOverrides[key];
+        }
       }
+    } else {
+      // On live storefront, IGNORE overrides - only use settings from template (data attributes)
+      // This ensures configured settings from template JSON are always used
+      console.log('ℹ️ Live storefront - using settings from template data attributes only, ignoring overrides');
     }
 
     console.log('Final settings after overrides:', {
