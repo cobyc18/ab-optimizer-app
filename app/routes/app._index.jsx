@@ -6,6 +6,7 @@ import prisma from "../db.server.js";
 import ExperimentOverview from "../components/ExperimentOverview.jsx";
 import ConversionPlayCard from "../components/ConversionPlayCard.jsx";
 import { abTestIdeas } from "../data/abTestIdeas.js";
+import { motion } from "framer-motion";
 
 // ---------- Statistical Analysis Functions ----------
 function betaSample(alpha, beta) {
@@ -1863,6 +1864,37 @@ export default function Dashboard() {
       </div>
 
     </div>
+    
+    {/* Layout Animation at Bottom */}
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ 
+        layout: { duration: 0.3, ease: "easeOut" },
+        opacity: { duration: 0.3 },
+        y: { duration: 0.3 }
+      }}
+      style={{
+        padding: '20px',
+        marginTop: '40px',
+        backgroundColor: '#f9fafb',
+        borderRadius: '8px',
+        border: '1px solid #e5e7eb'
+      }}
+    >
+      <motion.p
+        layout
+        style={{
+          margin: 0,
+          fontSize: '14px',
+          color: '#6b7280',
+          textAlign: 'center'
+        }}
+      >
+        Dashboard powered by Motion layout animations
+      </motion.p>
+    </motion.div>
     </>
   );
 }
