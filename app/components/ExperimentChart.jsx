@@ -34,9 +34,10 @@ export default function ExperimentChart({
   figmaColors 
 }) {
   // Calculate chart dimensions and padding
-  const padding = { top: 20, right: 50, bottom: 40, left: 40 }; // Reduced left padding to bring Y-axis labels closer to line
-  const xAxisOffset = 60; // Space before day 1 (so intersection is at 0 but 0 is not displayed) - increased to push day 1 right
-  const plotWidth = chartWidth - padding.left - padding.right - xAxisOffset;
+  const padding = { top: 20, right: 50, bottom: 40, left: 50 }; // Left padding for Y-axis labels
+  const xAxisOffset = 30; // Space before day 1 (so intersection is at 0 but 0 is not displayed)
+  const graphStartX = padding.left + xAxisOffset; // Where the graph area actually starts (Y-axis line position)
+  const plotWidth = chartWidth - graphStartX - padding.right;
   const plotHeight = chartHeight - padding.top - padding.bottom;
   
   // Fixed Y-axis: 0% to 40% with 5% increments (inverted: 0% at bottom, 40% at top)
@@ -83,8 +84,8 @@ export default function ExperimentChart({
   }, [dailyData]);
   
   // Convert data point to SVG coordinates
-  // X: Add xAxisOffset to create space before day 1 (intersection at 0, but 0 not displayed)
-  const toSVGX = (x) => padding.left + xAxisOffset + ((x - 1) / (maxDays - 1)) * plotWidth;
+  // X: Graph starts at graphStartX, day 1 is at the start of the plot area
+  const toSVGX = (x) => graphStartX + ((x - 1) / (maxDays - 1)) * plotWidth;
   // Y: Inverted - 0% at bottom, 40% at top
   const toSVGY = (y) => padding.top + plotHeight - (y / maxRate) * plotHeight;
   
@@ -127,7 +128,7 @@ export default function ExperimentChart({
       {/* Legend - Above chart */}
       <div style={{
         position: 'absolute',
-        top: '-30px',
+        top: '-27px',
         right: '20px',
         display: 'flex',
         gap: '20px',
@@ -173,13 +174,12 @@ export default function ExperimentChart({
         {yAxisLabels.map((label, i) => {
           // Inverted: 0% at bottom (i=8), 40% at top (i=0)
           const y = padding.top + (i / (yAxisLabels.length - 1)) * plotHeight;
-          const axisX = padding.left + xAxisOffset + ((1 - 1) / (maxDays - 1)) * plotWidth;
           return (
             <line
               key={`grid-y-${i}`}
-              x1={axisX}
+              x1={graphStartX}
               y1={y}
-              x2={padding.left + xAxisOffset + plotWidth}
+              x2={graphStartX + plotWidth}
               y2={y}
               stroke="#e6e6e6"
               strokeWidth="1"
@@ -188,11 +188,11 @@ export default function ExperimentChart({
           );
         })}
         
-        {/* Y-axis - aligned with day 1 position (day 1 is at x=0 in plotWidth) */}
+        {/* Y-axis - aligned with day 1 position */}
         <line
-          x1={padding.left + xAxisOffset}
+          x1={graphStartX}
           y1={padding.top}
-          x2={padding.left + xAxisOffset}
+          x2={graphStartX}
           y2={padding.top + plotHeight}
           stroke="#FFFFFF"
           strokeWidth="2"
@@ -200,9 +200,9 @@ export default function ExperimentChart({
         
         {/* X-axis - starts at day 1 position */}
         <line
-          x1={padding.left + xAxisOffset}
+          x1={graphStartX}
           y1={padding.top + plotHeight}
-          x2={padding.left + xAxisOffset + plotWidth}
+          x2={graphStartX + plotWidth}
           y2={padding.top + plotHeight}
           stroke="#FFFFFF"
           strokeWidth="2"
@@ -278,7 +278,7 @@ export default function ExperimentChart({
       {/* Y-axis labels - Show as percentages */}
       <div style={{
         position: 'absolute',
-        left: '10px',
+        left: '20px',
         top: `${padding.top}px`,
         display: 'flex',
         flexDirection: 'column',
@@ -303,7 +303,7 @@ export default function ExperimentChart({
       <div style={{
         position: 'absolute',
         bottom: '20px',
-        left: `${padding.left + xAxisOffset}px`,
+        left: `${graphStartX}px`,
         width: `${plotWidth}px`,
         display: 'flex',
         justifyContent: 'space-between',
