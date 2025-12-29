@@ -1572,7 +1572,7 @@ export default function Dashboard() {
 
       {/* Summary Section */}
       <div style={{ marginBottom: '40px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '30px' }}>
+        <div style={{ marginBottom: '30px' }}>
           <p style={{
             fontFamily: 'Geist, sans-serif',
             fontWeight: 500,
@@ -1582,18 +1582,6 @@ export default function Dashboard() {
           }}>
             Summary
           </p>
-          <div style={{ cursor: 'pointer' }}>
-            <p style={{
-              fontFamily: 'SF Pro, sans-serif',
-              fontWeight: 400,
-              fontSize: '16px',
-              color: figmaColors.primaryBlue,
-              margin: 0,
-              lineHeight: '24px'
-            }}>
-              View More
-            </p>
-          </div>
         </div>
         
         {/* Summary Cards Grid */}
@@ -1605,7 +1593,7 @@ export default function Dashboard() {
         }}>
           {/* Revenue Impact Card */}
           <div style={{
-            backgroundColor: figmaColors.lightBlue,
+            backgroundColor: '#D8D8D8',
             borderRadius: '20px',
             padding: '40px',
             position: 'relative'
@@ -1713,7 +1701,7 @@ export default function Dashboard() {
           
           {/* Total Tested Impressions Card */}
           <div style={{
-            backgroundColor: figmaColors.lightBlue,
+            backgroundColor: '#D8D8D8',
             borderRadius: '20px',
             padding: '40px',
             position: 'relative'
@@ -1895,54 +1883,50 @@ export default function Dashboard() {
         </div>
 
         {/* Queued Ideas */}
-        <div>
+        <div style={{
+          backgroundColor: '#d9d9d9',
+          borderRadius: '20px',
+          padding: '40px'
+        }}>
           <p style={{
             fontFamily: 'Geist, sans-serif',
             fontWeight: 500,
             fontSize: '32px',
             color: figmaColors.darkGray,
-            margin: '0 0 30px 0'
+            margin: '0 0 25px 0'
           }}>
             Queued Ideas
           </p>
 
-          {/* Queued Tests List */}
+          {/* Header - seamless in grey background */}
           <div style={{
-            backgroundColor: 'rgba(255,255,255,0.85)',
-            border: `1px solid ${figmaColors.basicFill}`,
-            borderRadius: '24px',
-            overflow: 'hidden'
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            marginBottom: '15px'
           }}>
-            {/* Header */}
-            <div style={{
-              backgroundColor: '#dbdbdb',
-              padding: '20px',
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center'
+            <p style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 600,
+              fontSize: '16px',
+              color: figmaColors.darkGray,
+              margin: 0
             }}>
-              <p style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 600,
-                fontSize: '16px',
-                color: figmaColors.darkGray,
-                margin: 0
-              }}>
-                Test Name
-              </p>
-              <p style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 600,
-                fontSize: '16px',
-                color: figmaColors.darkGray,
-                margin: 0
-              }}>
-                Action
-              </p>
-            </div>
+              Test Name
+            </p>
+            <p style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 600,
+              fontSize: '16px',
+              color: figmaColors.darkGray,
+              margin: 0
+            }}>
+              Action
+            </p>
+          </div>
             
-            {/* Tests List */}
-            <div style={{ padding: '20px' }}>
+          {/* Tests List */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
               {queuedTests.map((test, index) => (
                 <div key={index}>
                   <div
@@ -1950,16 +1934,7 @@ export default function Dashboard() {
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      padding: '15px 10px',
-                      cursor: 'pointer',
-                      borderRadius: '8px',
-                      transition: 'background-color 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.target.style.backgroundColor = 'rgba(0, 56, 255, 0.05)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.backgroundColor = 'transparent';
+                      cursor: 'pointer'
                     }}
                     onClick={() => toggleTestExpansion(test.name)}
                   >
@@ -1968,7 +1943,7 @@ export default function Dashboard() {
                       fontWeight: 400,
                       fontSize: '16px',
                       color: figmaColors.darkGray,
-                      margin: 0,
+                      margin: '0 0 5px 0',
                       lineHeight: '25.27px'
                     }}>
                       {test.name}
@@ -1989,12 +1964,9 @@ export default function Dashboard() {
                   
                   {/* Separator */}
                   {index < queuedTests.length - 1 && (
-                    <div style={{
-                      width: '100%',
-                      height: '1px',
-                      backgroundColor: figmaColors.basicFill,
-                      margin: '10px 0'
-                    }} />
+                    <div style={{ width: '100%', height: '1px', margin: '15px 0' }}>
+                      <img alt="Line" src={imgLine63} style={{ width: '100%' }} />
+                    </div>
                   )}
                   
                   {/* Expanded Content */}
@@ -2029,11 +2001,9 @@ export default function Dashboard() {
                   )}
                 </div>
               ))}
-            </div>
           </div>
         </div>
       </div>
-
     </div>
     </>
   );
