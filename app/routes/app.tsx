@@ -102,14 +102,14 @@ export default function AppLayout() {
         {/* Navigation Menu */}
         <div style={{
           position: 'absolute',
-          left: isCollapsed ? '0' : '8px',
+          left: isCollapsed ? '0' : '12px',
           top: isCollapsed ? '65px' : '178.32px',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
           alignItems: isCollapsed ? 'center' : 'flex-start',
           transition: 'all 0.3s ease',
-          width: isCollapsed ? '48px' : '274px'
+          width: isCollapsed ? '48px' : '270px'
         }}>
           {navigationItems.map((item, index) => (
             <Link
