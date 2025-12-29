@@ -76,7 +76,7 @@ export default function AppLayout() {
           <div style={{
             position: 'absolute',
             height: '108.793px',
-            left: '10px',
+            left: '0px',
             top: '35.1px',
             width: '108.793px',
             transition: 'opacity 0.3s ease'
@@ -90,7 +90,7 @@ export default function AppLayout() {
           <div style={{
             position: 'absolute',
             height: '44.613px',
-            left: '126px',
+            left: '116px',
             top: '67.39px',
             width: '159.51px',
             transition: 'opacity 0.3s ease'
@@ -102,14 +102,14 @@ export default function AppLayout() {
         {/* Navigation Menu */}
         <div style={{
           position: 'absolute',
-          left: isCollapsed ? '0' : '10px',
+          left: isCollapsed ? '0' : '0px',
           top: isCollapsed ? '40px' : '178.32px',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
           alignItems: isCollapsed ? 'center' : 'flex-start',
           transition: 'all 0.3s ease',
-          width: isCollapsed ? '48px' : '236px'
+          width: isCollapsed ? '48px' : '280px'
         }}>
           {navigationItems.map((item, index) => (
             <Link
@@ -136,10 +136,10 @@ export default function AppLayout() {
                 gap: isCollapsed ? '0' : '16px',
                 alignItems: 'center',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
-                padding: isCollapsed ? '12px' : '16px 12px',
+                padding: isCollapsed ? '12px' : '12px 8px',
                 borderRadius: selectedNavItem === item.id ? '12px' : '60px',
                 width: isCollapsed ? '48px' : '100%',
-                maxWidth: isCollapsed ? '48px' : '236px',
+                maxWidth: isCollapsed ? '48px' : '280px',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 textDecoration: 'none',
@@ -288,7 +288,7 @@ export default function AppLayout() {
           style={{
             position: 'absolute',
             top: isCollapsed ? '20px' : '67.39px',
-            left: isCollapsed ? '0px' : '254px',
+            left: isCollapsed ? '0px' : '252px',
             backgroundColor: '#FFFFFF',
             border: '1px solid rgba(0, 0, 0, 0.1)',
             borderRadius: '8px',
