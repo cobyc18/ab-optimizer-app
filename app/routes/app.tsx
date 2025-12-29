@@ -71,12 +71,12 @@ export default function AppLayout() {
         height: '100vh',
         overflow: 'hidden'
       }}>
-        {/* TryLab Logo - pushed more to the left */}
+        {/* TryLab Logo - pushed to the very left edge of grey border */}
         {!isCollapsed && (
           <div style={{
             position: 'absolute',
             height: '108.793px',
-            left: '0px',
+            left: '-2px',
             top: '35.1px',
             width: '108.793px',
             transition: 'opacity 0.3s ease'
@@ -90,7 +90,7 @@ export default function AppLayout() {
           <div style={{
             position: 'absolute',
             height: '44.613px',
-            left: '116px',
+            left: '114px',
             top: '67.39px',
             width: '159.51px',
             transition: 'opacity 0.3s ease'
@@ -102,7 +102,7 @@ export default function AppLayout() {
         {/* Navigation Menu */}
         <div style={{
           position: 'absolute',
-          left: isCollapsed ? '0' : '0px',
+          left: isCollapsed ? '0' : '-2px',
           top: isCollapsed ? '40px' : '178.32px',
           display: 'flex',
           flexDirection: 'column',
@@ -136,7 +136,7 @@ export default function AppLayout() {
                 gap: isCollapsed ? '0' : '16px',
                 alignItems: 'center',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
-                padding: isCollapsed ? '12px' : '12px 8px',
+                padding: isCollapsed ? '12px' : '12px 4px',
                 borderRadius: selectedNavItem === item.id ? '12px' : '60px',
                 width: isCollapsed ? '48px' : '100%',
                 maxWidth: isCollapsed ? '48px' : '280px',
@@ -288,7 +288,7 @@ export default function AppLayout() {
           style={{
             position: 'absolute',
             top: isCollapsed ? '20px' : '67.39px',
-            left: isCollapsed ? '0px' : '252px',
+            left: isCollapsed ? '0px' : '245px',
             backgroundColor: '#FFFFFF',
             border: '1px solid rgba(0, 0, 0, 0.1)',
             borderRadius: '8px',
