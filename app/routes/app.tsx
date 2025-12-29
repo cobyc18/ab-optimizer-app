@@ -71,12 +71,12 @@ export default function AppLayout() {
         height: '100vh',
         overflow: 'hidden'
       }}>
-        {/* TryLab Logo - aligned with menu item icons (26px menu left + 24px padding = 50px) */}
+        {/* TryLab Logo - pushed more to the left */}
         {!isCollapsed && (
           <div style={{
             position: 'absolute',
             height: '108.793px',
-            left: '26px',
+            left: '10px',
             top: '35.1px',
             width: '108.793px',
             transition: 'opacity 0.3s ease'
@@ -90,7 +90,7 @@ export default function AppLayout() {
           <div style={{
             position: 'absolute',
             height: '44.613px',
-            left: '142px',
+            left: '126px',
             top: '67.39px',
             width: '159.51px',
             transition: 'opacity 0.3s ease'
@@ -102,14 +102,14 @@ export default function AppLayout() {
         {/* Navigation Menu */}
         <div style={{
           position: 'absolute',
-          left: isCollapsed ? '0' : '26px',
+          left: isCollapsed ? '0' : '10px',
           top: isCollapsed ? '40px' : '178.32px',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
           alignItems: isCollapsed ? 'center' : 'flex-start',
           transition: 'all 0.3s ease',
-          width: isCollapsed ? '48px' : '238px'
+          width: isCollapsed ? '48px' : '236px'
         }}>
           {navigationItems.map((item, index) => (
             <Link
@@ -136,7 +136,7 @@ export default function AppLayout() {
                 gap: isCollapsed ? '0' : '16px',
                 alignItems: 'center',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
-                padding: isCollapsed ? '12px' : '16px 24px',
+                padding: isCollapsed ? '12px' : '16px 12px',
                 borderRadius: selectedNavItem === item.id ? '12px' : '60px',
                 width: isCollapsed ? '48px' : '100%',
                 maxWidth: isCollapsed ? '48px' : '236px',
