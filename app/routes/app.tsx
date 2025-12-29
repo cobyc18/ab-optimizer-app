@@ -103,7 +103,7 @@ export default function AppLayout() {
         <div style={{
           position: 'absolute',
           left: isCollapsed ? '0' : '8px',
-          top: isCollapsed ? '40px' : '178.32px',
+          top: isCollapsed ? '65px' : '178.32px',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
@@ -139,7 +139,7 @@ export default function AppLayout() {
                 padding: isCollapsed ? '12px' : '12px 9px',
                 borderRadius: selectedNavItem === item.id ? '12px' : '60px',
                 width: isCollapsed ? '48px' : '100%',
-                maxWidth: isCollapsed ? '48px' : '274px',
+                maxWidth: isCollapsed ? '48px' : '270px',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 textDecoration: 'none',
