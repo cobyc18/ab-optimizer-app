@@ -1070,10 +1070,7 @@ export default function Dashboard() {
   const [screenshotUrl, setScreenshotUrl] = useState('');
   const [testResult, setTestResult] = useState('');
   const [storePassword, setStorePassword] = useState('');
-  const [currentIdeaIndex, setCurrentIdeaIndex] = useState(0);
-  
-  // Limit to first 3 ideas
-  const displayedIdeas = abTestIdeas.slice(0, 3);
+  const ideasCarouselRef = React.useRef(null);
   const encodeWidgetConfigPayload = (payload) => {
     if (!payload) return null;
     try {
@@ -1363,7 +1360,13 @@ export default function Dashboard() {
         <div style={{ display: 'flex', gap: '11px', alignItems: 'center' }}>
           <div 
             onClick={() => {
-              setCurrentIdeaIndex((prev) => (prev === 0 ? displayedIdeas.length - 1 : prev - 1));
+              if (ideasCarouselRef.current) {
+                const scrollAmount = 345; // 320px card width + 25px gap
+                ideasCarouselRef.current.scrollBy({
+                  left: -scrollAmount,
+                  behavior: 'smooth'
+                });
+              }
             }}
             style={{
               border: '0.714px solid #414042',
@@ -1383,7 +1386,13 @@ export default function Dashboard() {
           </div>
           <div 
             onClick={() => {
-              setCurrentIdeaIndex((prev) => (prev === displayedIdeas.length - 1 ? 0 : prev + 1));
+              if (ideasCarouselRef.current) {
+                const scrollAmount = 345; // 320px card width + 25px gap
+                ideasCarouselRef.current.scrollBy({
+                  left: scrollAmount,
+                  behavior: 'smooth'
+                });
+              }
             }}
             style={{
               border: '0.714px solid ' + figmaColors.primaryBlue,
@@ -1405,35 +1414,48 @@ export default function Dashboard() {
       </div>
 
       {/* Conversion Play Cards - Using exact same cards from A/B flow */}
-      <div style={{ 
-        position: 'relative',
-        width: '320px', // Exact same width as ConversionPlayCard
-        height: 'auto',
-        marginBottom: '40px',
-        overflow: 'hidden'
-      }}>
-        <div style={{
-          display: 'flex',
-          transform: `translateX(-${currentIdeaIndex * 320}px)`, // Move by exact card width
-          transition: 'transform 0.3s ease',
-          width: `${displayedIdeas.length * 320}px` // Total width = number of cards * card width
-        }}>
-          {displayedIdeas.map((widget, index) => (
-            <div
-              key={widget.id}
-              style={{
-                width: '320px', // Exact same width as ConversionPlayCard
-                flexShrink: 0
-              }}
-            >
-              <ConversionPlayCard
-                widget={widget}
-                isSelected={false}
-                dashboardMode={true}
-              />
-            </div>
-          ))}
-        </div>
+      <div 
+        ref={ideasCarouselRef}
+        className="ideas-carousel"
+        style={{ 
+          display: 'flex', 
+          gap: '25px', 
+          marginBottom: '40px', 
+          overflowX: 'auto', 
+          overflowY: 'hidden',
+          paddingBottom: '10px',
+          scrollBehavior: 'smooth',
+          scrollbarWidth: 'none', // Firefox
+          msOverflowStyle: 'none', // IE/Edge
+        }}
+      >
+        <style>{`
+          .ideas-carousel::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera */
+          }
+        `}</style>
+        {abTestIdeas.map((widget, index) => (
+          <div
+            key={widget.id}
+            style={{
+              flexShrink: 0,
+              width: '320px', // Exact same width as ConversionPlayCard
+              transition: 'transform 0.2s ease'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.transform = 'translateY(-5px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.transform = 'translateY(0)';
+            }}
+          >
+            <ConversionPlayCard
+              widget={widget}
+              isSelected={false}
+              dashboardMode={true}
+            />
+          </div>
+        ))}
       </div>
 
       {/* Summary Section */}
