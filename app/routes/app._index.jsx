@@ -1647,7 +1647,7 @@ export default function Dashboard() {
           
           {/* Total Test Ran Card */}
           <div style={{
-            backgroundColor: figmaColors.lightBlue,
+            backgroundColor: '#D8D8D8',
             borderRadius: '20px',
             padding: '40px',
             position: 'relative'

@@ -35,12 +35,14 @@ export default function ExperimentChart({
 }) {
   // Calculate chart dimensions and padding
   const padding = { top: 20, right: 50, bottom: 40, left: 60 };
-  const plotWidth = chartWidth - padding.left - padding.right;
+  const xAxisOffset = 40; // Space before day 1 (so intersection is at 0 but 0 is not displayed)
+  const plotWidth = chartWidth - padding.left - padding.right - xAxisOffset;
   const plotHeight = chartHeight - padding.top - padding.bottom;
   
-  // Fixed Y-axis: 0% to 40% with 5% increments
+  // Fixed Y-axis: 0% to 40% with 5% increments (inverted: 0% at bottom, 40% at top)
   const maxRate = 0.40; // 40%
   const yAxisIncrement = 0.05; // 5%
+  const maxDays = 14; // Fixed to 14 days
   
   // Process data and calculate regression
   const { controlPoints, variantPoints, controlRegression, variantRegression, maxDay } = useMemo(() => {
@@ -81,33 +83,29 @@ export default function ExperimentChart({
   }, [dailyData]);
   
   // Convert data point to SVG coordinates
-  const toSVGX = (x) => padding.left + (x / maxDay) * plotWidth;
+  // X: Add xAxisOffset to create space before day 1 (intersection at 0, but 0 not displayed)
+  const toSVGX = (x) => padding.left + xAxisOffset + ((x - 1) / (maxDays - 1)) * plotWidth;
+  // Y: Inverted - 0% at bottom, 40% at top
   const toSVGY = (y) => padding.top + plotHeight - (y / maxRate) * plotHeight;
   
-  // Generate Y-axis labels (0% to 40% with 5% increments)
+  // Generate Y-axis labels (0% to 40% with 5% increments) - inverted order for display
   const yAxisLabels = useMemo(() => {
     const labels = [];
-    for (let i = 0; i <= 8; i++) { // 0, 5, 10, 15, 20, 25, 30, 35, 40
+    for (let i = 8; i >= 0; i--) { // 40, 35, 30, 25, 20, 15, 10, 5, 0 (inverted)
       const value = i * yAxisIncrement;
       labels.push(value.toFixed(2));
     }
     return labels;
   }, []);
   
-  // Generate X-axis labels (day numbers)
+  // Generate X-axis labels (days 1-14)
   const xAxisLabels = useMemo(() => {
-    if (maxDay <= 0) return [];
-    const numLabels = Math.min(maxDay, 12); // Max 12 labels
-    const step = Math.max(1, Math.ceil(maxDay / numLabels));
     const labels = [];
-    for (let i = 1; i <= maxDay; i += step) {
+    for (let i = 1; i <= maxDays; i++) {
       labels.push(i);
     }
-    if (labels[labels.length - 1] !== maxDay) {
-      labels.push(maxDay);
-    }
     return labels;
-  }, [maxDay]);
+  }, []);
   
   // Build SVG path for data points
   const buildPath = (points) => {
@@ -173,13 +171,14 @@ export default function ExperimentChart({
       >
         {/* Grid lines */}
         {yAxisLabels.map((label, i) => {
-          const y = padding.top + plotHeight - (i / (yAxisLabels.length - 1)) * plotHeight;
+          // Inverted: 0% at bottom (i=8), 40% at top (i=0)
+          const y = padding.top + (i / (yAxisLabels.length - 1)) * plotHeight;
           return (
             <line
               key={`grid-y-${i}`}
-              x1={padding.left}
+              x1={padding.left + xAxisOffset}
               y1={y}
-              x2={padding.left + plotWidth}
+              x2={padding.left + xAxisOffset + plotWidth}
               y2={y}
               stroke="#e6e6e6"
               strokeWidth="1"
@@ -190,9 +189,9 @@ export default function ExperimentChart({
         
         {/* Y-axis */}
         <line
-          x1={padding.left}
+          x1={padding.left + xAxisOffset}
           y1={padding.top}
-          x2={padding.left}
+          x2={padding.left + xAxisOffset}
           y2={padding.top + plotHeight}
           stroke="#e6e6e6"
           strokeWidth="2"
@@ -200,9 +199,9 @@ export default function ExperimentChart({
         
         {/* X-axis */}
         <line
-          x1={padding.left}
+          x1={padding.left + xAxisOffset}
           y1={padding.top + plotHeight}
-          x2={padding.left + plotWidth}
+          x2={padding.left + xAxisOffset + plotWidth}
           y2={padding.top + plotHeight}
           stroke="#e6e6e6"
           strokeWidth="2"
@@ -299,25 +298,38 @@ export default function ExperimentChart({
         })}
       </div>
       
-      {/* X-axis labels */}
+      {/* X-axis labels - Days 1-14 with spacing */}
       <div style={{
         position: 'absolute',
         bottom: '20px',
-        left: `${padding.left}px`,
+        left: `${padding.left + xAxisOffset}px`,
         width: `${plotWidth}px`,
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        fontSize: '18px',
+        fontSize: '14px',
         color: 'rgba(21,21,21,0.7)',
         fontFamily: 'Inter, sans-serif',
         fontWeight: 400
       }}>
-        {xAxisLabels.map((day, i) => (
-          <p key={`x-label-${i}`} style={{ margin: 0, textAlign: 'center' }}>
-            {day}
-          </p>
-        ))}
+        {xAxisLabels.map((day, i) => {
+          // Calculate position for each day label (evenly spaced across plotWidth)
+          const dayPosition = (i / (xAxisLabels.length - 1)) * plotWidth;
+          return (
+            <p 
+              key={`x-label-${i}`} 
+              style={{ 
+                margin: 0, 
+                textAlign: 'center',
+                position: 'absolute',
+                left: `${dayPosition}px`,
+                transform: 'translateX(-50%)'
+              }}
+            >
+              {day}
+            </p>
+          );
+        })}
       </div>
     </div>
   );
