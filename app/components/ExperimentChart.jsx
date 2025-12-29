@@ -34,8 +34,8 @@ export default function ExperimentChart({
   figmaColors 
 }) {
   // Calculate chart dimensions and padding
-  const padding = { top: 20, right: 50, bottom: 40, left: 60 };
-  const xAxisOffset = 40; // Space before day 1 (so intersection is at 0 but 0 is not displayed)
+  const padding = { top: 20, right: 50, bottom: 40, left: 40 }; // Reduced left padding to bring Y-axis labels closer to line
+  const xAxisOffset = 60; // Space before day 1 (so intersection is at 0 but 0 is not displayed) - increased to push day 1 right
   const plotWidth = chartWidth - padding.left - padding.right - xAxisOffset;
   const plotHeight = chartHeight - padding.top - padding.bottom;
   
@@ -124,10 +124,10 @@ export default function ExperimentChart({
   
   return (
     <div style={{ position: 'relative', width: '100%', height: `${chartHeight}px` }}>
-      {/* Legend - Top Right */}
+      {/* Legend - Above chart */}
       <div style={{
         position: 'absolute',
-        top: '10px',
+        top: '-40px',
         right: '20px',
         display: 'flex',
         gap: '20px',
@@ -277,7 +277,7 @@ export default function ExperimentChart({
       {/* Y-axis labels - Show as percentages */}
       <div style={{
         position: 'absolute',
-        left: '20px',
+        left: '10px',
         top: `${padding.top}px`,
         display: 'flex',
         flexDirection: 'column',

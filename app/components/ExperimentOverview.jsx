@@ -121,11 +121,11 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
       </div>
 
       {/* Chart Area with X/Y Axes */}
-      <div style={{ marginBottom: '10px', position: 'relative', height: '300px' }}>
+      <div style={{ marginBottom: '10px', position: 'relative', height: '400px' }}>
         <ExperimentChart
           dailyData={spotlightTest.dailyMetrics || []}
           chartWidth={1200}
-          chartHeight={240}
+          chartHeight={340}
           figmaColors={figmaColors}
         />
       </div>
