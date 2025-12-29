@@ -316,7 +316,9 @@ export default function ExperimentChart({
         {xAxisLabels.map((day, i) => {
           // Calculate position for each day label (evenly spaced across plotWidth)
           // Day 1 should be at the start (position 0), day 14 at the end
-          const dayPosition = (i / (xAxisLabels.length - 1)) * plotWidth;
+          // Add offset to push labels to the right
+          const labelOffset = 20; // Push all labels to the right
+          const dayPosition = (i / (xAxisLabels.length - 1)) * plotWidth + labelOffset;
           return (
             <p 
               key={`x-label-${i}`} 
