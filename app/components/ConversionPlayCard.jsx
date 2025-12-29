@@ -214,11 +214,15 @@ export default function ConversionPlayCard({
           <button
             onClick={(e) => {
               e.stopPropagation(); // Prevent card onClick from firing
+              console.log('🔵 Try Now clicked for widget:', widget);
               if (onTryNow) {
+                console.log('🔵 Using custom onTryNow handler');
                 onTryNow(widget);
               } else {
                 // Default navigation to A/B flow with widget ID, skip to step 2 (product selection, which is currentStep=1)
-                navigate(`/app/ab-tests?widgetId=${widget.id}&step=1`);
+                const url = `/app/ab-tests?widgetId=${widget.id}&step=1`;
+                console.log('🔵 Navigating to:', url);
+                navigate(url);
               }
             }}
             style={{
