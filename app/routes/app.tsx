@@ -59,169 +59,57 @@ export default function AppLayout() {
   }, [location.pathname]);
 
   return (
-    <div style={{ backgroundColor: figmaColors.gray, position: 'relative', minHeight: '100vh', fontFamily: 'Inter, sans-serif' }}>
-      {/* Vertical Separator Line Container - Only shows on grey background */}
-      <div style={{
-        position: 'fixed',
-        left: isCollapsed ? '100px' : '350px',
-        top: 0,
-        bottom: 0,
-        width: '2px',
-        backgroundColor: figmaColors.gray,
-        zIndex: 4,
-        transition: 'left 0.3s ease',
-        pointerEvents: 'none',
-        overflow: 'hidden'
-      }}>
-        <div style={{
-          position: 'absolute',
-          left: 0,
-          top: 0,
-          bottom: 0,
-          width: '2px',
-          backgroundColor: 'rgba(0, 0, 0, 0.15)'
-        }} />
-      </div>
-
+    <div style={{ backgroundColor: figmaColors.gray, position: 'relative', minHeight: '100vh', fontFamily: 'Inter, sans-serif', overflow: 'hidden' }}>
       {/* LEFT SIDEBAR */}
       <div style={{ 
         position: 'absolute', 
         left: isCollapsed ? '20px' : '60px', 
         top: 0, 
         zIndex: 10,
-        transition: 'left 0.3s ease'
+        transition: 'left 0.3s ease',
+        width: isCollapsed ? '80px' : '290px',
+        height: '100vh',
+        overflow: 'hidden'
       }}>
-        {/* TryLab Logo, Name, and Hamburger Menu - aligned with first letter of menu options */}
+        {/* TryLab Logo - aligned with first letter of menu options (94px = 26px menu left + 24px padding + 28px icon + 16px gap) */}
         {!isCollapsed && (
           <div style={{
             position: 'absolute',
+            height: '44.613px',
+            left: '94px',
             top: '67.39px',
-            left: 'calc(4.167% + 94px)',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
+            width: '108.793px',
             transition: 'opacity 0.3s ease'
           }}>
-            {/* Logo */}
-            <div style={{
-              width: '44.613px',
-              height: '44.613px',
-              flexShrink: 0
-            }}>
-              <img alt="TryLab Logo" src={tryLabLogo} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
-            </div>
-            {/* Name */}
-            <div style={{
-              height: '44.613px',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
-              <img alt="TryLab" src={imgTryLab} style={{ height: '100%', width: 'auto' }} />
-            </div>
-            {/* Hamburger Menu Button */}
-            <button
-              onClick={() => setIsCollapsed(!isCollapsed)}
-              onMouseEnter={(e) => {
-                const icon = e.currentTarget.querySelector('.toggle-icon') as HTMLElement;
-                if (icon) {
-                  icon.style.opacity = '0';
-                }
-                const arrow = e.currentTarget.querySelector('.toggle-arrow') as HTMLElement;
-                if (arrow) {
-                  arrow.style.opacity = '1';
-                }
-              }}
-              onMouseLeave={(e) => {
-                const icon = e.currentTarget.querySelector('.toggle-icon') as HTMLElement;
-                if (icon) {
-                  icon.style.opacity = '1';
-                }
-                const arrow = e.currentTarget.querySelector('.toggle-arrow') as HTMLElement;
-                if (arrow) {
-                  arrow.style.opacity = '0';
-                }
-              }}
-              style={{
-                backgroundColor: '#FFFFFF',
-                border: '1px solid rgba(0, 0, 0, 0.1)',
-                borderRadius: '8px',
-                width: '36px',
-                height: '36px',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                cursor: 'pointer',
-                boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-                transition: 'all 0.3s ease',
-                flexShrink: 0,
-                position: 'relative'
-              }}
-              title="Collapse sidebar"
-            >
-              {/* Hamburger Menu Icon */}
-              <div 
-                className="toggle-icon"
-                style={{ 
-                  position: 'absolute',
-                  width: '20px',
-                  height: '16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'space-between',
-                  transition: 'opacity 0.3s ease',
-                  opacity: 1
-                }}
-              >
-                <div style={{
-                  width: '100%',
-                  height: '3px',
-                  backgroundColor: '#151515',
-                  borderRadius: '2px'
-                }} />
-                <div style={{
-                  width: '100%',
-                  height: '3px',
-                  backgroundColor: '#151515',
-                  borderRadius: '2px'
-                }} />
-                <div style={{
-                  width: '100%',
-                  height: '3px',
-                  backgroundColor: '#151515',
-                  borderRadius: '2px'
-                }} />
-              </div>
-              
-              {/* Arrow Icon (shown on hover) */}
-              <img 
-                className="toggle-arrow"
-                src={imgChevronLeft} 
-                alt="Collapse" 
-                style={{ 
-                  width: '20px', 
-                  height: '20px',
-                  position: 'absolute',
-                  transition: 'opacity 0.3s ease',
-                  opacity: 0
-                }} 
-              />
-            </button>
+            <img alt="TryLab Logo" src={tryLabLogo} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           </div>
         )}
         
+        {/* TryLab Name - positioned after logo */}
+        {!isCollapsed && (
+          <div style={{
+            position: 'absolute',
+            height: '44.613px',
+            left: '210px',
+            top: '67.39px',
+            width: '159.51px',
+            transition: 'opacity 0.3s ease'
+          }}>
+            <img alt="TryLab" src={imgTryLab} style={{ width: '100%', height: '100%', objectFit: 'contain', objectPosition: 'left' }} />
+          </div>
+        )}
         
         {/* Navigation Menu */}
         <div style={{
           position: 'absolute',
-          left: isCollapsed ? '0' : 'calc(4.167% + 94px)',
+          left: isCollapsed ? '0' : '26px',
           top: isCollapsed ? '40px' : '178.32px',
-          transform: isCollapsed ? 'none' : 'translateX(-50%)',
           display: 'flex',
           flexDirection: 'column',
           gap: '12px',
           alignItems: isCollapsed ? 'center' : 'flex-start',
-          transition: 'all 0.3s ease'
+          transition: 'all 0.3s ease',
+          width: isCollapsed ? '48px' : '238px'
         }}>
           {navigationItems.map((item, index) => (
             <Link
@@ -248,15 +136,16 @@ export default function AppLayout() {
                 gap: isCollapsed ? '0' : '16px',
                 alignItems: 'center',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
-                padding: isCollapsed ? '12px' : '16px 20px',
+                padding: isCollapsed ? '12px' : '16px 24px',
                 borderRadius: selectedNavItem === item.id ? '12px' : '60px',
-                width: isCollapsed ? '48px' : 'auto',
-                maxWidth: isCollapsed ? '48px' : '220px',
+                width: isCollapsed ? '48px' : '100%',
+                maxWidth: isCollapsed ? '48px' : '238px',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 textDecoration: 'none',
                 position: 'relative',
-                transform: 'scale(1)'
+                transform: 'scale(1)',
+                boxSizing: 'border-box'
               }}
               title={isCollapsed ? item.label : ''}
             >
@@ -373,99 +262,109 @@ export default function AppLayout() {
         )}
         */}
 
-        {/* Collapse/Expand Toggle Button - When collapsed */}
-        {isCollapsed && (
-          <button
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            onMouseEnter={(e) => {
-              const icon = e.currentTarget.querySelector('.toggle-icon') as HTMLElement;
-              if (icon) {
-                icon.style.opacity = '0';
-              }
-              const arrow = e.currentTarget.querySelector('.toggle-arrow') as HTMLElement;
-              if (arrow) {
-                arrow.style.opacity = '1';
-              }
-            }}
-            onMouseLeave={(e) => {
-              const icon = e.currentTarget.querySelector('.toggle-icon') as HTMLElement;
-              if (icon) {
-                icon.style.opacity = '1';
-              }
-              const arrow = e.currentTarget.querySelector('.toggle-arrow') as HTMLElement;
-              if (arrow) {
-                arrow.style.opacity = '0';
-              }
-            }}
-            style={{
+        {/* Collapse/Expand Toggle Button - Positioned between TryLab name and vertical line */}
+        <button
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          onMouseEnter={(e) => {
+            const icon = e.currentTarget.querySelector('.toggle-icon') as HTMLElement;
+            if (icon) {
+              icon.style.opacity = '0';
+            }
+            const arrow = e.currentTarget.querySelector('.toggle-arrow') as HTMLElement;
+            if (arrow) {
+              arrow.style.opacity = '1';
+            }
+          }}
+          onMouseLeave={(e) => {
+            const icon = e.currentTarget.querySelector('.toggle-icon') as HTMLElement;
+            if (icon) {
+              icon.style.opacity = '1';
+            }
+            const arrow = e.currentTarget.querySelector('.toggle-arrow') as HTMLElement;
+            if (arrow) {
+              arrow.style.opacity = '0';
+            }
+          }}
+          style={{
+            position: 'absolute',
+            top: isCollapsed ? '20px' : '67.39px',
+            left: isCollapsed ? '0px' : '254px',
+            backgroundColor: '#FFFFFF',
+            border: '1px solid rgba(0, 0, 0, 0.1)',
+            borderRadius: '8px',
+            width: '36px',
+            height: '36px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            transition: 'all 0.3s ease',
+            zIndex: 20
+          }}
+          title={isCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+        >
+          {/* Hamburger Menu Icon */}
+          <div 
+            className="toggle-icon"
+            style={{ 
               position: 'absolute',
-              top: '20px',
-              left: '0px',
-              backgroundColor: '#FFFFFF',
-              border: '1px solid rgba(0, 0, 0, 0.1)',
-              borderRadius: '8px',
-              width: '36px',
-              height: '36px',
+              width: '20px',
+              height: '16px',
               display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              cursor: 'pointer',
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-              transition: 'all 0.3s ease',
-              zIndex: 20
+              flexDirection: 'column',
+              justifyContent: 'space-between',
+              transition: 'opacity 0.3s ease',
+              opacity: 1
             }}
-            title="Expand sidebar"
           >
-            {/* Hamburger Menu Icon */}
-            <div 
-              className="toggle-icon"
-              style={{ 
-                position: 'absolute',
-                width: '20px',
-                height: '16px',
-                display: 'flex',
-                flexDirection: 'column',
-                justifyContent: 'space-between',
-                transition: 'opacity 0.3s ease',
-                opacity: 1
-              }}
-            >
-              <div style={{
-                width: '100%',
-                height: '3px',
-                backgroundColor: '#151515',
-                borderRadius: '2px'
-              }} />
-              <div style={{
-                width: '100%',
-                height: '3px',
-                backgroundColor: '#151515',
-                borderRadius: '2px'
-              }} />
-              <div style={{
-                width: '100%',
-                height: '3px',
-                backgroundColor: '#151515',
-                borderRadius: '2px'
-              }} />
-            </div>
-            
-            {/* Arrow Icon (shown on hover) */}
-            <img 
-              className="toggle-arrow"
-              src={imgChevronRight} 
-              alt="Expand" 
-              style={{ 
-                width: '20px', 
-                height: '20px',
-                position: 'absolute',
-                transition: 'opacity 0.3s ease',
-                opacity: 0
-              }} 
-            />
-          </button>
-        )}
+            <div style={{
+              width: '100%',
+              height: '3px',
+              backgroundColor: '#151515',
+              borderRadius: '2px'
+            }} />
+            <div style={{
+              width: '100%',
+              height: '3px',
+              backgroundColor: '#151515',
+              borderRadius: '2px'
+            }} />
+            <div style={{
+              width: '100%',
+              height: '3px',
+              backgroundColor: '#151515',
+              borderRadius: '2px'
+            }} />
+          </div>
+          
+          {/* Arrow Icon (shown on hover) */}
+          <img 
+            className="toggle-arrow"
+            src={isCollapsed ? imgChevronRight : imgChevronLeft} 
+            alt={isCollapsed ? 'Expand' : 'Collapse'} 
+            style={{ 
+              width: '20px', 
+              height: '20px',
+              position: 'absolute',
+              transition: 'opacity 0.3s ease',
+              opacity: 0
+            }} 
+          />
+        </button>
       </div>
+
+      {/* Vertical Separator Line - Only within grey background */}
+      <div style={{
+        position: 'absolute',
+        left: isCollapsed ? '100px' : '350px',
+        top: 0,
+        height: '100vh',
+        width: '2px',
+        backgroundColor: 'rgba(0, 0, 0, 0.15)',
+        zIndex: 5,
+        transition: 'left 0.3s ease'
+      }} />
 
       {/* MAIN CONTENT AREA - Adjusted for sidebar */}
       <div style={{ 
