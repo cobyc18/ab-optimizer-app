@@ -63,7 +63,7 @@ export default function AppLayout() {
       {/* LEFT SIDEBAR */}
       <div style={{ 
         position: 'absolute', 
-        left: isCollapsed ? '20px' : '60px', 
+        left: isCollapsed ? '20px' : '0px', 
         top: 0, 
         zIndex: 10,
         transition: 'left 0.3s ease',
@@ -71,12 +71,12 @@ export default function AppLayout() {
         height: '100vh',
         overflow: 'hidden'
       }}>
-        {/* TryLab Logo - pushed to the very left edge of grey border */}
+        {/* TryLab Logo - at the left edge of grey border */}
         {!isCollapsed && (
           <div style={{
             position: 'absolute',
             height: '108.793px',
-            left: '-2px',
+            left: '0px',
             top: '35.1px',
             width: '108.793px',
             transition: 'opacity 0.3s ease'
@@ -90,7 +90,7 @@ export default function AppLayout() {
           <div style={{
             position: 'absolute',
             height: '44.613px',
-            left: '114px',
+            left: '116px',
             top: '67.39px',
             width: '159.51px',
             transition: 'opacity 0.3s ease'
@@ -102,7 +102,7 @@ export default function AppLayout() {
         {/* Navigation Menu */}
         <div style={{
           position: 'absolute',
-          left: isCollapsed ? '0' : '-2px',
+          left: isCollapsed ? '0' : '0px',
           top: isCollapsed ? '40px' : '178.32px',
           display: 'flex',
           flexDirection: 'column',
@@ -357,7 +357,7 @@ export default function AppLayout() {
       {/* Vertical Separator Line - Only within grey background */}
       <div style={{
         position: 'absolute',
-        left: isCollapsed ? '100px' : '350px',
+        left: isCollapsed ? '100px' : '290px',
         top: 0,
         height: '100vh',
         width: '2px',
@@ -368,7 +368,7 @@ export default function AppLayout() {
 
       {/* MAIN CONTENT AREA - Adjusted for sidebar */}
       <div style={{ 
-        marginLeft: isCollapsed ? '100px' : '350px', 
+        marginLeft: isCollapsed ? '100px' : '290px', 
         minHeight: '100vh',
         transition: 'margin-left 0.3s ease'
       }}>
