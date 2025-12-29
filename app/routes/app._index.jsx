@@ -1361,7 +1361,7 @@ export default function Dashboard() {
           <div 
             onClick={() => {
               if (ideasCarouselRef.current) {
-                const scrollAmount = 345; // 320px card width + 25px gap
+                const scrollAmount = 385; // 360px card width + 25px gap
                 ideasCarouselRef.current.scrollBy({
                   left: -scrollAmount,
                   behavior: 'smooth'
@@ -1387,7 +1387,7 @@ export default function Dashboard() {
           <div 
             onClick={() => {
               if (ideasCarouselRef.current) {
-                const scrollAmount = 345; // 320px card width + 25px gap
+                const scrollAmount = 385; // 360px card width + 25px gap
                 ideasCarouselRef.current.scrollBy({
                   left: scrollAmount,
                   behavior: 'smooth'
@@ -1439,7 +1439,7 @@ export default function Dashboard() {
             key={widget.id}
             style={{
               flexShrink: 0,
-              width: '320px', // Exact same width as ConversionPlayCard
+              width: '360px', // Exact same width as ConversionPlayCard (updated to fit longer titles)
               transition: 'transform 0.2s ease'
             }}
             onMouseEnter={(e) => {

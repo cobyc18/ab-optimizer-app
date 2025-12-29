@@ -35,7 +35,7 @@ export default function ConversionPlayCard({
   const navigate = useNavigate();
   const cardStyle = {
     minWidth: '320px',
-    width: dashboardMode ? '320px' : undefined, // Fixed width for dashboard
+    width: dashboardMode ? '360px' : undefined, // Fixed width for dashboard (wider to fit longer titles)
     backgroundColor: dashboardMode ? '#D8D8D8' : figmaColors.gray, // Darker grey for dashboard
     border: dashboardMode ? 'none' : (isSelected ? `3px solid ${figmaColors.primaryBlue}` : `1px solid ${figmaColors.primaryBlue}`),
     borderRadius: '24px',
@@ -217,7 +217,7 @@ export default function ConversionPlayCard({
               if (onTryNow) {
                 onTryNow(widget);
               } else {
-                // Default navigation to A/B flow with widget ID
+                // Default navigation to A/B flow with widget ID, skip to step 2 (product selection, which is currentStep=1)
                 navigate(`/app/ab-tests?widgetId=${widget.id}&step=1`);
               }
             }}
@@ -228,7 +228,7 @@ export default function ConversionPlayCard({
               borderRadius: '8px',
               padding: '12px 24px',
               fontFamily: 'Poppins, sans-serif',
-              fontWeight: 500,
+              fontWeight: 600,
               fontSize: '14px',
               cursor: 'pointer',
               width: '100%',

@@ -762,7 +762,7 @@ export default function ABTests() {
         // Set goal to 'add_to_cart' as default when coming from dashboard
         setSelectedGoal('add_to_cart');
         
-        // Navigate to specified step (1 = product selection)
+        // Navigate to specified step (step=1 means currentStep=1, which is step 2 = product selection)
         if (stepParam) {
           const stepNum = parseInt(stepParam, 10);
           if (stepNum >= 0 && stepNum <= 4) {
