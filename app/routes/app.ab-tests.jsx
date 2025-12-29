@@ -750,6 +750,26 @@ export default function ABTests() {
     }
   }, [isDragging, handleDragMove, handleDragEnd]);
 
+  // Map widget utility to appropriate goal
+  const getGoalForWidget = (widget) => {
+    if (!widget) return null;
+    
+    // "How Many in Cart" works with Social Proof or Urgency - default to Social Proof
+    if (widget.utility === 'How Many in Cart') {
+      return 'Social Proof';
+    }
+    // "Free Shipping Badge" and "Returns Guarantee Badge" work with Trust
+    if (widget.utility === 'Free Shipping Badge' || widget.utility === 'Returns Guarantee Badge') {
+      return 'Trust';
+    }
+    // Default fallback
+    return 'Social Proof';
+  };
+
+  // Store widget ID from URL params to apply after goal is set
+  const pendingWidgetIdRef = React.useRef(null);
+  const pendingStepRef = React.useRef(null);
+
   // Handle URL params for direct navigation from dashboard
   useEffect(() => {
     const widgetId = searchParams.get('widgetId');
@@ -758,23 +778,58 @@ export default function ABTests() {
     if (widgetId) {
       const widget = abTestIdeas.find(idea => idea.id === widgetId);
       if (widget) {
-        applyWidgetIdeaSelection(widget);
-        // Set goal to 'add_to_cart' as default when coming from dashboard
-        setSelectedGoal('add_to_cart');
+        // Store the widget ID and step to apply after goal is set
+        pendingWidgetIdRef.current = widgetId;
+        pendingStepRef.current = stepParam ? parseInt(stepParam, 10) : 1;
         
-        // Navigate to specified step (step=1 means currentStep=1, which is step 2 = product selection)
-        if (stepParam) {
-          const stepNum = parseInt(stepParam, 10);
-          if (stepNum >= 0 && stepNum <= 4) {
-            setCurrentStep(stepNum);
-          }
-        }
+        // First, determine and set the correct goal for this widget
+        const appropriateGoal = getGoalForWidget(widget);
+        setSelectedGoal(appropriateGoal);
         
         // Clear URL params after processing
         setSearchParams({}, { replace: true });
       }
     }
-  }, [searchParams, setSearchParams]); // Only run once on mount or when searchParams change
+  }, [searchParams, setSearchParams]);
+
+  // Apply widget selection and navigate after goal is set and filtered list is ready
+  useEffect(() => {
+    if (pendingWidgetIdRef.current && selectedGoal) {
+      const widgetId = pendingWidgetIdRef.current;
+      const stepNum = pendingStepRef.current;
+      
+      // Wait a tick to ensure filtered list is updated
+      setTimeout(() => {
+        const widget = abTestIdeas.find(idea => idea.id === widgetId);
+        if (widget) {
+          // Verify widget is in filtered list for the selected goal
+          const filteredWidgets = getFilteredConversionPlays();
+          const widgetInFiltered = filteredWidgets.find(w => w.id === widgetId);
+          
+          if (widgetInFiltered) {
+            // Apply the widget selection first (this sets selectedIdea, etc.)
+            applyWidgetIdeaSelection(widget);
+            
+            // Then set the index in the filtered list (this is what the swiper uses)
+            const filteredIndex = filteredWidgets.findIndex(w => w.id === widgetId);
+            setCurrentWidgetIndex(filteredIndex);
+            
+            // Navigate to specified step (step=1 means currentStep=1, which is step 2 = product selection)
+            if (stepNum >= 0 && stepNum <= 4) {
+              setCurrentStep(stepNum);
+            }
+          } else {
+            // Widget not in filtered list - this shouldn't happen if goal mapping is correct
+            console.warn(`Widget ${widgetId} not found in filtered list for goal ${selectedGoal}`);
+          }
+        }
+        
+        // Clear the pending refs
+        pendingWidgetIdRef.current = null;
+        pendingStepRef.current = null;
+      }, 150); // Small delay to ensure state updates are processed
+    }
+  }, [selectedGoal]); // Run when goal changes
 
   const encodeWidgetConfigPayload = (payload) => {
     if (!payload) return null;
