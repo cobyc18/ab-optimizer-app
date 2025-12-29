@@ -847,9 +847,16 @@ export const loader = async ({ request }) => {
       return activities;
     });
 
+    // Format shop name for display (remove .myshopify.com and capitalize)
+    const shopDisplayName = session.shop 
+      ? session.shop.replace('.myshopify.com', '').split('.').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ')
+      : 'Store';
+
     return json({
     user: {
-      name: "Zac",
+      name: shopDisplayName,
       level: "Legend Scientist",
       xp: 2100,
       maxXp: 3000
@@ -872,8 +879,15 @@ export const loader = async ({ request }) => {
     });
   } catch (error) {
     console.error("Error loading dashboard data:", error);
+    // Format shop name for display (remove .myshopify.com and capitalize)
+    const shopDisplayName = session.shop 
+      ? session.shop.replace('.myshopify.com', '').split('.').map(word => 
+          word.charAt(0).toUpperCase() + word.slice(1)
+        ).join(' ')
+      : 'Store';
+    
     return json({
-      user: { name: "Zac", level: "Legend Scientist", xp: 2100, maxXp: 3000 },
+      user: { name: shopDisplayName, level: "Legend Scientist", xp: 2100, maxXp: 3000 },
       experiments: [],
       productTemplates: [],
       // testCards removed - using conversion plays from abTestIdeas instead
@@ -1295,7 +1309,7 @@ export default function Dashboard() {
         <Link 
           to="/app/ab-tests"
           style={{
-          backgroundColor: '#3e3bf3',
+          backgroundColor: figmaColors.primaryBlue,
           border: 'none',
           borderRadius: '5px',
           padding: '12px 24px',
