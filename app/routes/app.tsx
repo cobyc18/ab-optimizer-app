@@ -1,5 +1,6 @@
 import { Outlet, useLocation, Link } from "@remix-run/react";
 import { useState, useEffect } from "react";
+import tryLabLogo from "../assets/TryLab-Logo.png";
 
 // Figma Design Assets - Sidebar specific assets (using inline SVG data URIs)
 const imgOption11 = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='109' height='109'%3E%3Ccircle cx='54.5' cy='54.5' r='54.5' fill='%23C5CEE0'/%3E%3Ccircle cx='54.5' cy='54.5' r='40' fill='%2397cdff'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%230038ff' font-family='Arial' font-size='24' font-weight='bold'%3EZ%3C/text%3E%3C/svg%3E";
@@ -67,20 +68,6 @@ export default function AppLayout() {
         zIndex: 10,
         transition: 'left 0.3s ease'
       }}>
-        {/* Background line - only show when expanded */}
-        {!isCollapsed && (
-          <div style={{
-            position: 'absolute',
-            backgroundColor: 'rgba(230,230,230,0.85)',
-            height: '2342px',
-            left: 'calc(12.5% + 107.5px)',
-            mixBlendMode: 'multiply',
-            top: 0,
-            transform: 'translateX(-50%)',
-            width: '1px'
-          }} />
-        )}
-        
         {/* TryLab Logo - only show when expanded */}
         {!isCollapsed && (
           <div style={{
@@ -105,7 +92,7 @@ export default function AppLayout() {
             top: '35.1px',
             transition: 'opacity 0.3s ease'
           }}>
-            <img alt="User Avatar" src={imgOption11} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+            <img alt="User Avatar" src={tryLabLogo} style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '50%' }} />
           </div>
         )}
         
@@ -270,7 +257,7 @@ export default function AppLayout() {
         )}
         */}
 
-        {/* Collapse/Expand Toggle Button */}
+        {/* Collapse/Expand Toggle Button - Moved to left side of sidebar */}
         <button
           onClick={() => setIsCollapsed(!isCollapsed)}
           onMouseEnter={(e) => {
@@ -296,7 +283,7 @@ export default function AppLayout() {
           style={{
             position: 'absolute',
             top: isCollapsed ? '20px' : '67.39px',
-            left: isCollapsed ? '60px' : 'calc(4.167% + 350px)',
+            left: isCollapsed ? '0px' : '26px',
             backgroundColor: '#FFFFFF',
             border: '1px solid rgba(0, 0, 0, 0.1)',
             borderRadius: '8px',
@@ -361,6 +348,18 @@ export default function AppLayout() {
           />
         </button>
       </div>
+
+      {/* Vertical Separator Line - Thin and subtle */}
+      <div style={{
+        position: 'fixed',
+        left: isCollapsed ? '100px' : '350px',
+        top: 0,
+        bottom: 0,
+        width: '1px',
+        backgroundColor: 'rgba(0, 0, 0, 0.08)',
+        zIndex: 5,
+        transition: 'left 0.3s ease'
+      }} />
 
       {/* MAIN CONTENT AREA - Adjusted for sidebar */}
       <div style={{ 
