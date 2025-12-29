@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from "@remix-run/react";
 import freeShippingBadgeImage from "../assets/free-shipping-badge.png";
 import moneyBackGuaranteeImage from "../assets/money-back-guarantee.png";
 import addToCartImage from "../assets/add-to-cart.png";
@@ -28,8 +29,10 @@ export default function ConversionPlayCard({
   style = {},
   onClick,
   dragHandlers = {},
-  dashboardMode = false // New prop for dashboard styling
+  dashboardMode = false, // New prop for dashboard styling
+  onTryNow // Callback for "Try now" button click
 }) {
+  const navigate = useNavigate();
   const cardStyle = {
     minWidth: '320px',
     width: dashboardMode ? '320px' : undefined, // Fixed width for dashboard
@@ -90,7 +93,7 @@ export default function ConversionPlayCard({
         </div>
       )}
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box', position: 'relative' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: dashboardMode ? '30px' : '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box', position: 'relative' }}>
         <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
           {/* Widget Preview - Image Section */}
           <div style={{ 
@@ -205,6 +208,45 @@ export default function ConversionPlayCard({
             </p>
           </div>
         </div>
+        
+        {/* Try Now Button - Only show in dashboard mode */}
+        {dashboardMode && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent card onClick from firing
+              if (onTryNow) {
+                onTryNow(widget);
+              } else {
+                // Default navigation to A/B flow with widget ID
+                navigate(`/app/ab-tests?widgetId=${widget.id}&step=1`);
+              }
+            }}
+            style={{
+              backgroundColor: '#FFFFFF',
+              color: figmaColors.primaryBlue,
+              border: 'none',
+              borderRadius: '8px',
+              padding: '12px 24px',
+              fontFamily: 'Poppins, sans-serif',
+              fontWeight: 500,
+              fontSize: '14px',
+              cursor: 'pointer',
+              width: '100%',
+              transition: 'all 0.2s ease',
+              marginTop: '10px'
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = figmaColors.primaryBlue;
+              e.currentTarget.style.color = '#FFFFFF';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#FFFFFF';
+              e.currentTarget.style.color = figmaColors.primaryBlue;
+            }}
+          >
+            Try now
+          </button>
+        )}
       </div>
     </div>
   );

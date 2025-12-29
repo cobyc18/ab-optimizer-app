@@ -1,5 +1,5 @@
 import { json } from "@remix-run/node";
-import { useLoaderData, useNavigate } from "@remix-run/react";
+import { useLoaderData, useNavigate, useSearchParams } from "@remix-run/react";
 import React, { useState, useEffect, useCallback } from "react";
 import { authenticate, BASIC_PLAN, PRO_PLAN, ENTERPRISE_PLAN } from "../shopify.server.js";
 import { checkBillingStatus } from "../utils/billing.server.js";
@@ -117,6 +117,7 @@ const figmaColors = {
 export default function ABTests() {
   const { themes, products, productTemplates, shop } = useLoaderData();
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
 
   // Wizard state variables
   const [currentStep, setCurrentStep] = useState(0);
@@ -748,6 +749,32 @@ export default function ABTests() {
       };
     }
   }, [isDragging, handleDragMove, handleDragEnd]);
+
+  // Handle URL params for direct navigation from dashboard
+  useEffect(() => {
+    const widgetId = searchParams.get('widgetId');
+    const stepParam = searchParams.get('step');
+    
+    if (widgetId) {
+      const widget = abTestIdeas.find(idea => idea.id === widgetId);
+      if (widget) {
+        applyWidgetIdeaSelection(widget);
+        // Set goal to 'add_to_cart' as default when coming from dashboard
+        setSelectedGoal('add_to_cart');
+        
+        // Navigate to specified step (1 = product selection)
+        if (stepParam) {
+          const stepNum = parseInt(stepParam, 10);
+          if (stepNum >= 0 && stepNum <= 4) {
+            setCurrentStep(stepNum);
+          }
+        }
+        
+        // Clear URL params after processing
+        setSearchParams({}, { replace: true });
+      }
+    }
+  }, [searchParams, setSearchParams]); // Only run once on mount or when searchParams change
 
   const encodeWidgetConfigPayload = (payload) => {
     if (!payload) return null;
