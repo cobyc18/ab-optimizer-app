@@ -71,13 +71,13 @@ export default function AppLayout() {
         height: '100vh',
         overflow: 'hidden'
       }}>
-        {/* TryLab Logo - aligned with first letter of menu options (94px = 26px menu left + 24px padding + 28px icon + 16px gap) */}
+        {/* TryLab Logo - aligned with menu item icons (26px menu left + 24px padding = 50px) */}
         {!isCollapsed && (
           <div style={{
             position: 'absolute',
-            height: '44.613px',
-            left: '94px',
-            top: '67.39px',
+            height: '108.793px',
+            left: '26px',
+            top: '35.1px',
             width: '108.793px',
             transition: 'opacity 0.3s ease'
           }}>
@@ -90,7 +90,7 @@ export default function AppLayout() {
           <div style={{
             position: 'absolute',
             height: '44.613px',
-            left: '210px',
+            left: '142px',
             top: '67.39px',
             width: '159.51px',
             transition: 'opacity 0.3s ease'
@@ -139,7 +139,7 @@ export default function AppLayout() {
                 padding: isCollapsed ? '12px' : '16px 24px',
                 borderRadius: selectedNavItem === item.id ? '12px' : '60px',
                 width: isCollapsed ? '48px' : '100%',
-                maxWidth: isCollapsed ? '48px' : '238px',
+                maxWidth: isCollapsed ? '48px' : '236px',
                 cursor: 'pointer',
                 transition: 'all 0.3s ease',
                 textDecoration: 'none',
