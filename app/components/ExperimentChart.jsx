@@ -35,7 +35,7 @@ export default function ExperimentChart({
 }) {
   // Calculate chart dimensions and padding
   const padding = { top: 20, right: 50, bottom: 40, left: 50 }; // Left padding for Y-axis labels
-  const xAxisOffset = 30; // Space before day 1 (so intersection is at 0 but 0 is not displayed)
+  const xAxisOffset = 5; // Minimal space before day 1 (so intersection is at 0 but 0 is not displayed)
   const graphStartX = padding.left + xAxisOffset; // Where the graph area actually starts (Y-axis line position)
   const plotWidth = chartWidth - graphStartX - padding.right;
   const plotHeight = chartHeight - padding.top - padding.bottom;
@@ -315,6 +315,7 @@ export default function ExperimentChart({
       }}>
         {xAxisLabels.map((day, i) => {
           // Calculate position for each day label (evenly spaced across plotWidth)
+          // Day 1 should be at the start (position 0), day 14 at the end
           const dayPosition = (i / (xAxisLabels.length - 1)) * plotWidth;
           return (
             <p 
