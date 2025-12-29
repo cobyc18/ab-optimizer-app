@@ -357,7 +357,7 @@ export default function AppLayout() {
       {/* Vertical Separator Line - Only within grey background */}
       <div style={{
         position: 'fixed',
-        left: isCollapsed ? '100px' : '294px',
+        left: isCollapsed ? '100px' : '296px',
         top: 0,
         bottom: 0,
         width: '2px',

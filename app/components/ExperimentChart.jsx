@@ -127,7 +127,7 @@ export default function ExperimentChart({
       {/* Legend - Above chart */}
       <div style={{
         position: 'absolute',
-        top: '-40px',
+        top: '-30px',
         right: '20px',
         display: 'flex',
         gap: '20px',
@@ -173,10 +173,11 @@ export default function ExperimentChart({
         {yAxisLabels.map((label, i) => {
           // Inverted: 0% at bottom (i=8), 40% at top (i=0)
           const y = padding.top + (i / (yAxisLabels.length - 1)) * plotHeight;
+          const axisX = padding.left + xAxisOffset + ((1 - 1) / (maxDays - 1)) * plotWidth;
           return (
             <line
               key={`grid-y-${i}`}
-              x1={padding.left + xAxisOffset}
+              x1={axisX}
               y1={y}
               x2={padding.left + xAxisOffset + plotWidth}
               y2={y}
@@ -187,23 +188,23 @@ export default function ExperimentChart({
           );
         })}
         
-        {/* Y-axis */}
+        {/* Y-axis - aligned with day 1 position (day 1 is at x=0 in plotWidth) */}
         <line
           x1={padding.left + xAxisOffset}
           y1={padding.top}
           x2={padding.left + xAxisOffset}
           y2={padding.top + plotHeight}
-          stroke="#e6e6e6"
+          stroke="#FFFFFF"
           strokeWidth="2"
         />
         
-        {/* X-axis */}
+        {/* X-axis - starts at day 1 position */}
         <line
           x1={padding.left + xAxisOffset}
           y1={padding.top + plotHeight}
           x2={padding.left + xAxisOffset + plotWidth}
           y2={padding.top + plotHeight}
-          stroke="#e6e6e6"
+          stroke="#FFFFFF"
           strokeWidth="2"
         />
         
