@@ -1070,6 +1070,10 @@ export default function Dashboard() {
   const [screenshotUrl, setScreenshotUrl] = useState('');
   const [testResult, setTestResult] = useState('');
   const [storePassword, setStorePassword] = useState('');
+  const [currentIdeaIndex, setCurrentIdeaIndex] = useState(0);
+  
+  // Limit to first 3 ideas
+  const displayedIdeas = abTestIdeas.slice(0, 3);
   const encodeWidgetConfigPayload = (payload) => {
     if (!payload) return null;
     try {
@@ -1357,30 +1361,42 @@ export default function Dashboard() {
         
         {/* Navigation Arrows */}
         <div style={{ display: 'flex', gap: '11px', alignItems: 'center' }}>
-          <div style={{
-            border: '0.714px solid #414042',
-            borderRadius: '25px',
-            width: '50px',
-            height: '50px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer'
-          }}>
+          <div 
+            onClick={() => {
+              setCurrentIdeaIndex((prev) => (prev === 0 ? displayedIdeas.length - 1 : prev - 1));
+            }}
+            style={{
+              border: '0.714px solid #414042',
+              borderRadius: '25px',
+              width: '50px',
+              height: '50px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s ease'
+            }}
+          >
             <div style={{ width: '22.857px', height: '22.857px' }}>
               <img alt="Arrow Left" src={icons.arrowLeft} style={{ width: '100%', height: '100%' }} />
             </div>
           </div>
-          <div style={{
-            border: '0.714px solid ' + figmaColors.primaryBlue,
-            borderRadius: '25px',
-            width: '50px',
-            height: '50px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            cursor: 'pointer'
-          }}>
+          <div 
+            onClick={() => {
+              setCurrentIdeaIndex((prev) => (prev === displayedIdeas.length - 1 ? 0 : prev + 1));
+            }}
+            style={{
+              border: '0.714px solid ' + figmaColors.primaryBlue,
+              borderRadius: '25px',
+              width: '50px',
+              height: '50px',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              cursor: 'pointer',
+              transition: 'opacity 0.2s ease'
+            }}
+          >
             <div style={{ width: '22.857px', height: '22.857px' }}>
               <img alt="Arrow Right" src={icons.arrowRight} style={{ width: '100%', height: '100%' }} />
             </div>
@@ -1389,27 +1405,35 @@ export default function Dashboard() {
       </div>
 
       {/* Conversion Play Cards - Using exact same cards from A/B flow */}
-      <div style={{ display: 'flex', gap: '25px', marginBottom: '40px', overflowX: 'auto', paddingBottom: '10px', maxWidth: '100%' }}>
-        {abTestIdeas.map((widget, index) => (
-          <div
-            key={widget.id}
-            style={{
-              flexShrink: 0,
-              transition: 'transform 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.transform = 'translateY(-5px)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.transform = 'translateY(0)';
-            }}
-          >
-            <ConversionPlayCard
-              widget={widget}
-              isSelected={false}
-            />
-          </div>
-        ))}
+      <div style={{ 
+        position: 'relative',
+        width: '320px', // Exact same width as ConversionPlayCard
+        height: 'auto',
+        marginBottom: '40px',
+        overflow: 'hidden'
+      }}>
+        <div style={{
+          display: 'flex',
+          transform: `translateX(-${currentIdeaIndex * 320}px)`, // Move by exact card width
+          transition: 'transform 0.3s ease',
+          width: `${displayedIdeas.length * 320}px` // Total width = number of cards * card width
+        }}>
+          {displayedIdeas.map((widget, index) => (
+            <div
+              key={widget.id}
+              style={{
+                width: '320px', // Exact same width as ConversionPlayCard
+                flexShrink: 0
+              }}
+            >
+              <ConversionPlayCard
+                widget={widget}
+                isSelected={false}
+                dashboardMode={true}
+              />
+            </div>
+          ))}
+        </div>
       </div>
 
       {/* Summary Section */}

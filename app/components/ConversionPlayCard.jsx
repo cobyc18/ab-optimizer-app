@@ -27,12 +27,14 @@ export default function ConversionPlayCard({
   isSelected = false, 
   style = {},
   onClick,
-  dragHandlers = {}
+  dragHandlers = {},
+  dashboardMode = false // New prop for dashboard styling
 }) {
   const cardStyle = {
     minWidth: '320px',
-    backgroundColor: figmaColors.gray,
-    border: isSelected ? `3px solid ${figmaColors.primaryBlue}` : `1px solid ${figmaColors.primaryBlue}`,
+    width: dashboardMode ? '320px' : undefined, // Fixed width for dashboard
+    backgroundColor: dashboardMode ? '#D8D8D8' : figmaColors.gray, // Darker grey for dashboard
+    border: dashboardMode ? 'none' : (isSelected ? `3px solid ${figmaColors.primaryBlue}` : `1px solid ${figmaColors.primaryBlue}`),
     borderRadius: '24px',
     padding: '40px',
     margin: '0',
