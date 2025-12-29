@@ -30,7 +30,8 @@ export default function ConversionPlayCard({
   onClick,
   dragHandlers = {},
   dashboardMode = false, // New prop for dashboard styling
-  onTryNow // Callback for "Try now" button click
+  onTryNow, // Callback for "Try now" button click
+  onRemove // Callback for remove button click
 }) {
   const navigate = useNavigate();
   const cardStyle = {
@@ -91,6 +92,55 @@ export default function ConversionPlayCard({
             />
           </svg>
         </div>
+      )}
+      
+      {/* Remove button (X) - top right, only in dashboard mode */}
+      {dashboardMode && onRemove && (
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            onRemove(widget);
+          }}
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            width: '28px',
+            height: '28px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            border: 'none',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            zIndex: 1000,
+            transition: 'all 0.2s ease',
+            padding: 0
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.2)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(0, 0, 0, 0.1)';
+          }}
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 16 16"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              d="M12 4L4 12M4 4L12 12"
+              stroke="#1F2937"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
+        </button>
       )}
       
       <div style={{ display: 'flex', flexDirection: 'column', gap: dashboardMode ? '30px' : '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box', position: 'relative' }}>
@@ -214,15 +264,11 @@ export default function ConversionPlayCard({
           <button
             onClick={(e) => {
               e.stopPropagation(); // Prevent card onClick from firing
-              console.log('🔵 Try Now clicked for widget:', widget);
               if (onTryNow) {
-                console.log('🔵 Using custom onTryNow handler');
                 onTryNow(widget);
               } else {
                 // Default navigation to A/B flow with widget ID, skip to step 2 (product selection, which is currentStep=1)
-                const url = `/app/ab-tests?widgetId=${widget.id}&step=1`;
-                console.log('🔵 Navigating to:', url);
-                navigate(url);
+                navigate(`/app/ab-tests?widgetId=${widget.id}&step=1`);
               }
             }}
             style={{

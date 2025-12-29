@@ -775,22 +775,10 @@ export default function ABTests() {
     const widgetIdParam = searchParams.get('widgetId');
     const stepParam = searchParams.get('step');
     
-    console.log('🟢 URL params useEffect triggered:', { widgetIdParam, stepParam, searchParams: Object.fromEntries(searchParams) });
-    console.log('🟢 Available widgets:', abTestIdeas.map(w => ({ id: w.id, idType: typeof w.id, utility: w.utility })));
-    
     if (widgetIdParam) {
       // Convert to number (URL params are strings, but widget IDs are numbers)
       const widgetId = parseInt(widgetIdParam, 10);
-      console.log('🟢 Searching for widget with ID:', widgetId, 'Type:', typeof widgetId);
-      
-      const widget = abTestIdeas.find(idea => {
-        const match = idea.id === widgetId;
-        if (!match) {
-          console.log('🟢 Comparing:', { ideaId: idea.id, ideaIdType: typeof idea.id, widgetId, widgetIdType: typeof widgetId, match });
-        }
-        return match;
-      });
-      console.log('🟢 Found widget:', widget);
+      const widget = abTestIdeas.find(idea => idea.id === widgetId);
       
       if (widget) {
         // Store the widget ID and step to apply after goal is set
@@ -798,92 +786,50 @@ export default function ABTests() {
         pendingWidgetIdRef.current = widgetId;
         pendingStepRef.current = stepNum;
         
-        console.log('🟢 Stored pending refs:', { widgetId: pendingWidgetIdRef.current, stepNum: pendingStepRef.current });
-        
         // First, determine and set the correct goal for this widget
         const appropriateGoal = getGoalForWidget(widget);
-        console.log('🟢 Determined goal for widget:', { widgetUtility: widget.utility, appropriateGoal });
-        
         setSelectedGoal(appropriateGoal);
-        console.log('🟢 Set selectedGoal to:', appropriateGoal);
         
         // Clear URL params after processing
         setSearchParams({}, { replace: true });
-        console.log('🟢 Cleared URL params');
-      } else {
-        console.error('🟢 Widget not found for ID:', widgetId);
       }
-    } else {
-      console.log('🟢 No widgetId in URL params');
     }
   }, [searchParams, setSearchParams]);
 
   // Apply widget selection and navigate after goal is set and filtered list is ready
   useEffect(() => {
-    console.log('🟡 Goal change useEffect triggered:', { 
-      pendingWidgetId: pendingWidgetIdRef.current, 
-      selectedGoal,
-      currentStep 
-    });
-    
     if (pendingWidgetIdRef.current && selectedGoal) {
       const widgetId = pendingWidgetIdRef.current;
       const stepNum = pendingStepRef.current;
       
-      console.log('🟡 Processing pending widget:', { widgetId, stepNum, selectedGoal });
-      
       // Wait a tick to ensure filtered list is updated
       setTimeout(() => {
         const widget = abTestIdeas.find(idea => idea.id === widgetId);
-        console.log('🟡 Found widget in abTestIdeas:', widget);
         
         if (widget) {
           // Verify widget is in filtered list for the selected goal
           const filteredWidgets = getFilteredConversionPlays();
-          console.log('🟡 Filtered widgets for goal:', { goal: selectedGoal, filteredCount: filteredWidgets.length, filteredWidgets });
-          
           const widgetInFiltered = filteredWidgets.find(w => w.id === widgetId);
-          console.log('🟡 Widget in filtered list:', widgetInFiltered);
           
           if (widgetInFiltered) {
             // Apply the widget selection first (this sets selectedIdea, etc.)
-            console.log('🟡 Applying widget selection...');
             applyWidgetIdeaSelection(widget);
             
             // Then set the index in the filtered list (this is what the swiper uses)
             const filteredIndex = filteredWidgets.findIndex(w => w.id === widgetId);
-            console.log('🟡 Setting currentWidgetIndex to filtered index:', filteredIndex);
             setCurrentWidgetIndex(filteredIndex);
             
             // Navigate to specified step (step=1 means currentStep=1, which is step 2 = product selection)
             if (stepNum >= 0 && stepNum <= 4) {
-              console.log('🟡 Navigating to step:', stepNum);
               setCurrentStep(stepNum);
-            } else {
-              console.error('🟡 Invalid step number:', stepNum);
             }
-          } else {
-            // Widget not in filtered list - this shouldn't happen if goal mapping is correct
-            console.error(`🟡 Widget ${widgetId} not found in filtered list for goal ${selectedGoal}`, {
-              widgetUtility: widget.utility,
-              selectedGoal,
-              filteredWidgets: filteredWidgets.map(w => ({ id: w.id, utility: w.utility }))
-            });
           }
-        } else {
-          console.error('🟡 Widget not found in abTestIdeas for ID:', widgetId);
         }
         
         // Clear the pending refs
-        console.log('🟡 Clearing pending refs');
         pendingWidgetIdRef.current = null;
         pendingStepRef.current = null;
       }, 150); // Small delay to ensure state updates are processed
-    } else {
-      console.log('🟡 Skipping - conditions not met:', { 
-        hasPendingWidget: !!pendingWidgetIdRef.current, 
-        hasSelectedGoal: !!selectedGoal 
-      });
     }
   }, [selectedGoal]); // Run when goal changes
 
