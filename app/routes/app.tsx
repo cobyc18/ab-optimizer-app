@@ -136,7 +136,7 @@ export default function AppLayout() {
                 gap: isCollapsed ? '0' : '16px',
                 alignItems: 'center',
                 justifyContent: isCollapsed ? 'center' : 'flex-start',
-                padding: isCollapsed ? '12px' : '12px 4px',
+                padding: isCollapsed ? '12px' : '12px 9px',
                 borderRadius: selectedNavItem === item.id ? '12px' : '60px',
                 width: isCollapsed ? '48px' : '100%',
                 maxWidth: isCollapsed ? '48px' : '280px',
