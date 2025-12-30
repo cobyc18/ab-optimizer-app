@@ -40,7 +40,7 @@ export default function ConversionPlayCard({
     backgroundColor: dashboardMode ? '#D8D8D8' : figmaColors.gray, // Darker grey for dashboard
     border: dashboardMode ? 'none' : (isSelected ? `3px solid ${figmaColors.primaryBlue}` : 'none'), // Only show border when selected
     borderRadius: '24px',
-    padding: dashboardMode ? '30px' : '30px', // 10% smaller: 50px * 0.9 = 45px
+    padding: dashboardMode ? '35px' : '35px', // 10% smaller: 50px * 0.9 = 45px
     margin: '0',
     boxSizing: 'border-box',
     overflow: 'visible',
