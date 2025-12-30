@@ -35,12 +35,12 @@ export default function ConversionPlayCard({
 }) {
   const navigate = useNavigate();
   const cardStyle = {
-    minWidth: dashboardMode ? '360px' : '250px', // 10% smaller: 368px * 0.9 = 331px
+    minWidth: dashboardMode ? '360px' : '331px', // 10% smaller: 368px * 0.9 = 331px
     width: dashboardMode ? '360px' : undefined, // Fixed width for dashboard (wider to fit longer titles)
     backgroundColor: dashboardMode ? '#D8D8D8' : figmaColors.gray, // Darker grey for dashboard
     border: dashboardMode ? 'none' : (isSelected ? `3px solid ${figmaColors.primaryBlue}` : 'none'), // Only show border when selected
     borderRadius: '24px',
-    padding: dashboardMode ? '40px' : '45px', // 10% smaller: 50px * 0.9 = 45px
+    padding: dashboardMode ? '30px' : '30px', // 10% smaller: 50px * 0.9 = 45px
     margin: '0',
     boxSizing: 'border-box',
     overflow: 'visible',
