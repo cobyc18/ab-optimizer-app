@@ -947,6 +947,52 @@ export const loader = async ({ request }) => {
       ? (thisMonthWinnersDeclared / lastMonthWinnersDeclared) * 100
       : thisMonthWinnersDeclared > 0 ? 100 : 0;
     
+    // Calculate Total Tested Impressions (variant + control)
+    const calculateTotalImpressions = async (experiments, excludeLatest = false) => {
+      let totalImpressions = 0;
+      
+      // Sort experiments by startDate to identify the latest one
+      const sortedExperiments = [...experiments].sort((a, b) => 
+        new Date(b.startDate) - new Date(a.startDate)
+      );
+      
+      // Filter experiments - exclude latest if requested
+      const experimentsToProcess = excludeLatest && sortedExperiments.length > 0
+        ? sortedExperiments.slice(1) // Skip the first (latest) one
+        : sortedExperiments;
+      
+      for (const experiment of experimentsToProcess) {
+        // Get all impression events for this experiment within its runtime
+        const experimentEndDate = experiment.endDate || new Date();
+        const events = await prisma.aBEvent.findMany({
+          where: {
+            testId: experiment.id,
+            eventType: 'impression',
+            timestamp: {
+              gte: experiment.startDate,
+              lte: experimentEndDate
+            }
+          }
+        });
+        
+        // Count all impressions (both variant and control)
+        totalImpressions += events.length;
+      }
+      
+      return totalImpressions;
+    };
+    
+    // Calculate current total impressions (all experiments)
+    const totalTestedImpressions = await calculateTotalImpressions(allExperimentsForCalc, false);
+    
+    // Calculate last month's impressions (excluding latest experiment)
+    const lastMonthImpressions = await calculateTotalImpressions(allExperimentsForCalc, true);
+    
+    // Calculate percentage change
+    const impressionsChange = lastMonthImpressions !== 0
+      ? ((totalTestedImpressions - lastMonthImpressions) / lastMonthImpressions) * 100
+      : totalTestedImpressions > 0 ? 100 : 0;
+    
     // Format shop name for display (remove .myshopify.com and capitalize)
     const shopDisplayName = session.shop 
       ? session.shop.replace('.myshopify.com', '').split('.').map(word => 
@@ -975,7 +1021,13 @@ export const loader = async ({ request }) => {
       themes: themes,
       products: products,
       productTemplates: productTemplates,
-      shop: session.shop
+      shop: session.shop,
+      incrementalATCs: totalIncrementalATCs,
+      incrementalATCChange: incrementalATCChange,
+      totalWinnersDeclared: totalWinnersDeclared,
+      winnersDeclaredChange: winnersDeclaredChange,
+      totalTestedImpressions: totalTestedImpressions,
+      impressionsChange: impressionsChange
     });
   } catch (error) {
     console.error("Error loading dashboard data:", error);
@@ -1160,7 +1212,7 @@ export const loader = async ({ request }) => {
   const getWidgetTweaks = (widgetType) => widgetTweaksCatalog[widgetType] || [];
 
 export default function Dashboard() {
-  const { user, experiments, queuedTests, recentActivities, themes, products, productTemplates, shop, incrementalATCs, incrementalATCChange, totalWinnersDeclared, winnersDeclaredChange } = useLoaderData();
+  const { user, experiments, queuedTests, recentActivities, themes, products, productTemplates, shop, incrementalATCs, incrementalATCChange, totalWinnersDeclared, winnersDeclaredChange, totalTestedImpressions, impressionsChange } = useLoaderData();
   const [expandedTests, setExpandedTests] = useState(new Set());
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -1176,6 +1228,7 @@ export default function Dashboard() {
   const [ideaToRemove, setIdeaToRemove] = useState(null);
   const [showIncrementalATCTooltip, setShowIncrementalATCTooltip] = useState(false);
   const [showWinnersDeclaredTooltip, setShowWinnersDeclaredTooltip] = useState(false);
+  const [showImpressionsTooltip, setShowImpressionsTooltip] = useState(false);
   const encodeWidgetConfigPayload = (payload) => {
     if (!payload) return null;
     try {
@@ -1876,9 +1929,12 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', width: '80px', height: '60px' }}>
-              <img alt="Vector" src={imgVector8} style={{ width: '100%', height: '100%' }} />
-            </div>
+            {/* Arrow - conditional based on percentage change */}
+            {winnersDeclaredChange !== undefined && winnersDeclaredChange !== null && winnersDeclaredChange !== 0 && (
+              <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', width: '80px', height: '60px' }}>
+                <img alt="Vector" src={winnersDeclaredChange > 0 ? imgVector7 : imgVector8} style={{ width: '100%', height: '100%' }} />
+              </div>
+            )}
           </div>
           
           {/* Total Tested Impressions Card */}
@@ -1888,6 +1944,43 @@ export default function Dashboard() {
             padding: '40px',
             position: 'relative'
           }}>
+            {/* Tooltip Icon - Top Right */}
+            <div 
+              style={{
+                position: 'absolute',
+                right: '20px',
+                top: '20px',
+                cursor: 'help',
+                zIndex: 10
+              }}
+              onMouseEnter={() => setShowImpressionsTooltip(true)}
+              onMouseLeave={() => setShowImpressionsTooltip(false)}
+            >
+              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: '#6B7280' }}>
+                <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+                <text x="8" y="11" textAnchor="middle" fontSize="10" fill="currentColor" fontWeight="bold">?</text>
+              </svg>
+              {showImpressionsTooltip && (
+                <div style={{
+                  position: 'absolute',
+                  bottom: '100%',
+                  right: 0,
+                  marginBottom: '8px',
+                  padding: '8px 12px',
+                  background: '#1F2937',
+                  color: '#FFFFFF',
+                  borderRadius: '6px',
+                  fontSize: '12px',
+                  zIndex: 1000,
+                  width: '280px',
+                  whiteSpace: 'normal',
+                  textAlign: 'left',
+                  boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                }}>
+                  Total product page views exposed to A/B tests. Monthly change reflects test exposure.
+                </div>
+              )}
+            </div>
             <div style={{ marginBottom: '20px' }}>
               <p style={{
                 fontFamily: 'Geist, sans-serif',
@@ -1897,7 +1990,7 @@ export default function Dashboard() {
                 margin: '0 0 10px 0',
                 lineHeight: '32px'
               }}>
-                2,15,221
+                {totalTestedImpressions?.toLocaleString() || '0'}
               </p>
               <p style={{
                 fontFamily: 'Inter, sans-serif',
@@ -1912,12 +2005,24 @@ export default function Dashboard() {
               <div>
                 <p style={{
                   fontFamily: 'Inter, sans-serif',
+                  fontWeight: 400,
+                  fontSize: '12px',
+                  color: '#14213d',
+                  margin: '0 0 5px 0'
+                }}>
+                  Total impressions (variant and control)
+                </p>
+                <p style={{
+                  fontFamily: 'Inter, sans-serif',
                   fontWeight: 600,
                   fontSize: '16px',
                   color: figmaColors.primaryBlue,
                   margin: '0 0 5px 0'
                 }}>
-                  + 250%
+                  {impressionsChange !== undefined && impressionsChange !== null
+                    ? `${impressionsChange >= 0 ? '+' : ''}${impressionsChange.toFixed(1)}%`
+                    : 'N/A'
+                  }
                 </p>
                 <p style={{
                   fontFamily: 'Inter, sans-serif',
@@ -1926,13 +2031,16 @@ export default function Dashboard() {
                   color: '#14213d',
                   margin: 0
                 }}>
-                  This month
+                  Compared to last month
                 </p>
               </div>
             </div>
-            <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', width: '80px', height: '60px' }}>
-              <img alt="Vector" src={imgVector9} style={{ width: '100%', height: '100%' }} />
-            </div>
+            {/* Arrow - conditional based on percentage change */}
+            {impressionsChange !== undefined && impressionsChange !== null && impressionsChange !== 0 && (
+              <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', width: '80px', height: '60px' }}>
+                <img alt="Vector" src={impressionsChange > 0 ? imgVector7 : imgVector8} style={{ width: '100%', height: '100%' }} />
+              </div>
+            )}
           </div>
           
           {/* Progress Card */}
