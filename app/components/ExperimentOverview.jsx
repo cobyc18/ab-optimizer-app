@@ -5,6 +5,7 @@ import ExperimentChart from "./ExperimentChart.jsx";
 export default function ExperimentOverview({ experiments, getWidgetTweaks, figmaColors, icons }) {
   const [showEndModal, setShowEndModal] = useState(false);
   const [isEnding, setIsEnding] = useState(false);
+  const [showModeTooltip, setShowModeTooltip] = useState(false);
   
   const runningTest = experiments.find(exp => exp.status === 'running' || exp.status === 'active' || exp.status === 'live');
   const completedWithWinner = experiments.find(exp => exp.status === 'completed' && exp.winner);
@@ -70,9 +71,36 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
   const testNameParts = spotlightTest.name?.split(' VS ') || [spotlightTest.name || 'Experiment'];
   const experimentTitle = testNameParts[0] || spotlightTest.name || 'Experiment';
 
-  const goalPercentage = spotlightTest.analysis?.atc?.probB 
-    ? Math.min(95, Math.max(50, Math.round(spotlightTest.analysis.atc.probB * 100)))
-    : 80;
+  // Get current probability from analysis
+  const currentProbability = spotlightTest.analysis?.atc?.probB 
+    ? Math.round(spotlightTest.analysis.atc.probB * 100)
+    : spotlightTest.analysis?.purchases?.probB
+    ? Math.round(spotlightTest.analysis.purchases.probB * 100)
+    : 0;
+  
+  // Get threshold percentage based on endResultType
+  const getThresholdPercentage = () => {
+    const endResultType = spotlightTest.endResultType || 'manual';
+    if (endResultType === 'manual') {
+      return 95;
+    }
+    if (endResultType.startsWith('auto-pilot')) {
+      const parts = endResultType.split('-');
+      if (parts.length >= 3) {
+        const mode = parts[2];
+        switch (mode) {
+          case 'fast': return 55;
+          case 'standard': return 70;
+          case 'careful': return 95;
+          default: return 95;
+        }
+      }
+    }
+    return 95; // Default fallback
+  };
+  
+  const thresholdPercentage = getThresholdPercentage();
+  const goalPercentage = Math.min(100, Math.max(0, currentProbability)); // Current probability for progress bar fill
 
   const widgetTweaks = winnerDeclared && spotlightTest.widgetType
     ? getWidgetTweaks(spotlightTest.widgetType)
@@ -80,7 +108,7 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, rgb(126, 200, 227) 0%, rgb(91, 168, 212) 50%, rgb(74, 148, 196) 100%)',
+      background: 'linear-gradient(135deg, rgb(126, 200, 227) 0%, rgb(126, 200, 227) 75%, rgb(91, 168, 212) 90%, rgb(74, 148, 196) 100%)',
       borderRadius: '20px',
       padding: '40px',
       marginBottom: '40px',
@@ -148,6 +176,30 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
         // Capitalize first letter of mode for display
         const modeDisplay = mode ? mode.charAt(0).toUpperCase() + mode.slice(1) : null;
         
+        // Get probability for each mode
+        const getModeProbability = (mode) => {
+          switch (mode) {
+            case 'fast': return '55';
+            case 'standard': return '70';
+            case 'careful': return '95';
+            default: return null;
+          }
+        };
+        
+        const modeProbability = mode ? getModeProbability(mode) : null;
+        
+        // Get tooltip text based on mode
+        const getTooltipText = () => {
+          if (isManual) {
+            return "Once the end date is reached, a winner is declared if 95% statistical significance is met.";
+          } else if (isAutopilot && mode && modeProbability) {
+            return `In '${modeDisplay}' mode, a winner is declared when probability reaches ${modeProbability}% or higher, which typically occurs within ~2 weeks.`;
+          }
+          return null;
+        };
+        
+        const tooltipText = getTooltipText();
+        
         // Only show if autopilot or manual mode
         if (!isAutopilot && !isManual) {
           return null;
@@ -193,18 +245,57 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
                 </div>
               </>
             )}
-            <p style={{
-              fontFamily: 'Inter, sans-serif',
-              fontWeight: 500,
-              fontSize: '16px',
-              color: figmaColors.primaryBlue,
-              margin: 0
-            }}>
-              {isAutopilot 
-                ? `AutoPilot On${modeDisplay ? ` - ${modeDisplay}` : ''}`
-                : 'Manual Mode'
-              }
-            </p>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <p style={{
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 500,
+                fontSize: '16px',
+                color: figmaColors.primaryBlue,
+                margin: 0
+              }}>
+                {isAutopilot 
+                  ? `AutoPilot On${modeDisplay ? ` - ${modeDisplay}` : ''}`
+                  : 'Manual Mode'
+                }
+              </p>
+              {tooltipText && (
+                <div 
+                  style={{
+                    position: 'relative',
+                    display: 'inline-block',
+                    cursor: 'help'
+                  }}
+                  onMouseEnter={() => setShowModeTooltip(true)}
+                  onMouseLeave={() => setShowModeTooltip(false)}
+                >
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: '#6B7280' }}>
+                    <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5"/>
+                    <text x="8" y="11" textAnchor="middle" fontSize="10" fill="currentColor" fontWeight="bold">?</text>
+                  </svg>
+                  {showModeTooltip && (
+                    <div style={{
+                      position: 'absolute',
+                      bottom: '100%',
+                      left: '50%',
+                      transform: 'translateX(-50%)',
+                      marginBottom: '8px',
+                      padding: '8px 12px',
+                      background: '#1F2937',
+                      color: '#FFFFFF',
+                      borderRadius: '6px',
+                      fontSize: '12px',
+                      zIndex: 1000,
+                      width: '280px',
+                      whiteSpace: 'normal',
+                      textAlign: 'left',
+                      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                    }}>
+                      {tooltipText}
+                    </div>
+                  )}
+                </div>
+              )}
+            </div>
           </div>
         );
       })()}
@@ -234,10 +325,26 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
               left: 0,
               top: 0
             }} />
+            {/* Current probability number on the progress bar */}
+            {goalPercentage > 0 && (
+              <div style={{
+                position: 'absolute',
+                left: `${goalPercentage}%`,
+                top: '-20px',
+                transform: 'translateX(-50%)',
+                fontSize: '12px',
+                color: figmaColors.darkGray,
+                fontFamily: 'Inter, sans-serif',
+                fontWeight: 500,
+                whiteSpace: 'nowrap'
+              }}>
+                {goalPercentage}%
+              </div>
+            )}
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: figmaColors.darkGray, fontFamily: 'Inter, sans-serif' }}>
-            <span>Goal: {goalPercentage}%</span>
-            <span>{goalPercentage}%</span>
+            <span>Current: {goalPercentage}%</span>
+            <span>Goal: {thresholdPercentage}%</span>
           </div>
         </div>
       </div>
