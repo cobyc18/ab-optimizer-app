@@ -35,8 +35,8 @@ export default function ConversionPlayCard({
 }) {
   const navigate = useNavigate();
   const cardStyle = {
-    minWidth: dashboardMode ? '360px' : '331px', // 10% smaller: 368px * 0.9 = 331px
-    width: dashboardMode ? '300px' : undefined, // Fixed width for dashboard (wider to fit longer titles)
+    minWidth: dashboardMode ? '360px' : '250px', // 10% smaller: 368px * 0.9 = 331px
+    width: dashboardMode ? '360px' : undefined, // Fixed width for dashboard (wider to fit longer titles)
     backgroundColor: dashboardMode ? '#D8D8D8' : figmaColors.gray, // Darker grey for dashboard
     border: dashboardMode ? 'none' : (isSelected ? `3px solid ${figmaColors.primaryBlue}` : 'none'), // Only show border when selected
     borderRadius: '24px',
