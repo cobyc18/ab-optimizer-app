@@ -147,8 +147,8 @@ export default function ConversionPlayCard({
         <div style={{ display: 'flex', flexDirection: 'column', gap: dashboardMode ? '40px' : '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
           {/* Widget Preview - Image Section */}
           <div style={{ 
-            width: dashboardMode ? '280px' : 'calc(100% - 20px)', // Use almost full width, reducing left/right padding to 10px each
-            maxWidth: dashboardMode ? '280px' : '450px', // Cap at reasonable max width
+            width: dashboardMode ? '280px' : 'calc(100% - 40px)', // Use almost full width, reducing left/right padding to 20px each
+            maxWidth: dashboardMode ? '280px' : '480px', // Cap at reasonable max width
             height: dashboardMode ? '200px' : '320px', // Increased significantly to make card longer (from 200px)
             borderRadius: '10px', 
             overflow: 'hidden',
