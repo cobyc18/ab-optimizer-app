@@ -967,10 +967,10 @@ export const loader = async ({ request }) => {
           }
         });
         
-        console.log(`🔍 Total Impressions Debug - Test ${experiment.id}:`);
-        console.log(`  StartDate: ${experiment.startDate}`);
-        console.log(`  EndDate: ${experiment.endDate || 'null'}`);
-        console.log(`  Found ${events.length} impression events`);
+        //console.log(`🔍 Total Impressions Debug - Test ${experiment.id}:`);
+        //console.log(`  StartDate: ${experiment.startDate}`);
+        //console.log(`  EndDate: ${experiment.endDate || 'null'}`);
+        //console.log(`  Found ${events.length} impression events`);
         events.forEach((event, idx) => {
           console.log(`    Event ${idx + 1}: timestamp=${event.timestamp}, variant=${event.variant}`);
         });
@@ -1839,9 +1839,12 @@ export default function Dashboard() {
                 </p>
               </div>
             </div>
-            <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', width: '80px', height: '60px' }}>
-              <img alt="Vector" src={imgVector7} style={{ width: '100%', height: '100%' }} />
-            </div>
+            {/* Arrow - conditional based on percentage change */}
+            {incrementalATCChange !== undefined && incrementalATCChange !== null && incrementalATCChange !== 0 && (
+              <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', width: '80px', height: '60px' }}>
+                <img alt="Vector" src={incrementalATCChange > 0 ? imgVector7 : imgVector8} style={{ width: '100%', height: '100%' }} />
+              </div>
+            )}
           </div>
           
           {/* Total Winners Declared Card */}

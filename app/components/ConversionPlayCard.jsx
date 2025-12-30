@@ -35,10 +35,10 @@ export default function ConversionPlayCard({
 }) {
   const navigate = useNavigate();
   const cardStyle = {
-    minWidth: '320px',
+    minWidth: dashboardMode ? '360px' : '368px', // Increased by 15% from 320px (320 * 1.15 = 368)
     width: dashboardMode ? '360px' : undefined, // Fixed width for dashboard (wider to fit longer titles)
     backgroundColor: dashboardMode ? '#D8D8D8' : figmaColors.gray, // Darker grey for dashboard
-    border: dashboardMode ? 'none' : (isSelected ? `3px solid ${figmaColors.primaryBlue}` : `1px solid ${figmaColors.primaryBlue}`),
+    border: dashboardMode ? 'none' : (isSelected ? `3px solid ${figmaColors.primaryBlue}` : 'none'), // Only show border when selected
     borderRadius: '24px',
     padding: '40px',
     margin: '0',
@@ -147,8 +147,8 @@ export default function ConversionPlayCard({
         <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
           {/* Widget Preview - Image Section */}
           <div style={{ 
-            width: '280px', 
-            height: '200px', 
+            width: dashboardMode ? '280px' : '322px', // Increased by 15% from 280px (280 * 1.15 = 322)
+            height: dashboardMode ? '200px' : '230px', // Increased by 15% from 200px (200 * 1.15 = 230)
             borderRadius: '10px', 
             overflow: 'hidden',
             boxSizing: 'border-box'

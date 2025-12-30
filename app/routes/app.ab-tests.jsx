@@ -1877,7 +1877,7 @@ export default function ABTests() {
                     letterSpacing: '0.5px',
                     margin: 0
                   }}>
-                    CHOOSE YOUR CONVERSION PLAY
+                    Pick an idea to test with
                   </p>
                   
                   {/* Navigation Arrows */}
