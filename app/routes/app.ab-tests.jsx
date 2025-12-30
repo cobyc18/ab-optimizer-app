@@ -1958,8 +1958,8 @@ export default function ABTests() {
                   flex: '0 0 auto',
                   boxSizing: 'border-box',
                   overflow: 'visible',
-                  minHeight: '600px',
-                  padding: '32px 0 120px 0'
+                  minHeight: '700px', // Increased from 600px to 700px to accommodate taller cards
+                  padding: '32px 0 140px 0' // Increased bottom padding from 120px to 140px
                 }}>
                   {/* Render stacked cards - show cards behind when dragging */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
@@ -2069,7 +2069,7 @@ export default function ABTests() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'absolute',
-                    bottom: '80px',
+                    bottom: '100px', // Increased from 80px to 100px to prevent overlap with taller cards
                     left: '50%',
                     transform: 'translateX(-50%)',
                     zIndex: 200,
@@ -2111,7 +2111,7 @@ export default function ABTests() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '16px',
+                  marginTop: '24px', // Increased from 16px to 24px to prevent overlap with taller cards
                   paddingTop: '0px',
                   paddingBottom: '10px'
                 }}>

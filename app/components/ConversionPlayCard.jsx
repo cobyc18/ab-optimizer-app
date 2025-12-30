@@ -40,7 +40,7 @@ export default function ConversionPlayCard({
     backgroundColor: dashboardMode ? '#D8D8D8' : figmaColors.gray, // Darker grey for dashboard
     border: dashboardMode ? 'none' : (isSelected ? `3px solid ${figmaColors.primaryBlue}` : 'none'), // Only show border when selected
     borderRadius: '24px',
-    padding: '40px',
+    padding: dashboardMode ? '40px' : '50px', // Increased padding for A/B flow to make card taller
     margin: '0',
     boxSizing: 'border-box',
     overflow: 'visible',
@@ -143,12 +143,12 @@ export default function ConversionPlayCard({
         </button>
       )}
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: dashboardMode ? '30px' : '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box', position: 'relative' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: dashboardMode ? '30px' : '60px', alignItems: 'center', width: '100%', boxSizing: 'border-box', position: 'relative' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: dashboardMode ? '40px' : '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
           {/* Widget Preview - Image Section */}
           <div style={{ 
             width: dashboardMode ? '280px' : '322px', // Increased by 15% from 280px (280 * 1.15 = 322)
-            height: dashboardMode ? '200px' : '230px', // Increased by 15% from 200px (200 * 1.15 = 230)
+            height: dashboardMode ? '200px' : '280px', // Increased height significantly for A/B flow (from 230px to 280px)
             borderRadius: '10px', 
             overflow: 'hidden',
             boxSizing: 'border-box'
