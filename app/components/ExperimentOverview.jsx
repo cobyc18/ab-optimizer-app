@@ -100,7 +100,10 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
   };
   
   const thresholdPercentage = getThresholdPercentage();
-  const goalPercentage = Math.min(100, Math.max(0, currentProbability)); // Current probability for progress bar fill
+  // If current probability exceeds threshold, fill to max (100%), otherwise show current probability
+  const goalPercentage = currentProbability >= thresholdPercentage 
+    ? 100 
+    : Math.min(100, Math.max(0, currentProbability));
 
   const widgetTweaks = winnerDeclared && spotlightTest.widgetType
     ? getWidgetTweaks(spotlightTest.widgetType)
@@ -108,7 +111,7 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
 
   return (
     <div style={{
-      background: 'linear-gradient(135deg, rgb(126, 200, 227) 0%, rgb(126, 200, 227) 75%, rgb(91, 168, 212) 90%, rgb(74, 148, 196) 100%)',
+      background: 'linear-gradient(135deg, rgb(126, 200, 227) 0%, rgb(126, 200, 227) 50%, rgb(91, 168, 212) 70%, rgb(74, 148, 196) 100%)',
       borderRadius: '20px',
       padding: '40px',
       marginBottom: '40px',
@@ -325,25 +328,9 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
               left: 0,
               top: 0
             }} />
-            {/* Current probability number on the progress bar */}
-            {goalPercentage > 0 && (
-              <div style={{
-                position: 'absolute',
-                left: `${goalPercentage}%`,
-                top: '-20px',
-                transform: 'translateX(-50%)',
-                fontSize: '12px',
-                color: figmaColors.darkGray,
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 500,
-                whiteSpace: 'nowrap'
-              }}>
-                {goalPercentage}%
-              </div>
-            )}
           </div>
           <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '14px', color: figmaColors.darkGray, fontFamily: 'Inter, sans-serif' }}>
-            <span>Current: {goalPercentage}%</span>
+            <span>Current: {currentProbability}%</span>
             <span>Goal: {thresholdPercentage}%</span>
           </div>
         </div>
