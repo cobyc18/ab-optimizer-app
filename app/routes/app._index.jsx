@@ -860,6 +860,72 @@ export const loader = async ({ request }) => {
       return activities;
     });
 
+    // Calculate Incremental Add-to-Carts
+    const calculateIncrementalATCs = async (experiments, excludeLatest = false) => {
+      let totalIncrementalATCs = 0;
+      
+      // Sort experiments by startDate to identify the latest one
+      const sortedExperiments = [...experiments].sort((a, b) => 
+        new Date(b.startDate) - new Date(a.startDate)
+      );
+      
+      // Filter experiments - exclude latest if requested
+      const experimentsToProcess = excludeLatest && sortedExperiments.length > 0
+        ? sortedExperiments.slice(1) // Skip the first (latest) one
+        : sortedExperiments;
+      
+      for (const experiment of experimentsToProcess) {
+        // Get all events for this experiment within its runtime
+        const experimentEndDate = experiment.endDate || new Date();
+        const events = await prisma.aBEvent.findMany({
+          where: {
+            testId: experiment.id,
+            timestamp: {
+              gte: experiment.startDate,
+              lte: experimentEndDate
+            }
+          }
+        });
+        
+        // Separate events by variant
+        const variantEvents = events.filter(e => e.variant === experiment.templateB);
+        const controlEvents = events.filter(e => e.variant === experiment.templateA);
+        
+        // Calculate impressions and add-to-cart counts
+        const impressionsVariant = variantEvents.filter(e => e.eventType === 'impression').length;
+        const addToCartVariant = variantEvents.filter(e => e.eventType === 'add_to_cart').length;
+        const impressionsControl = controlEvents.filter(e => e.eventType === 'impression').length;
+        const addToCartControl = controlEvents.filter(e => e.eventType === 'add_to_cart').length;
+        
+        // Calculate ATC rates (handle division by zero)
+        const atcRateVariant = impressionsVariant > 0 ? addToCartVariant / impressionsVariant : 0;
+        const atcRateControl = impressionsControl > 0 ? addToCartControl / impressionsControl : 0;
+        
+        // Calculate incremental ATCs for this experiment
+        const incrementalATC = (atcRateVariant - atcRateControl) * impressionsVariant;
+        totalIncrementalATCs += incrementalATC;
+      }
+      
+      return Math.round(totalIncrementalATCs); // Round to whole number
+    };
+    
+    // Get all experiments for calculation
+    const allExperimentsForCalc = await prisma.aBTest.findMany({
+      where: { shop: session.shop },
+      orderBy: { startDate: 'desc' }
+    });
+    
+    // Calculate current total incremental ATCs (all experiments)
+    const totalIncrementalATCs = await calculateIncrementalATCs(allExperimentsForCalc, false);
+    
+    // Calculate last month's incremental ATCs (excluding latest experiment)
+    const lastMonthIncrementalATCs = await calculateIncrementalATCs(allExperimentsForCalc, true);
+    
+    // Calculate percentage change
+    const incrementalATCChange = lastMonthIncrementalATCs !== 0
+      ? ((totalIncrementalATCs - lastMonthIncrementalATCs) / Math.abs(lastMonthIncrementalATCs)) * 100
+      : totalIncrementalATCs > 0 ? 100 : 0;
+    
     // Format shop name for display (remove .myshopify.com and capitalize)
     const shopDisplayName = session.shop 
       ? session.shop.replace('.myshopify.com', '').split('.').map(word => 
@@ -1073,7 +1139,7 @@ export const loader = async ({ request }) => {
   const getWidgetTweaks = (widgetType) => widgetTweaksCatalog[widgetType] || [];
 
 export default function Dashboard() {
-  const { user, experiments, queuedTests, recentActivities, themes, products, productTemplates, shop } = useLoaderData();
+  const { user, experiments, queuedTests, recentActivities, themes, products, productTemplates, shop, incrementalATCs, incrementalATCChange } = useLoaderData();
   const [expandedTests, setExpandedTests] = useState(new Set());
   const [selectedTheme, setSelectedTheme] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
@@ -1604,7 +1670,7 @@ export default function Dashboard() {
           gap: '20px',
           marginBottom: '40px'
         }}>
-          {/* Revenue Impact Card */}
+          {/* Incremental Add-to-Carts Card */}
           <div style={{
             backgroundColor: '#D8D8D8',
             borderRadius: '20px',
@@ -1620,7 +1686,7 @@ export default function Dashboard() {
                 margin: '0 0 10px 0',
                 lineHeight: '32px'
               }}>
-                +12%
+                {incrementalATCs?.toLocaleString() || '0'}
               </p>
               <p style={{
                 fontFamily: 'Inter, sans-serif',
@@ -1630,7 +1696,7 @@ export default function Dashboard() {
                 margin: '0 0 15px 0',
                 lineHeight: '20px'
               }}>
-                Revenue Impact
+                Incremental Add-to-Carts
               </p>
               <div>
                 <p style={{
@@ -1640,7 +1706,10 @@ export default function Dashboard() {
                   color: figmaColors.primaryBlue,
                   margin: '0 0 5px 0'
                 }}>
-                  + 23%
+                  {incrementalATCChange !== undefined && incrementalATCChange !== null
+                    ? `${incrementalATCChange >= 0 ? '+' : ''}${incrementalATCChange.toFixed(1)}%`
+                    : 'N/A'
+                  }
                 </p>
                 <p style={{
                   fontFamily: 'Inter, sans-serif',
@@ -1649,7 +1718,7 @@ export default function Dashboard() {
                   color: '#14213d',
                   margin: 0
                 }}>
-                  This month
+                  Compared to last month
                 </p>
               </div>
             </div>
