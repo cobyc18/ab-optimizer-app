@@ -955,23 +955,31 @@ export const loader = async ({ request }) => {
       let totalImpressions = 0;
       
       for (const experiment of experiments) {
-        // Get all impression events for this experiment within its runtime
-        const experimentEndDate = experiment.endDate || new Date();
+        // Get all impression events for this experiment (from startDate onward, no endDate filter)
         const events = await prisma.aBEvent.findMany({
           where: {
             testId: experiment.id,
             eventType: 'impression',
             timestamp: {
-              gte: experiment.startDate,
-              lte: experimentEndDate
+              gte: experiment.startDate
+              // No upper bound - count all impressions from when experiment started
             }
           }
+        });
+        
+        console.log(`🔍 Total Impressions Debug - Test ${experiment.id}:`);
+        console.log(`  StartDate: ${experiment.startDate}`);
+        console.log(`  EndDate: ${experiment.endDate || 'null'}`);
+        console.log(`  Found ${events.length} impression events`);
+        events.forEach((event, idx) => {
+          console.log(`    Event ${idx + 1}: timestamp=${event.timestamp}, variant=${event.variant}`);
         });
         
         // Count all impressions (both variant and control)
         totalImpressions += events.length;
       }
       
+      console.log(`📊 Total Impressions Calculated: ${totalImpressions}`);
       return totalImpressions;
     };
     
