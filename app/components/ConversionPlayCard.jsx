@@ -35,12 +35,12 @@ export default function ConversionPlayCard({
 }) {
   const navigate = useNavigate();
   const cardStyle = {
-    minWidth: dashboardMode ? '360px' : '368px', // Increased by 15% from 320px (320 * 1.15 = 368)
+    minWidth: dashboardMode ? '360px' : '420px', // Increased card width for A/B flow (from 368px to 420px)
     width: dashboardMode ? '360px' : undefined, // Fixed width for dashboard (wider to fit longer titles)
     backgroundColor: dashboardMode ? '#D8D8D8' : figmaColors.gray, // Darker grey for dashboard
     border: dashboardMode ? 'none' : (isSelected ? `3px solid ${figmaColors.primaryBlue}` : 'none'), // Only show border when selected
     borderRadius: '24px',
-    padding: dashboardMode ? '40px' : '50px', // Increased padding for A/B flow to make card taller
+    padding: dashboardMode ? '40px' : '60px', // Increased padding for A/B flow (from 50px to 60px)
     margin: '0',
     boxSizing: 'border-box',
     overflow: 'visible',
@@ -143,12 +143,12 @@ export default function ConversionPlayCard({
         </button>
       )}
       
-      <div style={{ display: 'flex', flexDirection: 'column', gap: dashboardMode ? '30px' : '60px', alignItems: 'center', width: '100%', boxSizing: 'border-box', position: 'relative' }}>
-        <div style={{ display: 'flex', flexDirection: 'column', gap: dashboardMode ? '40px' : '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: dashboardMode ? '30px' : '70px', alignItems: 'center', width: '100%', boxSizing: 'border-box', position: 'relative' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: dashboardMode ? '40px' : '60px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
           {/* Widget Preview - Image Section */}
           <div style={{ 
-            width: dashboardMode ? '280px' : '322px', // Increased by 15% from 280px (280 * 1.15 = 322)
-            height: dashboardMode ? '200px' : '280px', // Increased height significantly for A/B flow (from 230px to 280px)
+            width: dashboardMode ? '280px' : '360px', // Increased image width for A/B flow (from 322px to 360px)
+            height: dashboardMode ? '200px' : '300px', // Increased image height for A/B flow (from 280px to 300px)
             borderRadius: '10px', 
             overflow: 'hidden',
             boxSizing: 'border-box'
