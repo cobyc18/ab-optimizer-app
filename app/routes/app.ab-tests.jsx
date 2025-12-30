@@ -2069,7 +2069,7 @@ export default function ABTests() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'absolute',
-                    bottom: '80px',
+                    bottom: '140px', // Pushed down to avoid overlap with taller card
                     left: '50%',
                     transform: 'translateX(-50%)',
                     zIndex: 200,
@@ -2111,7 +2111,7 @@ export default function ABTests() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '16px',
+                  marginTop: '60px', // Pushed down to avoid overlap with taller card
                   paddingTop: '0px',
                   paddingBottom: '10px'
                 }}>
