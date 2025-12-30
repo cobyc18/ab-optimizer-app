@@ -2061,20 +2061,19 @@ export default function ABTests() {
                       </div>
                     );
                   })}
-                  
-                  {/* Navigation Dots - positioned absolutely at bottom of cards */}
-                  <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    position: 'absolute',
-                    bottom: '140px', // Pushed down to avoid overlap with taller card
-                    left: '50%',
-                    transform: 'translateX(-50%)',
-                    zIndex: 200,
-                    pointerEvents: 'auto'
-                  }}>
+                </div>
+
+                {/* Navigation Dots - positioned in white container, below the card container */}
+                <div style={{
+                  display: 'flex',
+                  gap: '8px',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginTop: '24px', // Space below the card container
+                  marginBottom: '16px',
+                  zIndex: 200,
+                  pointerEvents: 'auto'
+                }}>
                   {getFilteredConversionPlays().map((widget, index) => (
                     <button
                       key={`dot-${index}`}
@@ -2103,7 +2102,6 @@ export default function ABTests() {
                       aria-label={`Go to widget ${index + 1}`}
                     />
                   ))}
-                  </div>
                 </div>
 
                 {/* Select/Next Button */}
@@ -2111,7 +2109,7 @@ export default function ABTests() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '60px', // Pushed down to avoid overlap with taller card
+                  marginTop: '0px', // No extra margin since navigation dots are now in flow
                   paddingTop: '0px',
                   paddingBottom: '10px'
                 }}>
