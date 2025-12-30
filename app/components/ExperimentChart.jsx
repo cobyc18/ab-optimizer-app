@@ -57,14 +57,16 @@ export default function ExperimentChart({
       };
     }
     
-    // Extract points for control and variant
+    // Extract points for control and variant, sorted by day number
     const controlData = dailyData
       .filter(d => d.variant === 'control')
-      .map(d => ({ x: d.dayNumber, y: d.addToCartRate }));
+      .map(d => ({ x: d.dayNumber, y: d.addToCartRate }))
+      .sort((a, b) => a.x - b.x); // Sort by day number
     
     const variantData = dailyData
       .filter(d => d.variant === 'variant')
-      .map(d => ({ x: d.dayNumber, y: d.addToCartRate }));
+      .map(d => ({ x: d.dayNumber, y: d.addToCartRate }))
+      .sort((a, b) => a.x - b.x); // Sort by day number
     
     // Calculate regression lines
     const controlReg = calculateRegression(controlData);

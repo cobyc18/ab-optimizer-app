@@ -372,37 +372,49 @@ export const loader = async ({ request }) => {
         });
         
         // Calculate add to cart rate per day
-        Object.keys(eventsByDay).forEach(dayKey => {
-          const day = parseInt(dayKey, 10);
-          const dayData = eventsByDay[dayKey];
-          
-          // Control metrics
-          const controlRate = dayData.control.impressions > 0
-            ? dayData.control.addToCart / dayData.control.impressions
-            : 0;
-          dailyMetrics.push({
-            dayNumber: day,
-            variant: 'control',
-            impressions: dayData.control.impressions,
-            addToCart: dayData.control.addToCart,
-            addToCartRate: controlRate
+        // Limit to 14 days max
+        const maxDaysToShow = 14;
+        Object.keys(eventsByDay)
+          .map(key => parseInt(key, 10))
+          .filter(day => day <= maxDaysToShow)
+          .sort((a, b) => a - b)
+          .forEach(day => {
+            const dayData = eventsByDay[day];
+            
+            // Control metrics
+            const controlRate = dayData.control.impressions > 0
+              ? dayData.control.addToCart / dayData.control.impressions
+              : 0;
+            dailyMetrics.push({
+              dayNumber: day,
+              variant: 'control',
+              impressions: dayData.control.impressions,
+              addToCart: dayData.control.addToCart,
+              addToCartRate: controlRate
+            });
+            
+            // Variant metrics
+            const variantRate = dayData.variant.impressions > 0
+              ? dayData.variant.addToCart / dayData.variant.impressions
+              : 0;
+            dailyMetrics.push({
+              dayNumber: day,
+              variant: 'variant',
+              impressions: dayData.variant.impressions,
+              addToCart: dayData.variant.addToCart,
+              addToCartRate: variantRate
+            });
           });
-          
-          // Variant metrics
-          const variantRate = dayData.variant.impressions > 0
-            ? dayData.variant.addToCart / dayData.variant.impressions
-            : 0;
-          dailyMetrics.push({
-            dayNumber: day,
-            variant: 'variant',
-            impressions: dayData.variant.impressions,
-            addToCart: dayData.variant.addToCart,
-            addToCartRate: variantRate
-          });
+        
+        // Sort by day number, then by variant (control first)
+        dailyMetrics.sort((a, b) => {
+          if (a.dayNumber !== b.dayNumber) {
+            return a.dayNumber - b.dayNumber;
+          }
+          return a.variant === 'control' ? -1 : 1;
         });
         
-        // Sort by day number
-        dailyMetrics.sort((a, b) => a.dayNumber - b.dayNumber);
+        console.log(`📊 Daily metrics for test ${test.id}:`, dailyMetrics);
 
         console.log(`🔍 Test ${test.id} (${test.name}):`);
         console.log(`  Template A: ${test.templateA}`);
