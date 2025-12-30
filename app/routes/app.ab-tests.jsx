@@ -1097,7 +1097,7 @@ export default function ABTests() {
           
           if (assignResponse.ok) {
             console.log('✅ Temporarily assigned product to variant template for theme editor');
-          } else {
+                } else {
             console.error('⚠️ Failed to assign product template:', await assignResponse.json());
           }
         } catch (assignError) {
@@ -1958,8 +1958,8 @@ export default function ABTests() {
                   flex: '0 0 auto',
                   boxSizing: 'border-box',
                   overflow: 'visible',
-                  minHeight: '800px', // Increased from 700px to 800px to accommodate larger cards
-                  padding: '32px 0 160px 0' // Increased bottom padding from 140px to 160px to prevent overlap
+                  minHeight: '600px',
+                  padding: '32px 0 120px 0'
                 }}>
                   {/* Render stacked cards - show cards behind when dragging */}
                   {getVisibleCards().map(({ index, widget, stackIndex }) => {
@@ -2069,7 +2069,7 @@ export default function ABTests() {
                     alignItems: 'center',
                     justifyContent: 'center',
                     position: 'absolute',
-                    bottom: '100px', // Increased from 80px to 100px to prevent overlap with taller cards
+                    bottom: '80px',
                     left: '50%',
                     transform: 'translateX(-50%)',
                     zIndex: 200,
@@ -2111,7 +2111,7 @@ export default function ABTests() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '32px', // Increased from 24px to 32px to prevent overlap with larger cards
+                  marginTop: '16px',
                   paddingTop: '0px',
                   paddingBottom: '10px'
                 }}>
@@ -4836,19 +4836,19 @@ export default function ABTests() {
                     </p>
                     
                     {/* Fast Mode */}
-                    <div style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
+                <div style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
                       marginBottom: '12px',
                       padding: '12px',
                       background: fastMode ? '#E0F2FE' : '#FFFFFF',
                       border: fastMode ? '2px solid #3B82F6' : '1px solid #E5E7EB',
                       borderRadius: '8px',
                       transition: 'all 0.2s ease'
-                    }}>
+                }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                        <label style={{
+                    <label style={{
                           position: 'relative',
                           display: 'inline-block',
                           width: '40px',
@@ -4898,7 +4898,7 @@ export default function ABTests() {
                               boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
                             }} />
                           </span>
-                        </label>
+                    </label>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span style={{
@@ -4932,7 +4932,7 @@ export default function ABTests() {
                                   background: '#1F2937',
                                   color: '#FFFFFF',
                                   borderRadius: '6px',
-                                  fontSize: '12px',
+                      fontSize: '12px',
                                   zIndex: 1000,
                                   width: '200px',
                                   whiteSpace: 'normal',
@@ -4941,7 +4941,7 @@ export default function ABTests() {
                                 }}>
                                   <strong>Fast Mode (55% probability)</strong><br/>
                                   Quick decisions with lower confidence. Best for rapid iteration and early insights.
-                                </div>
+                  </div>
                               )}
                             </div>
                           </div>
@@ -4962,57 +4962,57 @@ export default function ABTests() {
                       transition: 'all 0.2s ease'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
-                        <label style={{
-                          position: 'relative',
-                          display: 'inline-block',
+                  <label style={{
+                    position: 'relative',
+                    display: 'inline-block',
                           width: '40px',
                           height: '20px',
                           flexShrink: 0
-                        }}>
-                          <input
-                            type="checkbox"
+                  }}>
+                    <input
+                      type="checkbox"
                             checked={standardMode}
-                            onChange={(e) => {
-                              const newValue = e.target.checked;
+                      onChange={(e) => {
+                        const newValue = e.target.checked;
                               setStandardMode(newValue);
-                              if (newValue) {
+                        if (newValue) {
                                 setFastMode(false);
                                 setCarefulMode(false);
-                              }
-                            }}
-                            style={{
-                              opacity: 0,
-                              width: 0,
-                              height: 0
-                            }}
-                          />
-                          <span style={{
-                            position: 'absolute',
-                            cursor: 'pointer',
-                            top: 0,
-                            left: 0,
-                            right: 0,
-                            bottom: 0,
+                        }
+                      }}
+                      style={{
+                        opacity: 0,
+                        width: 0,
+                        height: 0
+                      }}
+                    />
+                    <span style={{
+                      position: 'absolute',
+                      cursor: 'pointer',
+                      top: 0,
+                      left: 0,
+                      right: 0,
+                      bottom: 0,
                             backgroundColor: standardMode ? '#3B82F6' : '#D1D5DB',
                             borderRadius: '20px',
-                            transition: '0.3s',
-                            display: 'flex',
-                            alignItems: 'center',
-                            padding: '2px'
-                          }}>
-                            <span style={{
-                              content: '""',
-                              position: 'absolute',
+                      transition: '0.3s',
+                      display: 'flex',
+                      alignItems: 'center',
+                      padding: '2px'
+                    }}>
+                      <span style={{
+                        content: '""',
+                        position: 'absolute',
                               height: '16px',
                               width: '16px',
                               left: standardMode ? '22px' : '2px',
-                              backgroundColor: '#FFFFFF',
-                              borderRadius: '50%',
-                              transition: '0.3s',
-                              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                            }} />
-                          </span>
-                        </label>
+                        backgroundColor: '#FFFFFF',
+                        borderRadius: '50%',
+                        transition: '0.3s',
+                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                      }} />
+                    </span>
+                  </label>
                         <div style={{ flex: 1 }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                             <span style={{
@@ -5060,11 +5060,11 @@ export default function ABTests() {
                             </div>
                           </div>
                         </div>
-                      </div>
-                    </div>
+                </div>
+              </div>
 
                     {/* Careful Mode */}
-                    <div style={{
+                <div style={{ 
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'space-between',
@@ -5072,7 +5072,7 @@ export default function ABTests() {
                       padding: '12px',
                       background: carefulMode ? '#E0F2FE' : '#FFFFFF',
                       border: carefulMode ? '2px solid #3B82F6' : '1px solid #E5E7EB',
-                      borderRadius: '8px',
+                  borderRadius: '8px',
                       transition: 'all 0.2s ease'
                     }}>
                       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flex: 1 }}>
@@ -5180,41 +5180,41 @@ export default function ABTests() {
                 )}
 
                 {/* Manual Mode Toggle */}
-                <div style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
+                  <div style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
                   marginBottom: manualMode ? '16px' : '0',
                   paddingBottom: manualMode ? '16px' : '0',
                   borderBottom: manualMode ? '1px solid #E5E7EB' : 'none'
-                }}>
-                  <div>
-                    <label style={{
+                  }}>
+                    <div>
+                      <label style={{
                       fontSize: '16px',
-                      fontWeight: '600',
+                        fontWeight: '600',
                       color: manualMode ? '#3B82F6' : '#1F2937',
-                      marginBottom: '4px',
+                        marginBottom: '4px',
                       display: 'block',
                       transition: 'color 0.2s ease'
-                    }}>
+                      }}>
                       Manual Mode
-                    </label>
-                    <p style={{
-                      fontSize: '12px',
-                      color: '#6B7280',
-                      margin: 0
-                    }}>
+                      </label>
+                      <p style={{
+                        fontSize: '12px',
+                        color: '#6B7280',
+                        margin: 0
+                      }}>
                       Set end conditions manually
-                    </p>
-                  </div>
-                  <label style={{
-                    position: 'relative',
-                    display: 'inline-block',
-                    width: '48px',
-                    height: '24px'
-                  }}>
-                    <input
-                      type="checkbox"
+                      </p>
+                    </div>
+                    <label style={{
+                      position: 'relative',
+                      display: 'inline-block',
+                      width: '48px',
+                      height: '24px'
+                    }}>
+                      <input
+                        type="checkbox"
                       checked={manualMode}
                       onChange={(e) => {
                         const newValue = e.target.checked;
@@ -5231,40 +5231,40 @@ export default function ABTests() {
                           setAutopilotOn(true);
                         }
                       }}
-                      style={{
-                        opacity: 0,
-                        width: 0,
-                        height: 0
-                      }}
-                    />
-                    <span style={{
-                      position: 'absolute',
-                      cursor: 'pointer',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      bottom: 0,
-                      backgroundColor: manualMode ? '#3B82F6' : '#D1D5DB',
-                      borderRadius: '24px',
-                      transition: '0.3s',
-                      display: 'flex',
-                      alignItems: 'center',
-                      padding: '2px'
-                    }}>
+                        style={{
+                          opacity: 0,
+                          width: 0,
+                          height: 0
+                        }}
+                      />
                       <span style={{
-                        content: '""',
                         position: 'absolute',
-                        height: '20px',
-                        width: '20px',
-                        left: manualMode ? '26px' : '2px',
-                        backgroundColor: '#FFFFFF',
-                        borderRadius: '50%',
+                        cursor: 'pointer',
+                        top: 0,
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                      backgroundColor: manualMode ? '#3B82F6' : '#D1D5DB',
+                        borderRadius: '24px',
                         transition: '0.3s',
-                        boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                      }} />
-                    </span>
-                  </label>
-                </div>
+                        display: 'flex',
+                        alignItems: 'center',
+                        padding: '2px'
+                      }}>
+                        <span style={{
+                          content: '""',
+                          position: 'absolute',
+                          height: '20px',
+                          width: '20px',
+                        left: manualMode ? '26px' : '2px',
+                          backgroundColor: '#FFFFFF',
+                          borderRadius: '50%',
+                          transition: '0.3s',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                        }} />
+                      </span>
+                    </label>
+                  </div>
 
                 {/* Manual Mode Explanation */}
                 {manualMode && (
@@ -5301,22 +5301,22 @@ export default function ABTests() {
                   marginBottom: '0'
                 }}>
                   {/* End Date Input */}
-                  <div style={{
-                    background: '#FFFFFF',
-                    border: '1px solid #3B82F6',
-                    borderRadius: '8px',
+                    <div style={{
+                      background: '#FFFFFF',
+                      border: '1px solid #3B82F6',
+                      borderRadius: '8px',
                     padding: '16px'
-                  }}>
-                    <label style={{
-                      display: 'block',
+                    }}>
+                      <label style={{
+                        display: 'block',
                       fontSize: '14px',
                       fontWeight: '600',
-                      color: '#3B82F6',
-                      marginBottom: '8px'
-                    }}>
+                        color: '#3B82F6',
+                        marginBottom: '8px'
+                      }}>
                       End Date
-                    </label>
-                    <input
+                      </label>
+                      <input
                       type="datetime-local"
                       value={endOnDate}
                       min={(() => {
@@ -5336,26 +5336,26 @@ export default function ABTests() {
                           setEndOnDate(e.target.value);
                         }
                       }}
-                      style={{
-                        width: '100%',
-                        maxWidth: '300px',
-                        padding: '8px 12px',
-                        border: '1px solid #3B82F6',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        color: '#1F2937',
-                        outline: 'none',
-                        background: '#F9FAFB'
-                      }}
-                    />
-                    <p style={{
-                      fontSize: '12px',
-                      color: '#6B7280',
-                      margin: '8px 0 0 0'
-                    }}>
+                        style={{
+                          width: '100%',
+                          maxWidth: '300px',
+                          padding: '8px 12px',
+                          border: '1px solid #3B82F6',
+                          borderRadius: '6px',
+                          fontSize: '14px',
+                          color: '#1F2937',
+                          outline: 'none',
+                          background: '#F9FAFB'
+                        }}
+                      />
+                      <p style={{
+                        fontSize: '12px',
+                        color: '#6B7280',
+                        margin: '8px 0 0 0'
+                      }}>
                       Test will end on this date. Minimum duration is 1 week from today.
-                    </p>
-                  </div>
+                      </p>
+                    </div>
                 </div>
               )}
             </div>
