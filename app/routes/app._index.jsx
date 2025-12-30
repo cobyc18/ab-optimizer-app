@@ -861,20 +861,10 @@ export const loader = async ({ request }) => {
     });
 
     // Calculate Incremental Add-to-Carts
-    const calculateIncrementalATCs = async (experiments, excludeLatest = false) => {
+    const calculateIncrementalATCs = async (experiments) => {
       let totalIncrementalATCs = 0;
       
-      // Sort experiments by startDate to identify the latest one
-      const sortedExperiments = [...experiments].sort((a, b) => 
-        new Date(b.startDate) - new Date(a.startDate)
-      );
-      
-      // Filter experiments - exclude latest if requested
-      const experimentsToProcess = excludeLatest && sortedExperiments.length > 0
-        ? sortedExperiments.slice(1) // Skip the first (latest) one
-        : sortedExperiments;
-      
-      for (const experiment of experimentsToProcess) {
+      for (const experiment of experiments) {
         // Get all events for this experiment within its runtime
         const experimentEndDate = experiment.endDate || new Date();
         const events = await prisma.aBEvent.findMany({
@@ -915,53 +905,57 @@ export const loader = async ({ request }) => {
       orderBy: { startDate: 'desc' }
     });
     
+    // Helper function to filter experiments by month
+    const getExperimentsByMonth = (experiments, targetMonth, targetYear) => {
+      return experiments.filter(exp => {
+        const expDate = new Date(exp.startDate);
+        return expDate.getMonth() === targetMonth && expDate.getFullYear() === targetYear;
+      });
+    };
+    
+    // Get current and last month
+    const now = new Date();
+    const currentMonth = now.getMonth();
+    const currentYear = now.getFullYear();
+    const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+    const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+    
     // Calculate current total incremental ATCs (all experiments)
-    const totalIncrementalATCs = await calculateIncrementalATCs(allExperimentsForCalc, false);
+    const totalIncrementalATCs = await calculateIncrementalATCs(allExperimentsForCalc);
     
-    // Calculate last month's incremental ATCs (excluding latest experiment)
-    const lastMonthIncrementalATCs = await calculateIncrementalATCs(allExperimentsForCalc, true);
+    // Calculate this month's incremental ATCs
+    const thisMonthExperiments = getExperimentsByMonth(allExperimentsForCalc, currentMonth, currentYear);
+    const thisMonthIncrementalATCs = await calculateIncrementalATCs(thisMonthExperiments);
     
-    // Calculate percentage change
-    const incrementalATCChange = lastMonthIncrementalATCs !== 0
-      ? ((totalIncrementalATCs - lastMonthIncrementalATCs) / Math.abs(lastMonthIncrementalATCs)) * 100
-      : totalIncrementalATCs > 0 ? 100 : 0;
+    // Calculate last month's incremental ATCs
+    const lastMonthExperiments = getExperimentsByMonth(allExperimentsForCalc, lastMonth, lastMonthYear);
+    const lastMonthIncrementalATCs = await calculateIncrementalATCs(lastMonthExperiments);
+    
+    // Calculate percentage change (only if last month has data)
+    const incrementalATCChange = lastMonthExperiments.length > 0 && lastMonthIncrementalATCs !== 0
+      ? ((thisMonthIncrementalATCs - lastMonthIncrementalATCs) / Math.abs(lastMonthIncrementalATCs)) * 100
+      : lastMonthExperiments.length === 0 ? null : (thisMonthIncrementalATCs > 0 ? 100 : 0);
     
     // Calculate Total Winners Declared
     // Total winners declared (all time) - count experiments where winner is not null
     const totalWinnersDeclared = allExperimentsForCalc.filter(exp => exp.winner !== null && exp.winner !== undefined).length;
     
-    // Winners declared last month (excluding latest experiment)
-    const sortedExperiments = [...allExperimentsForCalc].sort((a, b) => 
-      new Date(b.startDate) - new Date(a.startDate)
-    );
-    const lastMonthExperiments = sortedExperiments.length > 0 
-      ? sortedExperiments.slice(1) // Exclude latest
-      : [];
+    // Winners declared this month
+    const thisMonthWinnersDeclared = thisMonthExperiments.filter(exp => exp.winner !== null && exp.winner !== undefined).length;
+    
+    // Winners declared last month
     const lastMonthWinnersDeclared = lastMonthExperiments.filter(exp => exp.winner !== null && exp.winner !== undefined).length;
     
     // Calculate percentage change for winners declared
-    // This month's winners = total winners - last month's winners (all time excluding latest)
-    const thisMonthWinnersDeclared = totalWinnersDeclared - lastMonthWinnersDeclared;
-    // Percentage change: if last month had X winners and this month has Y more, it's (Y/X) * 100%
-    const winnersDeclaredChange = lastMonthWinnersDeclared !== 0
-      ? (thisMonthWinnersDeclared / lastMonthWinnersDeclared) * 100
-      : thisMonthWinnersDeclared > 0 ? 100 : 0;
+    const winnersDeclaredChange = lastMonthExperiments.length > 0 && lastMonthWinnersDeclared !== 0
+      ? ((thisMonthWinnersDeclared - lastMonthWinnersDeclared) / lastMonthWinnersDeclared) * 100
+      : lastMonthExperiments.length === 0 ? null : (thisMonthWinnersDeclared > 0 ? 100 : 0);
     
     // Calculate Total Tested Impressions (variant + control)
-    const calculateTotalImpressions = async (experiments, excludeLatest = false) => {
+    const calculateTotalImpressions = async (experiments) => {
       let totalImpressions = 0;
       
-      // Sort experiments by startDate to identify the latest one
-      const sortedExperiments = [...experiments].sort((a, b) => 
-        new Date(b.startDate) - new Date(a.startDate)
-      );
-      
-      // Filter experiments - exclude latest if requested
-      const experimentsToProcess = excludeLatest && sortedExperiments.length > 0
-        ? sortedExperiments.slice(1) // Skip the first (latest) one
-        : sortedExperiments;
-      
-      for (const experiment of experimentsToProcess) {
+      for (const experiment of experiments) {
         // Get all impression events for this experiment within its runtime
         const experimentEndDate = experiment.endDate || new Date();
         const events = await prisma.aBEvent.findMany({
@@ -983,15 +977,18 @@ export const loader = async ({ request }) => {
     };
     
     // Calculate current total impressions (all experiments)
-    const totalTestedImpressions = await calculateTotalImpressions(allExperimentsForCalc, false);
+    const totalTestedImpressions = await calculateTotalImpressions(allExperimentsForCalc);
     
-    // Calculate last month's impressions (excluding latest experiment)
-    const lastMonthImpressions = await calculateTotalImpressions(allExperimentsForCalc, true);
+    // Calculate this month's impressions
+    const thisMonthImpressions = await calculateTotalImpressions(thisMonthExperiments);
+    
+    // Calculate last month's impressions
+    const lastMonthImpressions = await calculateTotalImpressions(lastMonthExperiments);
     
     // Calculate percentage change
-    const impressionsChange = lastMonthImpressions !== 0
-      ? ((totalTestedImpressions - lastMonthImpressions) / lastMonthImpressions) * 100
-      : totalTestedImpressions > 0 ? 100 : 0;
+    const impressionsChange = lastMonthExperiments.length > 0 && lastMonthImpressions !== 0
+      ? ((thisMonthImpressions - lastMonthImpressions) / lastMonthImpressions) * 100
+      : lastMonthExperiments.length === 0 ? null : (thisMonthImpressions > 0 ? 100 : 0);
     
     // Format shop name for display (remove .myshopify.com and capitalize)
     const shopDisplayName = session.shop 
@@ -2003,15 +2000,6 @@ export default function Dashboard() {
                 Total Tested Impressions
               </p>
               <div>
-                <p style={{
-                  fontFamily: 'Inter, sans-serif',
-                  fontWeight: 400,
-                  fontSize: '12px',
-                  color: '#14213d',
-                  margin: '0 0 5px 0'
-                }}>
-                  Total impressions (variant and control)
-                </p>
                 <p style={{
                   fontFamily: 'Inter, sans-serif',
                   fontWeight: 600,
