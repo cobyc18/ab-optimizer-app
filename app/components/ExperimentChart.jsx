@@ -86,15 +86,14 @@ export default function ExperimentChart({
   }, [dailyData]);
   
   // Convert data point to SVG coordinates
-  // X: Graph starts at graphStartX, day 1 is at the start of the plot area
-  // Match the X-axis label positioning (which uses labelOffset to push labels right)
+  // CRITICAL: SVG is positioned at left: 0, so SVG coordinates = absolute positions from container left
+  // X-axis labels container starts at: graphStartX (absolute from container left)
+  // Each label is at: graphStartX + (i / 13) * plotWidth + labelOffset (absolute from container left)
+  // So data points should use the same calculation
   const labelOffset = 100; // Same offset used for X-axis labels
   const toSVGX = (x) => {
-    // Calculate position: day 1 should align with the "1" label, day 14 with "14" label
-    // The labels are positioned at: (i / 13) * plotWidth + labelOffset
-    // So day 1 (x=1, i=0) is at: 0 + labelOffset
-    // Day 14 (x=14, i=13) is at: plotWidth + labelOffset
     const i = x - 1; // Convert day number to index (day 1 -> i=0, day 14 -> i=13)
+    // Match label positioning exactly: graphStartX + (i / 13) * plotWidth + labelOffset
     return graphStartX + (i / (maxDays - 1)) * plotWidth + labelOffset;
   };
   // Y: Inverted - 0% at bottom, 40% at top
@@ -177,8 +176,8 @@ export default function ExperimentChart({
         height={chartHeight}
         style={{ 
           position: 'absolute',
-          left: '50%',
-          transform: 'translateX(-50%)'
+          left: 0,
+          top: 0
         }}
       >
         {/* Grid lines */}
@@ -315,7 +314,7 @@ export default function ExperimentChart({
         position: 'absolute',
         bottom: '20px',
         left: `${graphStartX}px`,
-        width: `${plotWidth}px`,
+        width: `${plotWidth + 200}px`, // Wider to accommodate labelOffset
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
@@ -329,6 +328,7 @@ export default function ExperimentChart({
           // Day 1 should be at the start (position 0), day 14 at the end
           // Add offset to push labels to the right
           const labelOffset = 100; // Push all labels to the right
+          // Position labels to match data points: evenly spaced across plotWidth starting from labelOffset
           const dayPosition = (i / (xAxisLabels.length - 1)) * plotWidth + labelOffset;
           return (
             <p 
