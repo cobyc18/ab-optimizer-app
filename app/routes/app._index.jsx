@@ -865,14 +865,13 @@ export const loader = async ({ request }) => {
       let totalIncrementalATCs = 0;
       
       for (const experiment of experiments) {
-        // Get all events for this experiment within its runtime
-        const experimentEndDate = experiment.endDate || new Date();
+        // Get all events for this experiment (from startDate onward, no endDate filter for total)
         const events = await prisma.aBEvent.findMany({
           where: {
             testId: experiment.id,
             timestamp: {
-              gte: experiment.startDate,
-              lte: experimentEndDate
+              gte: experiment.startDate
+              // No upper bound - count all events from when experiment started
             }
           }
         });
