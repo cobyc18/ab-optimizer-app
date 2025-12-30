@@ -87,7 +87,16 @@ export default function ExperimentChart({
   
   // Convert data point to SVG coordinates
   // X: Graph starts at graphStartX, day 1 is at the start of the plot area
-  const toSVGX = (x) => graphStartX + ((x - 1) / (maxDays - 1)) * plotWidth;
+  // Match the X-axis label positioning (which uses labelOffset to push labels right)
+  const labelOffset = 100; // Same offset used for X-axis labels
+  const toSVGX = (x) => {
+    // Calculate position: day 1 should align with the "1" label, day 14 with "14" label
+    // The labels are positioned at: (i / 13) * plotWidth + labelOffset
+    // So day 1 (x=1, i=0) is at: 0 + labelOffset
+    // Day 14 (x=14, i=13) is at: plotWidth + labelOffset
+    const i = x - 1; // Convert day number to index (day 1 -> i=0, day 14 -> i=13)
+    return graphStartX + (i / (maxDays - 1)) * plotWidth + labelOffset;
+  };
   // Y: Inverted - 0% at bottom, 40% at top
   const toSVGY = (y) => padding.top + plotHeight - (y / maxRate) * plotHeight;
   
