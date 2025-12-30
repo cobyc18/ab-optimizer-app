@@ -130,52 +130,84 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
         />
       </div>
 
-      {/* AutoPilot On - Between chart and test name */}
-      <div style={{ 
-        display: 'flex', 
-        gap: '15px', 
-        alignItems: 'center',
-        marginBottom: '20px'
-      }}>
-        {/* Circular icon with upward zigzag arrow */}
-        <div style={{ 
-          width: '28px', 
-          height: '28px',
-          borderRadius: '50%',
-          backgroundColor: '#E0F2FE',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0
-        }}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 12L6 8L8 10L12 4" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-            <path d="M10 4L12 4L12 6" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-          </svg>
-        </div>
-        {/* Lightning bolt icon */}
-        <div style={{ 
-          width: '16px', 
-          height: '16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          flexShrink: 0
-        }}>
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M9 2L5 9H8L7 14L11 7H8L9 2Z" fill="#3B82F6" stroke="#3B82F6" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        </div>
-        <p style={{
-          fontFamily: 'Inter, sans-serif',
-          fontWeight: 500,
-          fontSize: '16px',
-          color: figmaColors.primaryBlue,
-          margin: 0
-        }}>
-          AutoPilot On
-        </p>
-      </div>
+      {/* AutoPilot/Manual Mode - Between chart and test name */}
+      {(() => {
+        const endResultType = spotlightTest.endResultType || 'manual';
+        const isAutopilot = endResultType.startsWith('auto-pilot');
+        const isManual = endResultType === 'manual';
+        
+        // Extract mode from endResultType (e.g., "auto-pilot-fast" -> "fast")
+        let mode = null;
+        if (isAutopilot && endResultType.includes('-')) {
+          const parts = endResultType.split('-');
+          if (parts.length >= 3) {
+            mode = parts[2]; // "fast", "standard", or "careful"
+          }
+        }
+        
+        // Capitalize first letter of mode for display
+        const modeDisplay = mode ? mode.charAt(0).toUpperCase() + mode.slice(1) : null;
+        
+        // Only show if autopilot or manual mode
+        if (!isAutopilot && !isManual) {
+          return null;
+        }
+        
+        return (
+          <div style={{ 
+            display: 'flex', 
+            gap: '15px', 
+            alignItems: 'center',
+            marginBottom: '20px'
+          }}>
+            {isAutopilot && (
+              <>
+                {/* Circular icon with upward zigzag arrow */}
+                <div style={{ 
+                  width: '28px', 
+                  height: '28px',
+                  borderRadius: '50%',
+                  backgroundColor: '#E0F2FE',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M4 12L6 8L8 10L12 4" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                    <path d="M10 4L12 4L12 6" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+                  </svg>
+                </div>
+                {/* Lightning bolt icon */}
+                <div style={{ 
+                  width: '16px', 
+                  height: '16px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  flexShrink: 0
+                }}>
+                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 2L5 9H8L7 14L11 7H8L9 2Z" fill="#3B82F6" stroke="#3B82F6" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"/>
+                  </svg>
+                </div>
+              </>
+            )}
+            <p style={{
+              fontFamily: 'Inter, sans-serif',
+              fontWeight: 500,
+              fontSize: '16px',
+              color: figmaColors.primaryBlue,
+              margin: 0
+            }}>
+              {isAutopilot 
+                ? `AutoPilot On${modeDisplay ? ` - ${modeDisplay}` : ''}`
+                : 'Manual Mode'
+              }
+            </p>
+          </div>
+        );
+      })()}
 
       {/* Experiment Title */}
       <div style={{ marginBottom: '30px' }}>

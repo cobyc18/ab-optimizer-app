@@ -117,6 +117,12 @@ export const action = async ({ request }) => {
       }
     }
 
+    // Combine endResultType with autopilotMode if autopilot is enabled
+    let finalEndResultType = endResultType || "manual";
+    if (endResultType === "auto-pilot" && autopilotMode) {
+      finalEndResultType = `auto-pilot-${autopilotMode}`;
+    }
+
     const createData = {
       shop,
       name: finalTestName,
@@ -124,7 +130,7 @@ export const action = async ({ request }) => {
       templateA: controlSuffixForDb,
       templateB: variantSuffix,
       trafficSplit: trafficSplitInt,
-      endResultType: endResultType || "manual",
+      endResultType: finalEndResultType,
       widgetType: widgetType || null
     };
 
