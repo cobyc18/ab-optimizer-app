@@ -828,7 +828,8 @@ export const loader = async ({ request }) => {
           dailyMetrics: dailyMetrics,
           templateA: test.templateA,
           templateB: test.templateB,
-          startDate: test.startDate // Add startDate for runtime calculation
+          startDate: test.startDate, // Add startDate for runtime calculation
+          endResultType: test.endResultType || null // Include endResultType for autopilot/manual mode display
         };
       })
     );

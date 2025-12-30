@@ -133,7 +133,7 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
       {/* AutoPilot/Manual Mode - Between chart and test name */}
       {(() => {
         const endResultType = spotlightTest.endResultType || 'manual';
-        const isAutopilot = endResultType.startsWith('auto-pilot');
+        const isAutopilot = endResultType && endResultType.startsWith('auto-pilot');
         const isManual = endResultType === 'manual';
         
         // Extract mode from endResultType (e.g., "auto-pilot-fast" -> "fast")
