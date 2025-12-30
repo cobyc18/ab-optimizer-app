@@ -80,7 +80,7 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
 
   return (
     <div style={{
-      backgroundColor: figmaColors.lightBlue,
+      background: 'linear-gradient(135deg, rgb(126, 200, 227) 0%, rgb(91, 168, 212) 50%, rgb(74, 148, 196) 100%)',
       borderRadius: '20px',
       padding: '40px',
       marginBottom: '40px',

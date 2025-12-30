@@ -288,7 +288,7 @@ export default function ExperimentChart({
       {/* Y-axis labels - Show as percentages */}
       <div style={{
         position: 'absolute',
-        left: '20px',
+        left: '10px',
         top: `${padding.top}px`,
         display: 'flex',
         flexDirection: 'column',
