@@ -2069,7 +2069,7 @@ export default function ABTests() {
                   gap: '8px',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '26px', // Space below the card container (24px + 2px)
+                  marginTop: '30px', // Space below the card container (24px + 2px)
                   marginBottom: '16px',
                   zIndex: 200,
                   pointerEvents: 'auto'
@@ -2109,7 +2109,7 @@ export default function ABTests() {
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  marginTop: '2px', // Moved down 2px
+                  marginTop: '6px', // Moved down 2px
                   paddingTop: '0px',
                   paddingBottom: '10px'
                 }}>
