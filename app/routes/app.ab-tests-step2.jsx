@@ -33,7 +33,7 @@ export default function Step2({
           color: '#1F2937',
           marginBottom: '12px'
         }}>
-          Install your widget
+          Let's activate the '{selectedIdea?.utility || 'widget'}' idea
         </h2>
         <p style={{
           fontSize: '16px',
@@ -43,218 +43,121 @@ export default function Step2({
           TryLab has already inserted your widget into your product template <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>. Just click Save in Shopify.
         </p>
 
-      {/* Step 1: Open Shopify Theme Editor */}
+      {/* Step 1: Save in Theme Editor (Active) */}
       <div style={{
-        marginBottom: '48px'
+        marginBottom: '24px'
       }}>
         <div style={{
+          background: '#D8D8D8',
+          border: '1px solid #E5E7EB',
+          borderRadius: '12px',
+          padding: '24px',
+          width: '100%',
+          minHeight: '140px',
           display: 'flex',
-          alignItems: 'flex-start',
-          gap: '16px',
-          marginBottom: '16px'
+          flexDirection: 'column',
+          gap: '16px'
         }}>
+          <h3 style={{
+            fontSize: '18px',
+            fontWeight: '600',
+            color: '#1F2937',
+            margin: 0
+          }}>
+            Save in Theme Editor:
+          </h3>
           <div style={{
             display: 'flex',
             flexDirection: 'column',
-            alignItems: 'center',
-            flexShrink: 0
+            gap: '8px',
+            marginBottom: '8px'
           }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: '#3B82F6',
-              color: '#FFFFFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '16px',
-              fontWeight: '600'
-            }}>
-              1
-            </div>
-            {/* Progress line */}
-            <div style={{
-              width: '2px',
-              height: '60px',
-              background: '#374151',
-              marginTop: '12px'
-            }}></div>
-          </div>
-          <div style={{ flex: 1 }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#1F2937',
-              margin: '0 0 8px 0'
-            }}>
-              Open Shopify Theme Editor
-            </h3>
             <p style={{
               fontSize: '14px',
-              color: '#6B7280',
-              margin: '0 0 16px 0',
-              lineHeight: '1.5'
+              color: '#374151',
+              margin: 0,
+              lineHeight: '1.6'
             }}>
-              This opens your product template with the TryLab widget pre-added.
+              <strong>1.</strong> Click the button below to open your theme.
             </p>
-            <button
-              onClick={openVariantInThemeEditor}
-              disabled={!canOpenThemeEditor}
-              style={{
-                padding: '12px 24px',
-                background: canOpenThemeEditor ? '#3B82F6' : '#9CA3AF',
-                color: '#FFFFFF',
-                borderRadius: '8px',
-                border: 'none',
-                cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
-                fontSize: '14px',
-                fontWeight: '600',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px'
-              }}
-            >
-              {isVariantRequestInFlight && !isVariantTemplateReady ? 'Preparing Theme Editor…' : 'Open Theme Editor'}
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M10 8H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* Step 2: Press Save in Shopify */}
-      <div style={{
-        marginBottom: '48px'
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'flex-start',
-          gap: '16px',
-          marginBottom: '16px'
-        }}>
-          <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            flexShrink: 0
-          }}>
-            <div style={{
-              width: '32px',
-              height: '32px',
-              borderRadius: '50%',
-              background: '#9CA3AF',
-              color: '#FFFFFF',
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              fontSize: '16px',
-              fontWeight: '600'
-            }}>
-              2
-            </div>
-            {/* Progress line */}
-            <div style={{
-              width: '2px',
-              height: '60px',
-              background: '#374151',
-              marginTop: '12px'
-            }}></div>
-          </div>
-          <div style={{ flex: 1 }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#1F2937',
-              margin: '0 0 8px 0'
-            }}>
-              Press Save in Shopify
-            </h3>
             <p style={{
               fontSize: '14px',
-              color: '#6B7280',
-              margin: '0 0 16px 0',
-              lineHeight: '1.5'
+              color: '#374151',
+              margin: 0,
+              lineHeight: '1.6'
             }}>
-              Look for the black Save button in the top-right corner of your theme editor.
+              <strong>2.</strong> A Trylab widget block will appear. Click "Save" in top right.
             </p>
-            <div style={{
-              background: '#F3F4F6',
-              border: '1px solid #E5E7EB',
+            <p style={{
+              fontSize: '14px',
+              color: '#374151',
+              margin: 0,
+              lineHeight: '1.6'
+            }}>
+              <strong>3.</strong> Come back here to customize the look.
+            </p>
+          </div>
+          <button
+            onClick={openVariantInThemeEditor}
+            disabled={!canOpenThemeEditor}
+            style={{
+              padding: '12px 24px',
+              background: canOpenThemeEditor ? '#3B82F6' : '#9CA3AF',
+              color: '#FFFFFF',
               borderRadius: '8px',
-              padding: '16px',
-              display: 'inline-block'
-            }}>
-              <button style={{
-                padding: '8px 16px',
-                background: '#000000',
-                color: '#FFFFFF',
-                borderRadius: '6px',
-                border: 'none',
-                fontSize: '14px',
-                fontWeight: '600',
-                cursor: 'default'
-              }}>
-                Save
-              </button>
-              <p style={{
-                fontSize: '12px',
-                color: '#6B7280',
-                margin: '8px 0 0 0',
-                textAlign: 'center'
-              }}>
-                Click the black Save button
-              </p>
-            </div>
-          </div>
+              border: 'none',
+              cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
+              fontSize: '14px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              width: 'fit-content',
+              alignSelf: 'flex-start'
+            }}
+          >
+            {isVariantRequestInFlight && !isVariantTemplateReady ? 'Preparing Theme Editor…' : 'Open Theme Editor'}
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M6 12L10 8L6 4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+              <path d="M10 8H2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </button>
         </div>
       </div>
 
-      {/* Step 3: Return here */}
+      {/* Step 2: Return here (Inactive/Faded) */}
       <div style={{
         marginBottom: '32px'
       }}>
         <div style={{
+          background: '#F3F4F6',
+          border: '1px solid #E5E7EB',
+          borderRadius: '12px',
+          padding: '24px',
+          width: '100%',
+          minHeight: '140px',
           display: 'flex',
-          alignItems: 'flex-start',
+          flexDirection: 'column',
           gap: '16px',
-          marginBottom: '24px'
+          opacity: 0.6
         }}>
-          <div style={{
-            width: '32px',
-            height: '32px',
-            borderRadius: '50%',
-            background: '#9CA3AF',
-            color: '#FFFFFF',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            fontSize: '16px',
+          <h3 style={{
+            fontSize: '18px',
             fontWeight: '600',
-            flexShrink: 0
+            color: '#9CA3AF',
+            margin: 0
           }}>
-            3
-          </div>
-          <div style={{ flex: 1 }}>
-            <h3 style={{
-              fontSize: '18px',
-              fontWeight: '600',
-              color: '#1F2937',
-              margin: '0 0 8px 0'
-            }}>
-              Return here
-            </h3>
-            <p style={{
-              fontSize: '14px',
-              color: '#6B7280',
-              margin: 0,
-              lineHeight: '1.5'
-            }}>
-              We'll verify your installation automatically.
-            </p>
-          </div>
+            Return here:
+          </h3>
+          <p style={{
+            fontSize: '14px',
+            color: '#9CA3AF',
+            margin: 0,
+            lineHeight: '1.6'
+          }}>
+            We'll verify your installation automatically.
+          </p>
         </div>
       </div>
 
