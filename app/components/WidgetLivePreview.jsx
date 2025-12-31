@@ -362,8 +362,8 @@ export default function WidgetLivePreview({
             disabled={!canOpenThemeEditor}
             style={{
               padding: '12px 24px',
-              background: canOpenThemeEditor ? '#1F2937' : '#9CA3AF',
-              color: '#FFFFFF',
+              background: canOpenThemeEditor ? '#F3F4F6' : '#9CA3AF',
+              color: canOpenThemeEditor ? '#1F2937' : '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
               fontSize: '14px',

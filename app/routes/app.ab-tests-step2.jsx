@@ -27,7 +27,7 @@ export default function Step2({
       setToastMessage('Widget Verified!');
       setToastType('success');
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 4000);
+      setTimeout(() => setShowToast(false), 3000);
     }
   }, [isBlockSaved]);
 
@@ -45,7 +45,7 @@ export default function Step2({
       setToastMessage('Widget not detected. Please ensure you clicked save in the theme editor');
       setToastType('error');
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 3000);
+      setTimeout(() => setShowToast(false), 1000);
       // Reset to step 1 - fade step 2, unfade step 1
       setHasOpenedThemeEditor(false);
     }
@@ -364,7 +364,8 @@ export default function Step2({
         flex: 1,
         maxWidth: '450px',
         position: 'sticky',
-        top: '50px'
+        top: '50px',
+        marginTop: '120px'
       }}>
         <div style={{
           backgroundColor: '#D8D8D8',

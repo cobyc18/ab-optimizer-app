@@ -28,7 +28,7 @@ export default function Step3({
         marginBottom: '8px',
         textAlign: 'center'
       }}>
-        Customize your widget
+        Customize Your Idea
       </h2>
       <p style={{
         fontSize: '16px',
@@ -1135,21 +1135,39 @@ export default function Step3({
         alignItems: 'center',
         marginTop: '60px'
       }}>
-        <button
-          onClick={() => setCurrentStep(4)}
-          style={{
-            padding: '12px 32px',
-            background: '#3B82F6',
-            color: '#FFFFFF',
-            borderRadius: '8px',
-            border: 'none',
-            cursor: 'pointer',
-            fontSize: '16px',
-            fontWeight: '600'
-          }}
-        >
-          Review
-        </button>
+        <div style={{
+          width: '100%',
+          display: 'flex',
+          gap: '24px'
+        }}>
+          {/* Spacer for left column (400px + gap) */}
+          <div style={{
+            flex: '0 0 400px',
+            maxWidth: '400px'
+          }}></div>
+          {/* Right column - align button to end */}
+          <div style={{
+            flex: 1,
+            display: 'flex',
+            justifyContent: 'flex-end'
+          }}>
+            <button
+              onClick={() => setCurrentStep(4)}
+              style={{
+                padding: '12px 32px',
+                background: '#3B82F6',
+                color: '#FFFFFF',
+                borderRadius: '8px',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: '16px',
+                fontWeight: '600'
+              }}
+            >
+              Review
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );
