@@ -204,7 +204,13 @@ export default function WidgetLivePreview({
   widgetSettings, 
   conversionPlayType = '',
   countMin = 40,
-  countMax = 60
+  countMax = 60,
+  isBlockSaved = false,
+  canOpenThemeEditor = false,
+  openVariantInThemeEditor = null,
+  shop = '',
+  wizardVariantProductHandle = '',
+  wizardVariantName = ''
 }) {
   const [previewMode, setPreviewMode] = useState('mobile'); // 'mobile' or 'desktop'
 
@@ -341,6 +347,77 @@ export default function WidgetLivePreview({
           previewMode={previewMode}
         />
       </div>
+
+      {/* Preview Buttons - Below Live Preview */}
+      {isBlockSaved && (
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          marginTop: '24px',
+          gap: '8px'
+        }}>
+          <div style={{
+            display: 'flex',
+            background: '#F3F4F6',
+            borderRadius: '8px',
+            padding: '4px',
+            gap: '4px'
+          }}>
+            <button
+              onClick={openVariantInThemeEditor}
+              disabled={!canOpenThemeEditor}
+              style={{
+                padding: '6px 12px',
+                background: canOpenThemeEditor ? '#1F2937' : '#9CA3AF',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '600',
+                cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
+                transition: 'all 0.2s ease',
+                boxShadow: canOpenThemeEditor ? '0 1px 3px rgba(0, 0, 0, 0.1)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                opacity: canOpenThemeEditor ? 1 : 0.7
+              }}
+            >
+              Save and Preview in Theme Editor
+            </button>
+            <button
+              onClick={() => {
+                if (shop && wizardVariantProductHandle && wizardVariantName) {
+                  const storefrontUrl = `https://${shop}/products/${wizardVariantProductHandle}?view=${wizardVariantName}`;
+                  window.open(storefrontUrl, '_blank');
+                } else {
+                  alert('Missing information to generate storefront preview URL.');
+                }
+              }}
+              disabled={!canOpenThemeEditor || !wizardVariantProductHandle || !wizardVariantName}
+              style={{
+                padding: '6px 12px',
+                background: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#FFFFFF' : '#9CA3AF',
+                color: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#1F2937' : '#FFFFFF',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: '12px',
+                fontWeight: '600',
+                cursor: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 'pointer' : 'not-allowed',
+                transition: 'all 0.2s ease',
+                boxShadow: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '0 1px 3px rgba(0, 0, 0, 0.1)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+                opacity: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 1 : 0.7
+              }}
+            >
+              Preview in Storefront
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

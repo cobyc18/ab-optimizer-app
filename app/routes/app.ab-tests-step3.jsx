@@ -39,58 +39,6 @@ export default function Step3({
         Make it match your brand perfectly.
       </p>
 
-      {/* Preview Buttons - Above backgrounds */}
-      {isBlockSaved && (
-        <div style={{
-          display: 'flex',
-          gap: '12px',
-          alignItems: 'center',
-          marginBottom: '24px'
-        }}>
-          <button
-            onClick={openVariantInThemeEditor}
-            disabled={!canOpenThemeEditor}
-            style={{
-              padding: '12px 24px',
-              background: canOpenThemeEditor ? '#22C55E' : '#9CA3AF',
-              color: '#FFFFFF',
-              borderRadius: '8px',
-              border: `1px solid ${canOpenThemeEditor ? '#22C55E' : '#9CA3AF'}`,
-              cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
-              opacity: canOpenThemeEditor ? 1 : 0.7,
-              fontSize: '14px',
-              fontWeight: '600'
-            }}
-          >
-            Save and Preview in Theme Editor
-          </button>
-          <button
-            onClick={() => {
-              if (shop && wizardVariantProductHandle && wizardVariantName) {
-                const storefrontUrl = `https://${shop}/products/${wizardVariantProductHandle}?view=${wizardVariantName}`;
-                window.open(storefrontUrl, '_blank');
-              } else {
-                alert('Missing information to generate storefront preview URL.');
-              }
-            }}
-            disabled={!canOpenThemeEditor || !wizardVariantProductHandle || !wizardVariantName}
-            style={{
-              padding: '12px 24px',
-              background: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF',
-              color: '#FFFFFF',
-              borderRadius: '8px',
-              border: `1px solid ${(canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? '#3B82F6' : '#9CA3AF'}`,
-              cursor: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 'pointer' : 'not-allowed',
-              opacity: (canOpenThemeEditor && wizardVariantProductHandle && wizardVariantName) ? 1 : 0.7,
-              fontSize: '14px',
-              fontWeight: '600'
-            }}
-          >
-            Preview in Storefront
-          </button>
-        </div>
-      )}
-
       {/* Main Container - Two Columns */}
       <div style={{
         display: 'flex',
@@ -1171,6 +1119,12 @@ export default function Step3({
           }
           countMin={widgetSettings.count_min || 40}
           countMax={widgetSettings.count_max || 60}
+          isBlockSaved={isBlockSaved}
+          canOpenThemeEditor={canOpenThemeEditor}
+          openVariantInThemeEditor={openVariantInThemeEditor}
+          shop={shop}
+          wizardVariantProductHandle={wizardVariantProductHandle}
+          wizardVariantName={wizardVariantName}
         />
       </div>
 

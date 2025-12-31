@@ -198,36 +198,22 @@ export default function ProductPagePreview({
               </div>
             </div>
 
-            {/* Action Buttons */}
+            {/* Action Button */}
             <div style={{
-              display: 'flex',
-              gap: '12px',
               marginBottom: '24px'
             }}>
               <button style={{
-                flex: 1,
-                padding: '16px',
-                background: '#FFFFFF',
-                color: '#1F2937',
-                border: '1px solid #E5E7EB',
-                borderRadius: '8px',
+                width: '100%',
+                padding: '16px 32px',
+                background: '#1F2937',
+                color: '#FFFFFF',
+                border: 'none',
+                borderRadius: '12px',
                 fontSize: '16px',
                 fontWeight: '600',
                 cursor: 'pointer'
               }}>
                 Add to Cart
-              </button>
-              <button style={{
-                padding: '16px 24px',
-                background: '#1F2937',
-                color: '#FFFFFF',
-                border: 'none',
-                borderRadius: '8px',
-                fontSize: '16px',
-                fontWeight: '600',
-                cursor: 'pointer'
-              }}>
-                Add to Wishlist
               </button>
             </div>
           </div>
