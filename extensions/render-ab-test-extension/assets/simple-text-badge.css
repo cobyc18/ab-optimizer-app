@@ -20,6 +20,17 @@
   border: var(--badge-border-thickness, 1px) solid var(--badge-border-color, #d4d4d8);
   box-shadow: var(--badge-drop-shadow, none);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
+  position: relative;
+}
+
+.simple-text-badge.has-background-image {
+  background-color: transparent;
+  min-height: 200px;
+}
+
+.simple-text-badge.has-background-image .badge-content {
+  position: relative;
+  z-index: 1;
 }
 
 .simple-text-badge.hover-enabled:hover {

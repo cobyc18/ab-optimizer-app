@@ -43,7 +43,7 @@
      data-outer-padding-y="{{ block.settings.outer_padding_vertical | default: 0 }}"
      data-outer-padding-x-mobile="{{ block.settings.outer_padding_horizontal_mobile | default: 0 }}"
      data-outer-padding-y-mobile="{{ block.settings.outer_padding_vertical_mobile | default: 0 }}"
-     data-icon-choice="{{ block.settings.icon_choice | default: 'star' }}"
+     data-icon-choice="{{ block.settings.icon_choice | default: 'none' }}"
     data-icon-blink="{{ block.settings.icon_blink | default: false }}"
     data-icon-blink-intensity="{{ block.settings.icon_blink_intensity | default: 50 }}"
      data-icon-size="{{ block.settings.icon_size | default: 36 }}"
@@ -55,9 +55,11 @@
      {% if block.settings.icon_custom %}
      data-icon-url="{{ block.settings.icon_custom | image_url: width: 120 }}"
      data-icon-alt="{{ block.settings.icon_custom.alt | default: 'Badge icon' }}"
+     data-icon-custom="true"
      {% else %}
-     data-icon-url=""
+     data-icon-url="{{ 'default-app-block-settings.png' | asset_url }}"
      data-icon-alt="Badge icon"
+     data-icon-custom="false"
      {% endif %}
      data-conversion-play-type="{{ block.settings.conversion_play_type | default: '' }}"
      data-count-min="{{ block.settings.count_min | default: 40 }}"
@@ -88,7 +90,6 @@
       "type": "richtext",
       "id": "header_text",
       "label": "Header text",
-      "default": "<p>Store Announcement</p>",
       "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
@@ -145,7 +146,6 @@
       "type": "richtext",
       "id": "body_text",
       "label": "Body text",
-      "default": "<p>Describe the promotion or offer details here.</p>",
       "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },
     {
@@ -320,7 +320,6 @@
         { "value": "trophy", "label": "🏆 Trophy", "group": "Trophy Icons" },
         { "value": "gift", "label": "🎁 Gift", "group": "Gift Icons" }
       ],
-      "default": "star",
       "info": "Choose a built-in icon or select 'None' to remove. Upload a custom icon below to override.",
       "visible_if": "{{ block.settings.enable_step_2 == false }}"
     },

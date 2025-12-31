@@ -209,53 +209,53 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
         }
         
         return (
-          <div style={{ 
-            display: 'flex', 
-            gap: '15px', 
-            alignItems: 'center',
-            marginBottom: '20px'
-          }}>
+      <div style={{ 
+        display: 'flex', 
+        gap: '15px', 
+        alignItems: 'center',
+        marginBottom: '20px'
+      }}>
             {isAutopilot && (
               <>
-                {/* Circular icon with upward zigzag arrow */}
-                <div style={{ 
-                  width: '28px', 
-                  height: '28px',
-                  borderRadius: '50%',
-                  backgroundColor: '#E0F2FE',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M4 12L6 8L8 10L12 4" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                    <path d="M10 4L12 4L12 6" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
-                  </svg>
-                </div>
-                {/* Lightning bolt icon */}
-                <div style={{ 
-                  width: '16px', 
-                  height: '16px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  flexShrink: 0
-                }}>
-                  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M9 2L5 9H8L7 14L11 7H8L9 2Z" fill="#3B82F6" stroke="#3B82F6" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                </div>
+        {/* Circular icon with upward zigzag arrow */}
+        <div style={{ 
+          width: '28px', 
+          height: '28px',
+          borderRadius: '50%',
+          backgroundColor: '#E0F2FE',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M4 12L6 8L8 10L12 4" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+            <path d="M10 4L12 4L12 6" stroke="#3B82F6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none"/>
+          </svg>
+        </div>
+        {/* Lightning bolt icon */}
+        <div style={{ 
+          width: '16px', 
+          height: '16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          flexShrink: 0
+        }}>
+          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M9 2L5 9H8L7 14L11 7H8L9 2Z" fill="#3B82F6" stroke="#3B82F6" strokeWidth="0.5" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </div>
               </>
             )}
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <p style={{
-                fontFamily: 'Inter, sans-serif',
-                fontWeight: 500,
-                fontSize: '16px',
-                color: figmaColors.primaryBlue,
-                margin: 0
-              }}>
+        <p style={{
+          fontFamily: 'Inter, sans-serif',
+          fontWeight: 500,
+          fontSize: '16px',
+          color: figmaColors.primaryBlue,
+          margin: 0
+        }}>
                 {isAutopilot 
                   ? `AutoPilot On${modeDisplay ? ` - ${modeDisplay}` : ''}`
                   : 'Manual Mode'
@@ -299,7 +299,7 @@ export default function ExperimentOverview({ experiments, getWidgetTweaks, figma
                 </div>
               )}
             </div>
-          </div>
+      </div>
         );
       })()}
 

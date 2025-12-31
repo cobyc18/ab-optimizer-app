@@ -181,7 +181,14 @@
     var settings = getSettings(container, overrides);
     applyCssVariables(container, settings);
 
-    var iconMarkup = buildIconMarkup(settings);
+    // Check if this is the default background image (not a custom uploaded icon)
+    var isCustomIcon = container.dataset.iconCustom === 'true';
+    var isDefaultBackground = settings.iconUrl && 
+                              !isCustomIcon &&
+                              (settings.iconUrl.includes('default-app-block-settings.png') || 
+                               settings.iconUrl.includes('asset_url'));
+    
+    var iconMarkup = buildIconMarkup(settings, isDefaultBackground);
     var headingMarkup = buildHeadingMarkup(settings);
     var bodyMarkup = buildBodyMarkup(settings);
 
@@ -189,9 +196,15 @@
     if (settings.hoverEffect) {
       classes.push('hover-enabled');
     }
+    if (isDefaultBackground) {
+      classes.push('has-background-image');
+    }
+
+    var backgroundStyle = isDefaultBackground ? 
+      `style="background-image: url('${settings.iconUrl}'); background-size: cover; background-position: center; background-repeat: no-repeat;"` : '';
 
     container.innerHTML = `
-      <div class="${classes.join(' ')}">
+      <div class="${classes.join(' ')}" ${backgroundStyle}>
         ${iconMarkup || ''}
         <div class="badge-content">
           ${headingMarkup}
@@ -201,7 +214,12 @@
     `;
   }
 
-  function buildIconMarkup(settings) {
+  function buildIconMarkup(settings, isDefaultBackground) {
+    // If this is the default background image, don't render it as an icon
+    if (isDefaultBackground) {
+      return '';
+    }
+    
     const blinkClass = settings.iconBlink ? ' blinking' : '';
     
     // If a custom icon is uploaded, use it regardless of iconChoice
@@ -335,7 +353,7 @@
       outerPaddingY: parseNumber(dataset.outerPaddingY, 0),
       outerPaddingXMobile: parseNumber(dataset.outerPaddingXMobile, 0),
       outerPaddingYMobile: parseNumber(dataset.outerPaddingYMobile, 0),
-      iconChoice: dataset.iconChoice || 'star',
+      iconChoice: dataset.iconChoice || 'none',
       iconUrl: dataset.iconUrl || '',
       iconAlt: dataset.iconAlt || 'Badge icon',
       iconBlink: parseBoolean(dataset.iconBlink, false),
