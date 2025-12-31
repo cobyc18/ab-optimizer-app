@@ -43,6 +43,8 @@ export default function Step2({
       setToastType('error');
       setShowToast(true);
       setTimeout(() => setShowToast(false), 5000);
+      // Reset to step 1 - fade step 2, unfade step 1
+      setHasOpenedThemeEditor(false);
     }
   };
 
@@ -130,14 +132,14 @@ export default function Step2({
           </div>
           <button
             onClick={handleOpenThemeEditor}
-            disabled={!canOpenThemeEditor}
+            disabled={!canOpenThemeEditor || hasOpenedThemeEditor}
             style={{
               padding: '12px 24px',
-              background: canOpenThemeEditor ? '#3B82F6' : '#9CA3AF',
+              background: (!canOpenThemeEditor || hasOpenedThemeEditor) ? '#9CA3AF' : '#3B82F6',
               color: '#FFFFFF',
               borderRadius: '8px',
               border: 'none',
-              cursor: canOpenThemeEditor ? 'pointer' : 'not-allowed',
+              cursor: (!canOpenThemeEditor || hasOpenedThemeEditor) ? 'not-allowed' : 'pointer',
               fontSize: '14px',
               fontWeight: '600',
               display: 'flex',
@@ -157,12 +159,12 @@ export default function Step2({
         </div>
       </div>
 
-      {/* Step 2: Verify Activation (Faded initially, becomes active when step 1 button is clicked) */}
+      {/* Step 2: Verify Activation (Faded initially, becomes active when step 1 button is clicked, fades when step 3 is active) */}
       <div style={{
         marginBottom: showToast ? '80px' : '24px'
       }}>
         <div style={{
-          background: hasOpenedThemeEditor ? '#D8D8D8' : '#F3F4F6',
+          background: (hasOpenedThemeEditor && !isBlockSaved) ? '#D8D8D8' : '#F3F4F6',
           border: '1px solid #E5E7EB',
           borderRadius: '12px',
           padding: '10px',
@@ -171,19 +173,19 @@ export default function Step2({
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
-          opacity: hasOpenedThemeEditor ? 1 : 0.6
+          opacity: (hasOpenedThemeEditor && !isBlockSaved) ? 1 : 0.6
         }}>
           <h3 style={{
             fontSize: '18px',
             fontWeight: '600',
-            color: hasOpenedThemeEditor ? '#1F2937' : '#9CA3AF',
+            color: (hasOpenedThemeEditor && !isBlockSaved) ? '#1F2937' : '#9CA3AF',
             margin: 0
           }}>
             Verify Activation:
           </h3>
           <p style={{
             fontSize: '14px',
-            color: hasOpenedThemeEditor ? '#374151' : '#9CA3AF',
+            color: (hasOpenedThemeEditor && !isBlockSaved) ? '#374151' : '#9CA3AF',
             margin: 0,
             lineHeight: '1.6'
           }}>
@@ -191,14 +193,14 @@ export default function Step2({
           </p>
           <button
             onClick={handleVerifyClick}
-            disabled={isCheckingBlockSaved || !hasOpenedThemeEditor}
+            disabled={isCheckingBlockSaved || !hasOpenedThemeEditor || isBlockSaved}
             style={{
               padding: '12px 24px',
-              background: (isCheckingBlockSaved || !hasOpenedThemeEditor) ? '#9CA3AF' : '#3B82F6',
+              background: (isCheckingBlockSaved || !hasOpenedThemeEditor || isBlockSaved) ? '#9CA3AF' : '#3B82F6',
               color: '#FFFFFF',
               borderRadius: '8px',
               border: 'none',
-              cursor: (isCheckingBlockSaved || !hasOpenedThemeEditor) ? 'not-allowed' : 'pointer',
+              cursor: (isCheckingBlockSaved || !hasOpenedThemeEditor || isBlockSaved) ? 'not-allowed' : 'pointer',
               fontSize: '14px',
               fontWeight: '600',
               display: 'flex',
@@ -291,40 +293,42 @@ export default function Step2({
         </div>
       </div>
 
-      {/* Step 3: Widget Successfully Activated (Active when verification succeeds) */}
-      <div style={{
-        marginBottom: '32px'
-      }}>
+      {/* Step 3: Widget Successfully Activated (Only appears when verification succeeds) */}
+      {isBlockSaved && (
         <div style={{
-          background: isBlockSaved ? '#D8D8D8' : '#F3F4F6',
-          border: '1px solid #E5E7EB',
-          borderRadius: '12px',
-          padding: '10px',
-          width: '100%',
-          minHeight: '140px',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '16px',
-          opacity: isBlockSaved ? 1 : 0.6
+          marginBottom: '32px'
         }}>
-          <h3 style={{
-            fontSize: '18px',
-            fontWeight: '600',
-            color: isBlockSaved ? '#1F2937' : '#9CA3AF',
-            margin: 0
+          <div style={{
+            background: '#D8D8D8',
+            border: '1px solid #E5E7EB',
+            borderRadius: '12px',
+            padding: '10px',
+            width: '100%',
+            minHeight: '140px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '16px',
+            opacity: 1
           }}>
-            Widget successfully activated!
-          </h3>
-          <p style={{
-            fontSize: '14px',
-            color: isBlockSaved ? '#374151' : '#9CA3AF',
-            margin: 0,
-            lineHeight: '1.6'
-          }}>
-            Next, let's customize how it looks.
-          </p>
+            <h3 style={{
+              fontSize: '18px',
+              fontWeight: '600',
+              color: '#1F2937',
+              margin: 0
+            }}>
+              Widget successfully activated!
+            </h3>
+            <p style={{
+              fontSize: '14px',
+              color: '#374151',
+              margin: 0,
+              lineHeight: '1.6'
+            }}>
+              Next, let's customize how it looks.
+            </p>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Next button - only enabled when saved */}
       {isBlockSaved && (
