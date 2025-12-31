@@ -362,7 +362,7 @@ export default function WidgetLivePreview({
             disabled={!canOpenThemeEditor}
             style={{
               padding: '12px 24px',
-              background: canOpenThemeEditor ? '#F3F4F6' : '#9CA3AF',
+              background: canOpenThemeEditor ? '#D8D8D8' : '#9CA3AF',
               color: canOpenThemeEditor ? '#1F2937' : '#FFFFFF',
               border: 'none',
               borderRadius: '8px',
@@ -379,7 +379,7 @@ export default function WidgetLivePreview({
           <button
             onClick={() => {
               if (shop && wizardVariantProductHandle && wizardVariantName) {
-                const storefrontUrl = `https://${shop}/products/${wizardVariantProductHandle}?view=${wizardVariantName}`;
+                const storefrontUrl = `https://${shop}/products/${wizardVariantProductHandle}?view=${wizardVariantName}&trylab_preview=true`;
                 window.open(storefrontUrl, '_blank');
               } else {
                 alert('Missing information to generate storefront preview URL.');

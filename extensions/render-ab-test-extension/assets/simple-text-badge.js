@@ -38,9 +38,25 @@
   };
 
   function init() {
+    // Check for preview parameter and show widgets if needed
+    checkPreviewMode();
     refreshBadges();
     registerConfigListener();
     registerThemeEditorListeners();
+  }
+
+  function checkPreviewMode() {
+    // Check if URL has trylab_preview parameter
+    const urlParams = new URLSearchParams(window.location.search);
+    const isPreviewMode = urlParams.get('trylab_preview') === 'true';
+    
+    if (isPreviewMode) {
+      // Show all widgets that are hidden by default
+      document.querySelectorAll('.simple-text-badge-widget.trylab-hidden-by-default').forEach(function(widget) {
+        widget.classList.remove('trylab-hidden-by-default');
+        widget.classList.add('trylab-preview-mode');
+      });
+    }
   }
 
   function refreshBadges() {

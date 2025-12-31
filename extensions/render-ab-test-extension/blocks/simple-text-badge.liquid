@@ -15,8 +15,8 @@
   {%- assign is_visible = true -%}
 {%- endif -%}
 
-{%- if is_visible -%}
-<div class="simple-text-badge-widget" 
+{%- comment -%} Always render the widget container, but hide it if not visible (for preview functionality) {%- endcomment -%}
+<div class="simple-text-badge-widget{% unless is_visible %} trylab-hidden-by-default{% endunless %}" 
      {{ block.shopify_attributes }}
      data-badge-id="badge-{{ block.id }}"
      data-block-id="{{ block.id }}"
@@ -65,7 +65,6 @@
      data-count-min="{{ block.settings.count_min | default: 40 }}"
      data-count-max="{{ block.settings.count_max | default: 60 }}">
 </div>
-{%- endif -%}
 
 {% schema %}
 {

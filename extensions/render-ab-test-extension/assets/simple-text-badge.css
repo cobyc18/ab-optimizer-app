@@ -186,6 +186,16 @@
   font-style: italic;
 }
 
+/* Hide widget by default if test is not running (unless in preview mode) */
+.simple-text-badge-widget.trylab-hidden-by-default {
+  display: none;
+}
+
+/* Show widget if preview parameter is present */
+.simple-text-badge-widget.trylab-preview-mode {
+  display: block !important;
+}
+
 @media (max-width: 768px) {
   .simple-text-badge-widget {
     padding: var(--badge-outer-padding-y-mobile, var(--badge-outer-padding-y, 0px))
