@@ -19,6 +19,7 @@ export default function Step2({
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
   const [toastType, setToastType] = useState('success'); // 'success' or 'error'
+  const [hasOpenedThemeEditor, setHasOpenedThemeEditor] = useState(false);
 
   // Show toast when isBlockSaved changes
   useEffect(() => {
@@ -29,6 +30,11 @@ export default function Step2({
       setTimeout(() => setShowToast(false), 4000);
     }
   }, [isBlockSaved]);
+
+  const handleOpenThemeEditor = () => {
+    setHasOpenedThemeEditor(true);
+    openVariantInThemeEditor();
+  };
 
   const handleVerifyClick = async () => {
     const wasSaved = await checkIfBlockSaved();
@@ -67,25 +73,26 @@ export default function Step2({
           TryLab has already inserted your widget into your product template <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>. Just click Save in Shopify.
         </p>
 
-      {/* Step 1: Save in Theme Editor (Active) */}
+      {/* Step 1: Save in Theme Editor (Faded initially, becomes faded when step 2 is active) */}
       <div style={{
         marginBottom: '24px'
       }}>
         <div style={{
-          background: '#D8D8D8',
+          background: !hasOpenedThemeEditor ? '#D8D8D8' : '#F3F4F6',
           border: '1px solid #E5E7EB',
           borderRadius: '12px',
-          padding: '20px',
+          padding: '10px',
           width: '100%',
           minHeight: '140px',
           display: 'flex',
           flexDirection: 'column',
-          gap: '16px'
+          gap: '16px',
+          opacity: !hasOpenedThemeEditor ? 1 : 0.6
         }}>
           <h3 style={{
             fontSize: '18px',
             fontWeight: '600',
-            color: '#1F2937',
+            color: !hasOpenedThemeEditor ? '#1F2937' : '#9CA3AF',
             margin: 0
           }}>
             Save in Theme Editor:
@@ -98,7 +105,7 @@ export default function Step2({
           }}>
             <p style={{
               fontSize: '14px',
-              color: '#374151',
+              color: !hasOpenedThemeEditor ? '#374151' : '#9CA3AF',
               margin: 0,
               lineHeight: '1.6'
             }}>
@@ -106,7 +113,7 @@ export default function Step2({
             </p>
             <p style={{
               fontSize: '14px',
-              color: '#374151',
+              color: !hasOpenedThemeEditor ? '#374151' : '#9CA3AF',
               margin: 0,
               lineHeight: '1.6'
             }}>
@@ -114,7 +121,7 @@ export default function Step2({
             </p>
             <p style={{
               fontSize: '14px',
-              color: '#374151',
+              color: !hasOpenedThemeEditor ? '#374151' : '#9CA3AF',
               margin: 0,
               lineHeight: '1.6'
             }}>
@@ -122,7 +129,7 @@ export default function Step2({
             </p>
           </div>
           <button
-            onClick={openVariantInThemeEditor}
+            onClick={handleOpenThemeEditor}
             disabled={!canOpenThemeEditor}
             style={{
               padding: '12px 24px',
@@ -150,33 +157,33 @@ export default function Step2({
         </div>
       </div>
 
-      {/* Step 2: Verify Activation (Active when ready to verify, otherwise faded) */}
+      {/* Step 2: Verify Activation (Faded initially, becomes active when step 1 button is clicked) */}
       <div style={{
-        marginBottom: '32px'
+        marginBottom: showToast ? '80px' : '24px'
       }}>
         <div style={{
-          background: canOpenThemeEditor ? '#D8D8D8' : '#F3F4F6',
+          background: hasOpenedThemeEditor ? '#D8D8D8' : '#F3F4F6',
           border: '1px solid #E5E7EB',
           borderRadius: '12px',
-          padding: '20px',
+          padding: '10px',
           width: '100%',
           minHeight: '140px',
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
-          opacity: canOpenThemeEditor ? 1 : 0.6
+          opacity: hasOpenedThemeEditor ? 1 : 0.6
         }}>
           <h3 style={{
             fontSize: '18px',
             fontWeight: '600',
-            color: canOpenThemeEditor ? '#1F2937' : '#9CA3AF',
+            color: hasOpenedThemeEditor ? '#1F2937' : '#9CA3AF',
             margin: 0
           }}>
             Verify Activation:
           </h3>
           <p style={{
             fontSize: '14px',
-            color: canOpenThemeEditor ? '#374151' : '#9CA3AF',
+            color: hasOpenedThemeEditor ? '#374151' : '#9CA3AF',
             margin: 0,
             lineHeight: '1.6'
           }}>
@@ -184,14 +191,14 @@ export default function Step2({
           </p>
           <button
             onClick={handleVerifyClick}
-            disabled={isCheckingBlockSaved || !canOpenThemeEditor}
+            disabled={isCheckingBlockSaved || !hasOpenedThemeEditor}
             style={{
               padding: '12px 24px',
-              background: (isCheckingBlockSaved || !canOpenThemeEditor) ? '#9CA3AF' : '#3B82F6',
+              background: (isCheckingBlockSaved || !hasOpenedThemeEditor) ? '#9CA3AF' : '#3B82F6',
               color: '#FFFFFF',
               borderRadius: '8px',
               border: 'none',
-              cursor: (isCheckingBlockSaved || !canOpenThemeEditor) ? 'not-allowed' : 'pointer',
+              cursor: (isCheckingBlockSaved || !hasOpenedThemeEditor) ? 'not-allowed' : 'pointer',
               fontSize: '14px',
               fontWeight: '600',
               display: 'flex',
@@ -218,74 +225,106 @@ export default function Step2({
               'Click after saving in Shopify.'
             )}
           </button>
+          
+          {/* Toast Notification - Below verify button */}
+          {showToast && (
+            <div style={{
+              marginTop: '12px',
+              animation: 'slideInFromRight 0.3s ease-out'
+            }}>
+              <div style={{
+                background: toastType === 'success' ? '#1F2937' : '#7F1D1D',
+                border: '1px solid #374151',
+                borderRadius: '12px',
+                padding: '16px 20px',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '12px',
+                minWidth: '300px',
+                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+              }}>
+                {/* Icon */}
+                {toastType === 'success' ? (
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    background: '#10B981',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M11.6667 3.5L5.25 9.91667L2.33334 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                    </svg>
+                  </div>
+                ) : (
+                  <div style={{
+                    width: '24px',
+                    height: '24px',
+                    borderRadius: '50%',
+                    background: '#EF4444',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    flexShrink: 0
+                  }}>
+                    <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                      <path d="M7 3.5V7M7 10.5H7.00583M13.4167 7C13.4167 10.4058 10.6558 13.1667 7.25 13.1667C3.84417 13.1667 1.08334 10.4058 1.08334 7C1.08334 3.59417 3.84417 0.833336 7.25 0.833336C10.6558 0.833336 13.4167 3.59417 13.4167 7Z" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                    </svg>
+                  </div>
+                )}
+                {/* Message */}
+                <p style={{
+                  fontSize: '14px',
+                  color: '#FFFFFF',
+                  margin: 0,
+                  fontWeight: '500',
+                  flex: 1
+                }}>
+                  {toastMessage}
+                </p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
-      {/* Toast Notification */}
-      {showToast && (
+      {/* Step 3: Widget Successfully Activated (Active when verification succeeds) */}
+      <div style={{
+        marginBottom: '32px'
+      }}>
         <div style={{
-          position: 'fixed',
-          top: '20px',
-          right: '20px',
-          zIndex: 10000,
-          animation: 'slideInFromRight 0.3s ease-out'
+          background: isBlockSaved ? '#D8D8D8' : '#F3F4F6',
+          border: '1px solid #E5E7EB',
+          borderRadius: '12px',
+          padding: '10px',
+          width: '100%',
+          minHeight: '140px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px',
+          opacity: isBlockSaved ? 1 : 0.6
         }}>
-          <div style={{
-            background: toastType === 'success' ? '#1F2937' : '#7F1D1D',
-            border: '1px solid #374151',
-            borderRadius: '12px',
-            padding: '16px 20px',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '12px',
-            minWidth: '300px',
-            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+          <h3 style={{
+            fontSize: '18px',
+            fontWeight: '600',
+            color: isBlockSaved ? '#1F2937' : '#9CA3AF',
+            margin: 0
           }}>
-            {/* Icon */}
-            {toastType === 'success' ? (
-              <div style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                background: '#10B981',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M11.6667 3.5L5.25 9.91667L2.33334 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </div>
-            ) : (
-              <div style={{
-                width: '24px',
-                height: '24px',
-                borderRadius: '50%',
-                background: '#EF4444',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                flexShrink: 0
-              }}>
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M7 3.5V7M7 10.5H7.00583M13.4167 7C13.4167 10.4058 10.6558 13.1667 7.25 13.1667C3.84417 13.1667 1.08334 10.4058 1.08334 7C1.08334 3.59417 3.84417 0.833336 7.25 0.833336C10.6558 0.833336 13.4167 3.59417 13.4167 7Z" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
-                </svg>
-              </div>
-            )}
-            {/* Message */}
-            <p style={{
-              fontSize: '14px',
-              color: '#FFFFFF',
-              margin: 0,
-              fontWeight: '500',
-              flex: 1
-            }}>
-              {toastMessage}
-            </p>
-          </div>
+            Widget successfully activated!
+          </h3>
+          <p style={{
+            fontSize: '14px',
+            color: isBlockSaved ? '#374151' : '#9CA3AF',
+            margin: 0,
+            lineHeight: '1.6'
+          }}>
+            Next, let's customize how it looks.
+          </p>
         </div>
-      )}
+      </div>
 
       {/* Next button - only enabled when saved */}
       {isBlockSaved && (
