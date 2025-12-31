@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { figmaColors } from "./app.ab-tests.shared.jsx";
 import freeShippingBadgeImage from "../assets/free-shipping-badge.png";
 import moneyBackGuaranteeImage from "../assets/money-back-guarantee.png";
@@ -16,6 +16,30 @@ export default function Step2({
   isBlockSaved,
   setCurrentStep
 }) {
+  const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
+  const [toastType, setToastType] = useState('success'); // 'success' or 'error'
+
+  // Show toast when isBlockSaved changes
+  useEffect(() => {
+    if (isBlockSaved) {
+      setToastMessage('Widget Verified!');
+      setToastType('success');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 4000);
+    }
+  }, [isBlockSaved]);
+
+  const handleVerifyClick = async () => {
+    const wasSaved = await checkIfBlockSaved();
+    if (wasSaved === false) {
+      setToastMessage('Widget not detected. Please ensure you clicked save in the theme editor');
+      setToastType('error');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 5000);
+    }
+  };
+
   return (
     <div style={{
       animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
@@ -51,7 +75,7 @@ export default function Step2({
           background: '#D8D8D8',
           border: '1px solid #E5E7EB',
           borderRadius: '12px',
-          padding: '24px',
+          padding: '20px',
           width: '100%',
           minHeight: '140px',
           display: 'flex',
@@ -126,99 +150,142 @@ export default function Step2({
         </div>
       </div>
 
-      {/* Step 2: Return here (Inactive/Faded) */}
+      {/* Step 2: Verify Activation (Active when ready to verify, otherwise faded) */}
       <div style={{
         marginBottom: '32px'
       }}>
         <div style={{
-          background: '#F3F4F6',
+          background: canOpenThemeEditor ? '#D8D8D8' : '#F3F4F6',
           border: '1px solid #E5E7EB',
           borderRadius: '12px',
-          padding: '24px',
+          padding: '20px',
           width: '100%',
           minHeight: '140px',
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
-          opacity: 0.6
+          opacity: canOpenThemeEditor ? 1 : 0.6
         }}>
           <h3 style={{
             fontSize: '18px',
             fontWeight: '600',
-            color: '#9CA3AF',
+            color: canOpenThemeEditor ? '#1F2937' : '#9CA3AF',
             margin: 0
           }}>
-            Return here:
+            Verify Activation:
           </h3>
           <p style={{
             fontSize: '14px',
-            color: '#9CA3AF',
+            color: canOpenThemeEditor ? '#374151' : '#9CA3AF',
             margin: 0,
             lineHeight: '1.6'
           }}>
-            We'll verify your installation automatically.
+            Once saved, click confirm to let us verify the setup was completed correctly.
           </p>
+          <button
+            onClick={handleVerifyClick}
+            disabled={isCheckingBlockSaved || !canOpenThemeEditor}
+            style={{
+              padding: '12px 24px',
+              background: (isCheckingBlockSaved || !canOpenThemeEditor) ? '#9CA3AF' : '#3B82F6',
+              color: '#FFFFFF',
+              borderRadius: '8px',
+              border: 'none',
+              cursor: (isCheckingBlockSaved || !canOpenThemeEditor) ? 'not-allowed' : 'pointer',
+              fontSize: '14px',
+              fontWeight: '600',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: '8px',
+              width: 'fit-content',
+              alignSelf: 'flex-start'
+            }}
+          >
+            {isCheckingBlockSaved ? (
+              <>
+                <div style={{
+                  width: '16px',
+                  height: '16px',
+                  border: '2px solid #FFFFFF',
+                  borderTop: '2px solid transparent',
+                  borderRadius: '50%',
+                  animation: 'spin 1s linear infinite'
+                }}></div>
+                Checking...
+              </>
+            ) : (
+              'Click after saving in Shopify.'
+            )}
+          </button>
         </div>
       </div>
 
-      {/* I've saved in Shopify button */}
-      <div style={{
-        marginBottom: '40px'
-      }}>
-        <button
-          onClick={async () => {
-            const wasSaved = await checkIfBlockSaved();
-            if (wasSaved === false) {
-              alert('Widget not found. Please make sure you clicked the Save button in the Shopify theme editor and try again.');
-            }
-          }}
-          disabled={isCheckingBlockSaved}
-          style={{
-            padding: '12px 32px',
-            background: isCheckingBlockSaved ? '#9CA3AF' : '#3B82F6',
-            color: '#FFFFFF',
-            borderRadius: '8px',
-            border: 'none',
-            cursor: isCheckingBlockSaved ? 'not-allowed' : 'pointer',
-            fontSize: '16px',
-            fontWeight: '600',
+      {/* Toast Notification */}
+      {showToast && (
+        <div style={{
+          position: 'fixed',
+          top: '20px',
+          right: '20px',
+          zIndex: 10000,
+          animation: 'slideInFromRight 0.3s ease-out'
+        }}>
+          <div style={{
+            background: toastType === 'success' ? '#1F2937' : '#7F1D1D',
+            border: '1px solid #374151',
+            borderRadius: '12px',
+            padding: '16px 20px',
             display: 'flex',
             alignItems: 'center',
-            gap: '8px'
-          }}
-        >
-          {isCheckingBlockSaved ? (
-            <>
-              <div style={{
-                width: '16px',
-                height: '16px',
-                border: '2px solid #FFFFFF',
-                borderTop: '2px solid transparent',
-                borderRadius: '50%',
-                animation: 'spin 1s linear infinite'
-              }}></div>
-              Checking...
-            </>
-          ) : (
-            <>
-              I've saved in Shopify
-            </>
-          )}
-        </button>
-        {isBlockSaved && (
-          <p style={{
-            fontSize: '14px',
-            color: '#3B82F6',
-            margin: '12px 0 0 0',
-            fontWeight: '500',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px'
+            gap: '12px',
+            minWidth: '300px',
+            boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
           }}>
-            <span style={{ color: '#3B82F6' }}>✅</span> Installation verified! You can proceed to the next step.
-          </p>
-        )}
-      </div>
+            {/* Icon */}
+            {toastType === 'success' ? (
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                background: '#10B981',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M11.6667 3.5L5.25 9.91667L2.33334 7" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </div>
+            ) : (
+              <div style={{
+                width: '24px',
+                height: '24px',
+                borderRadius: '50%',
+                background: '#EF4444',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                flexShrink: 0
+              }}>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M7 3.5V7M7 10.5H7.00583M13.4167 7C13.4167 10.4058 10.6558 13.1667 7.25 13.1667C3.84417 13.1667 1.08334 10.4058 1.08334 7C1.08334 3.59417 3.84417 0.833336 7.25 0.833336C10.6558 0.833336 13.4167 3.59417 13.4167 7Z" stroke="white" strokeWidth="1.5" strokeLinecap="round"/>
+                </svg>
+              </div>
+            )}
+            {/* Message */}
+            <p style={{
+              fontSize: '14px',
+              color: '#FFFFFF',
+              margin: 0,
+              fontWeight: '500',
+              flex: 1
+            }}>
+              {toastMessage}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Next button - only enabled when saved */}
       {isBlockSaved && (
