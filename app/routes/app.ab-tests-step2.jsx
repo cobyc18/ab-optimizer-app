@@ -32,8 +32,11 @@ export default function Step2({
   }, [isBlockSaved]);
 
   const handleOpenThemeEditor = () => {
-    setHasOpenedThemeEditor(true);
     openVariantInThemeEditor();
+    // Delay unfading step 2 by 2 seconds to give time for theme editor to open
+    setTimeout(() => {
+      setHasOpenedThemeEditor(true);
+    }, 2000);
   };
 
   const handleVerifyClick = async () => {
@@ -361,7 +364,7 @@ export default function Step2({
         flex: 1,
         maxWidth: '450px',
         position: 'sticky',
-        top: '20px'
+        top: '132px'
       }}>
         <div style={{
           backgroundColor: '#D8D8D8',
