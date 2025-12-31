@@ -880,6 +880,30 @@ export default function ABTests() {
         // The product will only be assigned to the variant template if it wins the A/B test.
         // Assignment happens temporarily when opening the theme editor, and permanently only when variant wins.
 
+        // Set metafield to false to ensure widget is hidden on live storefront until test is launched
+        // This prevents the widget from showing for new tests before they're launched
+        try {
+          const metafieldResponse = await fetch('/api/set-test-metafield', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              productId: productId,
+              value: false
+            })
+          });
+          
+          const metafieldResult = await metafieldResponse.json();
+          if (metafieldResult.success) {
+            console.log('✅ Set product metafield to false: widget will be hidden until test is launched');
+          } else {
+            console.warn('⚠️ Failed to set metafield to false:', metafieldResult.error);
+            // Don't fail template creation if metafield setting fails
+          }
+        } catch (metafieldError) {
+          console.warn('⚠️ Error setting metafield to false:', metafieldError);
+          // Don't fail template creation if metafield setting fails
+        }
+
         creationResult = { success: true, variantName, newFilename: result.newFilename };
       } else {
         creationResult = { success: false, error: result.error || 'variant_template_creation_failed' };
