@@ -45,7 +45,7 @@ export default function Step2({
       setToastMessage('Widget not detected. Please ensure you clicked save in the theme editor');
       setToastType('error');
       setShowToast(true);
-      setTimeout(() => setShowToast(false), 5000);
+      setTimeout(() => setShowToast(false), 3000);
       // Reset to step 1 - fade step 2, unfade step 1
       setHasOpenedThemeEditor(false);
     }
@@ -364,7 +364,7 @@ export default function Step2({
         flex: 1,
         maxWidth: '450px',
         position: 'sticky',
-        top: '132px'
+        top: '50px'
       }}>
         <div style={{
           backgroundColor: '#D8D8D8',
