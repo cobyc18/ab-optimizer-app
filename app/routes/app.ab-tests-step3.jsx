@@ -105,7 +105,7 @@ export default function Step3({
           borderRadius: '12px',
           padding: '24px',
           boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-          height: '600px',
+          height: '800px',
           display: 'flex',
           flexDirection: 'column'
         }}>
@@ -1179,7 +1179,7 @@ export default function Step3({
         display: 'flex',
         justifyContent: 'flex-end',
         alignItems: 'center',
-        marginTop: '40px'
+        marginTop: '60px'
       }}>
         <button
           onClick={() => setCurrentStep(4)}

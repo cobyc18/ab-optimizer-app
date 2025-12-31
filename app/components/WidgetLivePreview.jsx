@@ -234,21 +234,24 @@ export default function WidgetLivePreview({
       borderRadius: '12px',
       padding: '24px',
       boxShadow: '0 2px 8px rgba(0, 0, 0, 0.1)',
-      height: '600px',
+      height: '800px',
       display: 'flex',
       flexDirection: 'column'
     }}>
       <div style={{
         display: 'flex',
-        justifyContent: 'space-between',
+        justifyContent: 'center',
         alignItems: 'center',
-        marginBottom: '24px'
+        marginBottom: '24px',
+        position: 'relative'
       }}>
         <h3 style={{
           fontSize: '18px',
           fontWeight: '600',
           color: '#1F2937',
-          margin: 0
+          margin: 0,
+          position: 'absolute',
+          left: 0
         }}>
           Live Preview
         </h3>
@@ -315,17 +318,19 @@ export default function WidgetLivePreview({
               Desktop
             </button>
           </div>
-          <span style={{
-            background: '#3B82F6',
-            color: '#FFFFFF',
-            padding: '4px 12px',
-            borderRadius: '12px',
-            fontSize: '12px',
-            fontWeight: '500'
-          }}>
-            Updates in real-time
-          </span>
         </div>
+        <span style={{
+          background: '#3B82F6',
+          color: '#FFFFFF',
+          padding: '4px 12px',
+          borderRadius: '12px',
+          fontSize: '12px',
+          fontWeight: '500',
+          position: 'absolute',
+          right: 0
+        }}>
+          Updates in real-time
+        </span>
       </div>
       <div style={{ flex: 1, overflow: 'hidden' }}>
         <ProductPagePreview

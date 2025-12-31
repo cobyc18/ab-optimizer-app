@@ -259,7 +259,9 @@ export default function ProductPagePreview({
         {/* Product Image Placeholder */}
         <div style={{
           width: '100%',
-          aspectRatio: '1',
+          maxWidth: '300px',
+          margin: '0 auto',
+          aspectRatio: '0.75',
           background: '#F3F4F6',
           borderRadius: '8px',
           marginBottom: '24px',
