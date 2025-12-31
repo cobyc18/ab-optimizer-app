@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ProductPagePreview from './ProductPagePreview';
 
 // Import the CSS for the widget
@@ -206,6 +206,8 @@ export default function WidgetLivePreview({
   countMin = 40,
   countMax = 60
 }) {
+  const [previewMode, setPreviewMode] = useState('mobile'); // 'mobile' or 'desktop'
+
   // Inject CSS styles
   useEffect(() => {
     const styleId = 'widget-live-preview-styles';
@@ -250,16 +252,80 @@ export default function WidgetLivePreview({
         }}>
           Live Preview
         </h3>
-        <span style={{
-          background: '#3B82F6',
-          color: '#FFFFFF',
-          padding: '4px 12px',
-          borderRadius: '12px',
-          fontSize: '12px',
-          fontWeight: '500'
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
         }}>
-          Updates in real-time
-        </span>
+          {/* Mobile/Desktop Toggle */}
+          <div style={{
+            display: 'flex',
+            background: '#F3F4F6',
+            borderRadius: '8px',
+            padding: '4px',
+            gap: '4px'
+          }}>
+            <button
+              onClick={() => setPreviewMode('mobile')}
+              style={{
+                padding: '6px 12px',
+                background: previewMode === 'mobile' ? '#FFFFFF' : 'transparent',
+                border: 'none',
+                borderRadius: '6px',
+                color: previewMode === 'mobile' ? '#3B82F6' : '#6B7280',
+                fontSize: '12px',
+                fontWeight: previewMode === 'mobile' ? '600' : '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: previewMode === 'mobile' ? '0 1px 3px rgba(0, 0, 0, 0.1)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" strokeWidth="2"/>
+                <path d="M12 18H12.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              Mobile
+            </button>
+            <button
+              onClick={() => setPreviewMode('desktop')}
+              style={{
+                padding: '6px 12px',
+                background: previewMode === 'desktop' ? '#FFFFFF' : 'transparent',
+                border: 'none',
+                borderRadius: '6px',
+                color: previewMode === 'desktop' ? '#3B82F6' : '#6B7280',
+                fontSize: '12px',
+                fontWeight: previewMode === 'desktop' ? '600' : '500',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                boxShadow: previewMode === 'desktop' ? '0 1px 3px rgba(0, 0, 0, 0.1)' : 'none',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px'
+              }}
+            >
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="4" width="20" height="14" rx="2" stroke="currentColor" strokeWidth="2"/>
+                <path d="M2 8H22" stroke="currentColor" strokeWidth="2"/>
+                <path d="M7 20H17" stroke="currentColor" strokeWidth="2" strokeLinecap="round"/>
+              </svg>
+              Desktop
+            </button>
+          </div>
+          <span style={{
+            background: '#3B82F6',
+            color: '#FFFFFF',
+            padding: '4px 12px',
+            borderRadius: '12px',
+            fontSize: '12px',
+            fontWeight: '500'
+          }}>
+            Updates in real-time
+          </span>
+        </div>
       </div>
       <div style={{ flex: 1, overflow: 'hidden' }}>
         <ProductPagePreview
@@ -267,6 +333,7 @@ export default function WidgetLivePreview({
           conversionPlayType={conversionPlayType}
           countMin={countMin}
           countMax={countMax}
+          previewMode={previewMode}
         />
       </div>
     </div>

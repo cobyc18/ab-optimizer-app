@@ -99,7 +99,8 @@ export default function Step3({
       }}>
         {/* Left Side - Settings with Tabs */}
         <div style={{
-          flex: 1,
+          flex: '0 0 400px',
+          maxWidth: '400px',
           background: '#FFFFFF',
           borderRadius: '12px',
           padding: '24px',
