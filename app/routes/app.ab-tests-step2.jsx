@@ -75,12 +75,12 @@ export default function Step2({
           TryLab has already inserted your widget into your product template <strong>{wizardVariantName ? `product.${wizardVariantName}` : 'product'}</strong>. Just click Save in Shopify.
         </p>
 
-      {/* Step 1: Save in Theme Editor (Faded initially, becomes faded when step 2 is active) */}
+      {/* Step 1: Save in Theme Editor (Faded when step 2 or step 3 is active) */}
       <div style={{
         marginBottom: '24px'
       }}>
         <div style={{
-          background: !hasOpenedThemeEditor ? '#D8D8D8' : '#F3F4F6',
+          background: (!hasOpenedThemeEditor && !isBlockSaved) ? '#D8D8D8' : '#F3F4F6',
           border: '1px solid #E5E7EB',
           borderRadius: '12px',
           padding: '10px',
@@ -89,12 +89,12 @@ export default function Step2({
           display: 'flex',
           flexDirection: 'column',
           gap: '16px',
-          opacity: !hasOpenedThemeEditor ? 1 : 0.6
+          opacity: (!hasOpenedThemeEditor && !isBlockSaved) ? 1 : 0.6
         }}>
           <h3 style={{
             fontSize: '18px',
             fontWeight: '600',
-            color: !hasOpenedThemeEditor ? '#1F2937' : '#9CA3AF',
+            color: (!hasOpenedThemeEditor && !isBlockSaved) ? '#1F2937' : '#9CA3AF',
             margin: 0
           }}>
             Save in Theme Editor:
@@ -107,7 +107,7 @@ export default function Step2({
           }}>
             <p style={{
               fontSize: '14px',
-              color: !hasOpenedThemeEditor ? '#374151' : '#9CA3AF',
+              color: (!hasOpenedThemeEditor && !isBlockSaved) ? '#374151' : '#9CA3AF',
               margin: 0,
               lineHeight: '1.6'
             }}>
@@ -115,7 +115,7 @@ export default function Step2({
             </p>
             <p style={{
               fontSize: '14px',
-              color: !hasOpenedThemeEditor ? '#374151' : '#9CA3AF',
+              color: (!hasOpenedThemeEditor && !isBlockSaved) ? '#374151' : '#9CA3AF',
               margin: 0,
               lineHeight: '1.6'
             }}>
@@ -123,7 +123,7 @@ export default function Step2({
             </p>
             <p style={{
               fontSize: '14px',
-              color: !hasOpenedThemeEditor ? '#374151' : '#9CA3AF',
+              color: (!hasOpenedThemeEditor && !isBlockSaved) ? '#374151' : '#9CA3AF',
               margin: 0,
               lineHeight: '1.6'
             }}>
@@ -132,14 +132,14 @@ export default function Step2({
           </div>
           <button
             onClick={handleOpenThemeEditor}
-            disabled={!canOpenThemeEditor || hasOpenedThemeEditor}
+            disabled={!canOpenThemeEditor || hasOpenedThemeEditor || isBlockSaved}
             style={{
               padding: '12px 24px',
-              background: (!canOpenThemeEditor || hasOpenedThemeEditor) ? '#9CA3AF' : '#3B82F6',
+              background: (!canOpenThemeEditor || hasOpenedThemeEditor || isBlockSaved) ? '#9CA3AF' : '#3B82F6',
               color: '#FFFFFF',
               borderRadius: '8px',
               border: 'none',
-              cursor: (!canOpenThemeEditor || hasOpenedThemeEditor) ? 'not-allowed' : 'pointer',
+              cursor: (!canOpenThemeEditor || hasOpenedThemeEditor || isBlockSaved) ? 'not-allowed' : 'pointer',
               fontSize: '14px',
               fontWeight: '600',
               display: 'flex',
@@ -356,147 +356,52 @@ export default function Step2({
       )}
       </div>
 
-      {/* Right side - Conversion Play Display */}
-      {selectedIdea && (
+      {/* Right side - Video Placeholder */}
+      <div style={{
+        flex: 1,
+        maxWidth: '450px',
+        position: 'sticky',
+        top: '20px'
+      }}>
         <div style={{
-          flex: 1,
-          maxWidth: '450px',
-          position: 'sticky',
-          top: '20px'
+          backgroundColor: '#D8D8D8',
+          border: '1px solid #E5E7EB',
+          borderRadius: '12px',
+          padding: '40px',
+          margin: '0',
+          boxSizing: 'border-box',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '400px',
+          width: '100%'
         }}>
+          {/* Video Placeholder Icon */}
           <div style={{
-            backgroundColor: figmaColors.gray,
-            border: `1px solid ${figmaColors.primaryBlue}`,
-            borderRadius: '24px',
-            padding: '40px',
-            margin: '0',
-            boxSizing: 'border-box',
-            overflow: 'visible',
+            width: '80px',
+            height: '80px',
+            borderRadius: '50%',
+            background: '#9CA3AF',
             display: 'flex',
-            flexDirection: 'column',
-            gap: '20px',
             alignItems: 'center',
-            minHeight: '650px'
+            justifyContent: 'center',
+            marginBottom: '20px'
           }}>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '50px', alignItems: 'center', width: '100%', boxSizing: 'border-box', position: 'relative' }}>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '40px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
-                {/* Widget Preview - Image Section */}
-                <div style={{ 
-                  width: '350px', 
-                  height: '280px', 
-                  borderRadius: '10px', 
-                  overflow: 'hidden',
-                  boxSizing: 'border-box'
-                }}>
-                  {selectedIdea.utility === 'Free Shipping Badge' ? (
-                    <img 
-                      src={freeShippingBadgeImage} 
-                      alt="Free Shipping Badge"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                        display: 'block'
-                      }}
-                    />
-                  ) : selectedIdea.utility === 'How Many in Cart' ? (
-                    <img 
-                      src={addToCartImage} 
-                      alt="How Many in Cart"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                        display: 'block'
-                      }}
-                    />
-                  ) : selectedIdea.utility === 'Returns Guarantee Badge' ? (
-                    <img 
-                      src={moneyBackGuaranteeImage} 
-                      alt="Returns Guarantee Badge"
-                      style={{
-                        width: '100%',
-                        height: '100%',
-                        objectFit: 'contain',
-                        display: 'block'
-                      }}
-                    />
-                  ) : null}
-                </div>
-
-                {/* Title and Description Section */}
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', alignItems: 'center', width: '100%', boxSizing: 'border-box' }}>
-                  {/* Title */}
-                  <p style={{
-                    fontFamily: 'Geist, sans-serif',
-                    fontWeight: 600,
-                    fontSize: '20px',
-                    color: figmaColors.darkGray,
-                    margin: 0,
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word',
-                    width: '100%',
-                    boxSizing: 'border-box',
-                    textAlign: 'center'
-                  }}>
-                    {selectedIdea.utility}
-                  </p>
-                  
-                  {/* Tags */}
-                  <div style={{
-                    display: 'flex',
-                    gap: '8px',
-                    flexWrap: 'wrap',
-                    justifyContent: 'center',
-                    alignItems: 'center',
-                    width: '100%',
-                    boxSizing: 'border-box'
-                  }}>
-                    {(Array.isArray(selectedIdea.style) ? selectedIdea.style : [selectedIdea.style]).map((tag, tagIndex) => (
-                      <div
-                        key={tagIndex}
-                        style={{
-                          background: '#FFFFFF',
-                          color: '#1E40AF',
-                          padding: '8px 16px',
-                          borderRadius: '16px',
-                          fontSize: '14px',
-                          fontWeight: '500',
-                          width: 'fit-content',
-                          border: '1px solid #E5E7EB',
-                          wordWrap: 'break-word',
-                          overflowWrap: 'break-word',
-                          maxWidth: '100%',
-                          boxSizing: 'border-box'
-                        }}
-                      >
-                        {tag}
-                      </div>
-                    ))}
-                  </div>
-                  
-                  {/* Description */}
-                  <p style={{
-                    fontFamily: 'Inter, sans-serif',
-                    fontWeight: 500,
-                    fontSize: '14px',
-                    color: figmaColors.darkGray,
-                    margin: 0,
-                    lineHeight: '20px',
-                    width: '100%',
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word',
-                    boxSizing: 'border-box',
-                    textAlign: 'center'
-                  }}>
-                    {selectedIdea.rationale}
-                  </p>
-                </div>
-              </div>
-            </div>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M8 5V19L19 12L8 5Z" fill="#FFFFFF"/>
+            </svg>
           </div>
+          <p style={{
+            fontSize: '16px',
+            color: '#6B7280',
+            margin: 0,
+            fontWeight: '500'
+          }}>
+            Video placeholder
+          </p>
         </div>
-      )}
+      </div>
     </div>
   );
 }
