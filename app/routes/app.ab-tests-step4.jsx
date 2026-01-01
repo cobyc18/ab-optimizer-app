@@ -51,10 +51,20 @@ export default function Step4({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autopilotOn]);
 
-  // Confetti animation function
+  // Auto-hide success message after 2 seconds
+  useEffect(() => {
+    if (wizardLaunchSuccess) {
+      const timer = setTimeout(() => {
+        setWizardLaunchSuccess(null);
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [wizardLaunchSuccess]);
+
+  // Confetti animation function - more prominent
   const createConfetti = () => {
-    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
-    const confettiCount = 100;
+    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899', '#06B6D4', '#F97316'];
+    const confettiCount = 200; // Increased from 100
     const container = confettiContainerRef.current;
     if (!container) return;
 
@@ -64,12 +74,13 @@ export default function Step4({
     for (let i = 0; i < confettiCount; i++) {
       const confetti = document.createElement('div');
       const color = colors[Math.floor(Math.random() * colors.length)];
-      const size = Math.random() * 8 + 4;
+      const size = Math.random() * 12 + 6; // Increased size
       const startX = Math.random() * window.innerWidth;
-      const startY = -10;
-      const endY = window.innerHeight + 10;
-      const rotation = Math.random() * 360;
-      const duration = Math.random() * 2 + 2;
+      const startY = -20;
+      const endY = window.innerHeight + 20;
+      const rotation = Math.random() * 720; // More rotation
+      const duration = Math.random() * 3 + 3; // Longer duration
+      const horizontalDrift = (Math.random() - 0.5) * 200; // Add horizontal movement
 
       confetti.style.position = 'fixed';
       confetti.style.left = `${startX}px`;
@@ -80,14 +91,15 @@ export default function Step4({
       confetti.style.borderRadius = '50%';
       confetti.style.pointerEvents = 'none';
       confetti.style.zIndex = '10000';
-      confetti.style.opacity = '0.9';
+      confetti.style.opacity = '1';
+      confetti.style.boxShadow = `0 0 ${size}px ${color}`; // Add glow effect
 
       container.appendChild(confetti);
 
-      // Animate
+      // Animate with horizontal drift
       confetti.animate([
-        { transform: `translateY(0) rotate(0deg)`, opacity: 1 },
-        { transform: `translateY(${endY}px) rotate(${rotation}deg)`, opacity: 0 }
+        { transform: `translate(0, 0) rotate(0deg)`, opacity: 1 },
+        { transform: `translate(${horizontalDrift}px, ${endY}px) rotate(${rotation}deg)`, opacity: 0 }
       ], {
         duration: duration * 1000,
         easing: 'cubic-bezier(0.5, 0, 0.5, 1)'
@@ -97,7 +109,7 @@ export default function Step4({
     // Clear confetti after animation
     setTimeout(() => {
       container.innerHTML = '';
-    }, 5000);
+    }, 8000); // Increased timeout
   };
 
   const handleLaunchWithConfetti = () => {
@@ -116,23 +128,21 @@ export default function Step4({
       {/* Confetti Container */}
       <div ref={confettiContainerRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 10000 }} />
 
-      {/* Main White Card Container */}
+      {/* Main Dark Grey Container - No white container inside */}
       <div style={{
-        background: '#FFFFFF',
+        background: '#D8D8D8',
         borderRadius: '12px',
         padding: '40px',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
         maxWidth: '1200px',
         margin: '0 auto'
       }}>
         {/* 1. Test Name */}
         <div style={{
           background: '#FFFFFF',
-          border: '1px solid #E5E7EB',
           borderRadius: '8px',
           padding: '20px 24px',
           marginBottom: '24px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
           display: 'flex',
           alignItems: 'center',
           gap: '12px'
@@ -196,53 +206,23 @@ export default function Step4({
           )}
         </div>
 
-        {/* 2. Hypothesis */}
+        {/* 2. Hypothesis - Non-editable, bold, title font */}
         <div style={{
-          background: 'linear-gradient(135deg, rgb(126, 200, 227) 0%, rgb(91, 168, 212) 50%, rgb(74, 148, 196) 100%)',
+          background: '#FFFFFF',
           borderRadius: '8px',
           padding: '20px 24px',
-          marginBottom: '24px'
+          marginBottom: '24px',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
         }}>
-          {isEditingHypothesis ? (
-            <textarea
-              value={testHypothesis}
-              onChange={(e) => setTestHypothesis(e.target.value)}
-              onBlur={() => setIsEditingHypothesis(false)}
-              onKeyDown={(e) => {
-                if (e.key === 'Escape') {
-                  setIsEditingHypothesis(false);
-                }
-              }}
-              autoFocus
-              style={{
-                width: '100%',
-                minHeight: '60px',
-                padding: '8px 12px',
-                border: '1px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '4px',
-                fontSize: '14px',
-                fontFamily: 'monospace',
-                color: '#FFFFFF',
-                background: 'rgba(255, 255, 255, 0.1)',
-                outline: 'none',
-                resize: 'vertical'
-              }}
-            />
-          ) : (
-            <p
-              onClick={() => setIsEditingHypothesis(true)}
-              style={{
-                fontSize: '14px',
-                fontFamily: 'monospace',
-                color: '#FFFFFF',
-                margin: 0,
-                cursor: 'text',
-                lineHeight: '1.6'
-              }}
-            >
-              {testHypothesis || `Adding a ${selectedIdea?.utility || 'widget'} near the price will increase Add to Cart actions.`}
-            </p>
-          )}
+          <p style={{
+            fontSize: '18px',
+            fontWeight: '700',
+            color: '#1F2937',
+            margin: 0,
+            lineHeight: '1.6'
+          }}>
+            {testHypothesis || `Adding a ${selectedIdea?.utility || 'widget'} near the price will increase Add to Cart actions.`}
+          </p>
         </div>
 
         {/* 3. Variants */}
@@ -254,31 +234,32 @@ export default function Step4({
           {/* A - Control */}
           <div style={{
             flex: 1,
-            background: '#F9FAFB',
-            border: '1px solid #E5E7EB',
+            background: '#FFFFFF',
+            border: '2px solid #E5E7EB',
             borderRadius: '8px',
-            padding: '16px',
+            padding: '20px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px'
+            gap: '12px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{
-                fontSize: '14px',
+                fontSize: '16px',
                 fontWeight: '700',
                 color: '#374151',
                 background: '#E5E7EB',
                 borderRadius: '4px',
-                padding: '2px 8px'
+                padding: '4px 10px'
               }}>A</span>
               <span style={{
-                fontSize: '14px',
-                fontWeight: '600',
+                fontSize: '18px',
+                fontWeight: '700',
                 color: '#374151'
               }}>Control</span>
             </div>
             <p style={{
-              fontSize: '13px',
+              fontSize: '14px',
               color: '#6B7280',
               margin: 0
             }}>
@@ -289,31 +270,32 @@ export default function Step4({
           {/* B - Variant */}
           <div style={{
             flex: 1,
-            background: '#E0F2FE',
-            border: '1px solid #3B82F6',
+            background: '#FFFFFF',
+            border: '2px solid #3B82F6',
             borderRadius: '8px',
-            padding: '16px',
+            padding: '20px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '8px'
+            gap: '12px'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{
-                fontSize: '14px',
+                fontSize: '16px',
                 fontWeight: '700',
                 color: '#FFFFFF',
                 background: '#3B82F6',
                 borderRadius: '4px',
-                padding: '2px 8px'
+                padding: '4px 10px'
               }}>B</span>
               <span style={{
-                fontSize: '14px',
-                fontWeight: '600',
+                fontSize: '18px',
+                fontWeight: '700',
                 color: '#3B82F6'
               }}>Variant</span>
             </div>
             <p style={{
-              fontSize: '13px',
+              fontSize: '14px',
               color: '#1E40AF',
               margin: 0
             }}>
@@ -324,21 +306,23 @@ export default function Step4({
 
         {/* 4. Traffic Split */}
         <div style={{
+          background: '#FFFFFF',
+          borderRadius: '8px',
+          padding: '20px 24px',
           marginBottom: '24px',
-          paddingBottom: '24px',
-          borderBottom: '1px solid #E5E7EB'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+          <div style={{ marginBottom: '8px' }}>
             <span style={{
-              fontSize: '16px',
-              fontWeight: '600',
+              fontSize: '20px',
+              fontWeight: '700',
               color: '#1F2937'
             }}>
               {trafficSplitA} / {trafficSplitB}
             </span>
           </div>
           <p style={{
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#6B7280',
             margin: 0
           }}>
@@ -348,21 +332,23 @@ export default function Step4({
 
         {/* 5. Goal Metric */}
         <div style={{
+          background: '#FFFFFF',
+          borderRadius: '8px',
+          padding: '20px 24px',
           marginBottom: '24px',
-          paddingBottom: '24px',
-          borderBottom: '1px solid #E5E7EB'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
         }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+          <div style={{ marginBottom: '8px' }}>
             <span style={{
-              fontSize: '16px',
-              fontWeight: '600',
+              fontSize: '20px',
+              fontWeight: '700',
               color: '#1F2937'
             }}>
               Add to Cart
             </span>
           </div>
           <p style={{
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#6B7280',
             margin: 0
           }}>
@@ -372,14 +358,16 @@ export default function Step4({
 
         {/* 6. Autopilot Mode */}
         <div style={{
+          background: '#FFFFFF',
+          borderRadius: '8px',
+          padding: '20px 24px',
           marginBottom: '24px',
-          paddingBottom: '24px',
-          borderBottom: '1px solid #E5E7EB'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
         }}>
           <div style={{ marginBottom: '16px' }}>
             <label style={{
-              fontSize: '16px',
-              fontWeight: '600',
+              fontSize: '20px',
+              fontWeight: '700',
               color: '#1F2937',
               marginBottom: '8px',
               display: 'block'
@@ -387,7 +375,7 @@ export default function Step4({
               Autopilot Mode
             </label>
             <p style={{
-              fontSize: '12px',
+              fontSize: '14px',
               color: '#6B7280',
               margin: '0 0 12px 0'
             }}>
@@ -746,59 +734,129 @@ export default function Step4({
             </div>
           </div>
 
-        {/* 7. Manual Mode Link */}
+        {/* 7. Manual Mode - Bigger text with toggle */}
         <div style={{
+          background: '#FFFFFF',
+          borderRadius: '8px',
+          padding: '20px 24px',
           marginBottom: '24px',
-          paddingBottom: '24px',
-          borderBottom: '1px solid #E5E7EB'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
         }}>
-          <button
-            onClick={() => {
-              const newValue = !manualMode;
-              setManualMode(newValue);
-              if (newValue) {
-                setAutopilotOn(false);
-                setFastMode(false);
-                setStandardMode(false);
-                setCarefulMode(false);
-              } else {
-                setAutopilotOn(true);
-              }
-            }}
-            style={{
-              background: 'none',
-              border: 'none',
-              color: '#6B7280',
-              fontSize: '14px',
-              cursor: 'pointer',
-              textDecoration: 'underline',
-              padding: 0
-            }}
-          >
-            Manual Mode
-          </button>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            marginBottom: manualMode ? '16px' : '0'
+          }}>
+            <label style={{
+              fontSize: '20px',
+              fontWeight: '700',
+              color: '#1F2937',
+              display: 'block'
+            }}>
+              Manual Mode
+            </label>
+            <label style={{
+              position: 'relative',
+              display: 'inline-block',
+              width: '48px',
+              height: '24px'
+            }}>
+              <input
+                type="checkbox"
+                checked={manualMode}
+                onChange={(e) => {
+                  const newValue = e.target.checked;
+                  setManualMode(newValue);
+                  if (newValue) {
+                    setAutopilotOn(false);
+                    setFastMode(false);
+                    setStandardMode(false);
+                    setCarefulMode(false);
+                  } else {
+                    setAutopilotOn(true);
+                  }
+                }}
+                style={{
+                  opacity: 0,
+                  width: 0,
+                  height: 0
+                }}
+              />
+              <span style={{
+                position: 'absolute',
+                cursor: 'pointer',
+                top: 0,
+                left: 0,
+                right: 0,
+                bottom: 0,
+                backgroundColor: manualMode ? '#3B82F6' : '#D1D5DB',
+                borderRadius: '24px',
+                transition: '0.3s',
+                display: 'flex',
+                alignItems: 'center',
+                padding: '2px'
+              }}>
+                <span style={{
+                  content: '""',
+                  position: 'absolute',
+                  height: '20px',
+                  width: '20px',
+                  left: manualMode ? '26px' : '2px',
+                  backgroundColor: '#FFFFFF',
+                  borderRadius: '50%',
+                  transition: '0.3s',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                }} />
+              </span>
+            </label>
+          </div>
 
-          {/* Manual Mode Collapsible Card */}
+          {/* Manual Mode Collapsible Content */}
           {manualMode && (
             <div style={{
-              marginTop: '16px',
-              background: '#F9FAFB',
-              border: '1px solid #E5E7EB',
-              borderRadius: '8px',
-              padding: '20px'
+              marginTop: '20px',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '20px'
             }}>
-              {/* Traffic Split Slider */}
-              <div style={{ marginBottom: '24px' }}>
+              {/* Traffic Split - Separate white container */}
+              <div style={{
+                background: '#F9FAFB',
+                borderRadius: '8px',
+                padding: '20px',
+                border: '1px solid #E5E7EB'
+              }}>
                 <label style={{
                   display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '600',
+                  fontSize: '18px',
+                  fontWeight: '700',
                   color: '#374151',
-                  marginBottom: '8px'
+                  marginBottom: '16px'
                 }}>
                   Traffic Split
                 </label>
                 <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <div style={{
+                    minWidth: '80px',
+                    textAlign: 'left'
+                  }}>
+                    <span style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#374151'
+                    }}>
+                      Control
+                    </span>
+                    <div style={{
+                      fontSize: '20px',
+                      fontWeight: '700',
+                      color: '#1F2937',
+                      marginTop: '4px'
+                    }}>
+                      {trafficSplitA}%
+                    </div>
+                  </div>
                   <input
                     type="range"
                     min="0"
@@ -811,129 +869,58 @@ export default function Step4({
                     }}
                     style={{
                       flex: 1,
-                      height: '6px',
+                      height: '8px',
                       background: '#e5e7eb',
-                      borderRadius: '3px',
+                      borderRadius: '4px',
                       outline: 'none',
                       cursor: 'pointer'
                     }}
                   />
                   <div style={{
-                    background: 'white',
-                    padding: '8px 12px',
-                    borderRadius: '6px',
-                    border: '1px solid #d1d5db',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    color: '#000000',
-                    minWidth: '60px',
-                    textAlign: 'center'
+                    minWidth: '80px',
+                    textAlign: 'right'
                   }}>
-                    {trafficSplitA}%
+                    <span style={{
+                      fontSize: '16px',
+                      fontWeight: '600',
+                      color: '#374151'
+                    }}>
+                      Variant
+                    </span>
+                    <div style={{
+                      fontSize: '20px',
+                      fontWeight: '700',
+                      color: '#1F2937',
+                      marginTop: '4px'
+                    }}>
+                      {trafficSplitB}%
+                    </div>
                   </div>
                 </div>
               </div>
 
-              {/* Schedule */}
-              <div style={{ marginBottom: '24px' }}>
+              {/* End Conditions - Separate white container */}
+              <div style={{
+                background: '#F9FAFB',
+                borderRadius: '8px',
+                padding: '20px',
+                border: '1px solid #E5E7EB'
+              }}>
                 <label style={{
                   display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '600',
+                  fontSize: '18px',
+                  fontWeight: '700',
                   color: '#374151',
-                  marginBottom: '8px'
-                }}>
-                  Schedule
-                </label>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '12px',
-                      color: '#6B7280',
-                      marginBottom: '4px'
-                    }}>
-                      Start time
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={new Date().toISOString().slice(0, 16)}
-                      disabled
-                      style={{
-                        width: '100%',
-                        maxWidth: '300px',
-                        padding: '8px 12px',
-                        border: '1px solid #D1D5DB',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        color: '#6B7280',
-                        background: '#F3F4F6',
-                        cursor: 'not-allowed'
-                      }}
-                    />
-                  </div>
-                  <div>
-                    <label style={{
-                      display: 'block',
-                      fontSize: '12px',
-                      color: '#6B7280',
-                      marginBottom: '4px'
-                    }}>
-                      End date (optional)
-                    </label>
-                    <input
-                      type="datetime-local"
-                      value={endOnDate}
-                      min={(() => {
-                        const minDate = new Date();
-                        minDate.setDate(minDate.getDate() + 7);
-                        return minDate.toISOString().slice(0, 16);
-                      })()}
-                      onChange={(e) => {
-                        const selectedDate = new Date(e.target.value);
-                        const minDate = new Date();
-                        minDate.setDate(minDate.getDate() + 7);
-                        
-                        if (selectedDate < minDate) {
-                          setWizardLaunchError('End date must be at least 1 week from today');
-                        } else {
-                          setWizardLaunchError(null);
-                          setEndOnDate(e.target.value);
-                        }
-                      }}
-                      style={{
-                        width: '100%',
-                        maxWidth: '300px',
-                        padding: '8px 12px',
-                        border: '1px solid #D1D5DB',
-                        borderRadius: '6px',
-                        fontSize: '14px',
-                        color: '#1F2937',
-                        outline: 'none',
-                        background: '#FFFFFF'
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-
-              {/* End Conditions */}
-              <div>
-                <label style={{
-                  display: 'block',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  color: '#374151',
-                  marginBottom: '8px'
+                  marginBottom: '12px'
                 }}>
                   End Conditions
                 </label>
                 <div>
                   <label style={{
                     display: 'block',
-                    fontSize: '12px',
+                    fontSize: '14px',
                     color: '#6B7280',
-                    marginBottom: '4px'
+                    marginBottom: '8px'
                   }}>
                     End on date
                   </label>
@@ -959,11 +946,11 @@ export default function Step4({
                     }}
                     style={{
                       width: '100%',
-                      maxWidth: '300px',
-                      padding: '8px 12px',
+                      maxWidth: '400px',
+                      padding: '12px 16px',
                       border: '1px solid #D1D5DB',
                       borderRadius: '6px',
-                      fontSize: '14px',
+                      fontSize: '16px',
                       color: '#1F2937',
                       outline: 'none',
                       background: '#FFFFFF'
@@ -1078,7 +1065,7 @@ export default function Step4({
             {isLaunchingTest ? 'Launching Test...' : 'Launch Test'}
           </button>
           <p style={{
-            fontSize: '12px',
+            fontSize: '14px',
             color: '#6B7280',
             margin: '12px 0 0 0',
             textAlign: 'center'
