@@ -1244,7 +1244,8 @@ export default function ABTests() {
 
       setTimeout(() => {
         resetSwiper();
-        navigate('/app');
+        // Navigate to dashboard
+        window.location.href = '/app';
       }, 1500);
     } catch (error) {
       console.error('❌ Failed to launch A/B test!:', error);

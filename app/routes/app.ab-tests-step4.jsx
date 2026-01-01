@@ -132,6 +132,7 @@ export default function Step4({
       <div style={{
         background: '#D8D8D8',
         borderRadius: '12px',
+        border: '1px solid #C0C0C0',
         padding: '40px',
         maxWidth: '1200px',
         margin: '0 auto'
@@ -142,68 +143,79 @@ export default function Step4({
           borderRadius: '8px',
           padding: '20px 24px',
           marginBottom: '24px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
         }}>
-          {isEditingTestName ? (
-            <input
-              type="text"
-              value={wizardTestName}
-              onChange={(e) => setWizardTestName(e.target.value)}
-              onBlur={() => setIsEditingTestName(false)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') {
-                  setIsEditingTestName(false);
-                }
-              }}
-              autoFocus
-              style={{
-                flex: 1,
-                padding: '8px 12px',
-                border: '1px solid #3B82F6',
-                borderRadius: '4px',
-                fontSize: '18px',
-                fontWeight: '600',
-                color: '#1F2937',
-                outline: 'none'
-              }}
-            />
-          ) : (
-            <>
-              <p
-                onClick={() => setIsEditingTestName(true)}
+          <div style={{
+            fontSize: '22px',
+            fontWeight: '700',
+            color: '#1F2937',
+            marginBottom: '12px'
+          }}>
+            Test Name
+          </div>
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
+          }}>
+            {isEditingTestName ? (
+              <input
+                type="text"
+                value={wizardTestName}
+                onChange={(e) => setWizardTestName(e.target.value)}
+                onBlur={() => setIsEditingTestName(false)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    setIsEditingTestName(false);
+                  }
+                }}
+                autoFocus
                 style={{
+                  flex: 1,
+                  padding: '8px 12px',
+                  border: '1px solid #3B82F6',
+                  borderRadius: '4px',
                   fontSize: '18px',
                   fontWeight: '600',
                   color: '#1F2937',
-                  margin: 0,
-                  cursor: 'text',
-                  flex: 1
+                  outline: 'none'
                 }}
-              >
-                {wizardTestName || (selectedIdea && (wizardSelectedProductSnapshot || selectedProduct) 
-                  ? `${selectedIdea.utility || 'Widget'} on ${wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Product'}`
-                  : 'Test Name')}
-              </p>
-              <svg
-                onClick={() => setIsEditingTestName(true)}
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="#6B7280"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                style={{ cursor: 'pointer' }}
-              >
-                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
-                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
-              </svg>
-            </>
-          )}
+              />
+            ) : (
+              <>
+                <p
+                  onClick={() => setIsEditingTestName(true)}
+                  style={{
+                    fontSize: '18px',
+                    fontWeight: '700',
+                    color: '#1F2937',
+                    margin: 0,
+                    cursor: 'text',
+                    flex: 1
+                  }}
+                >
+                  {wizardTestName || (selectedIdea && (wizardSelectedProductSnapshot || selectedProduct) 
+                    ? `${selectedIdea.utility || 'Widget'} on ${wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Product'}`
+                    : 'Test Name')}
+                </p>
+                <svg
+                  onClick={() => setIsEditingTestName(true)}
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#6B7280"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  style={{ cursor: 'pointer' }}
+                >
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                  <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+                </svg>
+              </>
+            )}
+          </div>
         </div>
 
         {/* 2. Hypothesis - Non-editable, bold, title font */}
@@ -214,6 +226,14 @@ export default function Step4({
           marginBottom: '24px',
           boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
         }}>
+          <div style={{
+            fontSize: '22px',
+            fontWeight: '700',
+            color: '#1F2937',
+            marginBottom: '12px'
+          }}>
+            Hypothesis
+          </div>
           <p style={{
             fontSize: '18px',
             fontWeight: '700',
@@ -314,7 +334,7 @@ export default function Step4({
         }}>
           <div style={{ marginBottom: '8px' }}>
             <span style={{
-              fontSize: '20px',
+              fontSize: '24px',
               fontWeight: '700',
               color: '#1F2937'
             }}>
@@ -322,7 +342,7 @@ export default function Step4({
             </span>
           </div>
           <p style={{
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#6B7280',
             margin: 0
           }}>
@@ -340,7 +360,7 @@ export default function Step4({
         }}>
           <div style={{ marginBottom: '8px' }}>
             <span style={{
-              fontSize: '20px',
+              fontSize: '24px',
               fontWeight: '700',
               color: '#1F2937'
             }}>
@@ -348,7 +368,7 @@ export default function Step4({
             </span>
           </div>
           <p style={{
-            fontSize: '14px',
+            fontSize: '16px',
             color: '#6B7280',
             margin: 0
           }}>
@@ -366,7 +386,7 @@ export default function Step4({
         }}>
           <div style={{ marginBottom: '16px' }}>
             <label style={{
-              fontSize: '20px',
+              fontSize: '24px',
               fontWeight: '700',
               color: '#1F2937',
               marginBottom: '8px',
@@ -375,7 +395,7 @@ export default function Step4({
               Autopilot Mode
             </label>
             <p style={{
-              fontSize: '14px',
+              fontSize: '16px',
               color: '#6B7280',
               margin: '0 0 12px 0'
             }}>
@@ -749,7 +769,7 @@ export default function Step4({
             marginBottom: manualMode ? '16px' : '0'
           }}>
             <label style={{
-              fontSize: '20px',
+              fontSize: '24px',
               fontWeight: '700',
               color: '#1F2937',
               display: 'block'
@@ -908,7 +928,7 @@ export default function Step4({
               }}>
                 <label style={{
                   display: 'block',
-                  fontSize: '18px',
+                  fontSize: '22px',
                   fontWeight: '700',
                   color: '#374151',
                   marginBottom: '12px'
@@ -918,7 +938,7 @@ export default function Step4({
                 <div>
                   <label style={{
                     display: 'block',
-                    fontSize: '14px',
+                    fontSize: '16px',
                     color: '#6B7280',
                     marginBottom: '8px'
                   }}>
@@ -965,20 +985,22 @@ export default function Step4({
         {/* Auto-Push Winner - Only shown when Autopilot is ON */}
         {autopilotOn && (
           <div style={{
+            background: '#FFFFFF',
+            borderRadius: '8px',
+            padding: '20px 24px',
             marginBottom: '24px',
-            paddingBottom: '24px',
-            borderBottom: '1px solid #E5E7EB'
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
           }}>
             <h4 style={{
-              fontSize: '16px',
-              fontWeight: '600',
+              fontSize: '24px',
+              fontWeight: '700',
               color: '#1F2937',
               marginBottom: '8px'
             }}>
               Auto-Push Winner
             </h4>
             <p style={{
-              fontSize: '14px',
+              fontSize: '16px',
               color: '#6B7280',
               margin: 0
             }}>
