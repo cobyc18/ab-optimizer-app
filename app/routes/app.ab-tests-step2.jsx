@@ -365,7 +365,7 @@ export default function Step2({
         maxWidth: '450px',
         position: 'sticky',
         top: '50px',
-        marginTop: '100px'
+        marginTop: '150px'
       }}>
         <div style={{
           backgroundColor: '#D8D8D8',

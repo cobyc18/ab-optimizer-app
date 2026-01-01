@@ -1880,6 +1880,10 @@ export default function ABTests() {
             setWizardTestName={setWizardTestName}
             isEditingTestName={isEditingTestName}
             setIsEditingTestName={setIsEditingTestName}
+            testHypothesis={testHypothesis}
+            setTestHypothesis={setTestHypothesis}
+            isEditingHypothesis={isEditingHypothesis}
+            setIsEditingHypothesis={setIsEditingHypothesis}
             trafficSplitA={trafficSplitA}
             setTrafficSplitA={setTrafficSplitA}
             trafficSplitB={trafficSplitB}

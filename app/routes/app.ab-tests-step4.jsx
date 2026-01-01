@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 
 export default function Step4({
   selectedIdea,
@@ -8,6 +8,10 @@ export default function Step4({
   setWizardTestName,
   isEditingTestName,
   setIsEditingTestName,
+  testHypothesis,
+  setTestHypothesis,
+  isEditingHypothesis,
+  setIsEditingHypothesis,
   trafficSplitA,
   setTrafficSplitA,
   trafficSplitB,
@@ -37,457 +41,366 @@ export default function Step4({
   canLaunchTest,
   handleLaunchTest
 }) {
+  const confettiContainerRef = useRef(null);
+
+  // Set standardMode to true by default when autopilot is on
+  useEffect(() => {
+    if (autopilotOn && !fastMode && !standardMode && !carefulMode) {
+      setStandardMode(true);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [autopilotOn]);
+
+  // Confetti animation function
+  const createConfetti = () => {
+    const colors = ['#3B82F6', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+    const confettiCount = 100;
+    const container = confettiContainerRef.current;
+    if (!container) return;
+
+    // Clear any existing confetti
+    container.innerHTML = '';
+
+    for (let i = 0; i < confettiCount; i++) {
+      const confetti = document.createElement('div');
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const size = Math.random() * 8 + 4;
+      const startX = Math.random() * window.innerWidth;
+      const startY = -10;
+      const endY = window.innerHeight + 10;
+      const rotation = Math.random() * 360;
+      const duration = Math.random() * 2 + 2;
+
+      confetti.style.position = 'fixed';
+      confetti.style.left = `${startX}px`;
+      confetti.style.top = `${startY}px`;
+      confetti.style.width = `${size}px`;
+      confetti.style.height = `${size}px`;
+      confetti.style.backgroundColor = color;
+      confetti.style.borderRadius = '50%';
+      confetti.style.pointerEvents = 'none';
+      confetti.style.zIndex = '10000';
+      confetti.style.opacity = '0.9';
+
+      container.appendChild(confetti);
+
+      // Animate
+      confetti.animate([
+        { transform: `translateY(0) rotate(0deg)`, opacity: 1 },
+        { transform: `translateY(${endY}px) rotate(${rotation}deg)`, opacity: 0 }
+      ], {
+        duration: duration * 1000,
+        easing: 'cubic-bezier(0.5, 0, 0.5, 1)'
+      }).onfinish = () => confetti.remove();
+    }
+
+    // Clear confetti after animation
+    setTimeout(() => {
+      container.innerHTML = '';
+    }, 5000);
+  };
+
+  const handleLaunchWithConfetti = () => {
+    createConfetti();
+    handleLaunchTest();
+  };
   return (
     <div style={{
       animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       transform: 'translateX(0)',
-      opacity: 1
+      opacity: 1,
+      background: '#D8D8D8',
+      minHeight: '100vh',
+      padding: '40px'
     }}>
-      <h3 style={{
-        fontSize: '36px',
-        fontWeight: '700',
-        color: '#1F2937',
-        marginBottom: '32px'
-      }}>
-        Review & launch
-      </h3>
+      {/* Confetti Container */}
+      <div ref={confettiContainerRef} style={{ position: 'fixed', top: 0, left: 0, width: '100%', height: '100%', pointerEvents: 'none', zIndex: 10000 }} />
 
       {/* Main White Card Container */}
       <div style={{
         background: '#FFFFFF',
-        border: '1px solid #E5E7EB',
         borderRadius: '12px',
         padding: '40px',
-        boxShadow: '0 2px 8px rgba(59, 130, 246, 0.1)',
-        marginBottom: '32px'
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.1)',
+        maxWidth: '1200px',
+        margin: '0 auto'
       }}>
-        {/* Test Summary Section */}
-        <div style={{ marginBottom: '40px', paddingBottom: '32px', borderBottom: '1px solid #E5E7EB' }}>
-          <h4 style={{
-            fontSize: '32px',
-            fontWeight: '600',
-            color: '#3B82F6',
-            marginBottom: '16px'
-          }}>
-            Test Summary
-          </h4>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '20px'
-          }}>
-            {/* Product Name Card */}
-            <div style={{
-              background: '#F9FAFB',
-              border: '1px solid #E5E7EB',
-              borderRadius: '12px',
-              padding: '32px',
-              borderTop: '3px solid #e6e6e6',
-              minHeight: '180px',
-              display: 'flex',
-              flexDirection: 'column',
-              boxSizing: 'border-box'
-            }}>
-              <label style={{
-                display: 'block',
+        {/* 1. Test Name */}
+        <div style={{
+          background: '#FFFFFF',
+          border: '1px solid #E5E7EB',
+          borderRadius: '8px',
+          padding: '20px 24px',
+          marginBottom: '24px',
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.05)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '12px'
+        }}>
+          {isEditingTestName ? (
+            <input
+              type="text"
+              value={wizardTestName}
+              onChange={(e) => setWizardTestName(e.target.value)}
+              onBlur={() => setIsEditingTestName(false)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  setIsEditingTestName(false);
+                }
+              }}
+              autoFocus
+              style={{
+                flex: 1,
+                padding: '8px 12px',
+                border: '1px solid #3B82F6',
+                borderRadius: '4px',
                 fontSize: '18px',
-                fontWeight: '500',
-                color: '#6B7280',
-                marginBottom: '12px'
-              }}>
-                Product Name
-              </label>
-              <p style={{
-                fontSize: '22px',
                 fontWeight: '600',
                 color: '#1F2937',
-                margin: 0,
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word',
-                flex: 1
-              }}>
-                {wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Not selected'}
-              </p>
-            </div>
-
-            {/* Widget Name Card */}
-            <div style={{
-              background: '#F9FAFB',
-              border: '1px solid #E5E7EB',
-              borderRadius: '12px',
-              padding: '32px',
-              borderTop: '3px solid #e6e6e6',
-              minHeight: '180px',
-              display: 'flex',
-              flexDirection: 'column',
-              boxSizing: 'border-box'
-            }}>
-              <label style={{
-                display: 'block',
-                fontSize: '18px',
-                fontWeight: '500',
-                color: '#6B7280',
-                marginBottom: '12px'
-              }}>
-                Widget Name
-              </label>
-              <p style={{
-                fontSize: '22px',
-                fontWeight: '600',
-                color: '#1F2937',
-                margin: 0,
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word',
-                flex: 1
-              }}>
-                {selectedIdea?.utility || 'Not selected'}
-              </p>
-            </div>
-
-            {/* Test Name Card */}
-            <div style={{
-              background: '#F9FAFB',
-              border: '1px solid #E5E7EB',
-              borderRadius: '12px',
-              padding: '32px',
-              borderTop: '3px solid #ef9362',
-              minHeight: '180px',
-              display: 'flex',
-              flexDirection: 'column',
-              boxSizing: 'border-box'
-            }}>
-              <label style={{
-                display: 'block',
-                fontSize: '18px',
-                fontWeight: '500',
-                color: '#6B7280',
-                marginBottom: '12px'
-              }}>
-                Test Name
-              </label>
-              {isEditingTestName ? (
-                <input
-                  type="text"
-                  value={wizardTestName}
-                  onChange={(e) => setWizardTestName(e.target.value)}
-                  onBlur={() => setIsEditingTestName(false)}
-                  onKeyDown={(e) => {
-                    if (e.key === 'Enter') {
-                      setIsEditingTestName(false);
-                    }
-                  }}
-                  autoFocus
-                  style={{
-                    width: '100%',
-                    padding: '8px 14px',
-                    border: '1px solid #3B82F6',
-                    borderRadius: '4px',
-                    fontSize: '22px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    outline: 'none',
-                    boxSizing: 'border-box'
-                  }}
-                />
-              ) : (
-                <p
-                  onClick={() => setIsEditingTestName(true)}
-                  style={{
-                    fontSize: '22px',
-                    fontWeight: '600',
-                    color: '#1F2937',
-                    margin: 0,
-                    cursor: 'text',
-                    wordWrap: 'break-word',
-                    overflowWrap: 'break-word',
-                    flex: 1
-                  }}
-                >
-                  {wizardTestName || (selectedIdea && (wizardSelectedProductSnapshot || selectedProduct) 
-                    ? `${selectedIdea.utility || 'Widget'} on ${wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Product'}`
-                    : 'Test Name')}
-                </p>
-              )}
-            </div>
-
-            {/* Traffic Split Card */}
-            <div style={{
-              background: manualMode ? '#E0F2FE' : '#F9FAFB',
-              border: manualMode ? '1px solid #3B82F6' : '1px solid #E5E7EB',
-              borderRadius: '12px',
-              padding: '32px',
-              transition: 'all 0.2s ease',
-              minHeight: '180px',
-              display: 'flex',
-              flexDirection: 'column',
-              boxSizing: 'border-box'
-            }}>
-              <label style={{
-                display: 'block',
-                fontSize: '18px',
-                fontWeight: '500',
-                color: '#6B7280',
-                marginBottom: '12px'
-              }}>
-                Traffic Split
-              </label>
-              {manualMode ? (
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={trafficSplitA}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value) || 0;
-                      setTrafficSplitA(Math.min(100, Math.max(0, val)));
-                      setTrafficSplitB(100 - Math.min(100, Math.max(0, val)));
-                    }}
-                    style={{
-                      width: '80px',
-                      padding: '8px 12px',
-                      border: '1px solid #3B82F6',
-                      borderRadius: '6px',
-                      fontSize: '22px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      outline: 'none',
-                      background: '#FFFFFF'
-                    }}
-                  />
-                  <span style={{ fontSize: '22px', fontWeight: '600', color: '#3B82F6' }}>-</span>
-                  <input
-                    type="number"
-                    min="0"
-                    max="100"
-                    value={trafficSplitB}
-                    onChange={(e) => {
-                      const val = parseInt(e.target.value) || 0;
-                      setTrafficSplitB(Math.min(100, Math.max(0, val)));
-                      setTrafficSplitA(100 - Math.min(100, Math.max(0, val)));
-                    }}
-                    style={{
-                      width: '80px',
-                      padding: '8px 12px',
-                      border: '1px solid #3B82F6',
-                      borderRadius: '6px',
-                      fontSize: '22px',
-                      fontWeight: '600',
-                      color: '#1F2937',
-                      outline: 'none',
-                      background: '#FFFFFF'
-                    }}
-                  />
-                </div>
-              ) : (
-                <p style={{
-                  fontSize: '22px',
+                outline: 'none'
+              }}
+            />
+          ) : (
+            <>
+              <p
+                onClick={() => setIsEditingTestName(true)}
+                style={{
+                  fontSize: '18px',
                   fontWeight: '600',
                   color: '#1F2937',
                   margin: 0,
-                  flex: 1,
-                  display: 'flex',
-                  alignItems: 'center'
-                }}>
-                  {trafficSplitA} - {trafficSplitB}
-                </p>
-              )}
-            </div>
-          </div>
+                  cursor: 'text',
+                  flex: 1
+                }}
+              >
+                {wizardTestName || (selectedIdea && (wizardSelectedProductSnapshot || selectedProduct) 
+                  ? `${selectedIdea.utility || 'Widget'} on ${wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Product'}`
+                  : 'Test Name')}
+              </p>
+              <svg
+                onClick={() => setIsEditingTestName(true)}
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="#6B7280"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ cursor: 'pointer' }}
+              >
+                <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
+                <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
+              </svg>
+            </>
+          )}
         </div>
 
-        {/* Variants Section */}
-        <div style={{ marginBottom: '40px', paddingBottom: '32px', borderBottom: '1px solid #E5E7EB' }}>
-          <h4 style={{
-            fontSize: '32px',
-            fontWeight: '600',
-            color: '#3B82F6',
-            marginBottom: '16px'
-          }}>
-            Variants
-          </h4>
-          <div style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(2, 1fr)',
-            gap: '20px'
-          }}>
-            {/* Control Card */}
-            <div style={{
-              background: '#F9FAFB',
-              border: '1px solid #E5E7EB',
-              borderRadius: '12px',
-              padding: '32px',
-              borderLeft: '4px solid #e6e6e6',
-              minHeight: '180px',
-              display: 'flex',
-              flexDirection: 'column',
-              boxSizing: 'border-box'
-            }}>
-              <h5 style={{
-                fontSize: '20px',
-                fontWeight: '600',
-                color: '#374151',
-                margin: '0 0 12px 0'
-              }}>
-                Control
-              </h5>
-              <p style={{
-                fontSize: '18px',
-                color: '#6B7280',
+        {/* 2. Hypothesis */}
+        <div style={{
+          background: 'linear-gradient(135deg, rgb(126, 200, 227) 0%, rgb(91, 168, 212) 50%, rgb(74, 148, 196) 100%)',
+          borderRadius: '8px',
+          padding: '20px 24px',
+          marginBottom: '24px'
+        }}>
+          {isEditingHypothesis ? (
+            <textarea
+              value={testHypothesis}
+              onChange={(e) => setTestHypothesis(e.target.value)}
+              onBlur={() => setIsEditingHypothesis(false)}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setIsEditingHypothesis(false);
+                }
+              }}
+              autoFocus
+              style={{
+                width: '100%',
+                minHeight: '60px',
+                padding: '8px 12px',
+                border: '1px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '4px',
+                fontSize: '14px',
+                fontFamily: 'monospace',
+                color: '#FFFFFF',
+                background: 'rgba(255, 255, 255, 0.1)',
+                outline: 'none',
+                resize: 'vertical'
+              }}
+            />
+          ) : (
+            <p
+              onClick={() => setIsEditingHypothesis(true)}
+              style={{
+                fontSize: '14px',
+                fontFamily: 'monospace',
+                color: '#FFFFFF',
                 margin: 0,
-                lineHeight: '1.5',
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word',
-                flex: 1
-              }}>
-                Product Selected before widget
-              </p>
-            </div>
-
-            {/* Variant Card */}
-            <div style={{
-              background: '#E0F2FE',
-              border: '1px solid #3B82F6',
-              borderRadius: '12px',
-              padding: '32px',
-              borderLeft: '4px solid #3B82F6',
-              minHeight: '180px',
-              display: 'flex',
-              flexDirection: 'column',
-              boxSizing: 'border-box'
-            }}>
-              <h5 style={{
-                fontSize: '20px',
-                fontWeight: '600',
-                color: '#3B82F6',
-                margin: '0 0 12px 0'
-              }}>
-                Variant
-              </h5>
-              <p style={{
-                fontSize: '18px',
-                color: '#1E40AF',
-                margin: 0,
-                lineHeight: '1.5',
-                wordWrap: 'break-word',
-                overflowWrap: 'break-word',
-                flex: 1
-              }}>
-                Product Selected with widget added
-              </p>
-            </div>
-          </div>
+                cursor: 'text',
+                lineHeight: '1.6'
+              }}
+            >
+              {testHypothesis || `Adding a ${selectedIdea?.utility || 'widget'} near the price will increase Add to Cart actions.`}
+            </p>
+          )}
         </div>
 
-        {/* AutoPilot Mode and Manual Mode */}
-        <div style={{ marginBottom: '0' }}>
-          {/* Autopilot Mode Toggle */}
+        {/* 3. Variants */}
+        <div style={{
+          display: 'flex',
+          gap: '16px',
+          marginBottom: '24px'
+        }}>
+          {/* A - Control */}
           <div style={{
+            flex: 1,
+            background: '#F9FAFB',
+            border: '1px solid #E5E7EB',
+            borderRadius: '8px',
+            padding: '16px',
             display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: '16px',
-            paddingBottom: '16px',
-            borderBottom: '1px solid #E5E7EB'
+            flexDirection: 'column',
+            gap: '8px'
           }}>
-            <div>
-              <label style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: autopilotOn ? '#3B82F6' : '#1F2937',
-                marginBottom: '4px',
-                display: 'block',
-                transition: 'color 0.2s ease'
-              }}>
-                Autopilot Mode
-              </label>
-              <p style={{
-                fontSize: '12px',
-                color: '#6B7280',
-                margin: 0
-              }}>
-                Automatically declares a winner when the selected confidence threshold is reached
-              </p>
-            </div>
-            <label style={{
-              position: 'relative',
-              display: 'inline-block',
-              width: '48px',
-              height: '24px'
-            }}>
-              <input
-                type="checkbox"
-                checked={autopilotOn}
-                onChange={(e) => {
-                  const newValue = e.target.checked;
-                  setAutopilotOn(newValue);
-                  // If autopilot is turned on, manual mode must be off
-                  if (newValue) {
-                    setManualMode(false);
-                    // Reset mode selections when switching back to autopilot
-                    setFastMode(false);
-                    setStandardMode(false);
-                    setCarefulMode(false);
-                  } else {
-                    // If autopilot is turned off, manual mode must be on (mutually exclusive)
-                    setManualMode(true);
-                  }
-                }}
-                style={{
-                  opacity: 0,
-                  width: 0,
-                  height: 0
-                }}
-              />
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{
-                position: 'absolute',
-                cursor: 'pointer',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: autopilotOn ? '#3B82F6' : '#D1D5DB',
-                borderRadius: '24px',
-                transition: '0.3s',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '2px'
-              }}>
-                <span style={{
-                  content: '""',
-                  position: 'absolute',
-                  height: '20px',
-                  width: '20px',
-                  left: autopilotOn ? '26px' : '2px',
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '50%',
-                  transition: '0.3s',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                }} />
-              </span>
-            </label>
-          </div>
-
-          {/* Mode Selection - Only shown when Autopilot is ON */}
-          {autopilotOn && (
-            <div style={{
-              marginLeft: '24px',
-              marginTop: '16px',
-              paddingLeft: '24px',
-              borderLeft: '3px solid #3B82F6',
-              background: '#F0F9FF',
-              borderRadius: '8px',
-              padding: '20px',
-              marginBottom: '24px'
-            }}>
-              <p style={{
+                fontSize: '14px',
+                fontWeight: '700',
+                color: '#374151',
+                background: '#E5E7EB',
+                borderRadius: '4px',
+                padding: '2px 8px'
+              }}>A</span>
+              <span style={{
                 fontSize: '14px',
                 fontWeight: '600',
-                color: '#1F2937',
-                marginBottom: '16px'
-              }}>
-                Select Analysis Mode:
-              </p>
+                color: '#374151'
+              }}>Control</span>
+            </div>
+            <p style={{
+              fontSize: '13px',
+              color: '#6B7280',
+              margin: 0
+            }}>
+              {wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Original Product'}
+            </p>
+          </div>
+
+          {/* B - Variant */}
+          <div style={{
+            flex: 1,
+            background: '#E0F2FE',
+            border: '1px solid #3B82F6',
+            borderRadius: '8px',
+            padding: '16px',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <span style={{
+                fontSize: '14px',
+                fontWeight: '700',
+                color: '#FFFFFF',
+                background: '#3B82F6',
+                borderRadius: '4px',
+                padding: '2px 8px'
+              }}>B</span>
+              <span style={{
+                fontSize: '14px',
+                fontWeight: '600',
+                color: '#3B82F6'
+              }}>Variant</span>
+            </div>
+            <p style={{
+              fontSize: '13px',
+              color: '#1E40AF',
+              margin: 0
+            }}>
+              The original product with added {selectedIdea?.utility || 'widget'}.
+            </p>
+          </div>
+        </div>
+
+        {/* 4. Traffic Split */}
+        <div style={{
+          marginBottom: '24px',
+          paddingBottom: '24px',
+          borderBottom: '1px solid #E5E7EB'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+            <span style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#1F2937'
+            }}>
+              {trafficSplitA} / {trafficSplitB}
+            </span>
+          </div>
+          <p style={{
+            fontSize: '12px',
+            color: '#6B7280',
+            margin: 0
+          }}>
+            TryLab recommends a balanced split.
+          </p>
+        </div>
+
+        {/* 5. Goal Metric */}
+        <div style={{
+          marginBottom: '24px',
+          paddingBottom: '24px',
+          borderBottom: '1px solid #E5E7EB'
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '4px' }}>
+            <span style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#1F2937'
+            }}>
+              Add to Cart
+            </span>
+          </div>
+          <p style={{
+            fontSize: '12px',
+            color: '#6B7280',
+            margin: 0
+          }}>
+            Best for PDP changes.
+          </p>
+        </div>
+
+        {/* 6. Autopilot Mode */}
+        <div style={{
+          marginBottom: '24px',
+          paddingBottom: '24px',
+          borderBottom: '1px solid #E5E7EB'
+        }}>
+          <div style={{ marginBottom: '16px' }}>
+            <label style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#1F2937',
+              marginBottom: '8px',
+              display: 'block'
+            }}>
+              Autopilot Mode
+            </label>
+            <p style={{
+              fontSize: '12px',
+              color: '#6B7280',
+              margin: '0 0 12px 0'
+            }}>
+              Most stores see clear results in ~2 weeks
+            </p>
+          </div>
+
+          {/* Mode Selection - All three modes shown */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '12px'
+          }}>
               
               {/* Fast Mode */}
               <div style={{
@@ -831,262 +744,348 @@ export default function Step4({
                 </div>
               </div>
             </div>
-          )}
-
-          {/* Manual Mode Toggle */}
-          <div style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            marginBottom: manualMode ? '16px' : '0',
-            paddingBottom: manualMode ? '16px' : '0',
-            borderBottom: manualMode ? '1px solid #E5E7EB' : 'none'
-          }}>
-            <div>
-              <label style={{
-                fontSize: '16px',
-                fontWeight: '600',
-                color: manualMode ? '#3B82F6' : '#1F2937',
-                marginBottom: '4px',
-                display: 'block',
-                transition: 'color 0.2s ease'
-              }}>
-                Manual Mode
-              </label>
-              <p style={{
-                fontSize: '12px',
-                color: '#6B7280',
-                margin: 0
-              }}>
-                Set end conditions manually
-              </p>
-            </div>
-            <label style={{
-              position: 'relative',
-              display: 'inline-block',
-              width: '48px',
-              height: '24px'
-            }}>
-              <input
-                type="checkbox"
-                checked={manualMode}
-                onChange={(e) => {
-                  const newValue = e.target.checked;
-                  setManualMode(newValue);
-                  // If manual mode is turned on, autopilot must be off
-                  if (newValue) {
-                    setAutopilotOn(false);
-                    // Reset mode selections when switching to manual
-                    setFastMode(false);
-                    setStandardMode(false);
-                    setCarefulMode(false);
-                  } else {
-                    // If manual mode is turned off, autopilot must be on (mutually exclusive)
-                    setAutopilotOn(true);
-                  }
-                }}
-                style={{
-                  opacity: 0,
-                  width: 0,
-                  height: 0
-                }}
-              />
-              <span style={{
-                position: 'absolute',
-                cursor: 'pointer',
-                top: 0,
-                left: 0,
-                right: 0,
-                bottom: 0,
-                backgroundColor: manualMode ? '#3B82F6' : '#D1D5DB',
-                borderRadius: '24px',
-                transition: '0.3s',
-                display: 'flex',
-                alignItems: 'center',
-                padding: '2px'
-              }}>
-                <span style={{
-                  content: '""',
-                  position: 'absolute',
-                  height: '20px',
-                  width: '20px',
-                  left: manualMode ? '26px' : '2px',
-                  backgroundColor: '#FFFFFF',
-                  borderRadius: '50%',
-                  transition: '0.3s',
-                  boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
-                }} />
-              </span>
-            </label>
           </div>
 
-          {/* Manual Mode Explanation */}
+        {/* 7. Manual Mode Link */}
+        <div style={{
+          marginBottom: '24px',
+          paddingBottom: '24px',
+          borderBottom: '1px solid #E5E7EB'
+        }}>
+          <button
+            onClick={() => {
+              const newValue = !manualMode;
+              setManualMode(newValue);
+              if (newValue) {
+                setAutopilotOn(false);
+                setFastMode(false);
+                setStandardMode(false);
+                setCarefulMode(false);
+              } else {
+                setAutopilotOn(true);
+              }
+            }}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: '#6B7280',
+              fontSize: '14px',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              padding: 0
+            }}
+          >
+            Manual Mode
+          </button>
+
+          {/* Manual Mode Collapsible Card */}
           {manualMode && (
             <div style={{
-              marginTop: '12px',
-              marginBottom: '16px',
-              padding: '12px',
-              background: '#F0F9FF',
-              border: '1px solid #3B82F6',
-              borderRadius: '6px'
+              marginTop: '16px',
+              background: '#F9FAFB',
+              border: '1px solid #E5E7EB',
+              borderRadius: '8px',
+              padding: '20px'
             }}>
-              <p style={{
-                fontSize: '13px',
-                color: '#1F2937',
-                margin: 0,
-                lineHeight: '1.5'
-              }}>
-                <strong>Note:</strong> In manual mode, the primary measure we're targeting is <strong>add-to-cart</strong>, given that we're using widgets to optimize conversion.
-              </p>
+              {/* Traffic Split Slider */}
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  marginBottom: '8px'
+                }}>
+                  Traffic Split
+                </label>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+                  <input
+                    type="range"
+                    min="0"
+                    max="100"
+                    value={trafficSplitA}
+                    onChange={(e) => {
+                      const val = parseInt(e.target.value) || 0;
+                      setTrafficSplitA(val);
+                      setTrafficSplitB(100 - val);
+                    }}
+                    style={{
+                      flex: 1,
+                      height: '6px',
+                      background: '#e5e7eb',
+                      borderRadius: '3px',
+                      outline: 'none',
+                      cursor: 'pointer'
+                    }}
+                  />
+                  <div style={{
+                    background: 'white',
+                    padding: '8px 12px',
+                    borderRadius: '6px',
+                    border: '1px solid #d1d5db',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    color: '#000000',
+                    minWidth: '60px',
+                    textAlign: 'center'
+                  }}>
+                    {trafficSplitA}%
+                  </div>
+                </div>
+              </div>
+
+              {/* Schedule */}
+              <div style={{ marginBottom: '24px' }}>
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  marginBottom: '8px'
+                }}>
+                  Schedule
+                </label>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      marginBottom: '4px'
+                    }}>
+                      Start time
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={new Date().toISOString().slice(0, 16)}
+                      disabled
+                      style={{
+                        width: '100%',
+                        maxWidth: '300px',
+                        padding: '8px 12px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        color: '#6B7280',
+                        background: '#F3F4F6',
+                        cursor: 'not-allowed'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{
+                      display: 'block',
+                      fontSize: '12px',
+                      color: '#6B7280',
+                      marginBottom: '4px'
+                    }}>
+                      End date (optional)
+                    </label>
+                    <input
+                      type="datetime-local"
+                      value={endOnDate}
+                      min={(() => {
+                        const minDate = new Date();
+                        minDate.setDate(minDate.getDate() + 7);
+                        return minDate.toISOString().slice(0, 16);
+                      })()}
+                      onChange={(e) => {
+                        const selectedDate = new Date(e.target.value);
+                        const minDate = new Date();
+                        minDate.setDate(minDate.getDate() + 7);
+                        
+                        if (selectedDate < minDate) {
+                          setWizardLaunchError('End date must be at least 1 week from today');
+                        } else {
+                          setWizardLaunchError(null);
+                          setEndOnDate(e.target.value);
+                        }
+                      }}
+                      style={{
+                        width: '100%',
+                        maxWidth: '300px',
+                        padding: '8px 12px',
+                        border: '1px solid #D1D5DB',
+                        borderRadius: '6px',
+                        fontSize: '14px',
+                        color: '#1F2937',
+                        outline: 'none',
+                        background: '#FFFFFF'
+                      }}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* End Conditions */}
+              <div>
+                <label style={{
+                  display: 'block',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  color: '#374151',
+                  marginBottom: '8px'
+                }}>
+                  End Conditions
+                </label>
+                <div>
+                  <label style={{
+                    display: 'block',
+                    fontSize: '12px',
+                    color: '#6B7280',
+                    marginBottom: '4px'
+                  }}>
+                    End on date
+                  </label>
+                  <input
+                    type="datetime-local"
+                    value={endOnDate}
+                    min={(() => {
+                      const minDate = new Date();
+                      minDate.setDate(minDate.getDate() + 7);
+                      return minDate.toISOString().slice(0, 16);
+                    })()}
+                    onChange={(e) => {
+                      const selectedDate = new Date(e.target.value);
+                      const minDate = new Date();
+                      minDate.setDate(minDate.getDate() + 7);
+                      
+                      if (selectedDate < minDate) {
+                        setWizardLaunchError('End date must be at least 1 week from today');
+                      } else {
+                        setWizardLaunchError(null);
+                        setEndOnDate(e.target.value);
+                      }
+                    }}
+                    style={{
+                      width: '100%',
+                      maxWidth: '300px',
+                      padding: '8px 12px',
+                      border: '1px solid #D1D5DB',
+                      borderRadius: '6px',
+                      fontSize: '14px',
+                      color: '#1F2937',
+                      outline: 'none',
+                      background: '#FFFFFF'
+                    }}
+                  />
+                </div>
+              </div>
             </div>
           )}
         </div>
 
-        {/* End Test Section - Only shown when Manual Mode is ON */}
-        {manualMode && (
-          <div style={{ 
-            marginLeft: '24px',
-            marginTop: '16px',
-            paddingLeft: '24px',
-            borderLeft: '3px solid #3B82F6',
-            background: '#F0F9FF',
-            borderRadius: '8px',
-            padding: '20px',
-            marginBottom: '0'
+        {/* Auto-Push Winner - Only shown when Autopilot is ON */}
+        {autopilotOn && (
+          <div style={{
+            marginBottom: '24px',
+            paddingBottom: '24px',
+            borderBottom: '1px solid #E5E7EB'
           }}>
-            {/* End Date Input */}
-            <div style={{
-              background: '#FFFFFF',
-              border: '1px solid #3B82F6',
-              borderRadius: '8px',
-              padding: '16px'
+            <h4 style={{
+              fontSize: '16px',
+              fontWeight: '600',
+              color: '#1F2937',
+              marginBottom: '8px'
             }}>
-              <label style={{
-                display: 'block',
-                fontSize: '14px',
-                fontWeight: '600',
-                color: '#3B82F6',
-                marginBottom: '8px'
-              }}>
-                End Date
-              </label>
-              <input
-                type="datetime-local"
-                value={endOnDate}
-                min={(() => {
-                  const minDate = new Date();
-                  minDate.setDate(minDate.getDate() + 7); // Minimum 1 week from today
-                  return minDate.toISOString().slice(0, 16);
-                })()}
-                onChange={(e) => {
-                  const selectedDate = new Date(e.target.value);
-                  const minDate = new Date();
-                  minDate.setDate(minDate.getDate() + 7);
-                  
-                  if (selectedDate < minDate) {
-                    setWizardLaunchError('End date must be at least 1 week from today');
-                  } else {
-                    setWizardLaunchError(null);
-                    setEndOnDate(e.target.value);
-                  }
-                }}
-                style={{
-                  width: '100%',
-                  maxWidth: '300px',
-                  padding: '8px 12px',
-                  border: '1px solid #3B82F6',
-                  borderRadius: '6px',
-                  fontSize: '14px',
-                  color: '#1F2937',
-                  outline: 'none',
-                  background: '#F9FAFB'
-                }}
-              />
-              <p style={{
-                fontSize: '12px',
-                color: '#6B7280',
-                margin: '8px 0 0 0'
-              }}>
-                Test will end on this date. Minimum duration is 1 week from today.
-              </p>
-            </div>
+              Auto-Push Winner
+            </h4>
+            <p style={{
+              fontSize: '14px',
+              color: '#6B7280',
+              margin: 0
+            }}>
+              Automatically updates your PDP with the winning variant!
+            </p>
           </div>
         )}
-      </div>
 
-      {/* Validation Notices */}
-      {wizardLaunchError && (
-        <div style={{
-          background: '#FEE2E2',
-          border: '1px solid #EF4444',
-          color: '#B91C1C',
-          borderRadius: '8px',
-          padding: '12px 16px',
-          marginBottom: '24px'
-        }}>
-          {wizardLaunchError}
-        </div>
-      )}
-
-      {wizardLaunchSuccess && (
-        <div style={{
-          background: '#ECFDF5',
-          border: '1px solid #10B981',
-          color: '#065F46',
-          borderRadius: '8px',
-          padding: '12px 16px',
-          marginBottom: '24px'
-        }}>
-          {wizardLaunchSuccess}
-        </div>
-      )}
-
-      {/* Launch Test Button - Bottom Right */}
-      <div style={{
-        display: 'flex',
-        justifyContent: 'flex-end',
-        marginTop: '32px'
-      }}>
-        <button
-          onClick={handleLaunchTest}
-          disabled={isLaunchingTest || !canLaunchTest}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: '8px',
-            padding: '14px 28px',
-            background: (isLaunchingTest || !canLaunchTest) ? '#D1D5DB' : '#10B981',
-            color: '#FFFFFF',
-            border: 'none',
+        {/* Error/Success Messages */}
+        {wizardLaunchError && (
+          <div style={{
+            background: '#FEE2E2',
+            border: '1px solid #EF4444',
+            color: '#B91C1C',
             borderRadius: '8px',
-            fontSize: '16px',
-            fontWeight: '600',
-            cursor: (isLaunchingTest || !canLaunchTest) ? 'not-allowed' : 'pointer',
-            transition: 'all 0.2s ease',
-            opacity: (isLaunchingTest || !canLaunchTest) ? 0.6 : 1,
-            boxShadow: (isLaunchingTest || !canLaunchTest) ? 'none' : '0 2px 4px rgba(16, 185, 129, 0.3)'
-          }}
-          onMouseEnter={(e) => {
-            if (!e.currentTarget.disabled) {
-              e.currentTarget.style.background = '#059669';
-              e.currentTarget.style.boxShadow = '0 4px 8px rgba(16, 185, 129, 0.4)';
-            }
-          }}
-          onMouseLeave={(e) => {
-            if (!e.currentTarget.disabled) {
-              e.currentTarget.style.background = '#10B981';
-              e.currentTarget.style.boxShadow = '0 2px 4px rgba(16, 185, 129, 0.3)';
-            }
-          }}
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
-            <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
-            <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
-            <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
-          </svg>
-          {isLaunchingTest ? 'Launching Test...' : 'Launch Test'}
-        </button>
+            padding: '12px 16px',
+            marginBottom: '24px'
+          }}>
+            {wizardLaunchError}
+          </div>
+        )}
+
+        {wizardLaunchSuccess && (
+          <div style={{
+            background: '#ECFDF5',
+            border: '1px solid #10B981',
+            color: '#065F46',
+            borderRadius: '8px',
+            padding: '12px 16px',
+            marginBottom: '24px'
+          }}>
+            {wizardLaunchSuccess}
+          </div>
+        )}
+
+        {/* Launch Test Button - Centered */}
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          marginTop: '40px'
+        }}>
+          <button
+            onClick={handleLaunchWithConfetti}
+            disabled={isLaunchingTest || !canLaunchTest}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '12px',
+              padding: '18px 40px',
+              background: (isLaunchingTest || !canLaunchTest) ? '#D1D5DB' : '#3B82F6',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: '18px',
+              fontWeight: '700',
+              cursor: (isLaunchingTest || !canLaunchTest) ? 'not-allowed' : 'pointer',
+              transition: 'all 0.3s ease',
+              opacity: (isLaunchingTest || !canLaunchTest) ? 0.6 : 1,
+              boxShadow: (isLaunchingTest || !canLaunchTest) ? 'none' : '0 4px 12px rgba(59, 130, 246, 0.4)',
+              transform: (isLaunchingTest || !canLaunchTest) ? 'none' : 'scale(1)'
+            }}
+            onMouseEnter={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.background = '#2563EB';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(59, 130, 246, 0.5)';
+                e.currentTarget.style.transform = 'scale(1.05)';
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (!e.currentTarget.disabled) {
+                e.currentTarget.style.background = '#3B82F6';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+                e.currentTarget.style.transform = 'scale(1)';
+              }
+            }}
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/>
+              <path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/>
+              <path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/>
+              <path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/>
+            </svg>
+            {isLaunchingTest ? 'Launching Test...' : 'Launch Test'}
+          </button>
+          <p style={{
+            fontSize: '12px',
+            color: '#6B7280',
+            margin: '12px 0 0 0',
+            textAlign: 'center'
+          }}>
+            TryLab will notify you when a winner is found
+          </p>
+        </div>
       </div>
     </div>
   );
