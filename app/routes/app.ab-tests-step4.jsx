@@ -122,7 +122,7 @@ export default function Step4({
       animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       transform: 'translateX(0)',
       opacity: 1,
-      background: '#FFFFFF',
+      background: '#E5E7EB',
       minHeight: '100vh',
       padding: '40px'
     }}>
@@ -160,7 +160,7 @@ export default function Step4({
           <div style={{
             fontSize: '22px',
             fontWeight: '700',
-            color: '#1F2937',
+            color: '#3B82F6',
             marginBottom: '12px'
           }}>
             Test Name
@@ -200,7 +200,7 @@ export default function Step4({
                   style={{
                     fontSize: '18px',
                     fontWeight: '700',
-                    color: '#1F2937',
+                    color: '#000000',
                     margin: 0,
                     cursor: 'text',
                     flex: 1
@@ -242,7 +242,7 @@ export default function Step4({
           <div style={{
             fontSize: '22px',
             fontWeight: '700',
-            color: '#1F2937',
+            color: '#3B82F6',
             marginBottom: '12px'
           }}>
             Hypothesis
@@ -250,7 +250,7 @@ export default function Step4({
           <p style={{
             fontSize: '18px',
             fontWeight: '700',
-            color: '#1F2937',
+            color: '#000000',
             margin: 0,
             lineHeight: '1.6'
           }}>
@@ -289,12 +289,13 @@ export default function Step4({
               <span style={{
                 fontSize: '18px',
                 fontWeight: '700',
-                color: '#374151'
+                color: '#3B82F6'
               }}>Control</span>
             </div>
             <p style={{
               fontSize: '14px',
-              color: '#6B7280',
+              fontWeight: '700',
+              color: '#000000',
               margin: 0
             }}>
               {wizardSelectedProductSnapshot?.title || selectedProduct?.title || 'Original Product'}
@@ -331,7 +332,8 @@ export default function Step4({
             </div>
             <p style={{
               fontSize: '14px',
-              color: '#1E40AF',
+              fontWeight: '700',
+              color: '#000000',
               margin: 0
             }}>
               The original product with added {selectedIdea?.utility || 'widget'}.
@@ -355,21 +357,22 @@ export default function Step4({
             border: '1px solid #E5E7EB'
           }}>
             <div style={{ marginBottom: '8px' }}>
-              <span style={{
-                fontSize: '24px',
-                fontWeight: '700',
-                color: '#1F2937'
-              }}>
-                {trafficSplitA} / {trafficSplitB}
-              </span>
-            </div>
-            <p style={{
-              fontSize: '16px',
-              color: '#6B7280',
-              margin: 0
+            <span style={{
+              fontSize: '24px',
+              fontWeight: '700',
+              color: '#3B82F6'
             }}>
-              TryLab recommends a balanced split.
-            </p>
+              {trafficSplitA} / {trafficSplitB}
+            </span>
+          </div>
+          <p style={{
+            fontSize: '16px',
+            fontWeight: '700',
+            color: '#000000',
+            margin: 0
+          }}>
+            TryLab recommends a balanced split.
+          </p>
           </div>
 
           {/* Goal Metric */}
@@ -384,27 +387,24 @@ export default function Step4({
             alignItems: 'center',
             gap: '12px'
           }}>
-            {/* Progress Line Icon */}
-            <div style={{
-              width: '4px',
-              height: '40px',
-              background: '#3B82F6',
-              borderRadius: '2px',
-              flexShrink: 0
-            }} />
+            {/* Shopping Cart Icon */}
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ flexShrink: 0, color: '#3B82F6' }}>
+              <path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
             <div style={{ flex: 1 }}>
               <div style={{ marginBottom: '8px' }}>
                 <span style={{
                   fontSize: '24px',
                   fontWeight: '700',
-                  color: '#1F2937'
+                  color: '#3B82F6'
                 }}>
                   Add to Cart
                 </span>
               </div>
               <p style={{
                 fontSize: '16px',
-                color: '#6B7280',
+                fontWeight: '700',
+                color: '#000000',
                 margin: 0
               }}>
                 Best for PDP changes.
@@ -427,7 +427,7 @@ export default function Step4({
             <label style={{
               fontSize: '24px',
               fontWeight: '700',
-              color: '#1F2937',
+              color: '#3B82F6',
               marginBottom: '8px',
               display: 'block'
             }}>
@@ -435,7 +435,8 @@ export default function Step4({
             </label>
             <p style={{
               fontSize: '16px',
-              color: '#6B7280',
+              fontWeight: '700',
+              color: '#000000',
               margin: '0 0 12px 0'
             }}>
               Most stores see clear results in ~2 weeks
@@ -812,7 +813,7 @@ export default function Step4({
             <label style={{
               fontSize: '24px',
               fontWeight: '700',
-              color: '#1F2937',
+              color: '#3B82F6',
               display: 'block'
             }}>
               Manual Mode
@@ -904,15 +905,15 @@ export default function Step4({
                   }}>
                     <span style={{
                       fontSize: '16px',
-                      fontWeight: '600',
-                      color: '#374151'
+                      fontWeight: '700',
+                      color: '#000000'
                     }}>
                       Control
                     </span>
                     <div style={{
                       fontSize: '20px',
                       fontWeight: '700',
-                      color: '#1F2937',
+                      color: '#000000',
                       marginTop: '4px'
                     }}>
                       {trafficSplitA}%
@@ -971,7 +972,7 @@ export default function Step4({
                   display: 'block',
                   fontSize: '22px',
                   fontWeight: '700',
-                  color: '#374151',
+                  color: '#3B82F6',
                   marginBottom: '12px'
                 }}>
                   End Conditions
@@ -980,7 +981,8 @@ export default function Step4({
                   <label style={{
                     display: 'block',
                     fontSize: '16px',
-                    color: '#6B7280',
+                    fontWeight: '700',
+                    color: '#000000',
                     marginBottom: '8px'
                   }}>
                     End on date
@@ -1171,7 +1173,8 @@ export default function Step4({
           </button>
           <p style={{
             fontSize: '14px',
-            color: '#6B7280',
+            fontWeight: '700',
+            color: '#000000',
             margin: '12px 0 0 0',
             textAlign: 'center'
           }}>

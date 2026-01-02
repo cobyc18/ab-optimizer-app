@@ -52,7 +52,11 @@
      data-border-thickness="{{ block.settings.border_thickness | default: 1 }}"
      data-hover-effect="{{ block.settings.hover_effect | default: false }}"
      data-drop-shadow="{{ block.settings.drop_shadow | default: 10 }}"
-     {% if block.settings.icon_custom %}
+     {% if block.settings.icon_choice == 'none' %}
+     data-icon-url=""
+     data-icon-alt=""
+     data-icon-custom="false"
+     {% elsif block.settings.icon_custom %}
      data-icon-url="{{ block.settings.icon_custom | image_url: width: 120 }}"
      data-icon-alt="{{ block.settings.icon_custom.alt | default: 'Badge icon' }}"
      data-icon-custom="true"

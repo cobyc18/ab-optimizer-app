@@ -1150,22 +1150,22 @@ export default function Step3({
             flex: 1,
             display: 'flex',
             justifyContent: 'flex-end'
-          }}>
-            <button
-              onClick={() => setCurrentStep(4)}
-              style={{
-                padding: '12px 32px',
-                background: '#3B82F6',
-                color: '#FFFFFF',
-                borderRadius: '8px',
-                border: 'none',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600'
-              }}
-            >
-              Review
-            </button>
+      }}>
+        <button
+          onClick={() => setCurrentStep(4)}
+          style={{
+            padding: '12px 32px',
+            background: '#3B82F6',
+            color: '#FFFFFF',
+            borderRadius: '8px',
+            border: 'none',
+            cursor: 'pointer',
+            fontSize: '16px',
+            fontWeight: '600'
+          }}
+        >
+          Review
+        </button>
           </div>
         </div>
       </div>

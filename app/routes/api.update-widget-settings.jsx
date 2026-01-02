@@ -263,6 +263,11 @@ export const action = async ({ request }) => {
       // Ensure richtext values are properly formatted
       if (key === 'header_text' || key === 'body_text') {
         formattedSettings[key] = value || '<p></p>';
+      } else if (key === 'icon_custom' && (value === null || value === '')) {
+        // When icon_custom is null or empty and icon_choice is 'none', 
+        // explicitly set to empty string to prevent default PNG from showing
+        // The Liquid template will check icon_choice to determine if icon should be shown
+        formattedSettings[key] = '';
       } else {
         formattedSettings[key] = value;
       }
