@@ -1075,9 +1075,7 @@ export default function ABTests() {
           outer_padding_horizontal_mobile: widgetSettings.outer_padding_horizontal_mobile || 0,
           outer_padding_vertical_mobile: widgetSettings.outer_padding_vertical_mobile || 0,
           icon_choice: widgetSettings.icon_choice || 'star',
-          icon_custom: (widgetSettings.icon_choice === 'none' && !widgetSettings.icon_custom) 
-            ? null 
-            : (widgetSettings.icon_custom || ''),
+          icon_custom: widgetSettings.icon_custom || '',
           icon_blink: widgetSettings.icon_blink || false,
           icon_blink_intensity: widgetSettings.icon_blink_intensity || 50,
           icon_size: widgetSettings.icon_size || 36,
@@ -1721,7 +1719,7 @@ export default function ABTests() {
         {currentStep === 3 && selectedIdea?.blockId === 'simple-text-badge' && (
           <Step3
             selectedIdea={selectedIdea}
-            widgetSettings={widgetSettings}
+                widgetSettings={widgetSettings}
             setWidgetSettings={setWidgetSettings}
             activeSettingsTab={activeSettingsTab}
             setActiveSettingsTab={setActiveSettingsTab}
