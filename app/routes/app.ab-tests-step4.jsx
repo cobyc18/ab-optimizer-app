@@ -42,6 +42,7 @@ export default function Step4({
   handleLaunchTest
 }) {
   const confettiContainerRef = useRef(null);
+  const [showAutoPushTooltip, setShowAutoPushTooltip] = useState(false);
 
   // Set standardMode to true by default when autopilot is on
   useEffect(() => {
@@ -121,7 +122,7 @@ export default function Step4({
       animation: 'slideInFromRight 0.4s cubic-bezier(0.4, 0, 0.2, 1)',
       transform: 'translateX(0)',
       opacity: 1,
-      background: '#D8D8D8',
+      background: '#FFFFFF',
       minHeight: '100vh',
       padding: '40px'
     }}>
@@ -137,13 +138,24 @@ export default function Step4({
         maxWidth: '1200px',
         margin: '0 auto'
       }}>
+        {/* Review & Launch Title */}
+        <h1 style={{
+          fontSize: '32px',
+          fontWeight: '700',
+          color: '#1F2937',
+          marginBottom: '32px',
+          textAlign: 'left'
+        }}>
+          Review & Launch
+        </h1>
         {/* 1. Test Name */}
         <div style={{
           background: '#FFFFFF',
           borderRadius: '8px',
           padding: '20px 24px',
           marginBottom: '24px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #E5E7EB'
         }}>
           <div style={{
             fontSize: '22px',
@@ -224,7 +236,8 @@ export default function Step4({
           borderRadius: '8px',
           padding: '20px 24px',
           marginBottom: '24px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #E5E7EB'
         }}>
           <div style={{
             fontSize: '22px',
@@ -261,7 +274,8 @@ export default function Step4({
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px'
+            gap: '12px',
+            borderLeft: '4px solid #9CA3AF'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{
@@ -297,7 +311,8 @@ export default function Step4({
             boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
             display: 'flex',
             flexDirection: 'column',
-            gap: '12px'
+            gap: '12px',
+            borderLeft: '4px solid #3B82F6'
           }}>
             <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <span style={{
@@ -324,56 +339,78 @@ export default function Step4({
           </div>
         </div>
 
-        {/* 4. Traffic Split */}
+        {/* 4. Traffic Split and Goal Metric - Side by Side */}
         <div style={{
-          background: '#FFFFFF',
-          borderRadius: '8px',
-          padding: '20px 24px',
-          marginBottom: '24px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          display: 'flex',
+          gap: '16px',
+          marginBottom: '24px'
         }}>
-          <div style={{ marginBottom: '8px' }}>
-            <span style={{
-              fontSize: '24px',
-              fontWeight: '700',
-              color: '#1F2937'
-            }}>
-              {trafficSplitA} / {trafficSplitB}
-            </span>
-          </div>
-          <p style={{
-            fontSize: '16px',
-            color: '#6B7280',
-            margin: 0
+          {/* Traffic Split */}
+          <div style={{
+            flex: 1,
+            background: '#FFFFFF',
+            borderRadius: '8px',
+            padding: '20px 24px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            border: '1px solid #E5E7EB'
           }}>
-            TryLab recommends a balanced split.
-          </p>
-        </div>
+            <div style={{ marginBottom: '8px' }}>
+              <span style={{
+                fontSize: '24px',
+                fontWeight: '700',
+                color: '#1F2937'
+              }}>
+                {trafficSplitA} / {trafficSplitB}
+              </span>
+            </div>
+            <p style={{
+              fontSize: '16px',
+              color: '#6B7280',
+              margin: 0
+            }}>
+              TryLab recommends a balanced split.
+            </p>
+          </div>
 
-        {/* 5. Goal Metric */}
-        <div style={{
-          background: '#FFFFFF',
-          borderRadius: '8px',
-          padding: '20px 24px',
-          marginBottom: '24px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
-        }}>
-          <div style={{ marginBottom: '8px' }}>
-            <span style={{
-              fontSize: '24px',
-              fontWeight: '700',
-              color: '#1F2937'
-            }}>
-              Add to Cart
-            </span>
-          </div>
-          <p style={{
-            fontSize: '16px',
-            color: '#6B7280',
-            margin: 0
+          {/* Goal Metric */}
+          <div style={{
+            flex: 1,
+            background: '#FFFFFF',
+            borderRadius: '8px',
+            padding: '20px 24px',
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            border: '1px solid #E5E7EB',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '12px'
           }}>
-            Best for PDP changes.
-          </p>
+            {/* Progress Line Icon */}
+            <div style={{
+              width: '4px',
+              height: '40px',
+              background: '#3B82F6',
+              borderRadius: '2px',
+              flexShrink: 0
+            }} />
+            <div style={{ flex: 1 }}>
+              <div style={{ marginBottom: '8px' }}>
+                <span style={{
+                  fontSize: '24px',
+                  fontWeight: '700',
+                  color: '#1F2937'
+                }}>
+                  Add to Cart
+                </span>
+              </div>
+              <p style={{
+                fontSize: '16px',
+                color: '#6B7280',
+                margin: 0
+              }}>
+                Best for PDP changes.
+              </p>
+            </div>
+          </div>
         </div>
 
         {/* 6. Autopilot Mode */}
@@ -382,7 +419,9 @@ export default function Step4({
           borderRadius: '8px',
           padding: '20px 24px',
           marginBottom: '24px',
-          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+          boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+          border: '1px solid #E5E7EB',
+          borderLeft: '4px solid #9CA3AF'
         }}>
           <div style={{ marginBottom: '16px' }}>
             <label style={{
@@ -760,6 +799,8 @@ export default function Step4({
           borderRadius: '8px',
           padding: '20px 24px',
           marginBottom: '24px',
+          border: '1px solid #E5E7EB',
+          borderLeft: '4px solid #9CA3AF',
           boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
         }}>
           <div style={{
@@ -985,24 +1026,66 @@ export default function Step4({
         {/* Auto-Push Winner - Only shown when Autopilot is ON */}
         {autopilotOn && (
           <div style={{
-            background: '#FFFFFF',
+            background: 'linear-gradient(135deg, rgb(126, 200, 227) 0%, rgb(126, 200, 227) 50%, rgb(91, 168, 212) 70%, rgb(74, 148, 196) 100%)',
             borderRadius: '8px',
-            padding: '20px 24px',
+            padding: '12px 24px 20px 24px',
             marginBottom: '24px',
-            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)'
+            boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+            position: 'relative'
           }}>
-            <h4 style={{
-              fontSize: '24px',
-              fontWeight: '700',
-              color: '#1F2937',
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
               marginBottom: '8px'
             }}>
-              Auto-Push Winner
-            </h4>
+              <div
+                style={{
+                  position: 'relative',
+                  cursor: 'help'
+                }}
+                onMouseEnter={() => setShowAutoPushTooltip(true)}
+                onMouseLeave={() => setShowAutoPushTooltip(false)}
+              >
+                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg" style={{ color: '#FFFFFF' }}>
+                  <circle cx="8" cy="8" r="7" stroke="currentColor" strokeWidth="1.5" fill="rgba(255, 255, 255, 0.2)"/>
+                  <text x="8" y="11" textAnchor="middle" fontSize="10" fill="currentColor" fontWeight="bold">i</text>
+                </svg>
+                {showAutoPushTooltip && (
+                  <div style={{
+                    position: 'absolute',
+                    bottom: '100%',
+                    left: '0',
+                    marginBottom: '8px',
+                    padding: '8px 12px',
+                    background: '#1F2937',
+                    color: '#FFFFFF',
+                    borderRadius: '6px',
+                    fontSize: '12px',
+                    zIndex: 1000,
+                    width: '250px',
+                    whiteSpace: 'normal',
+                    textAlign: 'left',
+                    boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)'
+                  }}>
+                    Automatically updates your product page with the winning variant when the test concludes.
+                  </div>
+                )}
+              </div>
+              <h4 style={{
+                fontSize: '24px',
+                fontWeight: '700',
+                color: '#FFFFFF',
+                margin: 0
+              }}>
+                Auto-Push Winner
+              </h4>
+            </div>
             <p style={{
               fontSize: '16px',
-              color: '#6B7280',
-              margin: 0
+              color: '#FFFFFF',
+              margin: 0,
+              opacity: 0.95
             }}>
               Automatically updates your PDP with the winning variant!
             </p>
